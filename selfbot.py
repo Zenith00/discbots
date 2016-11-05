@@ -15,10 +15,16 @@ import imgurpython
 from imgurpython import ImgurClient
 import os
 import asyncio
-import time, shutil, fileinput, sys, traceback, inspect, filelock
+import time
+import shutil
+import fileinput
+import sys
+import traceback
+import inspect
+import filelock
 from datetime import datetime
-from io import BytesIO, StringIO
-from concurrent.futures import ProcessPoolExecutor
+# from io import BytesIO, StringIO
+# from concurrent.futures import ProcessPoolExecutor
 import aiohttp, csv
 from urllib.parse import parse_qs
 # import pandas as pd
@@ -27,9 +33,10 @@ import collections
 streamFile = "C:\\Users\\Austin\\Desktop\\Programming\\stream.txt"
 #lock = filelock.FileLock(streamFile
 
-global PATHS
 PATHS={}
 
+VCMess = None
+VCInvite = None
 
 # path =	"C:\\Users\\Austin\\Dropbox\\Zenith's Fanart\\"
 refreshToken = "5c52c0f6a47da6fb599e2835bf228c59c68dd902"
@@ -55,10 +62,12 @@ with open("paths.txt", "r") as f:
 
 
 #LFGBOT
-print("asdf")
+print("Selfbot Starting Up")
 client = discord.Client()
 lfgReg = re.compile("/lf(G|\d)/ig")
-print("asdf")
+
+
+
 @client.event
 async def on_ready():
 	print('Connected!')
@@ -69,33 +78,39 @@ async def on_ready():
 @client.event
 async def on_voice_state_update(before, after):
 	global PATHS
+	global VCMess
+	global VCInvite
 	f = open(PATHS["comms"] + "voiceTracked.txt", "r")
 	ids = f.readlines()
-	if after.id in ids:
-		await client.send_message(client.get_channel("238163810274246656"), "User ID " + str(after.id) + "/" + after.display_name  + " has logged into " + after.voice.voice_channel.name + ", joining ")
+	# if after.id in ids:
+		# await client.send_message(client.get_channel("238163810274246656"), "User ID " + str(after.id) + "/" + after.display_name  + " has logged into " + after.voice.voice_channel.name + ", joining ")
 	f.close()
+	if after.id == "129706966460137472":
+		if VCMess is not None and VCInvite is not None:
+			await client.delete_message(VCMess)
+			await client.delete_message(VCInvite)
+			VCMess = None
+			VCInvite = None
 
 
 async def log_message(message):
 	global PATHS
-	# print("Called")
 	try: 
-		#with lock.acquire(timeout = 2):
-			with open(PATHS["logs"] + "stream.txt", "a+") as f:
-				# print(message)
-				f.write(str(message))
-				
-			# lock.release(force=True)
-	except filelock.Timeout:
-		print("timed out")
+		with open(PATHS["logs"] + "stream.txt", "a+") as f:
+			f.write(str(message))
+	except:
+		pass
 	return
 
 async def ascii_string(str):
 	return str.encode('ascii','ignore').decode("utf-8")
 	
+
 @client.event
 async def on_message(mess):
 	global PATHS
+	global VCMess
+	global VCInvite
 	path2 = PATHS["logs"]
 	zwidth = chr(8203)
 	content = mess.content
@@ -109,15 +124,19 @@ async def on_message(mess):
 			return
 		
 		if "!join" == mess.content[0:5]:
-			mentionedUser = mess.mentions[0]
-			print(mentionedUser.name)
-			print()
+			if len(mess.mentions) > 0:
+				mentionedUser = mess.mentions[0]
+			else:
+				userID = mess.content[6:]
+				mentionedUser = discord.Object(userID)
+			# print(mentionedUser.name)
+			# print()
 			vc = (mentionedUser.voice.voice_channel)
 			instaInvite = await client.create_invite(vc, max_uses=1, max_age=6)
-			await client.send_message(mess.channel, instaInvite.url)
-		if "!joen" == mess.content[0:6]:
-			id = mess.content[7:]
-			await client.join_voice_channel(client.get_channel("180683512544886785"))
+			VCMess = mess
+			VCInvite = await client.send_message(mess.channel, instaInvite.url)
+			
+
 		if "!getactivity" in mess.content:
 			command = mess.content[13:]
 			await client.delete_message(mess)
@@ -246,14 +265,12 @@ async def on_message(mess):
 				print(output)
 			
 
-		#print(time.strftime("[%Y-%m-%d %H:%m:%S] ",time.gmtime()) + "message recieved")
 		if mess.content == '!count':
 			asyncio.sleep(.5)
 			await client.edit_message(mess, mess.server.member_count)
 			asyncio.sleep(.5)
 		if mess.content == '!refreshart':
 			global before
-			#msg = client.send_message(client.get_channel("236531729425235968"), image['link'])
 			f = open(PATHS["comms"] + "botdata.txt", "r")
 			for link in f:
 				print("NOTE" * 3)
@@ -267,8 +284,6 @@ async def on_message(mess):
 		if mess.content == '!lfg':
 			lfgText = "You're probably looking for <#182420486582435840> or <#185665683009306625>. Please avoid posting LFGs in <#94882524378968064> . "
 			await client.edit_message(mess, lfgText)
-			#logs = clients.logs_from('94882524378968064', limit=5)
-			# client=  discord.utils.get(server.channels, id='ID HERE')
 			authorMention = ""
 			messageStack = []
 			async for messageCheck in client.logs_from(mess.channel,8):
@@ -278,19 +293,13 @@ async def on_message(mess):
 					match = reg.search(messageCheck.content)
 					if match != None:
 						print("ASDF")
-						#if messageCheck.channel.id == "94882524378968064":
 						authorMention = "<@" + messageCheck.author.id + ">"
 						break
 					else:
 						authorMention = ""
-			# async for messageCheck in logs:
 				
-			#asyncio.sleep(.5)
 			lfgText += authorMention
-			#asyncio.sleep(.75)
 			await client.edit_message(mess, lfgText)
-			#asyncio.sleep(.5)
-		#print (str(mess.server) + " " + mess.content)
 		if "gib" in mess.content.lower() and "art" in mess.content.lower() and mess.server == None:
 			print("SENDING \n" * 5)
 			await client.send_message(mess.author, "http://bit.ly/zenithfanart")
@@ -307,21 +316,11 @@ async def on_message(mess):
 			f.close()
 		if mess.content == "!ping":
 			print(str(datetime.utcnow()))
-			newMessContent = "Ping!\nPong! " + str((datetime.utcnow() - mess.timestamp).total_seconds() * 1000) + " ms"
+			newMessContent = "Ping!\nPong! " + str((datetime().utcnow() - mess.timestamp).total_seconds() * 1000) + " ms"
 			await client.send_message(mess.channel, newMessContent)
 			await client.delete_message(mess)
 			content = newMessContent
 			return
-		
-	# if mess.author.id == "129706966460137472":
-		# try:
-			# await client.edit_message(mess, await avoid_bot(content))
-		# except:
-			# client.send_message(mess.channel, await avoid_bot(content))
-
-	
-	
-	
 
  
 
