@@ -1,0 +1,1 @@
+{'home': 'C:\\Users\\Austin\\Desktop\\Programming\\', 'art': "C:\\Users\\Austin\\Dropbox\\Zenith's Fanart\\", 'logs': 'C:\\Users\\Austin\\Desktop\\Programming\\Logs\\', 'comms': 'C:\\Users\\Austin\\Desktop\\Programming\\Comms\\'}

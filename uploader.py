@@ -2,7 +2,7 @@
 import urllib
 import imgurpython
 from imgurpython import ImgurClient
-import os
+import os, ast
 # import win32file
 # import win32con
 import time, shutil, fileinput
@@ -13,13 +13,23 @@ path = 	"C:\\Users\\Austin\\Dropbox\\Zenith's Fanart\\"
 refreshToken = "5c52c0f6a47da6fb599e2835bf228c59c68dd902"
 accessToken = "4c80c2924ddeb63d3f1c99d19ae04e01e438b5fb"
 
+global PATHS
+PATHS={}
+
+with open("paths.txt", "r") as f:
+	global PATHS
+	pathList = f.read()
+	PATHS = ast.literal_eval(pathList)
+	print("PATHS: " + str(PATHS))
+
+
 
 		
 		
 while True:
 	print("uploader init")
 	#grab first line
-	with open(path + "toUpload.txt", "r+") as f:
+	with open(PATHS["comms"] + "toUpload.txt", "r+") as f:
 		f.seek(0)
 		fileToUpload = str(f.readline())
 		
@@ -36,7 +46,7 @@ while True:
 	print("UPLOADER INSTANCE ONLINE")
 	
 	#remove first line
-	for line_number, line in enumerate(fileinput.input(path + "toUpload.txt", inplace=1)):
+	for line_number, line in enumerate(fileinput.input(PATHS["comms"] + "toUpload.txt", inplace=1)):
 		if line_number == 0:
 			time.sleep(0)
 		else:
@@ -50,6 +60,6 @@ while True:
 	
 	print("WRITING LINK")
 	#write link to botdata.txt
-	f = open(path + "botdata.txt", "a")
+	f = open(PATHS["comms"] + "botdata.txt", "a")
 	f.write(image['link'] + "\n")
 	f.close()
