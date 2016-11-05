@@ -113,27 +113,11 @@ async def on_message(mess):
 			print(mentionedUser.name)
 			print()
 			vc = (mentionedUser.voice.voice_channel)
-			print(str(mentionedUser.voice))
-			print(await ascii_string(vc.name))
-			
-			print("opus: "  + str(discord.opus.is_loaded()))
-			
-			if vc != None:
-				print("TRIGG12313ERED")
-				print("TRIGG12313ERED")
-				vclient = await client.join_voice_channel(vc)
-				print("TRIGGERED")
-				# vclient.move_to(vc)
-				print(await ascii_string(vclient.channel.name))
-				print(vclient.is_connected())
-				print(client.voice.Channel.name)
-				# client.
-			return
-		if "!join+" == mess.content[0:6]:
+			instaInvite = await client.create_invite(vc, max_uses=1, max_age=6)
+			await client.send_message(mess.channel, instaInvite.url)
+		if "!joen" == mess.content[0:6]:
 			id = mess.content[7:]
-			mentionedUser = discord.Object(id)
-			if mentionedUser.voice.voice_channel != None:
-				await client.join_voice_channel(mentionedUser.voice.voice_channel)
+			await client.join_voice_channel(client.get_channel("180683512544886785"))
 		if "!getactivity" in mess.content:
 			command = mess.content[13:]
 			await client.delete_message(mess)
