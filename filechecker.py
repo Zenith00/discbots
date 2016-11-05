@@ -43,7 +43,7 @@ while True:
 	before = [];
 	after = [];
 	if count == 100:
-		f = open (PATHS["art"] + "fileList.txt", "w")
+		f = open (PATHS["comms"] + "fileList.txt", "w")
 	for folderTuple in os.walk(PATHS["art"]):
 		for file in folderTuple[2]:
 			before.append(os.path.join(folderTuple[0],file))
@@ -62,8 +62,8 @@ while True:
 	added = [f for f in after if f not in before]
 	
 	print(added)
-	list = open(PATHS["art"] + "fileList.txt", "a")
-	f = open(PATHS["art"] + "toUpload.txt", "a")
+	list = open(PATHS["comms"] + "fileList.txt", "a")
+	f = open(PATHS["comms"] + "toUpload.txt", "a")
 	for x in added:
 		print("FILE REGISTERED. ADDING")
 		f.write(str(x) + "\n")
