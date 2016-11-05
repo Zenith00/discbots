@@ -81,7 +81,7 @@ async def log_message(message):
 	# print("Called")
 	try: 
 		#with lock.acquire(timeout = 2):
-			with open(PATH["logs"] + "stream.txt", "a+") as f:
+			with open(PATHS["logs"] + "stream.txt", "a+") as f:
 				# print(message)
 				f.write(str(message))
 				
@@ -270,14 +270,14 @@ async def on_message(mess):
 		if mess.content == '!refreshart':
 			global before
 			#msg = client.send_message(client.get_channel("236531729425235968"), image['link'])
-			f = open(PATH["comms"] + "botdata.txt", "r")
+			f = open(PATHS["comms"] + "botdata.txt", "r")
 			for link in f:
 				print("NOTE" * 3)
 				stripLink = link.rstrip('\n')
 				await client.send_message(mess.channel, stripLink)
 				asyncio.sleep(1)
 			f.close()
-			f = open(PATH["comms"] + "botdata.txt", "w")
+			f = open(PATHS["comms"] + "botdata.txt", "w")
 			f.close()
 		
 		if mess.content == '!lfg':
