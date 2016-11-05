@@ -15,8 +15,6 @@ import imgurpython
 from imgurpython import ImgurClient
 import os
 import asyncio
-#import win32file
-#import win32con
 import time, shutil, fileinput, sys, traceback, inspect, filelock
 from datetime import datetime
 from io import BytesIO, StringIO
@@ -27,16 +25,34 @@ from urllib.parse import parse_qs
 import collections
 
 streamFile = "C:\\Users\\Austin\\Desktop\\Programming\\stream.txt"
-#lock = filelock.FileLock(streamFile)
-print("asdf")
+#lock = filelock.FileLock(streamFile
 
-#FANARTBOT
-path =	"C:\\Users\\Austin\\Dropbox\\Zenith's Fanart\\"
+global PATHS
+PATHS={}
+
+
+# path =	"C:\\Users\\Austin\\Dropbox\\Zenith's Fanart\\"
 refreshToken = "5c52c0f6a47da6fb599e2835bf228c59c68dd902"
 accessToken = "4c80c2924ddeb63d3f1c99d19ae04e01e438b5fb"
 
-global before
-before = dict ([(f, None) for f in os.listdir (path)])
+
+with open("paths.txt", "r") as f:
+	global PATHS
+	pathList = f.read()
+	PATHS = ast.literal_eval(pathList)
+	print("PATHS: " + str(PATHS))
+
+
+
+
+
+
+
+
+
+
+
+
 
 #LFGBOT
 print("asdf")
@@ -49,71 +65,11 @@ async def on_ready():
 	print('Username: ' + client.user.name)
 	print('ID: ' + client.user.id)
 	
-async def get_google_entries(query):
-	params = {
-		'q': query,
-		'safe': 'on'
-	}
-	headers = {
-		'User-Agent': 'Mozilla/5.0 (Windows NT 6.3; Win64; x64)'
-	}
 
-	# list of URLs
-	entries = []
-
-	async with aiohttp.get('https://www.google.com/search', params=params, headers=headers) as resp:
-		if resp.status != 200:
-			raise RuntimeError('Google somehow failed to respond.')
-
-		root = etree.fromstring(await resp.text(), etree.HTMLParser())
-
-		"""
-		Tree looks like this.. sort of..
-		<div class="g">
-			...
-			<h3>
-				<a href="/url?q=<url>" ...>title</a>
-			</h3>
-			...
-			<span class="st">
-				<span class="f">date here</span>
-				summary here, can contain <em>tag</em>
-			</span>
-		</div>
-		"""
-
-		search_nodes = root.findall(".//div[@class='g']")
-		for node in search_nodes:
-			url_node = node.find('.//h3/a')
-			if url_node is None:
-				continue
-
-			url = url_node.attrib['href']
-			if not url.startswith('/url?'):
-				continue
-
-			url = parse_qs(url[5:])['q'][0] # get the URL from ?q query string
-
-			# if I ever cared about the description, this is how
-			entries.append(url)
-
-			# short = node.find(".//span[@class='st']")
-			# if short is None:
-			#	  entries.append((url, ''))
-			# else:
-			#	  text = ''.join(short.itertext())
-			#	  entries.append((url, text.replace('...', '')))
-
-	return entries
-	
-async def avoid_bot(text):
-	zwidth = chr(8203)
-	return zwidth.join(list(text))
-	
-	
 @client.event
 async def on_voice_state_update(before, after):
-	f = open(path + "voiceTracked.txt", "r")
+	global PATHS
+	f = open(PATHS["comms"] + "voiceTracked.txt", "r")
 	ids = f.readlines()
 	if after.id in ids:
 		await client.send_message(client.get_channel("238163810274246656"), "User ID " + str(after.id) + "/" + after.display_name  + " has logged into " + after.voice.voice_channel.name + ", joining ")
@@ -121,10 +77,11 @@ async def on_voice_state_update(before, after):
 
 
 async def log_message(message):
+	global PATHS
 	# print("Called")
 	try: 
 		#with lock.acquire(timeout = 2):
-			with open(streamFile, "a+") as f:
+			with open(PATH["logs"] + "stream.txt", "a+") as f:
 				# print(message)
 				f.write(str(message))
 				
@@ -138,7 +95,8 @@ async def ascii_string(str):
 	
 @client.event
 async def on_message(mess):
-	path2 = "C:\\Users\\Austin\\Logs\\"
+	global PATHS
+	path2 = PATHS["logs"]
 	zwidth = chr(8203)
 	content = mess.content
 	channel = mess.channel
@@ -152,14 +110,24 @@ async def on_message(mess):
 		
 		if "!join" == mess.content[0:5]:
 			mentionedUser = mess.mentions[0]
-			vc = mentionedUser.voice.voice_channel
+			print(mentionedUser.name)
+			print()
+			vc = (mentionedUser.voice.voice_channel)
+			print(str(mentionedUser.voice))
 			print(await ascii_string(vc.name))
+			
 			print("opus: "  + str(discord.opus.is_loaded()))
 			
 			if vc != None:
+				print("TRIGG12313ERED")
+				print("TRIGG12313ERED")
 				vclient = await client.join_voice_channel(vc)
-				vclient.move_to(vc)
-				print(vclient.channel.name)
+				print("TRIGGERED")
+				# vclient.move_to(vc)
+				print(await ascii_string(vclient.channel.name))
+				print(vclient.is_connected())
+				print(client.voice.Channel.name)
+				# client.
 			return
 		if "!join+" == mess.content[0:6]:
 			id = mess.content[7:]
@@ -180,7 +148,7 @@ async def on_message(mess):
 						messageCount.append(message.author.name)
 						messageCountConsolidated.append(message.author.name)
 				print("messages retrieved")
-				with open(path2 + str(channel.name) + ".csv", 'a', newline='') as myfile:
+				with open(PATHS["logs"] + str(channel.name) + ".csv", 'a', newline='') as myfile:
 					wr = csv.writer(myfile, quoting=csv.QUOTE_MINIMAL)
 					# print(messageCount)
 					for x in collections.Counter(messageCount).most_common():
@@ -190,7 +158,7 @@ async def on_message(mess):
 						wr.writerow(list(y))
 				
 				print("finished")
-			with open(path2 + "consolidated.csv", 'a', newline='') as myfile:
+			with open(PATHS["logs"] + "consolidated.csv", 'a', newline='') as myfile:
 				wr = csv.writer(myfile, quoting=csv.QUOTE_MINIMAL)
 				# print(messageCount)
 				for x in collections.Counter(messageCountConsolidated).most_common():
@@ -302,14 +270,14 @@ async def on_message(mess):
 		if mess.content == '!refreshart':
 			global before
 			#msg = client.send_message(client.get_channel("236531729425235968"), image['link'])
-			f = open(path + "botdata.txt", "r")
+			f = open(PATH["comms"] + "botdata.txt", "r")
 			for link in f:
 				print("NOTE" * 3)
 				stripLink = link.rstrip('\n')
 				await client.send_message(mess.channel, stripLink)
 				asyncio.sleep(1)
 			f.close()
-			f = open(path + "botdata.txt", "w")
+			f = open(PATH["comms"] + "botdata.txt", "w")
 			f.close()
 		
 		if mess.content == '!lfg':
@@ -343,12 +311,12 @@ async def on_message(mess):
 			print("SENDING \n" * 5)
 			await client.send_message(mess.author, "http://bit.ly/zenithfanart")
 		if mess.content == "!nothingbutfanarthere":
-			f = open(path + "fileList.txt", "r")
+			f = open(PATHS["comms"] + "fileList.txt", "r")
 			files = f.readline().split("^")
 			f.close()
 			print(files)
 			rand_art = random.sample(files,15)
-			f = open(path + "toUpload.txt", "a")
+			f = open(PATHS["comms"] + "toUpload.txt", "a")
 			for artpiece in rand_art:
 				print(artpiece)
 				f.write(artpiece + "\n")
