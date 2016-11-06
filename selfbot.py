@@ -35,6 +35,8 @@ streamFile = "C:\\Users\\Austin\\Desktop\\Programming\\stream.txt"
 
 PATHS={}
 
+ZENITH_ID = "129706966460137472"
+
 VCMess = None
 VCInvite = None
 
@@ -85,7 +87,7 @@ async def on_voice_state_update(before, after):
 	# if after.id in ids:
 		# await client.send_message(client.get_channel("238163810274246656"), "User ID " + str(after.id) + "/" + after.display_name  + " has logged into " + after.voice.voice_channel.name + ", joining ")
 	f.close()
-	if after.id == "129706966460137472":
+	if after.id == ZENITH_ID:
 		if VCMess is not None and VCInvite is not None:
 			await client.delete_message(VCMess)
 			await client.delete_message(VCInvite)
@@ -117,7 +119,7 @@ async def on_message(mess):
 	channel = mess.channel
 	reg = re.compile(r"((lf(G|\d)))|( \d\d\d\d )|(plat|gold|silver|diamond)|(^LF((((NA)|(EU)))|(\s?\d)))|((NA|EU) (LF(g|\d)*))|(http(s?)://discord.gg/)|(xbox)|(ps4)", re.IGNORECASE)
 	match = reg.search(mess.content)
-	if mess.author.id == "129706966460137472":
+	if mess.author.id == ZENITH_ID:
 		if mess.server == client.get_server("94882524378968064") and mess.channel.id not in ["152757147288076297", "170179130694828032", "147153976687591424", "200185170249252865", "209609220084072450"]:
 			toSend = await ascii_string("[" + mess.channel.name + "] " + mess.author.name + ": -*0       " + mess.content + "\n")
 			await log_message(toSend)
