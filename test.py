@@ -1,14 +1,32 @@
+userID = "'member.id'"
+userNick = "'member.nick'"
+userName = "'member.name'"
+import sqlite3, ast
 
-from imgurpython import ImgurClient
+with open("paths.txt", "r") as f:
+	global PATHS
+	pathList = f.read()
+	PATHS = ast.literal_eval(pathList)
+	# print("PATHS: " + str(PATHS))
 
-client_id = '5e1b2fcfcf0f36e'
-client_secret = 'd919f14c31fa97819b1e9c82e2be40aef8bd9682'
-client = ImgurClient(client_id, client_secret)
 
-# Authorization flow, pin example (see docs for other auth types)
-authorization_url = client.get_auth_url('pin')
 
-# ... redirect user to `authorization_url`, obtain pin (or code or token) ...
-
-credentials = client.authorize('PIN OBTAINED FROM AUTHORIZATION', 'afc2380eaf')
-client.set_user_auth(credentials['access_token'], credentials['refresh_token'])
+database = sqlite3.connect(PATHS["comms"] + "userIDlist.db")
+# database.execute('''CREATE TABLE useridlist (
+    # userid   STRING,
+    # nickname STRING,
+    # username STRING,
+    # UNIQUE (
+        # userid
+    # )
+# )''')
+toExecute = "INSERT INTO useridlist VALUES (?, ?, ?)"
+vars = (userID, userNick, userName)
+try:
+	database.execute(toExecute, vars)
+except:
+	pass
+database.execute(toExecute, ("'123'", "'123'", "'123'"))
+database.commit()
+for row in database.execute('SELECT * FROM useridlist'):
+	print(row)
