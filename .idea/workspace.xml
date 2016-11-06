@@ -38,34 +38,38 @@
   </component>
   <component name="FileEditorManager">
     <leaf>
-      <file leaf-file-name="nadir.py" pinned="false" current-in-tab="true">
+      <file leaf-file-name="nadir.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/nadir.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="136">
-              <caret line="47" column="31" selection-start-line="47" selection-start-column="31" selection-end-line="47" selection-end-column="31" />
+            <state relative-caret-position="340">
+              <caret line="179" column="34" selection-start-line="179" selection-start-column="34" selection-end-line="179" selection-end-column="34" />
               <folding>
                 <element signature="e#0#10#0" expanded="true" />
-                <element signature="e#575#672#0" expanded="false" />
-                <element signature="e#727#858#0" expanded="false" />
-                <element signature="e#954#1026#0" expanded="false" />
-                <element signature="e#1066#1122#0" expanded="false" />
-                <element signature="e#1211#1662#0" expanded="false" />
-                <element signature="e#1913#1980#0" expanded="false" />
-                <element signature="e#2412#2831#0" expanded="false" />
-                <element signature="e#2429#2643#0" expanded="true" />
-                <element signature="e#2956#3203#0" expanded="false" />
-                <element signature="e#2976#3169#0" expanded="true" />
-                <element signature="e#3783#4223#0" expanded="false" />
-                <element signature="e#4467#6643#0" expanded="false" />
-                <element signature="e#6688#7556#0" expanded="false" />
-                <marker date="1478455694987" expanded="true" signature="1466:1505" placeholder="INSERT INTO useridlist... " />
-                <marker date="1478455694987" expanded="false" signature="1760:1867" placeholder="..." />
-                <marker date="1478455694987" expanded="true" signature="2430:2642" placeholder="CREATE TABLE... useridlist" />
-                <marker date="1478455694987" expanded="true" signature="2432:2640" placeholder="CREATE TABLE... useridlist" />
-                <marker date="1478455694987" expanded="true" signature="2979:3166" placeholder="CREATE TABLE... messageList" />
-                <marker date="1478455694987" expanded="true" signature="3949:3992" placeholder="INSERT INTO messageList... " />
-                <marker date="1478455694987" expanded="true" signature="6817:6855" placeholder="SELECT useri... useridlist" />
+                <element signature="e#1176#1273#0" expanded="false" />
+                <element signature="e#1983#2039#0" expanded="false" />
+                <element signature="e#4165#4632#0" expanded="false" />
+                <element signature="e#4182#4424#0" expanded="true" />
+                <element signature="e#4773#5044#0" expanded="false" />
+                <element signature="e#4793#5006#0" expanded="true" />
+                <element signature="e#8999#11175#0" expanded="false" />
+                <marker date="1478466309355" expanded="true" signature="2389:2439" placeholder="INSERT INTO useridlist... " />
+                <marker date="1478466309355" expanded="true" signature="4183:4423" placeholder="CREATE TABLE... useridlist" />
+                <marker date="1478466309355" expanded="true" signature="4185:4421" placeholder="CREATE TABLE... useridlist" />
+                <marker date="1478466309355" expanded="true" signature="4796:5003" placeholder="CREATE TABLE... messageList" />
+                <marker date="1478466309355" expanded="true" signature="8481:8524" placeholder="INSERT INTO messageList... " />
+                <marker date="1478466309355" expanded="false" signature="11215:12088" placeholder="..." />
+                <marker date="1478466309355" expanded="true" signature="11349:11387" placeholder="SELECT useri... useridlist" />
               </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="selfbot.py" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/selfbot.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="2077">
+              <caret line="172" column="23" selection-start-line="172" selection-start-column="23" selection-end-line="172" selection-end-column="23" />
+              <folding />
             </state>
           </provider>
         </entry>
@@ -78,6 +82,7 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
+        <option value="$PROJECT_DIR$/selfbot.py" />
         <option value="$PROJECT_DIR$/nadir.py" />
       </list>
     </option>
@@ -145,7 +150,7 @@
   <component name="PropertiesComponent">
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
     <property name="WebServerToolWindowFactoryState" value="false" />
-    <property name="settings.editor.selected.configurable" value="preferences.sourceCode.Python" />
+    <property name="settings.editor.selected.configurable" value="reference.settingsdialog.IDE.editor.colors.Python" />
     <property name="settings.editor.splitter.proportion" value="0.2" />
     <property name="js-jscs-nodeInterpreter" value="C:\Program Files\nodejs\node.exe" />
     <property name="com.intellij.database.dataSource.DataSourceTemplate" value="Sqlite (Xerial)" />
@@ -419,31 +424,33 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/nadir.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="136">
-          <caret line="47" column="31" selection-start-line="47" selection-start-column="31" selection-end-line="47" selection-end-column="31" />
+        <state relative-caret-position="340">
+          <caret line="179" column="34" selection-start-line="179" selection-start-column="34" selection-end-line="179" selection-end-column="34" />
           <folding>
             <element signature="e#0#10#0" expanded="true" />
-            <element signature="e#575#672#0" expanded="false" />
-            <element signature="e#727#858#0" expanded="false" />
-            <element signature="e#954#1026#0" expanded="false" />
-            <element signature="e#1066#1122#0" expanded="false" />
-            <element signature="e#1211#1662#0" expanded="false" />
-            <element signature="e#1913#1980#0" expanded="false" />
-            <element signature="e#2412#2831#0" expanded="false" />
-            <element signature="e#2429#2643#0" expanded="true" />
-            <element signature="e#2956#3203#0" expanded="false" />
-            <element signature="e#2976#3169#0" expanded="true" />
-            <element signature="e#3783#4223#0" expanded="false" />
-            <element signature="e#4467#6643#0" expanded="false" />
-            <element signature="e#6688#7556#0" expanded="false" />
-            <marker date="1478455694987" expanded="true" signature="1466:1505" placeholder="INSERT INTO useridlist... " />
-            <marker date="1478455694987" expanded="false" signature="1760:1867" placeholder="..." />
-            <marker date="1478455694987" expanded="true" signature="2430:2642" placeholder="CREATE TABLE... useridlist" />
-            <marker date="1478455694987" expanded="true" signature="2432:2640" placeholder="CREATE TABLE... useridlist" />
-            <marker date="1478455694987" expanded="true" signature="2979:3166" placeholder="CREATE TABLE... messageList" />
-            <marker date="1478455694987" expanded="true" signature="3949:3992" placeholder="INSERT INTO messageList... " />
-            <marker date="1478455694987" expanded="true" signature="6817:6855" placeholder="SELECT useri... useridlist" />
+            <element signature="e#1176#1273#0" expanded="false" />
+            <element signature="e#1983#2039#0" expanded="false" />
+            <element signature="e#4165#4632#0" expanded="false" />
+            <element signature="e#4182#4424#0" expanded="true" />
+            <element signature="e#4773#5044#0" expanded="false" />
+            <element signature="e#4793#5006#0" expanded="true" />
+            <element signature="e#8999#11175#0" expanded="false" />
+            <marker date="1478466309355" expanded="true" signature="2389:2439" placeholder="INSERT INTO useridlist... " />
+            <marker date="1478466309355" expanded="true" signature="4183:4423" placeholder="CREATE TABLE... useridlist" />
+            <marker date="1478466309355" expanded="true" signature="4185:4421" placeholder="CREATE TABLE... useridlist" />
+            <marker date="1478466309355" expanded="true" signature="4796:5003" placeholder="CREATE TABLE... messageList" />
+            <marker date="1478466309355" expanded="true" signature="8481:8524" placeholder="INSERT INTO messageList... " />
+            <marker date="1478466309355" expanded="false" signature="11215:12088" placeholder="..." />
+            <marker date="1478466309355" expanded="true" signature="11349:11387" placeholder="SELECT useri... useridlist" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/selfbot.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="2077">
+          <caret line="172" column="23" selection-start-line="172" selection-start-column="23" selection-end-line="172" selection-end-column="23" />
+          <folding />
         </state>
       </provider>
     </entry>
