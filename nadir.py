@@ -16,8 +16,11 @@ import os
 import time, shutil, fileinput, datetime, traceback, inspect, filelock
 from io import BytesIO, StringIO
 from concurrent.futures import ProcessPoolExecutor
-import fuzzywuzzy
+
+from fuzzywuzzy import fuzz
+from fuzzywuzzy import process
 import sqlite3
+global PATHS
 PATHS = {}
 
 with open("paths.txt", "r") as f:
@@ -59,7 +62,14 @@ async def on_member_join(member):
 	
 	userID = member.id
 	userNick = member.nick
-	userName = member.name
+	userName = await ascii_string(member.name)
+	if userNick is None:
+		userNick = userName
+	else:
+		userNick = await ascii_string(userNick)
+	
+	userNick = userNick.lower()
+				
 	toExecute = "INSERT INTO useridlist VALUES (?, ?, ?)"
 	vars = (userID, userNick, userName)
 	try:
@@ -69,6 +79,10 @@ async def on_member_join(member):
 	database.commit()
 	return
 	
+async def ascii_string(str):
+	return str.encode('ascii','ignore').decode("utf-8")
+	
+
 @client.event
 async def on_message(mess):
 	global PATHS
@@ -85,7 +99,8 @@ async def on_message(mess):
 		# VCMess = mess
 		VCInvite = await client.send_message(mess.channel, instaInvite.url)
 	if "!find" == mess.content[0:5]:
-		match = await fuzzy_match()
+		command = mess.content[6:]
+		match = await fuzzy_match(command, mess)
 	
 	
 	
@@ -104,30 +119,82 @@ async def on_message(mess):
 					userid
 				)
 			)''')
-		return
-		
-		if "!startup" in mess.content:
+			
 			print("BUILDING DATABASE")
 			count = 0
 			for member in mess.server.members:
-				print("ADDING A MEMBER" + str(count))
+				if count % 100 == 0:
+					print("ADDING A MEMBER" + str(count))
 				count = count + 1
 				userID = member.id
 				userNick = member.nick
-				userName = member.name
+				userName = await ascii_string(member.name)
+				if userNick is None:
+					userNick = userName
+				else:
+					userNick = await ascii_string(userNick)
+				
+				userNick = userNick.lower()
+				
 				toExecute = "INSERT INTO useridlist VALUES (?, ?, ?)"
 				vars = (userID, userNick, userName)
 				try:
-					print(str(database.execute(toExecute, vars)))
+					database.execute(toExecute, vars)
 					# print(str(database.commit()))
 				except:
 					pass
 			database.commit()
 			return
-async def fuzzy_match():
-	return None
+		
+		
+async def fuzzy_match(command, mess):
+	sentMessages = []
+	sentMessages.append(await client.send_message(mess.channel, "Input: " + command))
+	cursor = database.cursor()
+	cursor.execute('SELECT userid,nickname FROM useridlist')
+	nickIdList = cursor.fetchall()
+	nickIdDict = {}
+	for v, k in nickIdList:
+		nickIdDict.setdefault(k, []).append(v)
+	# topThree = process.extract(command, nickIdDict.keys(), limit=3)
+	# topOne = process.extractOne(command, nickIdDict.keys())
+	# for nickFuzzPair in topThree:
+		# nick = nickFuzzPair[0]
+		# for id in nickIdDict[nick]:
+			# sentMessages.append(
+				# await client.send_message(mess.channel, 
+				
+					# "ID: " + str(id) + " | Nickname: " + nick + " (" + str(nickFuzzPair[1]) + ")"
+				# )
+			# )
+	
+	# await client.send_message(mess.channel, 
+			
+		# "ID: " + str(id) + " | Nickname: " + topOne[0] + " (" + str(topOne[1]) + ")"
+	# 
+	topScore = 0
+	topNick = ""
+	ratio = 0
+	for k in nickIdDict.keys():
+		ratio = fuzz.ratio(command, str(k))
+		if ratio > topScore:
+			topScore = ratio
+			topNick = k
+			print("new topScore: " + str(topScore))
+			print("new nick: " + str(topNick))
+	nick = topNick
+	for id in nickIdDict[nick]:
+		sentMessages.append(
+			await client.send_message(mess.channel, 
+			
+				"ID: " + str(id) + " | Nickname: " + nick + " (" + str(topScore) + ")"
+			)
+		)
+
+
 	
 async def manually_reset():
+	
 	pass
 async def stream():
 	await client.wait_until_ready()
