@@ -77,10 +77,6 @@ async def on_message(mess):
             await client.change_presence(game=discord.Game(name=str(status)))
             return
 
-        if match is not None and mess.channel.id == "94882524378968064":
-            await client.send_message(client.get_channel("240310063082897409"), mess.content)
-            return
-
         if "!getlogs" in mess.content:
             counter = 1
             async for message in client.logs_from(mess.channel, 1000000):
@@ -154,27 +150,7 @@ async def on_message(mess):
             f = open(PATHS["comms"] + "botdata.txt", "w")
             f.close()
 
-        if mess.content == '!lfg':
-            lfgText = ("You're probably looking for <#182420486582435840> or <#185665683009306625>."
-                       "Please avoid posting LFGs in <#94882524378968064> . ")
-            await client.edit_message(mess, lfgText)
-            authorMention = ""
 
-            async for messageCheck in client.logs_from(mess.channel, 8):
-                if messageCheck.author.id != client.user.id:
-                    print(messageCheck.content)
-                    reg = re.compile(
-                        (r"(lf(G|\d))|( \d\d\d\d )|(plat|gold|silver|diamond)|(^LF(((NA)|(EU))|(\s?\d)))|((NA|EU)"
-                         "(LF(g|\d)*))|(http(s?)://discord.gg/)|(xbox)|(ps4)"), re.IGNORECASE)
-                    match = reg.search(messageCheck.content)
-                if match is not None:
-                    print("ASDF")
-                    authorMention = "<@" + messageCheck.author.id + ">"
-                    break
-                else:
-                    authorMention = ""
-            lfgText += authorMention
-            await client.edit_message(mess, lfgText)
     if "gib" in mess.content.lower() and "art" in mess.content.lower() and mess.server is None:
         print("SENDING \n" * 5)
         await client.send_message(mess.author, "http://bit.ly/zenithfanart")
