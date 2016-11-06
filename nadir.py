@@ -30,7 +30,6 @@ MOD_CHAT_ID = "106091034852794368"
 TRUSTED_CHAT_ID = "170185225526181890"
 GENERAL_DISCUSSION_ID = "94882524378968064"
 
-
 NADIR_AUDIT_LOG_ID = "240320691868663809"
 global before
 
@@ -47,6 +46,7 @@ lfgReg = re.compile(
 VCInvite = None
 VCMess = None
 
+
 @client.event
 async def on_ready():
     print('Connected!')
@@ -56,10 +56,10 @@ async def on_ready():
 
 @client.event
 async def on_member_join(member):
-
     await add_to_nickIdList(member)
     database.commit()
     return
+
 
 @client.event
 async def on_voice_state_update(before, after):
@@ -70,6 +70,7 @@ async def on_voice_state_update(before, after):
             await client.delete_messages([VCInvite, VCMess])
             VCInvite = None
             VCMess = None
+
 
 # noinspection PyShadowingNames
 @client.event
@@ -84,7 +85,23 @@ async def ascii_string(toascii):
     return toascii.encode('ascii', 'ignore').decode("utf-8")
 
 
-# noinspection PyBroadException,PyPep8Naming
+async def increment_lfgd(author):
+    toExecute = "UPDATE useridlist SET lfgd = lfgd + 1 WHERE userid = (?)"
+    vars = (author.id,)
+    try:
+        database.execute(toExecute, vars)
+        database.commit()
+
+        cursor = database.cursor()
+        toExecute = "SELECT lfgd FROM useridlist WHERE userid = (?)"
+
+        cursor.execute(toExecute, vars)
+        database.commit()
+        return cursor.fetchone()
+    except:
+        print(traceback.format_exc())  # noinspection PyBroadException,PyPep8Naming
+
+
 async def add_to_nickIdList(member):
     userID = member.id
     userName = await ascii_string(member.name)
@@ -96,13 +113,13 @@ async def add_to_nickIdList(member):
     userNick = await ascii_string(userNick)
     userNick = userNick.lower()
 
-    toExecute = "INSERT OR REPLACE INTO useridlist VALUES (?, ?, ?)"
-    values = (userID, userNick, userName)
+    toExecute = "INSERT OR REPLACE INTO useridlist VALUES (?, ?, ?, ?)"
+    values = (userID, userNick, userName, 0)
     try:
         database.execute(toExecute, values)
     # print(str(database.commit()))
     except:
-        pass
+        print(traceback.format_exc())
 
 
 @client.event
@@ -112,14 +129,34 @@ async def on_message(mess):
     global PATHS
 
     if mess.author.id != MERCY_ID:
-        if mess.channel.id == GENERAL_DISCUSSION_ID:
-            match = reg.search(mess.content)
+        if mess.channel.id == GENERAL_DISCUSSION_ID and not mess.author.server_permissions.manage_roles:
+            match = lfgReg.search(mess.content)
             if match != None:
                 await client.send_message(client.get_channel(NADIR_AUDIT_LOG_ID), mess.content)
 
-        if mess.author.top_role.hoist:
+        if mess.content == '`lfg' and mess.author.server_permissions.manage_roles:
+
+            lfgText = ("You're probably looking for <#182420486582435840> or <#185665683009306625>."
+                       "Please avoid posting LFGs in <#94882524378968064> . ")
+            await client.delete_message(mess)
+            authorMention = ""
+            async for messageCheck in client.logs_from(mess.channel, 8):
+                if messageCheck.author.id != MERCY_ID:  # and not mess.author.server_permissions.manage_roles:
+                    match = lfgReg.search(messageCheck.content)
+                    if match is not None:
+                        authorMention = messageCheck.author.mention
+                        count = await increment_lfgd(mess.author)
+                        authorMention += " (" + str(count[0]) + ")"
+                        break
+                else:
+                    authorMention = ""
+            lfgText += authorMention
+            await client.send_message(mess.channel, lfgText)
+
+        if mess.author.server_permissions.manage_roles:
             if "`kill" in mess.content:
-                await client.send_message(mess.channel, "Shutting down...")
+                await client.send_message(mess.channel, "Shut down by " + mess.author.name)
+                await client.send_message(client.get_channel(NADIR_AUDIT_LOG_ID), "Shut down by " + mess.author.name)
                 await client.logout()
         if "`roles" in mess.content:
             for x in mess.server.roles:
@@ -142,9 +179,10 @@ async def on_message(mess):
                 await getactivity(mess)
             if "`rebuildIDs" in mess.content:
                 database.execute('''CREATE TABLE useridlist (
-                    userid   STRING,
-                    nickname STRING,
-                    username STRING,
+                    userid   TEXT,
+                    nickname TEXT,
+                    username TEXT,
+                    lfgd     INTEGER DEFAULT(0),
                     UNIQUE (
                         userid
                     )
@@ -172,6 +210,7 @@ async def on_message(mess):
                 if match != None:
                     await invite_checker(mess, match)
 
+
 async def invite_checker(mess, regexMatch):
     try:
         invite = await client.get_invite(regexMatch.group(1))
@@ -191,6 +230,7 @@ async def invite_checker(mess, regexMatch):
     except:
         print(traceback.format_exc())
 
+
 # noinspection PyPep8Naming
 async def get_vc_link(mess):
     if len(mess.mentions) > 0:
@@ -202,10 +242,12 @@ async def get_vc_link(mess):
     instaInvite = await client.create_invite(vc, max_uses=1, max_age=6)
     return instaInvite.url
 
+
 async def log_automated(description):
     action = ("At " + str(datetime.utcnow().strftime("[%Y-%m-%d %H:%m:%S] ")) + ", I automatically "
               + str(description) + "\n" + "`kill to disable me")
     await client.send_message(client.get_channel("209609220084072450"), action)
+
 
 async def ping(message):
     # lag = (datetime.utcnow() - message).timestamp.total_seconds() * 1000) + " ms")
@@ -242,7 +284,8 @@ async def ping(message):
         "Immer unterbricht mich jemand bei der Arbeit.")
     voice = random.choice(voiceLines)
     sent = await client.send_message(message.channel, voice)
-    await client.edit_message(sent, voice + " (" + str((sent.timestamp - message.timestamp).total_seconds()*1000) + " ms)")
+    await client.edit_message(sent,
+                              voice + " (" + str((sent.timestamp - message.timestamp).total_seconds() * 1000) + " ms)")
 
 
 # noinspection PyBroadException
@@ -349,7 +392,7 @@ async def fuzzy_match(command, mess):
     for userID in nickIdDict[nick]:
         sentMessages.append(
             await client.send_message(mess.channel,
-                 "ID: " + str(userID) + " | Nickname: " + nick + " (" + str(topScore) + ")" ))
+                                      "ID: " + str(userID) + " | Nickname: " + nick + " (" + str(topScore) + ")"))
 
 
 async def manually_reset():
