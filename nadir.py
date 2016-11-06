@@ -9,22 +9,26 @@ import asyncio
 import discord
 import re
 from discord.ext import commands
-import random
+import random, traceback
 import os
 #import win32file
 #import win32con
-import time, shutil, fileinput, datetime, traceback, inspect, filelock
+import time, fileinput, datetime, traceback
 from io import BytesIO, StringIO
 from concurrent.futures import ProcessPoolExecutor
-
+from datetime import datetime
+from datetime import timedelta
 from fuzzywuzzy import fuzz
+from collections import defaultdict
 from fuzzywuzzy import process
+import collections
 import sqlite3
+import csv
 global PATHS
 PATHS = {}
 
 with open("paths.txt", "r") as f:
-	global PATHS
+	# global PATHS
 	pathList = f.read()
 	PATHS = ast.literal_eval(pathList)
 	# print("PATHS: " + str(PATHS))
@@ -34,6 +38,7 @@ with open("paths.txt", "r") as f:
 database = sqlite3.connect(PATHS["comms"] + "userIDlist.db")
 # os.environ["PYTHONASYNCIODEBUG"] = "1"
 
+messageBase = sqlite3.connect("E:\\Logs\\messages.db")
 
 streamFile = "C:\\Users\\Austin\\Desktop\\Programming\\stream.txt"
 
@@ -60,6 +65,19 @@ async def on_member_join(member):
 	# if "!startup" in mess.content:
 	print("NEW USER JOINED")
 	
+	await add_to_nickIdList(member)
+	database.commit()
+	return
+	
+@client.event
+async def on_member_update(before, after):
+	if before.nick is not after.nick:
+		await add_to_nickIdList(after)
+		
+async def ascii_string(str):
+	return str.encode('ascii','ignore').decode("utf-8")
+	
+async def add_to_nickIdList(member):
 	userID = member.id
 	userNick = member.nick
 	userName = await ascii_string(member.name)
@@ -69,19 +87,14 @@ async def on_member_join(member):
 		userNick = await ascii_string(userNick)
 	
 	userNick = userNick.lower()
-				
+	
 	toExecute = "INSERT INTO useridlist VALUES (?, ?, ?)"
 	vars = (userID, userNick, userName)
 	try:
 		database.execute(toExecute, vars)
+		# print(str(database.commit()))
 	except:
 		pass
-	database.commit()
-	return
-	
-async def ascii_string(str):
-	return str.encode('ascii','ignore').decode("utf-8")
-	
 
 @client.event
 async def on_message(mess):
@@ -110,7 +123,9 @@ async def on_message(mess):
 		deleted = await client.purge_from(mess.channel)
 	
 	if mess.author.id == ZENITH_ID:
-		if "!rebuild" in mess.content:
+		if "!tetactivity" in mess.content:
+			await getactivity(mess)
+		if "!rebuildIDs" in mess.content:
 			database.execute('''CREATE TABLE useridlist (
 				userid   STRING,
 				nickname STRING,
@@ -119,33 +134,102 @@ async def on_message(mess):
 					userid
 				)
 			)''')
-			
 			print("BUILDING DATABASE")
-			count = 0
 			for member in mess.server.members:
-				if count % 100 == 0:
-					print("ADDING A MEMBER" + str(count))
-				count = count + 1
-				userID = member.id
-				userNick = member.nick
-				userName = await ascii_string(member.name)
-				if userNick is None:
-					userNick = userName
-				else:
-					userNick = await ascii_string(userNick)
-				
-				userNick = userNick.lower()
-				
-				toExecute = "INSERT INTO useridlist VALUES (?, ?, ?)"
-				vars = (userID, userNick, userName)
-				try:
-					database.execute(toExecute, vars)
-					# print(str(database.commit()))
-				except:
-					pass
-			database.commit()
+				await add_to_nickIdList(member)
+				database.commit()
 			return
+		if "!buildlogs" in mess.content:
+			build_logs(mess)
+		if "!firstbuild" in mess.content:
+			messageBase.execute('''CREATE TABLE messageList (
+				userid   TEXT,
+				messageContent   TEXT,
+				messageLength   INTEGER,
+				dateSent   DATETIME
+			)''')
+			messageBase.commit()
+	# await add_message_to_log(mess)
+	
+async def add_message_to_log(mess):
+	userid = mess.author.id
+	messageContent = mess.content
+	messageLength = len(messageContent)
+	dateSent = mess.timestamp
+
+	
+	toExecute = "INSERT INTO messageList VALUES (?, ?, ?, ?)"
+	vars = (userid, messageContent, messageLength, dateSent)
+	try:
+		messageBase.execute(toExecute, vars)
+		# print(str(database.commit()))
+	except Exception as e:
+		print(traceback.format_exc())
+	messageBase.commit()
+	
+			
+async def build_logs(mess):
+	channel = mess.channel
+	async for message in client.logs_from(channel, 100000):
+		pass
 		
+	
+async def getactivity(mess):
+	command = mess.content[13:]
+	await client.delete_message(mess)
+	d = timedelta(days=int(command))
+	
+	sinceTime = mess.timestamp - d
+	messageCountConsolidated = []
+	consolidatedDict = {}
+	print(str(sinceTime))
+	for channel in (y for y in mess.server.channels if y.type == discord.ChannelType.text):
+		try:
+			channelDict = {}
+			messageCount = []
+			count = 0
+			async for message in client.logs_from(channel, 100000):
+				count += 1
+				for x in range(len(str(message.content)) - 1):
+					
+					# messageCount.append(mess age.author.name)
+					author = await ascii_string(message.author.name)
+					channelDict[author] = channelDict.get(author, 0) + 1
+					# messageCountConsolidated.append(message.author.name)
+					consolidatedDict[author] = channelDict.get(author, 0) + 1
+				if count % 100 == 0:
+					print(len(channelDict.keys()))
+			print("messages retrieved: " + str(count))
+			with open(PATHS["logs"] + str(channel.name) + ".csv", 'w', newline='') as myfile:
+				wr = csv.writer(myfile, quoting=csv.QUOTE_MINIMAL)
+				# print(messageCount)
+				# for x in collections.Counter(messageCount).most_common():
+					# y = (str(x[0]).encode('ascii','ignore').decode("utf-8"), str(x[1]).encode('ascii','ignore').decode("utf-8"))
+					
+					# print("y = " + str(y))
+					# wr.writerow(list(y))
+				for x in channelDict.keys():
+					print(channelDict[x])
+					user = await ascii_string(x)
+					count = channelDict[user]
+					wr.writerow([user, count])
+		except Exception as e:
+			print(traceback.format_exc())
+		
+	print("finished")
+	with open(PATHS["logs"] + "consolidated.csv", 'w', newline='') as myfile:
+		wr = csv.writer(myfile, quoting=csv.QUOTE_MINIMAL)
+		# print(messageCount)
+		# for x in collections.Counter(messageCount).most_common():
+			# y = (str(x[0]).encode('ascii','ignore').decode("utf-8"), str(x[1]).encode('ascii','ignore').decode("utf-8"))
+			
+			# print("y = " + str(y))
+			# wr.writerow(list(y))
+		for x in channelDict.keys():
+			user = await ascii_string(x)
+			count = channelDict[user]
+			wr.writerow([user, count])
+	return
 		
 async def fuzzy_match(command, mess):
 	sentMessages = []
