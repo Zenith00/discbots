@@ -10,30 +10,36 @@ import discord
 import re
 from discord.ext import commands
 import random
-import urllib
-import imgurpython
-from imgurpython import ImgurClient
 import os
-import asyncio
 #import win32file
 #import win32con
-import time, shutil, fileinput, datetime, sys, traceback, inspect, filelock
+import time, shutil, fileinput, datetime, traceback, inspect, filelock
 from io import BytesIO, StringIO
 from concurrent.futures import ProcessPoolExecutor
+import fuzzywuzzy
+import sqlite3
+PATHS = {}
 
-os.environ["PYTHONASYNCIODEBUG"] = "1"
+with open("paths.txt", "r") as f:
+	global PATHS
+	pathList = f.read()
+	PATHS = ast.literal_eval(pathList)
+	# print("PATHS: " + str(PATHS))
+
+
+
+database = sqlite3.connect(PATHS["comms"] + "userIDlist.db")
+# os.environ["PYTHONASYNCIODEBUG"] = "1"
+
 
 streamFile = "C:\\Users\\Austin\\Desktop\\Programming\\stream.txt"
 
 # lock = filelock.FileLock(streamFile)
+ZENITH_ID = "129706966460137472"
 
 #FANARTBOT
-path =	"C:\\Users\\Austin\\Dropbox\\Zenith's Fanart\\"
-refreshToken = "5c52c0f6a47da6fb599e2835bf228c59c68dd902"
-accessToken = "4c80c2924ddeb63d3f1c99d19ae04e01e438b5fb"
 
 global before
-before = dict ([(f, None) for f in os.listdir (path)])
 
 #LFGBOT
 
@@ -46,9 +52,26 @@ async def on_ready():
 	print('Username: ' + client.user.name)
 	print('ID: ' + client.user.id)
 	
-
+@client.event
+async def on_member_join(member):
+	# if "!startup" in mess.content:
+	print("NEW USER JOINED")
+	
+	userID = member.id
+	userNick = member.nick
+	userName = member.name
+	toExecute = "INSERT INTO useridlist VALUES (?, ?, ?)"
+	vars = (userID, userNick, userName)
+	try:
+		database.execute(toExecute, vars)
+	except:
+		pass
+	database.commit()
+	return
+	
 @client.event
 async def on_message(mess):
+	global PATHS
 	if "!join" == mess.content[0:5]:
 		if len(mess.mentions) > 0:
 			mentionedUser = mess.mentions[0]
@@ -61,14 +84,51 @@ async def on_message(mess):
 		instaInvite = await client.create_invite(vc, max_uses=1, max_age=6)
 		# VCMess = mess
 		VCInvite = await client.send_message(mess.channel, instaInvite.url)
-			
-
+	if "!find" == mess.content[0:5]:
+		match = await fuzzy_match()
+	
+	
+	
 	if mess.channel.id == "240310063082897409":
 		await client.send_message(client.get_channel("240320691868663809"), mess.content)
 	if "!clear" in mess.content and mess.server.id == "236343416177295360":
 		deleted = await client.purge_from(mess.channel)
-		# await client.send_message(client.get_channel("240320691868663809"), deleted)
 	
+	if mess.author.id == ZENITH_ID:
+		if "!rebuild" in mess.content:
+			database.execute('''CREATE TABLE useridlist (
+				userid   STRING,
+				nickname STRING,
+				username STRING,
+				UNIQUE (
+					userid
+				)
+			)''')
+		return
+		
+		if "!startup" in mess.content:
+			print("BUILDING DATABASE")
+			count = 0
+			for member in mess.server.members:
+				print("ADDING A MEMBER" + str(count))
+				count = count + 1
+				userID = member.id
+				userNick = member.nick
+				userName = member.name
+				toExecute = "INSERT INTO useridlist VALUES (?, ?, ?)"
+				vars = (userID, userNick, userName)
+				try:
+					print(str(database.execute(toExecute, vars)))
+					# print(str(database.commit()))
+				except:
+					pass
+			database.commit()
+			return
+async def fuzzy_match():
+	return None
+	
+async def manually_reset():
+	pass
 async def stream():
 	await client.wait_until_ready()
 	while not client.is_closed:
