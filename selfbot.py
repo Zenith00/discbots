@@ -22,7 +22,7 @@ import sys
 import traceback
 import inspect
 import filelock
-from datetime import datetime
+from datetime import datetime, timedelta
 # from io import BytesIO, StringIO
 # from concurrent.futures import ProcessPoolExecutor
 import aiohttp, csv
@@ -129,7 +129,7 @@ async def on_message(mess):
 		if "!getactivity" in mess.content:
 			command = mess.content[13:]
 			await client.delete_message(mess)
-			d = datetime.timedelta(days=int(command))
+			d = timedelta(days=int(command))
 			sinceTime = mess.timestamp - d
 			messageCountConsolidated = []
 			print(str(sinceTime))
