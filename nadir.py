@@ -145,7 +145,7 @@ async def on_message(mess):
                     match = lfgReg.search(messageCheck.content)
                     if match is not None:
                         authorMention = messageCheck.author.mention
-                        count = await increment_lfgd(mess.author)
+                        count = await increment_lfgd(messageCheck.author)
                         authorMention += " (" + str(count[0]) + ")"
                         break
                 else:
