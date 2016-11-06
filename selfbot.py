@@ -18,6 +18,8 @@ import asyncio
 import time
 import shutil
 import fileinput
+from fuzzywuzzy import fuzz
+from fuzzywuzzy import process
 import sys
 import traceback
 import inspect
@@ -134,23 +136,26 @@ async def on_message(mess):
 			messageCountConsolidated = []
 			print(str(sinceTime))
 			for channel in (y for y in mess.server.channels if y.type == discord.ChannelType.text):
-				messageCount = []
-				async for message in client.logs_from(channel, after=sinceTime):
-					for x in range(len(str(message.content)) - 1):
-						messageCount.append(message.author.name)
-						messageCountConsolidated.append(message.author.name)
-				print("messages retrieved")
-				with open(PATHS["logs"] + str(channel.name) + ".csv", 'a', newline='') as myfile:
-					wr = csv.writer(myfile, quoting=csv.QUOTE_MINIMAL)
-					# print(messageCount)
-					for x in collections.Counter(messageCount).most_common():
-						y = (str(x[0]).encode('ascii','ignore').decode("utf-8"), str(x[1]).encode('ascii','ignore').decode("utf-8"))
-						
-						# print("y = " + str(y))
-						wr.writerow(list(y))
+				try:
+					messageCount = []
+					async for message in client.logs_from(channel, after=sinceTime):
+						for x in range(len(str(message.content)) - 1):
+							messageCount.append(message.author.name)
+							messageCountConsolidated.append(message.author.name)
+					print("messages retrieved")
+					with open(PATHS["logs"] + str(channel.name) + ".csv", 'w', newline='') as myfile:
+						wr = csv.writer(myfile, quoting=csv.QUOTE_MINIMAL)
+						# print(messageCount)
+						for x in collections.Counter(messageCount).most_common():
+							y = (str(x[0]).encode('ascii','ignore').decode("utf-8"), str(x[1]).encode('ascii','ignore').decode("utf-8"))
+							
+							print("y = " + str(y))
+							wr.writerow(list(y))
+				except:
+					print(sys.exc_info()[0])
 				
-				print("finished")
-			with open(PATHS["logs"] + "consolidated.csv", 'a', newline='') as myfile:
+			print("finished")
+			with open(PATHS["logs"] + "consolidated.csv", 'w', newline='') as myfile:
 				wr = csv.writer(myfile, quoting=csv.QUOTE_MINIMAL)
 				# print(messageCount)
 				for x in collections.Counter(messageCountConsolidated).most_common():
@@ -180,7 +185,7 @@ async def on_message(mess):
 					except:
 						print("error")
 				if counter % 200 == 0:
-					await client.edit_message(mess, "Log Retrieval at minimum " + str((float(i)/1000000) * 100) + "%")
+					await client.edit_message(mess, "Log Retrieval at minimum " + str((float(counter)/1000000) * 100) + "%")
 			await client.send_message(mess.channel, "Log Retrieval complete after " + (datetime.utcnow() - time).strftime("%H:%m:%S"))
 						
 			
