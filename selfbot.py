@@ -123,19 +123,6 @@ async def on_message(mess):
 			await log_message(toSend)
 			return
 		
-		if "!join" == mess.content[0:5]:
-			if len(mess.mentions) > 0:
-				mentionedUser = mess.mentions[0]
-			else:
-				userID = mess.content[6:]
-				mentionedUser = discord.Object(userID)
-			# print(mentionedUser.name)
-			# print()
-			vc = (mentionedUser.voice.voice_channel)
-			instaInvite = await client.create_invite(vc, max_uses=1, max_age=6)
-			VCMess = mess
-			VCInvite = await client.send_message(mess.channel, instaInvite.url)
-			
 
 		if "!getactivity" in mess.content:
 			command = mess.content[13:]
