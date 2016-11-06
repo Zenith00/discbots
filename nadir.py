@@ -49,9 +49,23 @@ async def on_ready():
 
 @client.event
 async def on_message(mess):
+	if "!join" == mess.content[0:5]:
+		if len(mess.mentions) > 0:
+			mentionedUser = mess.mentions[0]
+		else:
+			userID = mess.content[6:]
+			mentionedUser = mess.server.get_member(userID)
+
+		vc = (mentionedUser.voice.voice_channel)
+		
+		instaInvite = await client.create_invite(vc, max_uses=1, max_age=6)
+		# VCMess = mess
+		VCInvite = await client.send_message(mess.channel, instaInvite.url)
+			
+
 	if mess.channel.id == "240310063082897409":
 		await client.send_message(client.get_channel("240320691868663809"), mess.content)
-	if "!clear" in mess.content:
+	if "!clear" in mess.content and mess.server.id == "236343416177295360":
 		deleted = await client.purge_from(mess.channel)
 		# await client.send_message(client.get_channel("240320691868663809"), deleted)
 	
@@ -81,5 +95,5 @@ async def stream():
 			pass
 		# await asyncio.sleep(.05)
 	
-client.loop.create_task(stream())	
+# client.loop.create_task(stream())	
 client.run("MjM2MzQxMTkzODQyMDk4MTc3.CvBk5w.gr9Uv5OnhXLL3I14jFmn0IcesUE", bot=True)
