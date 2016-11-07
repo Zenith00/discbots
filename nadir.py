@@ -452,7 +452,14 @@ async def getactivity(mess):
     return
 
 
-async def fuzzy_match(command, mess):
+#async def fuzzy_match(command, mess):
+async def fuzzy_match(*args):
+	if len(args) == 2:
+		count = 1
+	command = args[0]
+	mess = args[1]
+	
+	
     sentMessages = [await client.send_message(mess.channel, "Input: " + command)]
     cursor = database.cursor()
     cursor.execute('SELECT userid,nickname FROM useridlist')
@@ -471,11 +478,12 @@ async def fuzzy_match(command, mess):
             topNick = k
             print("new topScore: " + str(topScore))
             print("new nick: " + str(topNick))
+	
     nick = topNick
     for userID in nickIdDict[nick]:
         sentMessages.append(
             await client.send_message(mess.channel,
-                                      "ID: " + str(userID) + " | Nickname: " + nick + " (" + str(topScore) + ")"))
+                                      "ID: <" + str(userID) + ">|Nickname: " + nick + " (" + str(topScore) + ")"))
 
 
 async def manually_reset():
