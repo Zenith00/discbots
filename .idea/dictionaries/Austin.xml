@@ -1,24 +1,43 @@
 <component name="ProjectDictionaryState">
   <dictionary name="Austin">
     <words>
+      <w>artpiece</w>
       <w>asdf</w>
       <w>asyncio</w>
+      <w>botdata</w>
       <w>buildlogs</w>
       <w>comms</w>
+      <w>compat</w>
+      <w>ddeb</w>
       <w>dlist</w>
+      <w>dropbox</w>
+      <w>fanart</w>
       <w>fanartbot</w>
       <w>filelock</w>
       <w>firstbuild</w>
       <w>fout</w>
       <w>getactivity</w>
+      <w>geticon</w>
+      <w>getlogs</w>
+      <w>glxsv</w>
       <w>insta</w>
       <w>instainvite</w>
       <w>lfgbot</w>
       <w>myfile</w>
+      <w>nothingbutfanarthere</w>
+      <w>nxsl</w>
       <w>pythonasynciodebug</w>
+      <w>refreshart</w>
+      <w>selfbot</w>
+      <w>stdout</w>
       <w>tetactivity</w>
+      <w>tgqv</w>
+      <w>toascii</w>
       <w>userid</w>
       <w>useridlist</w>
+      <w>wlngdxn</w>
+      <w>xbox</w>
+      <w>zwidth</w>
     </words>
   </dictionary>
 </component>
