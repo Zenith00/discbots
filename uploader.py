@@ -41,18 +41,24 @@ while True:
     imgur = ImgurClient("5e1b2fcfcf0f36e", "d919f14c31fa97819b1e9c82e2be40aef8bd9682", accessToken, refreshToken)
     print("UPLOADER INSTANCE ONLINE")
 
+
+
+    print("UPLOADING FILE")
+    # upload file
+    fileToUpload = fileToUpload.strip("\n")
+    try:
+        image = imgur.upload_from_path(fileToUpload, config=None, anon=False)
+    except:
+        print("Ran into an error!")
+        continue
+    print(image['link'])
+
     # remove first line
     for line_number, line in enumerate(fileinput.input(PATHS["comms"] + "toUpload.txt", inplace=1)):
         if line_number == 0:
             time.sleep(0)
         else:
             sys.stdout.write(line)
-
-    print("UPLOADING FILE")
-    # upload file
-    fileToUpload = fileToUpload.strip("\n")
-    image = imgur.upload_from_path(fileToUpload, config=None, anon=False)
-    print(image['link'])
 
     print("WRITING LINK")
     # write link to botdata.txt and master image list
