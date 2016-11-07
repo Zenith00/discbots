@@ -29,11 +29,12 @@ ZENITH_ID = "129706966460137472"
 MOD_CHAT_ID = "106091034852794368"
 TRUSTED_CHAT_ID = "170185225526181890"
 GENERAL_DISCUSSION_ID = "94882524378968064"
+SPAM_CHANNEL_ID = "209609220084072450"
 
 REDDITMODERATOR_ROLE = 94887153133162496
 BLIZZARD_ROLE = 106536617967116288
 MUTED_ROLE = 110595961490792448
-KRUSHER99S_ROLE = 117291830810247170
+MVP_ROLE = 117291830810247170
 OMNIC_ROLE = 138132942542077952
 TRUSTED_ROLE = 169728613216813056
 ADMINISTRATOR_ROLE = 172949857164722176
@@ -132,11 +133,24 @@ async def add_to_nickIdList(member):
     userNick = await ascii_string(userNick)
     userNick = userNick.lower()
 
-    toExecute = "INSERT OR REPLACE INTO useridlist VALUES (?, ?, ?, ?)"
-    values = (userID, userNick, userName, 0)
+    count = "SELECT lfgd FROM useridlist WHERE userid = (?)"
+    vars = (userID,)
+
+    cursor = database.cursor()
     try:
+        cursor.execute(count, vars)
+        old_lfgd = cursor.fetchone()
+    except:
+        print(traceback.format_exc())
+
+    if old_lfgd is None:
+        old_lfgd = 0
+    else:
+        old_lfgd = int(old_lfgd[0])
+    try:
+        toExecute = "INSERT OR REPLACE INTO useridlist VALUES (?, ?, ?, ?)"
+        values = (userID, userNick, userName, old_lfgd)
         database.execute(toExecute, values)
-    # print(str(database.commit()))
     except:
         print(traceback.format_exc())
 
@@ -153,7 +167,13 @@ async def on_message(mess):
     global VCInvite
     global PATHS
 
-    if mess.author.id != MERCY_ID:
+    roles = []
+    for x in mess.author.roles:
+        roles.append(str(x.id))
+    if mess.author.id != MERCY_ID and (
+                mess.author.server_permissions.manage_roles or
+                any(x in [str(TRUSTED_ROLE), str(MVP_ROLE)] for x in roles)):
+
         if mess.channel.id == GENERAL_DISCUSSION_ID and not mess.author.server_permissions.manage_roles:
             match = lfgReg.search(mess.content)
             if match != None:
@@ -165,13 +185,9 @@ async def on_message(mess):
         #         await client.send_message(mess.channel, x.name + ":" + x.id)
 
         if '`lfg' == mess.content[0:4]:
-            roles = []
-            for x in mess.author.roles:
-                print(x.name)
-                roles.append(str(x.id))
 
-            print(roles)
-            if mess.author.server_permissions.manage_roles or str(TRUSTED_ROLE) in roles:
+            if mess.author.server_permissions.manage_roles or any(
+                            x in [str(TRUSTED_ROLE), str(MVP_ROLE)] for x in roles):
                 lfgText = ("You're probably looking for <#182420486582435840> or <#185665683009306625>."
                            " Please avoid posting LFGs in ")
                 channelString = mess.channel.mention
@@ -206,9 +222,6 @@ async def on_message(mess):
                 await client.send_message(mess.channel, "Shut down by " + mess.author.name)
                 await client.send_message(client.get_channel(NADIR_AUDIT_LOG_ID), "Shut down by " + mess.author.name)
                 await client.logout()
-        if "`roles" in mess.content:
-            for x in mess.server.roles:
-                await client.send_message(mess.channel, x.name + " " + str(x.id))
         if "`join" == mess.content[0:5]:
             VCMess = mess
             instainvite = await get_vc_link(mess)
@@ -273,7 +286,9 @@ async def invite_checker(mess, regexMatch):
                                              mess.server.get_member(ZENITH_ID).mention)
             await client.delete_message(mess)
 
-            await log_automated("deleted an external invite: " + invite.url)
+            await log_automated("deleted an external invite: " + str(invite.url) + " from " + mess.author.mention)
+            await client.send_message(client.get_channel(SPAM_CHANNEL_ID), "~an " + mess.author.mention +
+                                      " AUTOMATED: Posted a link to another server")
     except discord.errors.NotFound:
         pass
     except:
@@ -295,7 +310,7 @@ async def get_vc_link(mess):
 async def log_automated(description):
     action = ("At " + str(datetime.utcnow().strftime("[%Y-%m-%d %H:%m:%S] ")) + ", I automatically "
               + str(description) + "\n" + "`kill to disable me")
-    await client.send_message(client.get_channel("209609220084072450"), action)
+    await client.send_message(client.get_channel(SPAM_CHANNEL_ID), action)
 
 
 async def ping(message):
@@ -334,7 +349,9 @@ async def ping(message):
     voice = random.choice(voiceLines)
     sent = await client.send_message(message.channel, voice)
     await client.edit_message(sent,
-                              voice + " (" + str((sent.timestamp - message.timestamp).total_seconds() * 1000) + " ms)")
+                              voice + " (" + str((sent.timestamp - message.timestamp).total_seconds() * 1000) + " ms) " +
+                              message.author.mention)
+    await client.delete_message(message)
 
 
 # noinspection PyBroadException
