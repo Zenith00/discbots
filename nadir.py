@@ -30,6 +30,25 @@ MOD_CHAT_ID = "106091034852794368"
 TRUSTED_CHAT_ID = "170185225526181890"
 GENERAL_DISCUSSION_ID = "94882524378968064"
 
+REDDITMODERATOR_ROLE = 94887153133162496
+BLIZZARD_ROLE = 106536617967116288
+MUTED_ROLE = 110595961490792448
+KRUSHER99S_ROLE = 117291830810247170
+OMNIC_ROLE = 138132942542077952
+TRUSTED_ROLE = 169728613216813056
+ADMINISTRATOR_ROLE = 172949857164722176
+MODERATOR_ROLE = 172950000412655616
+DISCORD_STAFF_ROLE = 185217304533925888
+PSEUDO_ADMINISTRATOR_ROLE = 188858581276164096
+FOUNDER_ROLE = 197364237952221184
+REDDITOVERWATCH_ROLE = 204083728182411264
+VETERAN_ROLE = 216302320189833226
+OVERWATCH_AGENT_ROLE = 227935626954014720
+ESPORTSSUB_ROLE = 230937138852659201
+BLIZZARDSUB_ROLE = 231198164210810880
+DISCORDSUB_ROLE = 231199148647383040
+DJ_ROLE = 231852994780594176
+
 NADIR_AUDIT_LOG_ID = "240320691868663809"
 global before
 
@@ -122,6 +141,12 @@ async def add_to_nickIdList(member):
         print(traceback.format_exc())
 
 
+async def get_role(mess, id):
+    for x in mess.server.roles:
+        if x.id == id:
+            return x
+
+
 @client.event
 async def on_message(mess):
     global VCMess
@@ -133,25 +158,48 @@ async def on_message(mess):
             match = lfgReg.search(mess.content)
             if match != None:
                 await client.send_message(client.get_channel(NADIR_AUDIT_LOG_ID), mess.content)
+        # if '`getroles' == mess.content[0:9]:
+        #     userID = mess.content[10:]
+        #     member = mess.server.get_member(userID)
+        #     for x in member.roles:
+        #         await client.send_message(mess.channel, x.name + ":" + x.id)
 
-        if mess.content == '`lfg' and mess.author.server_permissions.manage_roles:
+        if '`lfg' == mess.content[0:4]:
+            roles = []
+            for x in mess.author.roles:
+                print(x.name)
+                roles.append(str(x.id))
 
-            lfgText = ("You're probably looking for <#182420486582435840> or <#185665683009306625>."
-                       "Please avoid posting LFGs in <#94882524378968064> . ")
-            await client.delete_message(mess)
-            authorMention = ""
-            async for messageCheck in client.logs_from(mess.channel, 8):
-                if messageCheck.author.id != MERCY_ID:  # and not mess.author.server_permissions.manage_roles:
-                    match = lfgReg.search(messageCheck.content)
-                    if match is not None:
-                        authorMention = messageCheck.author.mention
-                        count = await increment_lfgd(messageCheck.author)
+            print(roles)
+            if mess.author.server_permissions.manage_roles or str(TRUSTED_ROLE) in roles:
+                lfgText = ("You're probably looking for <#182420486582435840> or <#185665683009306625>."
+                           " Please avoid posting LFGs in ")
+                channelString = mess.channel.mention
+                lfgText += channelString
+                await client.delete_message(mess)
+                authorMention = ""
+                if len(mess.mentions) > 0:
+                    try:
+                        author = mess.mentions[0]
+                        authorMention = ", " + author.mention
+                        count = await increment_lfgd(author)
                         authorMention += " (" + str(count[0]) + ")"
-                        break
+                    except:
+                        print(traceback.format_exc())
+
                 else:
-                    authorMention = ""
-            lfgText += authorMention
-            await client.send_message(mess.channel, lfgText)
+                    async for messageCheck in client.logs_from(mess.channel, 8):
+                        if messageCheck.author.id != MERCY_ID:  # and not mess.author.server_permissions.manage_roles:
+                            match = lfgReg.search(messageCheck.content)
+                            if match is not None:
+                                authorMention = ", " + messageCheck.author.mention
+                                count = await increment_lfgd(messageCheck.author)
+                                authorMention += " (" + str(count[0]) + ")"
+                                break
+                        else:
+                            authorMention = ""
+                lfgText += authorMention
+                await client.send_message(mess.channel, lfgText)
 
         if mess.author.server_permissions.manage_roles:
             if "`kill" in mess.content:
@@ -169,6 +217,7 @@ async def on_message(mess):
             await ping(mess)
         if "`find" == mess.content[0:5]:
             command = mess.content[6:]
+            command = command.lower()
             await fuzzy_match(command, mess)
         if mess.channel.id == "240310063082897409":
             await client.send_message(client.get_channel("240320691868663809"), mess.content)
