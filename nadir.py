@@ -56,7 +56,7 @@ global before
 client = discord.Client()
 
 linkReg = reg = re.compile(
-    r"(http(s?)://discord.gg/(\w){5})",
+    r"(http(s?)://discord.gg/(\w+))",
     re.IGNORECASE)
 
 lfgReg = re.compile(
@@ -170,6 +170,22 @@ async def on_message(mess):
     roles = []
     for x in mess.author.roles:
         roles.append(str(x.id))
+    if mess.channel.id not in ["147153976687591424", "152757147288076297", "200185170249252865"]:
+        await add_message_to_log(mess)
+
+
+    if mess.author.id != MERCY_ID and not (
+                mess.author.server_permissions.manage_roles or
+                any(x in [str(TRUSTED_ROLE), str(MVP_ROLE)] for x in roles)):
+        if mess.channel.id not in ["147153976687591424", "152757147288076297",
+                                   "200185170249252865"] and mess.channel.id not in [MOD_CHAT_ID, TRUSTED_CHAT_ID,
+                                                                                     SPAM_CHANNEL_ID]:
+            match = reg.search(mess.content)
+            if match != None:
+                await invite_checker(mess, match)
+
+
+#WHITELIST MODSt
     if mess.author.id != MERCY_ID and (
                 mess.author.server_permissions.manage_roles or
                 any(x in [str(TRUSTED_ROLE), str(MVP_ROLE)] for x in roles)):
@@ -264,19 +280,14 @@ async def on_message(mess):
                     dateSent   DATETIME
                 )''')
                 messageBase.commit()
-        if mess.channel.id not in ["147153976687591424", "152757147288076297", "200185170249252865"]:
-            await add_message_to_log(mess)
 
-            if mess.channel.id not in [MOD_CHAT_ID, TRUSTED_CHAT_ID]:
-                match = reg.search(mess.content)
-                if match != None:
-                    await invite_checker(mess, match)
 
 
 async def invite_checker(mess, regexMatch):
     try:
         invite = await client.get_invite(regexMatch.group(1))
         serverID = invite.server.id
+        
         if serverID != OVERWATCH_ID:
             channel = mess.channel
             # await client.send_message(mess.channel, serverID + " " + OVERWATCH_ID)
@@ -360,9 +371,15 @@ async def add_message_to_log(mess):
     messageContent = await ascii_string(mess.content)
     messageLength = len(messageContent)
     dateSent = mess.timestamp
+    mentioned_users = []
+    mentioned_channels = []
+    for x in mess.mentions:
+        mentioned_users.append(x.id)
+    for x in mess.channel_mentions:
+        mentioned_channels.append(x.id)
+    toExecute = "INSERT INTO messageLog VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
+    values = (dateSent, userid, messageContent, messageLength, mess.channel.id, mess.id, str(mentioned_users), str(mentioned_channels))
 
-    toExecute = "INSERT INTO messageList VALUES (?, ?, ?, ?)"
-    values = (userid, messageContent, messageLength, dateSent)
     try:
         messageBase.execute(toExecute, values)
     # print(str(database.commit()))

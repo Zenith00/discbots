@@ -37,38 +37,65 @@
     <favorites_list name="discbots" />
   </component>
   <component name="FileEditorManager">
-    <leaf>
-      <file leaf-file-name="nadir.py" pinned="false" current-in-tab="false">
+    <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
+      <file leaf-file-name="nadir.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/nadir.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="340">
-              <caret line="179" column="34" selection-start-line="179" selection-start-column="34" selection-end-line="179" selection-end-column="34" />
+            <state relative-caret-position="-1281">
+              <caret line="289" column="8" selection-start-line="289" selection-start-column="8" selection-end-line="289" selection-end-column="8" />
               <folding>
                 <element signature="e#0#10#0" expanded="true" />
-                <element signature="e#1176#1273#0" expanded="false" />
-                <element signature="e#1983#2039#0" expanded="false" />
-                <element signature="e#4165#4632#0" expanded="false" />
-                <element signature="e#4182#4424#0" expanded="true" />
-                <element signature="e#4773#5044#0" expanded="false" />
-                <element signature="e#4793#5006#0" expanded="true" />
-                <element signature="e#8999#11175#0" expanded="false" />
-                <marker date="1478466309355" expanded="true" signature="2389:2439" placeholder="INSERT INTO useridlist... " />
-                <marker date="1478466309355" expanded="true" signature="4183:4423" placeholder="CREATE TABLE... useridlist" />
-                <marker date="1478466309355" expanded="true" signature="4185:4421" placeholder="CREATE TABLE... useridlist" />
-                <marker date="1478466309355" expanded="true" signature="4796:5003" placeholder="CREATE TABLE... messageList" />
-                <marker date="1478466309355" expanded="true" signature="8481:8524" placeholder="INSERT INTO messageList... " />
-                <marker date="1478466309355" expanded="false" signature="11215:12088" placeholder="..." />
-                <marker date="1478466309355" expanded="true" signature="11349:11387" placeholder="SELECT useri... useridlist" />
+                <element signature="e#1874#1971#0" expanded="false" />
+                <element signature="e#2682#2738#0" expanded="false" />
+                <element signature="e#6105#6242#0" expanded="true" />
+                <element signature="e#8877#9162#0" expanded="true" />
+                <element signature="e#9511#9782#0" expanded="false" />
+                <element signature="e#9531#9744#0" expanded="true" />
+                <element signature="e#14029#16205#0" expanded="false" />
+                <element signature="e#16250#17138#0" expanded="false" />
+                <marker date="1478534548506" expanded="true" signature="2792:2845" placeholder="UPDATE useri... " />
+                <marker date="1478534548506" expanded="true" signature="2792:2848" placeholder="UPDATE useri... " />
+                <marker date="1478534548506" expanded="true" signature="3008:3054" placeholder="SELECT lfgd useridlist" />
+                <marker date="1478534548506" expanded="true" signature="3552:3598" placeholder="SELECT lfgd useridlist" />
+                <marker date="1478534548506" expanded="true" signature="8878:9161" placeholder="CREATE TABLE... useridlist" />
+                <marker date="1478534548506" expanded="true" signature="8880:9159" placeholder="CREATE TABLE... useridlist" />
+                <marker date="1478534548506" expanded="true" signature="9534:9741" placeholder="CREATE TABLE... messageList" />
+                <marker date="1478534548506" expanded="true" signature="13426:13480" placeholder="INSERT INTO messageList... " />
+                <marker date="1478534548506" expanded="true" signature="16379:16417" placeholder="SELECT useri... useridlist" />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="selfbot.py" pinned="false" current-in-tab="true">
+      <file leaf-file-name="selfbot.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/selfbot.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="2077">
-              <caret line="172" column="23" selection-start-line="172" selection-start-column="23" selection-end-line="172" selection-end-column="23" />
+            <state relative-caret-position="1751">
+              <caret line="104" column="16" selection-start-line="104" selection-start-column="16" selection-end-line="104" selection-end-column="16" />
+              <folding>
+                <element signature="e#1488#1639#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="filechecker.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/filechecker.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="1224">
+              <caret line="74" column="30" selection-start-line="74" selection-start-column="30" selection-end-line="74" selection-end-column="30" />
+              <folding>
+                <element signature="e#0#9#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="uploader.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/uploader.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="816">
+              <caret line="51" column="33" selection-start-line="51" selection-start-column="33" selection-end-line="51" selection-end-column="33" />
               <folding />
             </state>
           </provider>
@@ -82,7 +109,9 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
+        <option value="$PROJECT_DIR$/filechecker.py" />
         <option value="$PROJECT_DIR$/selfbot.py" />
+        <option value="$PROJECT_DIR$/uploader.py" />
         <option value="$PROJECT_DIR$/nadir.py" />
       </list>
     </option>
@@ -123,8 +152,6 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
-      <pane id="Scratches" />
-      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <PATH>
@@ -145,6 +172,8 @@
           </PATH>
         </subPane>
       </pane>
+      <pane id="Scope" />
+      <pane id="Scratches" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -154,6 +183,7 @@
     <property name="settings.editor.splitter.proportion" value="0.2" />
     <property name="js-jscs-nodeInterpreter" value="C:\Program Files\nodejs\node.exe" />
     <property name="com.intellij.database.dataSource.DataSourceTemplate" value="Sqlite (Xerial)" />
+    <property name="last.edited.regexp" value="Sample Text" />
   </component>
   <component name="RunManager">
     <configuration default="true" type="DjangoTestsConfigurationType" factoryName="Django tests">
@@ -239,6 +269,12 @@
       <method />
     </configuration>
     <configuration default="true" type="js.build_tools.gulp" factoryName="Gulp.js">
+      <node-interpreter>project</node-interpreter>
+      <node-options />
+      <gulpfile />
+      <tasks />
+      <arguments />
+      <envs />
       <method />
     </configuration>
     <configuration default="true" type="js.build_tools.npm" factoryName="npm">
@@ -376,24 +412,24 @@
     <frame x="24" y="-8" width="1904" height="1096" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
-      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="-1" side_tool="true" content_ui="tabs" />
-      <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3995943" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
-      <window_info id="Python Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
-      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
-      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
       <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.1832627" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
-      <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
-      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
+      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3296146" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
+      <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Python Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
-      <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="-1" side_tool="true" content_ui="tabs" />
-      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
-      <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
+      <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3995943" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
+      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
     </layout>
   </component>
   <component name="VcsContentAnnotationSettings">
@@ -406,11 +442,65 @@
     <watches-manager />
   </component>
   <component name="editorHistoryManager">
+    <entry file="file://$PROJECT_DIR$/nadir.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding>
+            <element signature="e#0#10#0" expanded="true" />
+            <element signature="e#1874#1971#0" expanded="false" />
+            <element signature="e#2682#2738#0" expanded="false" />
+            <element signature="e#6105#6242#0" expanded="true" />
+            <element signature="e#8877#9162#0" expanded="true" />
+            <element signature="e#9511#9782#0" expanded="false" />
+            <element signature="e#9531#9744#0" expanded="true" />
+            <element signature="e#14029#16205#0" expanded="false" />
+            <element signature="e#16250#17138#0" expanded="false" />
+            <marker date="1478534548506" expanded="true" signature="2792:2845" placeholder="UPDATE useri... " />
+            <marker date="1478534548506" expanded="true" signature="2792:2848" placeholder="UPDATE useri... " />
+            <marker date="1478534548506" expanded="true" signature="3008:3054" placeholder="SELECT lfgd useridlist" />
+            <marker date="1478534548506" expanded="true" signature="3552:3598" placeholder="SELECT lfgd useridlist" />
+            <marker date="1478534548506" expanded="true" signature="8878:9161" placeholder="CREATE TABLE... useridlist" />
+            <marker date="1478534548506" expanded="true" signature="8880:9159" placeholder="CREATE TABLE... useridlist" />
+            <marker date="1478534548506" expanded="true" signature="9534:9741" placeholder="CREATE TABLE... messageList" />
+            <marker date="1478534548506" expanded="true" signature="13426:13480" placeholder="INSERT INTO messageList... " />
+            <marker date="1478534548506" expanded="true" signature="16379:16417" placeholder="SELECT useri... useridlist" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/selfbot.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1751">
+          <caret line="104" column="16" selection-start-line="104" selection-start-column="16" selection-end-line="104" selection-end-column="16" />
+          <folding>
+            <element signature="e#1488#1639#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/filechecker.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1224">
+          <caret line="74" column="30" selection-start-line="74" selection-start-column="30" selection-end-line="74" selection-end-column="30" />
+          <folding>
+            <element signature="e#0#9#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/uploader.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="816">
+          <caret line="51" column="33" selection-start-line="51" selection-start-column="33" selection-end-line="51" selection-end-column="33" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$APPLICATION_CONFIG_DIR$/consoles/db/566c0891-8068-41f1-9efa-df018161f0d1/console.sql">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
           <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -418,39 +508,61 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
           <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/nadir.py">
+    <entry file="file://$PROJECT_DIR$/filechecker.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="340">
-          <caret line="179" column="34" selection-start-line="179" selection-start-column="34" selection-end-line="179" selection-end-column="34" />
+        <state relative-caret-position="1224">
+          <caret line="74" column="30" selection-start-line="74" selection-start-column="30" selection-end-line="74" selection-end-column="30" />
           <folding>
-            <element signature="e#0#10#0" expanded="true" />
-            <element signature="e#1176#1273#0" expanded="false" />
-            <element signature="e#1983#2039#0" expanded="false" />
-            <element signature="e#4165#4632#0" expanded="false" />
-            <element signature="e#4182#4424#0" expanded="true" />
-            <element signature="e#4773#5044#0" expanded="false" />
-            <element signature="e#4793#5006#0" expanded="true" />
-            <element signature="e#8999#11175#0" expanded="false" />
-            <marker date="1478466309355" expanded="true" signature="2389:2439" placeholder="INSERT INTO useridlist... " />
-            <marker date="1478466309355" expanded="true" signature="4183:4423" placeholder="CREATE TABLE... useridlist" />
-            <marker date="1478466309355" expanded="true" signature="4185:4421" placeholder="CREATE TABLE... useridlist" />
-            <marker date="1478466309355" expanded="true" signature="4796:5003" placeholder="CREATE TABLE... messageList" />
-            <marker date="1478466309355" expanded="true" signature="8481:8524" placeholder="INSERT INTO messageList... " />
-            <marker date="1478466309355" expanded="false" signature="11215:12088" placeholder="..." />
-            <marker date="1478466309355" expanded="true" signature="11349:11387" placeholder="SELECT useri... useridlist" />
+            <element signature="e#0#9#0" expanded="true" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/uploader.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="816">
+          <caret line="51" column="33" selection-start-line="51" selection-start-column="33" selection-end-line="51" selection-end-column="33" />
+          <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/selfbot.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="2077">
-          <caret line="172" column="23" selection-start-line="172" selection-start-column="23" selection-end-line="172" selection-end-column="23" />
-          <folding />
+        <state relative-caret-position="1751">
+          <caret line="104" column="16" selection-start-line="104" selection-start-column="16" selection-end-line="104" selection-end-column="16" />
+          <folding>
+            <element signature="e#1488#1639#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/nadir.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-1281">
+          <caret line="289" column="8" selection-start-line="289" selection-start-column="8" selection-end-line="289" selection-end-column="8" />
+          <folding>
+            <element signature="e#0#10#0" expanded="true" />
+            <element signature="e#1874#1971#0" expanded="false" />
+            <element signature="e#2682#2738#0" expanded="false" />
+            <element signature="e#6105#6242#0" expanded="true" />
+            <element signature="e#8877#9162#0" expanded="true" />
+            <element signature="e#9511#9782#0" expanded="false" />
+            <element signature="e#9531#9744#0" expanded="true" />
+            <element signature="e#14029#16205#0" expanded="false" />
+            <element signature="e#16250#17138#0" expanded="false" />
+            <marker date="1478534548506" expanded="true" signature="2792:2845" placeholder="UPDATE useri... " />
+            <marker date="1478534548506" expanded="true" signature="2792:2848" placeholder="UPDATE useri... " />
+            <marker date="1478534548506" expanded="true" signature="3008:3054" placeholder="SELECT lfgd useridlist" />
+            <marker date="1478534548506" expanded="true" signature="3552:3598" placeholder="SELECT lfgd useridlist" />
+            <marker date="1478534548506" expanded="true" signature="8878:9161" placeholder="CREATE TABLE... useridlist" />
+            <marker date="1478534548506" expanded="true" signature="8880:9159" placeholder="CREATE TABLE... useridlist" />
+            <marker date="1478534548506" expanded="true" signature="9534:9741" placeholder="CREATE TABLE... messageList" />
+            <marker date="1478534548506" expanded="true" signature="13426:13480" placeholder="INSERT INTO messageList... " />
+            <marker date="1478534548506" expanded="true" signature="16379:16417" placeholder="SELECT useri... useridlist" />
+          </folding>
         </state>
       </provider>
     </entry>

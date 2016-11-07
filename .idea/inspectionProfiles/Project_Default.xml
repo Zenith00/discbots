@@ -15,6 +15,7 @@
           <option value="discord.message.Message.__await__" />
           <option value="list.*" />
           <option value="discord.invite.Invite.*" />
+          <option value="discord.user.User.__await__" />
         </list>
       </option>
     </inspection_tool>
