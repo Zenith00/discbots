@@ -173,7 +173,6 @@ async def on_message(mess):
     if mess.channel.id not in ["147153976687591424", "152757147288076297", "200185170249252865"]:
         await add_message_to_log(mess)
 
-
     if mess.author.id != MERCY_ID and not (
                 mess.author.server_permissions.manage_roles or
                 any(x in [str(TRUSTED_ROLE), str(MVP_ROLE)] for x in roles)):
@@ -185,7 +184,7 @@ async def on_message(mess):
                 await invite_checker(mess, match)
 
 
-#WHITELIST MODSt
+                # WHITELIST MODSt
     if mess.author.id != MERCY_ID and (
                 mess.author.server_permissions.manage_roles or
                 any(x in [str(TRUSTED_ROLE), str(MVP_ROLE)] for x in roles)):
@@ -282,12 +281,11 @@ async def on_message(mess):
                 messageBase.commit()
 
 
-
 async def invite_checker(mess, regexMatch):
     try:
         invite = await client.get_invite(regexMatch.group(1))
         serverID = invite.server.id
-        
+
         if serverID != OVERWATCH_ID:
             channel = mess.channel
             # await client.send_message(mess.channel, serverID + " " + OVERWATCH_ID)
@@ -360,7 +358,8 @@ async def ping(message):
     voice = random.choice(voiceLines)
     sent = await client.send_message(message.channel, voice)
     await client.edit_message(sent,
-                              voice + " (" + str((sent.timestamp - message.timestamp).total_seconds() * 1000) + " ms) " +
+                              voice + " (" + str(
+                                  (sent.timestamp - message.timestamp).total_seconds() * 1000) + " ms) " +
                               message.author.mention)
     await client.delete_message(message)
 
@@ -378,7 +377,8 @@ async def add_message_to_log(mess):
     for x in mess.channel_mentions:
         mentioned_channels.append(x.id)
     toExecute = "INSERT INTO messageLog VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
-    values = (dateSent, userid, messageContent, messageLength, mess.channel.id, mess.id, str(mentioned_users), str(mentioned_channels))
+    values = (dateSent, userid, messageContent, messageLength, mess.channel.id, mess.id, str(mentioned_users),
+              str(mentioned_channels))
 
     try:
         messageBase.execute(toExecute, values)
@@ -452,38 +452,39 @@ async def getactivity(mess):
     return
 
 
-#async def fuzzy_match(command, mess):
+# async def fuzzy_match(command, mess):
 async def fuzzy_match(*args):
-	if len(args) == 2:
-		count = 1
-	command = args[0]
-	mess = args[1]
-	
-	
-    sentMessages = [await client.send_message(mess.channel, "Input: " + command)]
-    cursor = database.cursor()
-    cursor.execute('SELECT userid,nickname FROM useridlist')
-    nickIdList = cursor.fetchall()
-    nickIdDict = {}
-    for v, k in nickIdList:
-        nickIdDict.setdefault(k, []).append(v)
-    topScore = 0
-    topNick = ""
-    # noinspection PyUnusedLocal
-    ratio = 0
-    for k in nickIdDict.keys():
-        ratio = fuzz.ratio(command, str(k))
-        if ratio > topScore:
-            topScore = ratio
-            topNick = k
-            print("new topScore: " + str(topScore))
-            print("new nick: " + str(topNick))
-	
-    nick = topNick
-    for userID in nickIdDict[nick]:
-        sentMessages.append(
-            await client.send_message(mess.channel,
-                                      "ID: <" + str(userID) + ">|Nickname: " + nick + " (" + str(topScore) + ")"))
+    if len(args) == 2:
+        count = 1
+    command = args[0]
+    mess = args[1]
+
+
+sentMessages = [await client.send_message(mess.channel, "Input: " + command)]
+cursor = database.cursor()
+cursor.execute('SELECT userid,nickname FROM useridlist')
+nickIdList = cursor.fetchall()
+nickIdDict = {}
+for v, k in nickIdList:
+    nickIdDict.setdefault(k, []).append(v)
+topScore = 0
+topNick = ""
+# noinspection PyUnusedLocal
+ratio = 0
+for k in nickIdDict.keys():
+    ratio = fuzz.ratio(command, str(k))
+    if ratio > topScore:
+        topScore = ratio
+        topNick = k
+        print("new topScore: " + str(topScore))
+        print("new nick: " + str(topNick))
+
+nick = topNick
+for userID in nickIdDict[nick]:
+    sentMessages.append(
+        await
+    client.send_message(mess.channel,
+                        "ID: <" + str(userID) + ">|Nickname: " + nick + " (" + str(topScore) + ")"))
 
 
 async def manually_reset():
