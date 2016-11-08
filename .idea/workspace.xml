@@ -16,6 +16,9 @@
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
   <component name="ChangesViewManager" flattened_view="true" show_ignored="false" />
+  <component name="CoverageDataManager">
+    <SUITE FILE_PATH="coverage/discbots$test.coverage" NAME="test Coverage Results" MODIFIED="1478577720767" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+  </component>
   <component name="CreatePatchCommitExecutor">
     <option name="PATCH_PATH" value="" />
   </component>
@@ -25,12 +28,6 @@
     <option name="SORT_POSITIONED" value="false" />
     <option name="SHOW_TABLE_DETAILS" value="true" />
     <option name="SHOW_EMPTY_GROUPS" value="false" />
-    <PATH>
-      <PATH_ELEMENT>
-        <option name="myItemId" />
-        <option name="myItemType" value="com.intellij.database.view.DatabaseStructure$Root" />
-      </PATH_ELEMENT>
-    </PATH>
   </component>
   <component name="ExecutionTargetManager" SELECTED_TARGET="default_target" />
   <component name="FavoritesManager">
@@ -41,27 +38,49 @@
       <file leaf-file-name="nadir.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/nadir.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-1281">
-              <caret line="289" column="8" selection-start-line="289" selection-start-column="8" selection-end-line="289" selection-end-column="8" />
+            <state relative-caret-position="421">
+              <caret line="343" column="0" selection-start-line="343" selection-start-column="0" selection-end-line="343" selection-end-column="0" />
               <folding>
                 <element signature="e#0#10#0" expanded="true" />
-                <element signature="e#1874#1971#0" expanded="false" />
-                <element signature="e#2682#2738#0" expanded="false" />
-                <element signature="e#6105#6242#0" expanded="true" />
-                <element signature="e#8877#9162#0" expanded="true" />
-                <element signature="e#9511#9782#0" expanded="false" />
-                <element signature="e#9531#9744#0" expanded="true" />
-                <element signature="e#14029#16205#0" expanded="false" />
-                <element signature="e#16250#17138#0" expanded="false" />
-                <marker date="1478534548506" expanded="true" signature="2792:2845" placeholder="UPDATE useri... " />
-                <marker date="1478534548506" expanded="true" signature="2792:2848" placeholder="UPDATE useri... " />
-                <marker date="1478534548506" expanded="true" signature="3008:3054" placeholder="SELECT lfgd useridlist" />
-                <marker date="1478534548506" expanded="true" signature="3552:3598" placeholder="SELECT lfgd useridlist" />
-                <marker date="1478534548506" expanded="true" signature="8878:9161" placeholder="CREATE TABLE... useridlist" />
-                <marker date="1478534548506" expanded="true" signature="8880:9159" placeholder="CREATE TABLE... useridlist" />
-                <marker date="1478534548506" expanded="true" signature="9534:9741" placeholder="CREATE TABLE... messageList" />
-                <marker date="1478534548506" expanded="true" signature="13426:13480" placeholder="INSERT INTO messageList... " />
-                <marker date="1478534548506" expanded="true" signature="16379:16417" placeholder="SELECT useri... useridlist" />
+                <element signature="e#3862#3959#0" expanded="false" />
+                <element signature="e#4670#4726#0" expanded="false" />
+                <element signature="e#8021#8158#0" expanded="true" />
+                <element signature="e#10839#11124#0" expanded="true" />
+                <element signature="e#11473#11744#0" expanded="false" />
+                <element signature="e#11493#11706#0" expanded="true" />
+                <element signature="e#14437#15909#0" expanded="false" />
+                <element signature="e#17081#19257#0" expanded="false" />
+                <marker date="1478578004283" expanded="true" signature="4780:4833" placeholder="UPDATE useri... " />
+                <marker date="1478578004283" expanded="true" signature="4780:4836" placeholder="UPDATE useri... " />
+                <marker date="1478578004283" expanded="true" signature="4996:5042" placeholder="SELECT lfgd useridlist" />
+                <marker date="1478578004283" expanded="true" signature="5540:5586" placeholder="SELECT lfgd useridlist" />
+                <marker date="1478578004283" expanded="true" signature="10840:11123" placeholder="CREATE TABLE... useridlist" />
+                <marker date="1478578004283" expanded="true" signature="10842:11121" placeholder="CREATE TABLE... useridlist" />
+                <marker date="1478578004283" expanded="true" signature="11496:11703" placeholder="CREATE TABLE... messageList" />
+                <marker date="1478578004283" expanded="true" signature="12233:12299" placeholder="SELECT autho... messageLog" />
+                <marker date="1478578004283" expanded="true" signature="12342:12376" placeholder="SELECT lfgd useridlist" />
+                <marker date="1478578004283" expanded="true" signature="12420:12453" placeholder="SELECT autho... messageLog" />
+                <marker date="1478578004283" expanded="true" signature="16439:16496" placeholder="INSERT INTO messageList... " />
+                <marker date="1478578004283" expanded="true" signature="19505:19543" placeholder="SELECT useri... useridlist" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="mongo/overwatch/message_log" pinned="false" current-in-tab="false">
+        <entry file="mongo://mongo/overwatch/message_log">
+          <provider selected="true" editor-type-id="MongoData">
+            <state />
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="test.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/test.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="374">
+              <caret line="22" column="19" selection-start-line="22" selection-start-column="19" selection-end-line="22" selection-end-column="19" />
+              <folding>
+                <element signature="e#335#565#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -112,6 +131,7 @@
         <option value="$PROJECT_DIR$/filechecker.py" />
         <option value="$PROJECT_DIR$/selfbot.py" />
         <option value="$PROJECT_DIR$/uploader.py" />
+        <option value="$PROJECT_DIR$/test.py" />
         <option value="$PROJECT_DIR$/nadir.py" />
       </list>
     </option>
@@ -122,10 +142,24 @@
     <detection-done>true</detection-done>
   </component>
   <component name="ProjectFrameBounds">
-    <option name="x" value="24" />
-    <option name="y" value="-8" />
-    <option name="width" value="1904" />
+    <option name="x" value="1973" />
+    <option name="y" value="-931" />
+    <option name="width" value="1875" />
     <option name="height" value="1096" />
+  </component>
+  <component name="ProjectInspectionProfilesVisibleTreeState">
+    <entry key="Project Default">
+      <profile-state>
+        <expanded-state>
+          <State>
+            <id />
+          </State>
+          <State>
+            <id>SQL</id>
+          </State>
+        </expanded-state>
+      </profile-state>
+    </entry>
   </component>
   <component name="ProjectLevelVcsManager" settingsEditedManually="false">
     <OptionsSetting value="true" id="Add" />
@@ -153,39 +187,41 @@
     </navigator>
     <panes>
       <pane id="ProjectPane">
-        <subPane>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="discbots" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="discbots" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="discbots" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-        </subPane>
+        <subPane />
       </pane>
       <pane id="Scope" />
       <pane id="Scratches" />
     </panes>
   </component>
   <component name="PropertiesComponent">
-    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="last_opened_file_path" value="E:/Logs/messages.db" />
     <property name="WebServerToolWindowFactoryState" value="false" />
-    <property name="settings.editor.selected.configurable" value="reference.settingsdialog.IDE.editor.colors.Python" />
+    <property name="settings.editor.selected.configurable" value="preferences.mongoOptions" />
     <property name="settings.editor.splitter.proportion" value="0.2" />
     <property name="js-jscs-nodeInterpreter" value="C:\Program Files\nodejs\node.exe" />
     <property name="com.intellij.database.dataSource.DataSourceTemplate" value="Sqlite (Xerial)" />
     <property name="last.edited.regexp" value="Sample Text" />
+    <property name="SearchEverywhereHistoryKey" value="&#9;FILE&#9;file://C:/Users/Austin/.PyCharm2016.1/config/consoles/db/5f321448-b859-4839-a7f1-96ce1c8e49b4/console.sql" />
   </component>
-  <component name="RunManager">
+  <component name="RunManager" selected="Python.test">
+    <configuration default="false" name="test" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <module name="discbots" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" enabled="false" sample_coverage="true" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/test.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <method />
+    </configuration>
     <configuration default="true" type="DjangoTestsConfigurationType" factoryName="Django tests">
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -394,9 +430,20 @@
       <option name="USE_KEYWORD" value="false" />
       <method />
     </configuration>
+    <list size="1">
+      <item index="0" class="java.lang.String" itemvalue="Python.test" />
+    </list>
+    <recent_temporary>
+      <list size="1">
+        <item index="0" class="java.lang.String" itemvalue="Python.test" />
+      </list>
+    </recent_temporary>
   </component>
   <component name="ShelveChangesManager" show_recycled="false">
     <option name="remove_strategy" value="false" />
+  </component>
+  <component name="SvnConfiguration">
+    <configuration />
   </component>
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
@@ -409,28 +456,37 @@
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="24" y="-8" width="1904" height="1096" extended-state="6" />
+    <frame x="1973" y="-931" width="1875" height="1096" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.1832627" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3296146" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
-      <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Python Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3296146" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Mongo Explorer" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32974717" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.1832627" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32974717" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.1640667" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3995943" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
-      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
-      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
     </layout>
+  </component>
+  <component name="Vcs.Log.UiProperties">
+    <option name="RECENTLY_FILTERED_USER_GROUPS">
+      <collection />
+    </option>
+    <option name="RECENTLY_FILTERED_BRANCH_GROUPS">
+      <collection />
+    </option>
   </component>
   <component name="VcsContentAnnotationSettings">
     <option name="myLimit" value="2678400000" />
@@ -448,23 +504,162 @@
           <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
             <element signature="e#0#10#0" expanded="true" />
-            <element signature="e#1874#1971#0" expanded="false" />
-            <element signature="e#2682#2738#0" expanded="false" />
-            <element signature="e#6105#6242#0" expanded="true" />
-            <element signature="e#8877#9162#0" expanded="true" />
-            <element signature="e#9511#9782#0" expanded="false" />
-            <element signature="e#9531#9744#0" expanded="true" />
-            <element signature="e#14029#16205#0" expanded="false" />
-            <element signature="e#16250#17138#0" expanded="false" />
-            <marker date="1478534548506" expanded="true" signature="2792:2845" placeholder="UPDATE useri... " />
-            <marker date="1478534548506" expanded="true" signature="2792:2848" placeholder="UPDATE useri... " />
-            <marker date="1478534548506" expanded="true" signature="3008:3054" placeholder="SELECT lfgd useridlist" />
-            <marker date="1478534548506" expanded="true" signature="3552:3598" placeholder="SELECT lfgd useridlist" />
-            <marker date="1478534548506" expanded="true" signature="8878:9161" placeholder="CREATE TABLE... useridlist" />
-            <marker date="1478534548506" expanded="true" signature="8880:9159" placeholder="CREATE TABLE... useridlist" />
-            <marker date="1478534548506" expanded="true" signature="9534:9741" placeholder="CREATE TABLE... messageList" />
-            <marker date="1478534548506" expanded="true" signature="13426:13480" placeholder="INSERT INTO messageList... " />
-            <marker date="1478534548506" expanded="true" signature="16379:16417" placeholder="SELECT useri... useridlist" />
+            <element signature="e#3862#3959#0" expanded="false" />
+            <element signature="e#4670#4726#0" expanded="false" />
+            <element signature="e#8021#8158#0" expanded="true" />
+            <element signature="e#10839#11124#0" expanded="true" />
+            <element signature="e#11473#11744#0" expanded="false" />
+            <element signature="e#11493#11706#0" expanded="true" />
+            <element signature="e#14437#15909#0" expanded="false" />
+            <element signature="e#17081#19257#0" expanded="false" />
+            <marker date="1478578004283" expanded="true" signature="4780:4833" placeholder="UPDATE useri... " />
+            <marker date="1478578004283" expanded="true" signature="4780:4836" placeholder="UPDATE useri... " />
+            <marker date="1478578004283" expanded="true" signature="4996:5042" placeholder="SELECT lfgd useridlist" />
+            <marker date="1478578004283" expanded="true" signature="5540:5586" placeholder="SELECT lfgd useridlist" />
+            <marker date="1478578004283" expanded="true" signature="10840:11123" placeholder="CREATE TABLE... useridlist" />
+            <marker date="1478578004283" expanded="true" signature="10842:11121" placeholder="CREATE TABLE... useridlist" />
+            <marker date="1478578004283" expanded="true" signature="11496:11703" placeholder="CREATE TABLE... messageList" />
+            <marker date="1478578004283" expanded="true" signature="12233:12299" placeholder="SELECT autho... messageLog" />
+            <marker date="1478578004283" expanded="true" signature="12342:12376" placeholder="SELECT lfgd useridlist" />
+            <marker date="1478578004283" expanded="true" signature="12420:12453" placeholder="SELECT autho... messageLog" />
+            <marker date="1478578004283" expanded="true" signature="16439:16496" placeholder="INSERT INTO messageList... " />
+            <marker date="1478578004283" expanded="true" signature="19505:19543" placeholder="SELECT useri... useridlist" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/test.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="17">
+          <caret line="1" column="13" selection-start-line="1" selection-start-column="13" selection-end-line="1" selection-end-column="13" />
+          <folding>
+            <element signature="e#335#565#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/selfbot.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1751">
+          <caret line="104" column="16" selection-start-line="104" selection-start-column="16" selection-end-line="104" selection-end-column="16" />
+          <folding>
+            <element signature="e#1488#1639#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/filechecker.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1224">
+          <caret line="74" column="30" selection-start-line="74" selection-start-column="30" selection-end-line="74" selection-end-column="30" />
+          <folding>
+            <element signature="e#0#9#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/uploader.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="816">
+          <caret line="51" column="33" selection-start-line="51" selection-start-column="33" selection-end-line="51" selection-end-column="33" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/nadir.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding>
+            <element signature="e#0#10#0" expanded="true" />
+            <element signature="e#3862#3959#0" expanded="false" />
+            <element signature="e#4670#4726#0" expanded="false" />
+            <element signature="e#8021#8158#0" expanded="true" />
+            <element signature="e#10839#11124#0" expanded="true" />
+            <element signature="e#11473#11744#0" expanded="false" />
+            <element signature="e#11493#11706#0" expanded="true" />
+            <element signature="e#14437#15909#0" expanded="false" />
+            <element signature="e#17081#19257#0" expanded="false" />
+            <marker date="1478578004283" expanded="true" signature="4780:4833" placeholder="UPDATE useri... " />
+            <marker date="1478578004283" expanded="true" signature="4780:4836" placeholder="UPDATE useri... " />
+            <marker date="1478578004283" expanded="true" signature="4996:5042" placeholder="SELECT lfgd useridlist" />
+            <marker date="1478578004283" expanded="true" signature="5540:5586" placeholder="SELECT lfgd useridlist" />
+            <marker date="1478578004283" expanded="true" signature="10840:11123" placeholder="CREATE TABLE... useridlist" />
+            <marker date="1478578004283" expanded="true" signature="10842:11121" placeholder="CREATE TABLE... useridlist" />
+            <marker date="1478578004283" expanded="true" signature="11496:11703" placeholder="CREATE TABLE... messageList" />
+            <marker date="1478578004283" expanded="true" signature="12233:12299" placeholder="SELECT autho... messageLog" />
+            <marker date="1478578004283" expanded="true" signature="12342:12376" placeholder="SELECT lfgd useridlist" />
+            <marker date="1478578004283" expanded="true" signature="12420:12453" placeholder="SELECT autho... messageLog" />
+            <marker date="1478578004283" expanded="true" signature="16439:16496" placeholder="INSERT INTO messageList... " />
+            <marker date="1478578004283" expanded="true" signature="19505:19543" placeholder="SELECT useri... useridlist" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/test.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="24" selection-start-line="0" selection-start-column="24" selection-end-line="0" selection-end-column="24" />
+          <folding>
+            <element signature="e#335#565#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/selfbot.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1751">
+          <caret line="104" column="16" selection-start-line="104" selection-start-column="16" selection-end-line="104" selection-end-column="16" />
+          <folding>
+            <element signature="e#1488#1639#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/filechecker.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1224">
+          <caret line="74" column="30" selection-start-line="74" selection-start-column="30" selection-end-line="74" selection-end-column="30" />
+          <folding>
+            <element signature="e#0#9#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/uploader.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="816">
+          <caret line="51" column="33" selection-start-line="51" selection-start-column="33" selection-end-line="51" selection-end-column="33" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/nadir.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding>
+            <element signature="e#0#10#0" expanded="true" />
+            <element signature="e#3862#3959#0" expanded="false" />
+            <element signature="e#4670#4726#0" expanded="false" />
+            <element signature="e#8021#8158#0" expanded="true" />
+            <element signature="e#10839#11124#0" expanded="true" />
+            <element signature="e#11473#11744#0" expanded="false" />
+            <element signature="e#11493#11706#0" expanded="true" />
+            <element signature="e#14437#15909#0" expanded="false" />
+            <element signature="e#17081#19257#0" expanded="false" />
+            <marker date="1478578004283" expanded="true" signature="4780:4833" placeholder="UPDATE useri... " />
+            <marker date="1478578004283" expanded="true" signature="4780:4836" placeholder="UPDATE useri... " />
+            <marker date="1478578004283" expanded="true" signature="4996:5042" placeholder="SELECT lfgd useridlist" />
+            <marker date="1478578004283" expanded="true" signature="5540:5586" placeholder="SELECT lfgd useridlist" />
+            <marker date="1478578004283" expanded="true" signature="10840:11123" placeholder="CREATE TABLE... useridlist" />
+            <marker date="1478578004283" expanded="true" signature="10842:11121" placeholder="CREATE TABLE... useridlist" />
+            <marker date="1478578004283" expanded="true" signature="11496:11703" placeholder="CREATE TABLE... messageList" />
+            <marker date="1478578004283" expanded="true" signature="12233:12299" placeholder="SELECT autho... messageLog" />
+            <marker date="1478578004283" expanded="true" signature="12342:12376" placeholder="SELECT lfgd useridlist" />
+            <marker date="1478578004283" expanded="true" signature="12420:12453" placeholder="SELECT autho... messageLog" />
+            <marker date="1478578004283" expanded="true" signature="16439:16496" placeholder="INSERT INTO messageList... " />
+            <marker date="1478578004283" expanded="true" signature="19505:19543" placeholder="SELECT useri... useridlist" />
           </folding>
         </state>
       </provider>
@@ -504,10 +699,21 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$APPLICATION_CONFIG_DIR$/consoles/db/5f321448-b859-4839-a7f1-96ce1c8e49b4/console.sql">
+    <entry file="file://$PROJECT_DIR$/selfbot.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+        <state relative-caret-position="1751">
+          <caret line="104" column="16" selection-start-line="104" selection-start-column="16" selection-end-line="104" selection-end-column="16" />
+          <folding>
+            <element signature="e#1488#1639#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/uploader.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="816">
+          <caret line="51" column="33" selection-start-line="51" selection-start-column="33" selection-end-line="51" selection-end-column="33" />
+          <folding />
         </state>
       </provider>
     </entry>
@@ -521,47 +727,49 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/uploader.py">
+    <entry file="file://$APPLICATION_CONFIG_DIR$/consoles/db/5f321448-b859-4839-a7f1-96ce1c8e49b4/console.sql">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="816">
-          <caret line="51" column="33" selection-start-line="51" selection-start-column="33" selection-end-line="51" selection-end-column="33" />
-          <folding />
+        <state relative-caret-position="0">
+          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/selfbot.py">
+    <entry file="file://$PROJECT_DIR$/test.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1751">
-          <caret line="104" column="16" selection-start-line="104" selection-start-column="16" selection-end-line="104" selection-end-column="16" />
+        <state relative-caret-position="374">
+          <caret line="22" column="19" selection-start-line="22" selection-start-column="19" selection-end-line="22" selection-end-column="19" />
           <folding>
-            <element signature="e#1488#1639#0" expanded="true" />
+            <element signature="e#335#565#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/nadir.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-1281">
-          <caret line="289" column="8" selection-start-line="289" selection-start-column="8" selection-end-line="289" selection-end-column="8" />
+        <state relative-caret-position="421">
+          <caret line="343" column="0" selection-start-line="343" selection-start-column="0" selection-end-line="343" selection-end-column="0" />
           <folding>
             <element signature="e#0#10#0" expanded="true" />
-            <element signature="e#1874#1971#0" expanded="false" />
-            <element signature="e#2682#2738#0" expanded="false" />
-            <element signature="e#6105#6242#0" expanded="true" />
-            <element signature="e#8877#9162#0" expanded="true" />
-            <element signature="e#9511#9782#0" expanded="false" />
-            <element signature="e#9531#9744#0" expanded="true" />
-            <element signature="e#14029#16205#0" expanded="false" />
-            <element signature="e#16250#17138#0" expanded="false" />
-            <marker date="1478534548506" expanded="true" signature="2792:2845" placeholder="UPDATE useri... " />
-            <marker date="1478534548506" expanded="true" signature="2792:2848" placeholder="UPDATE useri... " />
-            <marker date="1478534548506" expanded="true" signature="3008:3054" placeholder="SELECT lfgd useridlist" />
-            <marker date="1478534548506" expanded="true" signature="3552:3598" placeholder="SELECT lfgd useridlist" />
-            <marker date="1478534548506" expanded="true" signature="8878:9161" placeholder="CREATE TABLE... useridlist" />
-            <marker date="1478534548506" expanded="true" signature="8880:9159" placeholder="CREATE TABLE... useridlist" />
-            <marker date="1478534548506" expanded="true" signature="9534:9741" placeholder="CREATE TABLE... messageList" />
-            <marker date="1478534548506" expanded="true" signature="13426:13480" placeholder="INSERT INTO messageList... " />
-            <marker date="1478534548506" expanded="true" signature="16379:16417" placeholder="SELECT useri... useridlist" />
+            <element signature="e#3862#3959#0" expanded="false" />
+            <element signature="e#4670#4726#0" expanded="false" />
+            <element signature="e#8021#8158#0" expanded="true" />
+            <element signature="e#10839#11124#0" expanded="true" />
+            <element signature="e#11473#11744#0" expanded="false" />
+            <element signature="e#11493#11706#0" expanded="true" />
+            <element signature="e#14437#15909#0" expanded="false" />
+            <element signature="e#17081#19257#0" expanded="false" />
+            <marker date="1478578004283" expanded="true" signature="4780:4833" placeholder="UPDATE useri... " />
+            <marker date="1478578004283" expanded="true" signature="4780:4836" placeholder="UPDATE useri... " />
+            <marker date="1478578004283" expanded="true" signature="4996:5042" placeholder="SELECT lfgd useridlist" />
+            <marker date="1478578004283" expanded="true" signature="5540:5586" placeholder="SELECT lfgd useridlist" />
+            <marker date="1478578004283" expanded="true" signature="10840:11123" placeholder="CREATE TABLE... useridlist" />
+            <marker date="1478578004283" expanded="true" signature="10842:11121" placeholder="CREATE TABLE... useridlist" />
+            <marker date="1478578004283" expanded="true" signature="11496:11703" placeholder="CREATE TABLE... messageList" />
+            <marker date="1478578004283" expanded="true" signature="12233:12299" placeholder="SELECT autho... messageLog" />
+            <marker date="1478578004283" expanded="true" signature="12342:12376" placeholder="SELECT lfgd useridlist" />
+            <marker date="1478578004283" expanded="true" signature="12420:12453" placeholder="SELECT autho... messageLog" />
+            <marker date="1478578004283" expanded="true" signature="16439:16496" placeholder="INSERT INTO messageList... " />
+            <marker date="1478578004283" expanded="true" signature="19505:19543" placeholder="SELECT useri... useridlist" />
           </folding>
         </state>
       </provider>
