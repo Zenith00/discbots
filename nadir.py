@@ -32,7 +32,7 @@ TRUSTED_CHAT_ID = "170185225526181890"
 GENERAL_DISCUSSION_ID = "94882524378968064"
 SPAM_CHANNEL_ID = "209609220084072450"
 
-REDDITMODERATOR_ROLE = 94887153133162496
+REDDIT_MODERATOR_ROLE = 94887153133162496
 BLIZZARD_ROLE = 106536617967116288
 MUTED_ROLE = 110595961490792448
 MVP_ROLE = 117291830810247170
@@ -43,12 +43,12 @@ MODERATOR_ROLE = 172950000412655616
 DISCORD_STAFF_ROLE = 185217304533925888
 PSEUDO_ADMINISTRATOR_ROLE = 188858581276164096
 FOUNDER_ROLE = 197364237952221184
-REDDITOVERWATCH_ROLE = 204083728182411264
+REDDIT_OVERWATCH_ROLE = 204083728182411264
 VETERAN_ROLE = 216302320189833226
 OVERWATCH_AGENT_ROLE = 227935626954014720
-ESPORTSSUB_ROLE = 230937138852659201
-BLIZZARDSUB_ROLE = 231198164210810880
-DISCORDSUB_ROLE = 231199148647383040
+ESPORTS_SUB_ROLE = 230937138852659201
+BLIZZARD_SUB_ROLE = 231198164210810880
+DISCORD_SUB_ROLE = 231199148647383040
 DJ_ROLE = 231852994780594176
 
 NADIR_AUDIT_LOG_ID = "240320691868663809"
@@ -174,6 +174,7 @@ async def on_message(mess):
     if mess.channel.id not in ["147153976687591424", "152757147288076297", "200185170249252865"]:
         await add_message_to_log(mess)
 
+    #BLACKLIST MODS
     if mess.author.id != MERCY_ID and not (
                 mess.author.server_permissions.manage_roles or
                 any(x in [str(TRUSTED_ROLE), str(MVP_ROLE)] for x in roles)):
@@ -185,11 +186,13 @@ async def on_message(mess):
                 await invite_checker(mess, match)
 
 
-                # WHITELIST MODSt
+     # WHITELIST MODSt
     if mess.author.id != MERCY_ID and (
                 mess.author.server_permissions.manage_roles or
                 any(x in [str(TRUSTED_ROLE), str(MVP_ROLE)] for x in roles)):
-
+        if "`getmentions" == mess.content:
+            await get_mentions(mess)
+            return
         if mess.channel.id == GENERAL_DISCUSSION_ID and not mess.author.server_permissions.manage_roles:
             match = lfgReg.search(mess.content)
             if match != None:
@@ -282,6 +285,34 @@ async def on_message(mess):
                     dateSent   DATETIME
                 )''')
                 messageBase.commit()
+
+async def get_mentions(mess):
+    target = mess.author
+
+    await client.send_message(target, "Automated Mention Log Fetcher Starting Up!")
+    await client.send_message(target, "Please respond with the number in the parentheses (X)")
+    await client.send_message(target, "Would you like to query personal mentions (1), role mentions (2), or both (3)?")
+
+    pass
+
+async def get_logs_mentions(type):
+    cursor = messageBase.cursor()
+    toExecute = ""
+    vars = ()
+    toExecute = "SELECT author_id, content, channel_id, message_id  FROM messageLog "
+    if type == 1:
+        toExecute += "WHERE mentioned_users_ids LIKE (?)"
+    elif type == 2:
+        toExecute += "WHERE mentioned_role_ids LIKE (?)"
+    elif type == 3:
+        toExecute += "WHERE mentioned_users_ids LIKE (?)"
+
+    try:
+        messageBase.execute(toExecute, vars)
+    # print(str(database.commit()))
+    except:
+        print(traceback.format_exc())
+
 
 
 async def invite_checker(mess, regexMatch):
@@ -483,7 +514,6 @@ async def fuzzy_match(*args):
         nickFuzz[str(nick)] = int(ratio)
 
     topNicks = heapq.nlargest(int(count), nickFuzz, key=lambda k: nickFuzz[k])
-
 
     for nick in topNicks:
         userID = nickIdDict[nick]
