@@ -204,6 +204,7 @@ async def get_logs_mentions(query_type, mess):
     count = 1
     triplet_count = 1
     message_choices_text = ""
+    await client.send_message(target, "Retrieving Messages! (0) to get more messages!")
     mention_choices_message = await client.send_message(target, "Please wait...")
     response = 0
 
@@ -220,17 +221,19 @@ async def get_logs_mentions(query_type, mess):
             if response is None:
                 await client.send_message(target, "You have taken too long to respond! Please restart.")
                 return
+            elif response.content == "0":
+                triplet_count == 0
             else:
                 break
         else:
             triplet_count += 1
         count += 1
     try:
-        if response != 0:
+        if response.content != "0":
             selected_message = number_message_dict[int(response.content)]
             await client.send_message(target, selected_message["content"])
         else:
-            await client.send_message(target, "You have no logged mentions!")
+            await client.send_message(target, "You have no (more) logged mentions!") #LET PEOPLE DO SOMETHING ONCE THEY'RE HERE. CALL RESPONSE AGAIN,
     except ValueError:
         await client.send_message(target, "You entered something wrong! Oops!")
 
