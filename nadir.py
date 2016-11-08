@@ -8,6 +8,7 @@ import random
 import discord
 import asyncio
 from fuzzywuzzy import fuzz
+import heapq
 
 PATHS = {}
 
@@ -246,7 +247,9 @@ async def on_message(mess):
         if "`find" == mess.content[0:5]:
             command = mess.content[6:]
             command = command.lower()
-            await fuzzy_match(command, mess)
+            command = command.split("|", 2)
+            await fuzzy_match(mess, *command)
+
         if mess.channel.id == "240310063082897409":
             await client.send_message(client.get_channel("240320691868663809"), mess.content)
         if mess.author.id == ZENITH_ID:
@@ -372,13 +375,17 @@ async def add_message_to_log(mess):
     dateSent = mess.timestamp
     mentioned_users = []
     mentioned_channels = []
+    mentioned_roles = []
     for x in mess.mentions:
         mentioned_users.append(x.id)
     for x in mess.channel_mentions:
         mentioned_channels.append(x.id)
-    toExecute = "INSERT INTO messageLog VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
+    for x in mess.role_mentions:
+        mentioned_roles.append(x.id)
+
+    toExecute = "INSERT INTO messageLog VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)"
     values = (dateSent, userid, messageContent, messageLength, mess.channel.id, mess.id, str(mentioned_users),
-              str(mentioned_channels))
+              str(mentioned_channels), str(mentioned_roles))
 
     try:
         messageBase.execute(toExecute, values)
@@ -452,43 +459,55 @@ async def getactivity(mess):
     return
 
 
-# async def fuzzy_match(command, mess):
+# async def fuzzy_match(mess, nick, count):
 async def fuzzy_match(*args):
     if len(args) == 2:
         count = 1
-    command = args[0]
-    mess = args[1]
+    else:
+        count = args[2]
+    nickToFind = args[1]
+    mess = args[0]
+
+    cursor = database.cursor()
+    cursor.execute('SELECT userid,nickname FROM useridlist')
+    nickIdList = cursor.fetchall()
+    nickIdDict = {}
+    for id, nick in nickIdList:
+        nickIdDict.setdefault(nick, []).append(id)
+
+    # noinspection PyUnusedLocal
+    nickFuzz = {}
+
+    for nick in nickIdDict.keys():
+        ratio = fuzz.ratio(nickToFind, str(nick))
+        nickFuzz[str(nick)] = int(ratio)
+
+    topNicks = heapq.nlargest(int(count), nickFuzz, key=lambda k: nickFuzz[k])
 
 
-sentMessages = [await client.send_message(mess.channel, "Input: " + command)]
-cursor = database.cursor()
-cursor.execute('SELECT userid,nickname FROM useridlist')
-nickIdList = cursor.fetchall()
-nickIdDict = {}
-for v, k in nickIdList:
-    nickIdDict.setdefault(k, []).append(v)
-topScore = 0
-topNick = ""
-# noinspection PyUnusedLocal
-ratio = 0
-for k in nickIdDict.keys():
-    ratio = fuzz.ratio(command, str(k))
-    if ratio > topScore:
-        topScore = ratio
-        topNick = k
-        print("new topScore: " + str(topScore))
-        print("new nick: " + str(topNick))
+    for nick in topNicks:
+        userID = nickIdDict[nick]
+        messageToSend = "```\n"
+        prettyList = []
+        for singleID in userID:
+            prettyList.append(["ID: '" + str(singleID),
+                               "| Nickname: " + nick,
+                               " (" + str(nickFuzz[nick]) + ")"])
 
-nick = topNick
-for userID in nickIdDict[nick]:
-    sentMessages.append(
-        await
-    client.send_message(mess.channel,
-                        "ID: <" + str(userID) + ">|Nickname: " + nick + " (" + str(topScore) + ")"))
+        messageToSend += await pretty_column(prettyList)
+        messageToSend += "```"
+        await client.send_message(mess.channel, messageToSend)
 
 
 async def manually_reset():
     pass
+
+async def pretty_column(list_of_rows):
+    widths = [max(map(len, col)) for col in zip(*list_of_rows)]
+    output = ""
+    for row in list_of_rows:
+        output += ("  ".join((val.ljust(width) for val, width in zip(row, widths)))) + "\n"
+    return output
 
 
 # client.loop.create_task(stream())
