@@ -30,32 +30,34 @@ database = sqlite3.connect(PATHS["comms"] + "userIDlist.db")
 
 messageBase = sqlite3.connect("E:\\Logs\\messages.db")
 
-MERCY_ID = 236341193842098177
-ZENITH_ID = 129706966460137472
+BOT_HAPPENINGS_ID = "245415914600661003"
 
-MOD_CHAT_ID = 106091034852794368
-TRUSTED_CHAT_ID = 170185225526181890
-GENERAL_DISCUSSION_ID = 94882524378968064
-SPAM_CHANNEL_ID = 209609220084072450
+MERCY_ID = "236341193842098177"
+ZENITH_ID = "129706966460137472"
 
-REDDIT_MODERATOR_ROLE = 94887153133162496
-BLIZZARD_ROLE = 106536617967116288
-MUTED_ROLE = 110595961490792448
-MVP_ROLE = 117291830810247170
-OMNIC_ROLE = 138132942542077952
-TRUSTED_ROLE = 169728613216813056
-ADMINISTRATOR_ROLE = 172949857164722176
-MODERATOR_ROLE = 172950000412655616
-DISCORD_STAFF_ROLE = 185217304533925888
-PSEUDO_ADMINISTRATOR_ROLE = 188858581276164096
-FOUNDER_ROLE = 197364237952221184
-REDDIT_OVERWATCH_ROLE = 204083728182411264
-VETERAN_ROLE = 216302320189833226
-OVERWATCH_AGENT_ROLE = 227935626954014720
-ESPORTS_SUB_ROLE = 230937138852659201
-BLIZZARD_SUB_ROLE = 231198164210810880
-DISCORD_SUB_ROLE = 231199148647383040
-DJ_ROLE = 231852994780594176
+MOD_CHAT_ID = "106091034852794368"
+TRUSTED_CHAT_ID = "170185225526181890"
+GENERAL_DISCUSSION_ID = "94882524378968064"
+SPAM_CHANNEL_ID = "209609220084072450"
+
+REDDIT_MODERATOR_ROLE = "94887153133162496"
+BLIZZARD_ROLE = "106536617967116288"
+MUTED_ROLE = "110595961490792448"
+MVP_ROLE = "117291830810247170"
+OMNIC_ROLE = "138132942542077952"
+TRUSTED_ROLE = "169728613216813056"
+ADMINISTRATOR_ROLE = "172949857164722176"
+MODERATOR_ROLE = "172950000412655616"
+DISCORD_STAFF_ROLE = "185217304533925888"
+PSEUDO_ADMINISTRATOR_ROLE = "188858581276164096"
+FOUNDER_ROLE = "197364237952221184"
+REDDIT_OVERWATCH_ROLE = "204083728182411264"
+VETERAN_ROLE = "216302320189833226"
+OVERWATCH_AGENT_ROLE = "227935626954014720"
+ESPORTS_SUB_ROLE = "230937138852659201"
+BLIZZARD_SUB_ROLE = "231198164210810880"
+DISCORD_SUB_ROLE = "231199148647383040"
+DJ_ROLE = "231852994780594176"
 
 NADIR_AUDIT_LOG_ID = "240320691868663809"
 global before
@@ -75,6 +77,10 @@ VCMess = None
 
 
 async def parse_message_info(mess):
+    """
+
+    :type mess: discord.Message
+    """
     userid = mess.author.id
     messageContent = await ascii_string(mess.content)
     messageLength = len(messageContent)
@@ -103,21 +109,136 @@ async def parse_message_info(mess):
     return info_dict
 
 
+async def parse_user_info(user):
+    """
+
+    :type user: discord.User
+    """
+    info_dict = {
+        "name"       : user.name,
+        "id"         : user.id,
+        "is_bot"     : user.bot,
+        "avatar_url" : user.avatar_url,
+        "mention_str": user.mention,
+        "created_at" : user.created_at,
+    }
+    return info_dict
+
+async def parse_member_info(member):
+    """
+
+    :type member: discord.Member
+    """
+    info_dict = await parse_user_info(member)
+
+    roleIDs = []
+    roleNames = []
+    # print(member.roles)
+    for x in member.roles:
+        roleIDs.append(x.id)
+        # print(roleIDs)
+        roleNames.append(x.name)
+        # print(roleNames)
+    info_dict["role_ids"] = roleIDs
+    info_dict["role_names"] = roleNames
+    info_dict["color"] = member.color
+    return info_dict
+
+
 async def mongo_add_message_to_log(mess):
     messInfo = await parse_message_info(mess)
-    # str_mentioned_users = str(messInfo["mentioned_users"])[1:-1]
-    # str_mentioned_channels = str(messInfo["mentioned_channels"])[1:-1]
-    # str_mentioned_roles = str(messInfo["mentioned_roles"])[1:-1]
-    mongo_dict = {
-        "userid"            : messInfo["userid"],
-        "content"           : messInfo["content"],
-        "length"            : messInfo["length"],
-        "date"              : messInfo["date"],
-        "mentioned_users"   : messInfo["mentioned_users"],
-        "mentioned_channels": messInfo["mentioned_channels"],
-        "mentioned_roles"   : messInfo["mentioned_roles"],
-    }
-    result = await message_log_collection.insert_one(mongo_dict)
+    result = await message_log_collection.insert_one(messInfo)
+
+
+async def get_mentions(mess):
+    target = mess.author
+
+    await client.send_message(target, "Automated Mention Log Fetcher Starting Up!")
+    await client.send_message(target, "Please respond with the number in the parentheses (X)")
+    await client.send_message(target,
+                              "Would you like to query personal mentions (1), admin/mod mentions (2), or both (3)?")
+
+    response_mess = await get_response_int(target)
+    await get_logs_mentions(response_mess.content, mess)
+
+async def get_response_int(target):
+
+    """
+
+    :type target: discord.User
+    """
+
+    def check(msg):
+        if msg.server is None and msg.author.id == target.id:
+            try:
+                int(msg.content)
+                return True
+            except ValueError:
+                return False
+
+    return await client.wait_for_message(timeout=30, author=target, check=check)
+
+async def get_logs_mentions(query_type, mess):
+    """
+    :type query_type: Integer
+    :type mess: discord.Message
+    """
+    mess_info = await parse_message_info(mess)
+    target = mess.author
+    author_info = await parse_member_info(mess.server.get_member(mess.author.id))
+    cursor = None
+    if query_type == "1":
+        cursor = overwatch_db.message_log.find({"mentioned_users": author_info["id"]})
+    elif query_type == "2":
+        cursor = overwatch_db.message_log.find({"mentioned_roles": {"$in": author_info["role_ids"]}})
+    elif query_type == "3":
+        cursor = overwatch_db.message_log.find({"$or": [
+            {"mentioned_users": author_info["id"]},
+            {"mentioned_roles": {"$in": author_info["role_ids"]}}
+        ]})
+    cursor.sort("date", -1)
+    await client.send_message(target, "DEBUG: Query Did Not Fail!")
+    retrieving_messages = True
+
+    number_message_dict = {}
+    count = 1
+    triplet_count = 1
+    message_choices_text = ""
+    mention_choices_message = await client.send_message(target, "Please wait...")
+    response = 0
+
+    async for message_dict in cursor:
+
+        await client.send_message(target, "DEBUG: FOUND MATCH! " + message_dict["content"])
+        number_message_dict[count] = message_dict
+        message_choices_text += "(" + str(count) + ") " + message_dict["content"] + "\n"
+        await client.edit_message(mention_choices_message, message_choices_text)
+
+        if triplet_count == 3:
+
+            response = await get_response_int(target)
+            if response is None:
+                await client.send_message(target, "You have taken too long to respond! Please restart.")
+                return
+            else:
+                break
+        else:
+            triplet_count += 1
+        count += 1
+    try:
+        if response != 0:
+            selected_message = number_message_dict[int(response.content)]
+            await client.send_message(target, selected_message["content"])
+        else:
+            await client.send_message(target, "You have no logged mentions!")
+    except ValueError:
+        await client.send_message(target, "You entered something wrong! Oops!")
+
+
+
+
+
+    pass
 
 
 @client.event
@@ -220,148 +341,120 @@ async def on_message(mess):
     global VCInvite
     global PATHS
 
+
     roles = []
-    for x in mess.author.roles:
-        roles.append(str(x.id))
-    if mess.channel.id not in ["147153976687591424", "152757147288076297", "200185170249252865"]:
-        #     await add_message_to_log(mess)
-        await mongo_add_message_to_log(mess)
 
-    # BLACKLIST MODS
-    if mess.author.id != MERCY_ID and not (
-                mess.author.server_permissions.manage_roles or
-                any(x in [str(TRUSTED_ROLE), str(MVP_ROLE)] for x in roles)):
-        if mess.channel.id not in ["147153976687591424", "152757147288076297",
-                                   "200185170249252865"] and mess.channel.id not in [MOD_CHAT_ID, TRUSTED_CHAT_ID,
-                                                                                     SPAM_CHANNEL_ID]:
-            match = reg.search(mess.content)
-            if match != None:
-                await invite_checker(mess, match)
-
-
-                # WHITELIST MODSt
-    if mess.author.id != MERCY_ID and (
-                mess.author.server_permissions.manage_roles or
-                any(x in [str(TRUSTED_ROLE), str(MVP_ROLE)] for x in roles)):
-        if "`getmentions" == mess.content:
-            await get_mentions(mess)
-            return
-        if mess.channel.id == GENERAL_DISCUSSION_ID and not mess.author.server_permissions.manage_roles:
-            match = lfgReg.search(mess.content)
-            if match != None:
-                await client.send_message(client.get_channel(NADIR_AUDIT_LOG_ID), mess.content)
-
-        if '`lfg' == mess.content[0:4]:
-
-            if mess.author.server_permissions.manage_roles or any(
-                            x in [str(TRUSTED_ROLE), str(MVP_ROLE)] for x in roles):
-                lfgText = ("You're probably looking for <#182420486582435840> or <#185665683009306625>."
-                           " Please avoid posting LFGs in ")
-                channelString = mess.channel.mention
-                lfgText += channelString
-                await client.delete_message(mess)
-                authorMention = ""
-                if len(mess.mentions) > 0:
-                    try:
-                        author = mess.mentions[0]
-                        authorMention = ", " + author.mention
-                        count = await increment_lfgd(author)
-                        authorMention += " (" + str(count[0]) + ")"
-                    except:
-                        print(traceback.format_exc())
-
-                else:
-                    async for messageCheck in client.logs_from(mess.channel, 8):
-                        if messageCheck.author.id != MERCY_ID:  # and not mess.author.server_permissions.manage_roles:
-                            match = lfgReg.search(messageCheck.content)
-                            if match is not None:
-                                authorMention = ", " + messageCheck.author.mention
-                                count = await increment_lfgd(messageCheck.author)
-                                authorMention += " (" + str(count[0]) + ")"
-                                break
-                        else:
-                            authorMention = ""
-                lfgText += authorMention
-                await client.send_message(mess.channel, lfgText)
-
-        if mess.author.server_permissions.manage_roles:
-            if "`kill" in mess.content:
-                await client.send_message(mess.channel, "Shut down by " + mess.author.name)
-                await client.send_message(client.get_channel(NADIR_AUDIT_LOG_ID), "Shut down by " + mess.author.name)
-                await client.logout()
-        if "`join" == mess.content[0:5]:
-            VCMess = mess
-            instainvite = await get_vc_link(mess)
-            VCInvite = await client.send_message(mess.channel, instainvite)
-        if "`ping" == mess.content:
-            await ping(mess)
-        if "`find" == mess.content[0:5]:
-            command = mess.content[6:]
-            command = command.lower()
-            command = command.split("|", 2)
-            await fuzzy_match(mess, *command)
-
-        if mess.channel.id == "240310063082897409":
-            await client.send_message(client.get_channel("240320691868663809"), mess.content)
+    if mess.server is not None:
+        if mess.channel.id not in ["147153976687591424", "152757147288076297", "200185170249252865"]:
+            #     await add_message_to_log(mess)
+            await mongo_add_message_to_log(mess)
         if mess.author.id == ZENITH_ID:
             if "`clear" in mess.content and mess.server.id == "236343416177295360":
                 await client.purge_from(mess.channel)
-            if "`tetactivity" in mess.content:
-                await getactivity(mess)
-            if "`rebuildIDs" in mess.content:
-                database.execute('''CREATE TABLE useridlist (
-                    userid   TEXT,
-                    nickname TEXT,
-                    username TEXT,
-                    lfgd     INTEGER DEFAULT(0),
-                    UNIQUE (
-                        userid
-                    )
-                )''')
-                print("BUILDING DATABASE")
-                for member in mess.server.members:
-                    await add_to_nickIdList(member)
-                    database.commit()
+        # BLACKLIST MODS
+        if mess.author.id != MERCY_ID and not (
+                    mess.author.server_permissions.manage_roles or
+                    any(x in [str(TRUSTED_ROLE), str(MVP_ROLE)] for x in roles)):
+            if mess.channel.id not in ["147153976687591424", "152757147288076297",
+                                       "200185170249252865"] and mess.channel.id not in [MOD_CHAT_ID, TRUSTED_CHAT_ID,
+                                                                                         SPAM_CHANNEL_ID]:
+                match = reg.search(mess.content)
+                if match != None:
+                    await invite_checker(mess, match)
+
+
+                    # WHITELIST MODSt
+        if mess.author.id != MERCY_ID and (
+                    mess.author.server_permissions.manage_roles or
+                    any(x in [str(TRUSTED_ROLE), str(MVP_ROLE)] for x in roles)):
+            if "`getmentions" == mess.content:
+                await get_mentions(mess)
                 return
-            if "`buildlogs" in mess.content:
-                build_logs(mess)
-            if "`firstbuild" in mess.content:
-                messageBase.execute('''CREATE TABLE messageList (
-                    userid   TEXT,
-                    messageContent   TEXT,
-                    messageLength   INTEGER,
-                    dateSent   DATETIME
-                )''')
-                messageBase.commit()
+            if mess.channel.id == GENERAL_DISCUSSION_ID and not mess.author.server_permissions.manage_roles:
+                match = lfgReg.search(mess.content)
+                if match != None:
+                    await client.send_message(client.get_channel(NADIR_AUDIT_LOG_ID), mess.content)
 
+            if '`lfg' == mess.content[0:4]:
 
-async def get_mentions(mess):
-    target = mess.author
+                if mess.author.server_permissions.manage_roles or any(
+                                x in [str(TRUSTED_ROLE), str(MVP_ROLE)] for x in roles):
+                    lfgText = ("You're probably looking for <#182420486582435840> or <#185665683009306625>."
+                               " Please avoid posting LFGs in ")
+                    channelString = mess.channel.mention
+                    lfgText += channelString
+                    await client.delete_message(mess)
+                    authorMention = ""
+                    if len(mess.mentions) > 0:
+                        try:
+                            author = mess.mentions[0]
+                            authorMention = ", " + author.mention
+                            count = await increment_lfgd(author)
+                            authorMention += " (" + str(count[0]) + ")"
+                        except:
+                            print(traceback.format_exc())
 
-    await client.send_message(target, "Automated Mention Log Fetcher Starting Up!")
-    await client.send_message(target, "Please respond with the number in the parentheses (X)")
-    await client.send_message(target, "Would you like to query personal mentions (1), role mentions (2), or both (3)?")
+                    else:
+                        async for messageCheck in client.logs_from(mess.channel, 8):
+                            if messageCheck.author.id != MERCY_ID:  # and not mess.author.server_permissions.manage_roles:
+                                match = lfgReg.search(messageCheck.content)
+                                if match is not None:
+                                    authorMention = ", " + messageCheck.author.mention
+                                    count = await increment_lfgd(messageCheck.author)
+                                    authorMention += " (" + str(count[0]) + ")"
+                                    break
+                            else:
+                                authorMention = ""
+                    lfgText += authorMention
+                    await client.send_message(mess.channel, lfgText)
 
-    pass
+            if mess.author.server_permissions.manage_roles:
+                if "`kill" in mess.content:
+                    await client.send_message(mess.channel, "Shut down by " + mess.author.name)
+                    await client.send_message(client.get_channel(BOT_HAPPENINGS_ID), "Shut down by " + mess.author.name)
+                    await client.logout()
+            if "`join" == mess.content[0:5]:
+                VCMess = mess
+                instainvite = await get_vc_link(mess)
+                VCInvite = await client.send_message(mess.channel, instainvite)
+            if "`ping" == mess.content:
+                await ping(mess)
+            if "`find" == mess.content[0:5]:
+                command = mess.content[6:]
+                command = command.lower()
+                command = command.split("|", 2)
+                await fuzzy_match(mess, *command)
 
-
-async def get_logs_mentions(type):
-    cursor = messageBase.cursor()
-    toExecute = ""
-    vars = ()
-    toExecute = "SELECT author_id, content, channel_id, message_id  FROM messageLog "
-    if type == 1:
-        toExecute += "WHERE mentioned_users_ids LIKE (?)"
-    elif type == 2:
-        toExecute += "WHERE mentioned_role_ids LIKE (?)"
-    elif type == 3:
-        toExecute += "WHERE mentioned_users_ids LIKE (?)"
-
-    try:
-        messageBase.execute(toExecute, vars)
-    # print(str(database.commit()))
-    except:
-        print(traceback.format_exc())
+            if mess.channel.id == "240310063082897409":
+                await client.send_message(client.get_channel("240320691868663809"), mess.content)
+            if mess.author.id == ZENITH_ID:
+                if "`tetactivity" in mess.content:
+                    await getactivity(mess)
+                if "`rebuildIDs" in mess.content:
+                    database.execute('''CREATE TABLE useridlist (
+                        userid   TEXT,
+                        nickname TEXT,
+                        username TEXT,
+                        lfgd     INTEGER DEFAULT(0),
+                        UNIQUE (
+                            userid
+                        )
+                    )''')
+                    print("BUILDING DATABASE")
+                    for member in mess.server.members:
+                        await add_to_nickIdList(member)
+                        database.commit()
+                    return
+                if "`buildlogs" in mess.content:
+                    build_logs(mess)
+                if "`firstbuild" in mess.content:
+                    messageBase.execute('''CREATE TABLE messageList (
+                        userid   TEXT,
+                        messageContent   TEXT,
+                        messageLength   INTEGER,
+                        dateSent   DATETIME
+                    )''')
+                    messageBase.commit()
 
 
 async def invite_checker(mess, regexMatch):
