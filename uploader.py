@@ -16,6 +16,11 @@ accessToken = "4c80c2924ddeb63d3f1c99d19ae04e01e438b5fb"
 global PATHS
 PATHS = {}
 
+print("IMGUR INIT")
+
+print("UPLOADER INSTANCE ONLINE")
+imgur = ImgurClient("5e1b2fcfcf0f36e", "d919f14c31fa97819b1e9c82e2be40aef8bd9682", accessToken, refreshToken)
+
 with open("paths.txt", "r") as f:
     global PATHS
     pathList = f.read()
@@ -37,9 +42,7 @@ while True:
     print(fileToUpload)
     print()
     # start imgur uploader
-    print("IMGUR INIT")
-    imgur = ImgurClient("5e1b2fcfcf0f36e", "d919f14c31fa97819b1e9c82e2be40aef8bd9682", accessToken, refreshToken)
-    print("UPLOADER INSTANCE ONLINE")
+
 
 
 
