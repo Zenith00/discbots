@@ -7,6 +7,7 @@ import os, ast
 import time, shutil, fileinput
 from concurrent.futures import ProcessPoolExecutor
 import sys
+import traceback
 
 # FANARTBOT
 path = "C:\\Users\\Austin\\Dropbox\\Zenith's Fanart\\"
@@ -15,6 +16,10 @@ accessToken = "4c80c2924ddeb63d3f1c99d19ae04e01e438b5fb"
 
 global PATHS
 PATHS = {}
+
+
+imgur = ImgurClient("5e1b2fcfcf0f36e", "d919f14c31fa97819b1e9c82e2be40aef8bd9682", accessToken, refreshToken)
+print(imgur.credits)
 
 with open("paths.txt", "r") as f:
     global PATHS
@@ -38,7 +43,6 @@ while True:
     print()
     # start imgur uploader
     print("IMGUR INIT")
-    imgur = ImgurClient("5e1b2fcfcf0f36e", "d919f14c31fa97819b1e9c82e2be40aef8bd9682", accessToken, refreshToken)
     print("UPLOADER INSTANCE ONLINE")
 
 
@@ -48,11 +52,13 @@ while True:
     fileToUpload = fileToUpload.strip("\n")
     try:
         image = imgur.upload_from_path(fileToUpload, config=None, anon=False)
+        print(imgur.credits)
     except:
-        print("Ran into an error!")
+        print(traceback.format_exc())
+        print("oops")
         continue
     print(image['link'])
-
+	
     # remove first line
     for line_number, line in enumerate(fileinput.input(PATHS["comms"] + "toUpload.txt", inplace=1)):
         if line_number == 0:
