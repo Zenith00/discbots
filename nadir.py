@@ -159,7 +159,10 @@ async def get_mentions(mess):
                               "Would you like to query personal mentions (1), admin/mod mentions (2), or both (3)?")
 
     response_mess = await get_response_int(target)
-    await get_logs_mentions(response_mess.content, mess)
+    if response_mess is not None:
+        await get_logs_mentions(response_mess.content, mess)
+    else:
+        await client.send_message(target, "You have taken too long to respond! Please restart.")
 
 async def get_response_int(target):
 
@@ -214,19 +217,17 @@ async def get_logs_mentions(query_type, mess):
         number_message_dict[count] = message_dict
         message_choices_text += "(" + str(count) + ") " + message_dict["content"] + "\n"
         await client.edit_message(mention_choices_message, message_choices_text)
-
-        if triplet_count == 3:
+        print("triplet: " + str(triplet_count))
+        if count % 3 == 0:
 
             response = await get_response_int(target)
             if response is None:
                 await client.send_message(target, "You have taken too long to respond! Please restart.")
                 return
             elif response.content == "0":
-                triplet_count == 0
+                triplet_count = 0
             else:
                 break
-        else:
-            triplet_count += 1
         count += 1
     try:
         if response.content != "0":
@@ -345,9 +346,10 @@ async def on_message(mess):
     global PATHS
 
 
-    roles = []
+
 
     if mess.server is not None:
+        author_info = await parse_member_info(mess.author)
         if mess.channel.id not in ["147153976687591424", "152757147288076297", "200185170249252865"]:
             #     await add_message_to_log(mess)
             await mongo_add_message_to_log(mess)
@@ -357,7 +359,7 @@ async def on_message(mess):
         # BLACKLIST MODS
         if mess.author.id != MERCY_ID and not (
                     mess.author.server_permissions.manage_roles or
-                    any(x in [str(TRUSTED_ROLE), str(MVP_ROLE)] for x in roles)):
+                    any(x in [str(TRUSTED_ROLE), str(MVP_ROLE)] for x in author_info["role_ids"])):
             if mess.channel.id not in ["147153976687591424", "152757147288076297",
                                        "200185170249252865"] and mess.channel.id not in [MOD_CHAT_ID, TRUSTED_CHAT_ID,
                                                                                          SPAM_CHANNEL_ID]:
@@ -369,7 +371,7 @@ async def on_message(mess):
                     # WHITELIST MODSt
         if mess.author.id != MERCY_ID and (
                     mess.author.server_permissions.manage_roles or
-                    any(x in [str(TRUSTED_ROLE), str(MVP_ROLE)] for x in roles)):
+                    any(x in [str(TRUSTED_ROLE), str(MVP_ROLE)] for x in author_info["role_ids"])):
             if "`getmentions" == mess.content:
                 await get_mentions(mess)
                 return
@@ -381,7 +383,7 @@ async def on_message(mess):
             if '`lfg' == mess.content[0:4]:
 
                 if mess.author.server_permissions.manage_roles or any(
-                                x in [str(TRUSTED_ROLE), str(MVP_ROLE)] for x in roles):
+                                x in [str(TRUSTED_ROLE), str(MVP_ROLE)] for x in author_info["role_ids"]):
                     lfgText = ("You're probably looking for <#182420486582435840> or <#185665683009306625>."
                                " Please avoid posting LFGs in ")
                     channelString = mess.channel.mention
