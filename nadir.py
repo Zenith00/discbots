@@ -263,7 +263,7 @@ async def get_logs_mentions(query_type, mess):
     response = 0
 
     async for message_dict in cursor:
-		user_info = parse_user_info(target.server.get_member(message_dict["userid"]))
+        user_info = await parse_user_info(target.server.get_member(message_dict["userid"]))
         await client.send_message(target, "DEBUG: FOUND MATCH! " + message_dict["content"])
         number_message_dict[count] = message_dict
         message_choices_text += "(" + str(count) + ") [" + message_dict["date"][:19] + "][" + user_info["nick"] + "]: + message_dict["content"] + "\n"
@@ -286,7 +286,7 @@ async def get_logs_mentions(query_type, mess):
         count += 1
     try:
         if response.content == "0":
-		message_choices_text += "\n```"
+        message_choices_text += "\n```"
             await client.send_message(target,
                                       "You have no (more) logged mentions!")
             response = await get_response_int(target)
