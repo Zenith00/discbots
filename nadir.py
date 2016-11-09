@@ -267,26 +267,23 @@ async def get_logs_mentions(query_type, mess):
         await client.send_message(target, "DEBUG: FOUND MATCH! " + message_dict["content"])
         number_message_dict[count] = message_dict
         message_choices_text += "(" + str(count) + ") [" + message_dict["date"][:19] + "][" + user_info["nick"] + "]:" + message_dict["content"] + "\n"
-        try:
-            await client.edit_message(mention_choices_message, message_choices_text)
-        except discord.errors.HTTPException as e:
-            print(e.response)
-            print(e.text)
-            print(message_choices_text)
         if count % 5 == 0:
-
+            message_choices_text += "\n```"
+            await client.edit_message(mention_choices_message, message_choices_text)
             response = await get_response_int(target)
             if response is None:
                 await client.send_message(target, "You have taken too long to respond! Please restart.")
                 return
             elif response.content == "0":
-                triplet_count = 0
+                message_choices_text = message_choices_text[:-4]
+                continue
             else:
                 break
         count += 1
     try:
+        
         if response.content == "0":
-        message_choices_text += "\n```"
+        
             await client.send_message(target,
                                       "You have no (more) logged mentions!")
             response = await get_response_int(target)
