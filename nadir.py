@@ -257,25 +257,23 @@ async def get_logs_mentions(query_type, mess):
 
     number_message_dict = {}
     count = 1
-    triplet_count = 1
-    message_choices_text = ""
+    message_choices_text = "```\n"
     await client.send_message(target, "Retrieving Messages! (0) to get more messages!")
     mention_choices_message = await client.send_message(target, "Please wait...")
     response = 0
 
     async for message_dict in cursor:
-
+		user_info = parse_user_info(target.server.get_member(message_dict["userid"]))
         await client.send_message(target, "DEBUG: FOUND MATCH! " + message_dict["content"])
         number_message_dict[count] = message_dict
-        message_choices_text += "(" + str(count) + ") [" + message_dict["date"] + "]: " + message_dict["content"] + "\n"
+        message_choices_text += "(" + str(count) + ") [" + message_dict["date"][:19] + "][" + user_info["nick"] + "]: + message_dict["content"] + "\n"
         try:
             await client.edit_message(mention_choices_message, message_choices_text)
         except discord.errors.HTTPException as e:
             print(e.response)
             print(e.text)
             print(message_choices_text)
-        print("triplet: " + str(triplet_count))
-        if count % 3 == 0:
+        if count % 5 == 0:
 
             response = await get_response_int(target)
             if response is None:
@@ -288,6 +286,7 @@ async def get_logs_mentions(query_type, mess):
         count += 1
     try:
         if response.content == "0":
+		message_choices_text += "\n```"
             await client.send_message(target,
                                       "You have no (more) logged mentions!")
             response = await get_response_int(target)
@@ -312,7 +311,7 @@ async def get_logs_mentions(query_type, mess):
         contextContent = ""
         async for message_dict in cursor:
             print("DEBUG: FOUND MATCH! " + message_dict["content"])
-            contextContent += "[" + message_dict["date"][:20] + "]: " + message_dict[
+            contextContent += "[" + message_dict["date"][:19] + "]: " + message_dict[
                 "content"] + "\n"
 
         gist = gistClient.create(name="M3R-CY Log", description=selected_message["date"], public=True,
@@ -387,7 +386,6 @@ async def on_member_update(before, after):
     :type before: discord.Member
     """
     if before.nick is not after.nick:
-        print("NEW NICKNAME FOUND: " + str(after.nick))
         # await add_to_nick_id_list(after)
         if after.nick is not None:
             await add_to_nick_id_list_mongo(after)
