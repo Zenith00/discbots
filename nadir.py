@@ -266,7 +266,7 @@ async def get_logs_mentions(query_type, mess):
         user_info = await parse_user_info(target.server.get_member(message_dict["userid"]))
         await client.send_message(target, "DEBUG: FOUND MATCH! " + message_dict["content"])
         number_message_dict[count] = message_dict
-        message_choices_text += "(" + str(count) + ") [" + message_dict["date"][:19] + "][" + user_info["nick"] + "]: + message_dict["content"] + "\n"
+        message_choices_text += "(" + str(count) + ") [" + message_dict["date"][:19] + "][" + user_info["nick"] + "]:" + message_dict["content"] + "\n"
         try:
             await client.edit_message(mention_choices_message, message_choices_text)
         except discord.errors.HTTPException as e:
