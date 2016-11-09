@@ -814,7 +814,7 @@ async def fuzzy_match(*args):
         messageToSend = "```\n"
         prettyList = []
         for singleID in userID:
-            prettyList.append(["ID: '" + str(singleID),
+            prettyList.append(["ID: '" + str(singleID) + "'",
                                "| Nickname: " + nick,
                                " (" + str(nickFuzz[nick]) + ")"])
 
