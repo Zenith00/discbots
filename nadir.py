@@ -94,37 +94,31 @@ ROLENAME_ID_DICT = {
 ID_ROLENAME_DICT = dict([[v, k] for k, v in ROLENAME_ID_DICT.items()])
 
 NADIR_AUDIT_LOG_ID = "240320691868663809"
-
+    
 client = discord.Client()
 
 BLACKLISTED_CHANNELS = (CHANNELNAME_CHANNELID_DICT["bot-log"], CHANNELNAME_CHANNELID_DICT["server-log"],
                         CHANNELNAME_CHANNELID_DICT["voice-channel-output"])
 
-linkReg = reg = re.compile(
-    r"(http(s?)://discord.gg/(\w+))",
-    re.IGNORECASE)
+linkReg = reg = re.compile(r"(http(s?)://discord.gg/(\w+))", re.IGNORECASE)
 
 lfgReg = re.compile(
     (r"(lf(G|\d))|( \d\d\d\d )|(plat|gold|silver|diamond)|(^LF(((NA)|(EU))|(\s?\d)))|((NA|EU) (LF(g|\d)*))|"
-     "(http(s?)://discord.gg/)|(xbox)|(ps4)"),
-    re.IGNORECASE)
+     "(http(s?)://discord.gg/)|(xbox)|(ps4)"), re.IGNORECASE)
 
 VCInvite = None
 VCMess = None
-
 INITIALIZED = False
 
 
 # noinspection PyPep8
-async def parse_message_info(mess):
+async def parse_message_info(mess) -> dict:
     """
-
     :type mess: discord.Message
     """
     userid = mess.author.id
     messageContent = await ascii_string(mess.content)
     messageLength = len(messageContent)
-    dateSent = mess.timestamp
     mentioned_users = []
     mentioned_channels = []
     mentioned_roles = []
@@ -148,7 +142,6 @@ async def parse_message_info(mess):
         "channel_id"        : mess.channel.id,
         "server_id"         : mess.server.id,
         "mess_id"           : mess.id
-
     }
     return info_dict
 
@@ -220,7 +213,7 @@ async def get_mentions(mess):
         await client.send_message(target, "You have taken too long to respond! Please restart.")
 
 
-async def get_response_int(target):
+async def get_response_int(target) -> discord.Message:
     """
 
     :type target: discord.User
@@ -242,6 +235,10 @@ async def get_logs_mentions(query_type, mess):
     :type query_type: Integer
     :type mess: discord.Message
     """
+    try:
+        await client.send_message(NADIR_AUDIT_LOG_ID, str(await parse_message_info(mess)))
+    except:
+        await client.send_message(NADIR_AUDIT_LOG_ID, str(await traceback.format_exc()))
     mess_info = await parse_message_info(mess)
     target = mess.author
     author_info = await parse_member_info(mess.server.get_member(mess.author.id))
@@ -256,9 +253,7 @@ async def get_logs_mentions(query_type, mess):
             {"mentioned_roles": {"$in": author_info["role_ids"]}}
         ]})
     cursor.sort("date", -1)
-    await client.send_message(target, "DEBUG: Query Did Not Fail!")
-    retrieving_messages = True
-
+    # await client.send_message(target, "DEBUG: Query Did Not Fail!")
     number_message_dict = {}
     count = 1
     message_choices_text = "```\n"
@@ -267,7 +262,7 @@ async def get_logs_mentions(query_type, mess):
     response = 0
     async for message_dict in cursor:
         user_info = await parse_member_info(target.server.get_member(message_dict["userid"]))
-        await client.send_message(target, "DEBUG: FOUND MATCH! " + message_dict["content"])
+        # await client.send_message(target, "DEBUG: FOUND MATCH! " + message_dict["content"])
         number_message_dict[count] = message_dict
         message_choices_text += "(" + str(count) + ") [" + message_dict["date"][:19] + "][" + user_info["nick"] + "]:" + \
                                 message_dict["content"] + "\n"
@@ -282,7 +277,6 @@ async def get_logs_mentions(query_type, mess):
                 message_choices_text = message_choices_text[:-4]
                 continue
             else:
-                selected_message = message_dict
                 break
         count += 1
     try:
@@ -301,7 +295,7 @@ async def get_logs_mentions(query_type, mess):
                                   "\n\n\n\nHow many messages of context would you like to retrieve? Enter an integer")
         response = await get_response_int(target)
         response = int(response.content)
-        print("Response = " + str(response))
+        # print("Response = " + str(response))
         cursor = overwatch_db.message_log.find(
             {
                 "date"      : {"$lt": selected_message["date"]},
@@ -312,18 +306,13 @@ async def get_logs_mentions(query_type, mess):
         contextMess = await client.send_message(target, "Please wait...")
         contextContent = ""
         async for message_dict in cursor:
-            print("DEBUG: FOUND MATCH! " + message_dict["content"])
+            # print("DEBUG: FOUND MATCH! " + message_dict["content"])
             contextContent += "[" + message_dict["date"][:19] + "]: " + message_dict[
                 "content"] + "\n"
 
         gist = gistClient.create(name="M3R-CY Log", description=selected_message["date"], public=True,
                                  content=contextContent)
         await client.edit_message(contextMess, gist["Gist-Link"])
-
-
-
-
-
 
 
     except ValueError as e:
@@ -338,14 +327,12 @@ async def get_logs_mentions(query_type, mess):
 async def initialize(mess):
     global INITIALIZED
     for role in client.get_server(OVERWATCH_SERVER_ID).roles:
-
         if role.id in ID_ROLENAME_DICT.keys():
             ROLENAME_ROLE_DICT[ID_ROLENAME_DICT[role.id]] = role
     channel_dict = {}
     for channel in client.get_server(OVERWATCH_SERVER_ID).channels:
         if channel.type == discord.ChannelType.text:
             channel_dict[await ascii_string(channel.name)] = channel.id
-    print(channel_dict)
     INITIALIZED = True
 
 
@@ -367,7 +354,6 @@ async def on_member_join(member):
 @client.event
 async def on_voice_state_update(before, after):
     """
-
     :type after: discord.Member
     :type before: discord.Member
     """
@@ -422,6 +408,10 @@ async def ascii_string(toascii):
 #
 
 async def increment_lfgd_mongo(author):
+    """
+
+    :type author: discord.Member
+    """
     result = await userinfo_collection.find_one_and_update(
         {"userid": author.id},
         {"$inc": {
@@ -517,7 +507,7 @@ async def credential(member, level):
 @client.event
 async def on_message(mess):
     """
-
+    Called on client message reception
     :type mess: discord.Message
     """
     global VCMess
@@ -651,6 +641,11 @@ async def on_message(mess):
 
 
 async def invite_checker(mess, regex_match):
+    """
+
+    :type regex_match: re.match
+    :type mess: discord.Message
+    """
     try:
         invite = await client.get_invite(regex_match.group(1))
         serverID = invite.server.id
@@ -676,6 +671,10 @@ async def invite_checker(mess, regex_match):
 
 # noinspection PyPep8Naming
 async def get_vc_link(mess):
+    """
+
+    :type mess: discord.Message
+    """
     if len(mess.mentions) > 0:
         mentionedUser = mess.mentions[0]
     else:
@@ -690,6 +689,7 @@ async def log_automated(description):
     action = ("At " + str(datetime.utcnow().strftime("[%Y-%m-%d %H:%m:%S] ")) + ", I automatically "
               + str(description) + "\n" + "`kill to disable me")
     await client.send_message(client.get_channel(CHANNELNAME_CHANNELID_DICT["spam-channel"]), action)
+
 
 async def command_info(*args):
     info_list = []
@@ -712,8 +712,12 @@ async def command_info(*args):
             info_list.append(["`getnicks", "[Gets the previous nicknames of a user]", "`getnicks <id>"])
     await client.send_message(args[0].channel, "```md\n" + await pretty_column(info_list, True) + "```")
 
+
 async def ping(message):
     # lag = (datetime.utcnow() - message).timestamp.total_seconds() * 1000) + " ms")
+    """
+    :type message: discord.Message
+    """
     voiceLines = (
         "Did someone call a doctor?",
         "Right beside you.",
@@ -754,99 +758,6 @@ async def ping(message):
     await client.delete_message(message)
 
 
-# noinspection PyBroadException
-# async def add_message_to_log(mess):
-#     userid = mess.author.id
-#     messageContent = await ascii_string(mess.content)
-#     messageLength = len(messageContent)
-#     dateSent = mess.timestamp
-#     mentioned_users = []
-#     mentioned_channels = []
-#     mentioned_roles = []
-#     for x in mess.mentions:
-#         mentioned_users.append(x.id)
-#     for x in mess.channel_mentions:
-#         mentioned_channels.append(x.id)
-#     for x in mess.role_mentions:
-#         mentioned_roles.append(x.id)
-#
-#     toExecute = "INSERT INTO messageLog VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)"
-#     values = (dateSent, userid, messageContent, messageLength, mess.channel.id, mess.id, str(mentioned_users),
-#               str(mentioned_channels), str(mentioned_roles))
-#
-#     try:
-#         messageBase.execute(toExecute, values)
-#     # print(str(database.commit()))
-#     except:
-#         print(traceback.format_exc())
-#     messageBase.commit()
-
-#
-# async def build_logs(mess) -> object:
-#     """
-#
-#     :rtype: object
-#     """
-#     channel = mess.channel
-#     async for message in client.logs_from(channel, 100000):
-#         pass
-
-
-# noinspection PyBroadException
-# async def getactivity(mess):
-#     command = mess.content[13:]
-#     await client.delete_message(mess)
-#     d = timedelta(days=int(command))
-#
-#     sinceTime = mess.timestamp - d
-#     messageCountConsolidated = []
-#     consolidatedDict = {}
-#     print(str(sinceTime))
-#     for channel in (y for y in mess.server.channels if y.type == discord.ChannelType.text):
-#         try:
-#             channelDict = {}
-#             messageCount = []
-#             count = 0
-#             async for message in client.logs_from(channel, 100000):
-#                 count += 1
-#                 for x in range(len(str(message.content)) - 1):
-#                     # messageCount.append(mess age.author.name)
-#                     author = await ascii_string(message.author.name)
-#                     channelDict[author] = channelDict.get(author, 0) + 1
-#                     # messageCountConsolidated.append(message.author.name)
-#                     consolidatedDict[author] = channelDict.get(author, 0) + 1
-#                 if count % 100 == 0:
-#                     # noinspection PyTypeChecker
-#                     print(len(channelDict.keys()))
-#             print("messages retrieved: " + str(count))
-#             with open(PATHS["logs"] + str(channel.name) + ".csv", 'w', newline='') as myfile:
-#                 wr = csv.writer(myfile, quoting=csv.QUOTE_MINIMAL)
-#
-#                 for x in channelDict.keys():
-#                     print(channelDict[x])
-#                     user = await ascii_string(x)
-#                     count = channelDict[user]
-#                     wr.writerow([user, count])
-#         except:
-#             print(traceback.format_exc())
-#
-#     print("finished")
-#     with open(PATHS["logs"] + "consolidated.csv", 'w', newline='') as myfile:
-#         wr = csv.writer(myfile, quoting=csv.QUOTE_MINIMAL)
-#         # print(messageCount)
-#         # for x in collections.Counter(messageCount).most_common():
-#         # y = (str(x[0]).encode('ascii','ignore').decode("utf-8"), str(x[1]).encode('ascii','ignore').decode("utf-8"))
-#
-#         # print("y = " + str(y))
-#         # wr.writerow(list(y))
-#         for x in channelDict.keys():
-#             user = await ascii_string(x)
-#             count = channelDict[user]
-#             wr.writerow([user, count])
-#     return
-
-
-# async def fuzzy_match(mess, nick, count):
 async def get_previous_nicks(member) -> list:
     """
 
@@ -904,11 +815,18 @@ async def fuzzy_match(*args):
 async def manually_reset():
     pass
 
+
 async def get_user_info(member):
+    """
+
+    :type member: discord.Member
+    """
     mongo_cursor = await userinfo_collection.find_one(
-        {"userid" : member.id}
+        {"userid": member.id}
     )
     return mongo_cursor
+
+
 async def pretty_column(list_of_rows, left_just):
     """
     :type list_of_rows: list
