@@ -13,6 +13,10 @@ import sys
 import traceback
 from datetime import datetime
 
+from pip.utils import logging
+
+logging.basicConfig(level=logging.DEBUG)
+
 # from io import BytesIO, StringIO
 # from concurrent.futures import ProcessPoolExecutor
 # import pandas as pd
