@@ -17,9 +17,8 @@ accessToken = "4c80c2924ddeb63d3f1c99d19ae04e01e438b5fb"
 global PATHS
 PATHS = {}
 
-
-imgur = ImgurClient("5e1b2fcfcf0f36e", 
-"d919f14c31fa97819b1e9c82e2be40aef8bd9682", accessToken, refreshToken)
+imgur = ImgurClient("5e1b2fcfcf0f36e",
+                    "d919f14c31fa97819b1e9c82e2be40aef8bd9682", accessToken, refreshToken)
 print(imgur.credits)
 
 print("IMGUR INIT")
@@ -35,41 +34,60 @@ while True:
     with open(PATHS["comms"] + "toUpload.txt", "r+") as f:
         f.seek(0)
         fileToUpload = str(f.readline())
+    with open(PATHS["comms"] + "toDelete.txt", "r+") as f:
+        f.seek(0)
+        fileToDelete = str(f.readline())
 
-    if fileToUpload == "":
+    if fileToUpload == "" and fileToDelete == "":
         time.sleep(5)
         continue
 
+    # for x in imgur.get_album_images('umuvY'):
+    #     print(x.link)
     print("File to upload found:")
     print(fileToUpload)
     print()
     # start imgur uploader
 
-
-
+    if "\\mercy\\" in fileToUpload:
+        config = {
+            'album': 'umuvY'
+        }
+    elif "\\dva\\" in fileToUpload:
+        config = {
+            'album': 'xQXIi'
+        }
 
     print("UPLOADING FILE")
     # upload file
     fileToUpload = fileToUpload.strip("\n")
     try:
-        image = imgur.upload_from_path(fileToUpload, config=None, anon=False)
+        if fileToUpload != "":
+
+            image = imgur.upload_from_path(fileToUpload, config=config, anon=False)
+            for line_number, line in enumerate(fileinput.input(PATHS["comms"] + "toUpload.txt", inplace=1)):
+                if line_number == 0:
+                    pass
+                else:
+                    sys.stdout.write(line)
+            print("WRITING LINK")
+            # write link to botdata.txt and master image list
+            with open(PATHS["comms"] + "botdata.txt", "a") as f:
+                f.write(image['link'] + "\n")
+            with open(PATHS["comms"] + "artlist.txt", "a") as f:
+                f.write(image['link'] + "\n")
+
+        if fileToDelete != "":
+            fileToDelete = fileToDelete.replace("http://imgur.com/","")
+            imgur.delete_image(fileToDelete)
+            for line_number, line in enumerate(fileinput.input(PATHS["comms"] + "toDelete.txt", inplace=1)):
+                if line_number == 0:
+                    pass
+                else:
+                    sys.stdout.write(line)
+
         print(imgur.credits)
     except:
         print(traceback.format_exc())
         print("oops")
         continue
-    print(image['link'])
-	
-    # remove first line
-    for line_number, line in enumerate(fileinput.input(PATHS["comms"] + "toUpload.txt", inplace=1)):
-        if line_number == 0:
-            time.sleep(0)
-        else:
-            sys.stdout.write(line)
-
-    print("WRITING LINK")
-    # write link to botdata.txt and master image list
-    with open(PATHS["comms"] + "botdata.txt", "a") as f:
-        f.write(image['link'] + "\n")
-    with open(PATHS["comms"] + "artlist.txt", "a") as f:
-        f.write(image['link'] + "\n")
