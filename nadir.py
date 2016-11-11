@@ -10,14 +10,26 @@ import asyncio
 from fuzzywuzzy import fuzz
 import heapq
 import motor.motor_asyncio
+import logging
+
+from imgurpython import ImgurClient
 from pymongo import ReturnDocument
 from simplegist.simplegist import Simplegist
+
+# logging.basicConfig(level=logging.INFO)
 
 mongo_client = motor.motor_asyncio.AsyncIOMotorClient()
 overwatch_db = mongo_client.overwatch
 message_log_collection = overwatch_db.message_log
 userinfo_collection = overwatch_db.userinfo
 
+
+
+
+refreshToken = "5c52c0f6a47da6fb599e2835bf228c59c68dd902"
+accessToken = "4c80c2924ddeb63d3f1c99d19ae04e01e438b5fb"
+imgur = ImgurClient("5e1b2fcfcf0f36e",
+                    "d919f14c31fa97819b1e9c82e2be40aef8bd9682", accessToken, refreshToken)
 PATHS = {}
 
 gistClient = Simplegist()
@@ -506,6 +518,7 @@ async def credential(member, level):
     role_whitelist = any(x in [ROLENAME_ID_DICT["TRUSTED_ROLE"], ROLENAME_ID_DICT["MVP_ROLE"]]
                          for x in author_info["role_ids"])
     mod_whitelist = member.server_permissions.manage_roles
+    # print("auth: " + level)
     if level == "mod":
         return mod_whitelist
     elif level == "zenith":
@@ -515,6 +528,7 @@ async def credential(member, level):
     elif level == "art":
         with open(PATHS["comms"] + "art_credentials.txt", "r") as cred_list:
             cred_list.readlines()
+            print(author_info["id"] in cred_list)
             return author_info["id"] in cred_list
 
 
@@ -539,15 +553,17 @@ async def on_message(mess):
             await mongo_add_message_to_log(mess)
 
         # AUTHOR-ONLY
-        if await credential(mess.author, "art") or await credential(mess.author, "trusted"):
-            # art_channel = client.get_channel(CHANNELNAME_CHANNELID_DICT["fanart"])
-            art_channel = client.get_channel("238380537251627008")
-            with open(PATHS["comms"] + "artlist.txt") as art_list:
-                files = art_list.readlines()
-                rand_art = random.sample(files, 10)
+        if mess.content == "`getart":
+            if await credential(mess.author, "art") or await credential(mess.author, "trusted"):
+                await client.delete_message(mess)
+                art_channel = client.get_channel(CHANNELNAME_CHANNELID_DICT["fanart"])
+
+                link_list = [x.link for x in imgur.get_album_images("umuvY")]
+                rand_art = random.sample(link_list, 10)
                 for artlink in rand_art:
                     await client.send_message(art_channel, artlink)
-            rand_art = random.sample(files, 15)
+
+
         if await credential(mess.author, "zenith"):
             if "`auth" in mess.content:
                 command = mess.content.replace("`auth ","")
@@ -663,7 +679,8 @@ async def on_message(mess):
                 instainvite = await get_vc_link(mess)
                 VCInvite = await client.send_message(mess.channel, instainvite)
             # Ping bot
-            if "`ping" == mess.content: await ping(mess)
+            if "`ping" == mess.content:
+                await ping(mess)
             # Fuzzy Nick Find
             if "`find" == mess.content[0:5]:
                 command = mess.content[6:]
@@ -739,15 +756,16 @@ async def command_info(*args):
             ["`getmentions", "Mention retrieval", "`getmentions"],
             ["`lfg", "Automated lfg logger and copypasta warning", "`lfg \*<mention> \*<userid>"],
             ["`ping", "Gets a random mercy voice-line and bot ping", "`ping"],
+            ["`getart", "Sends 10 random pieces of mercy fanart into #fanart", "`getart"],
             [" ", " ", " "],
 
         ]
         if await credential(args[0].author, "mod"):
             info_list.append(["<Moderator>", " ", " "])
-            info_list.append(["`kill", "[Disconnects bot]", "`kill"])
-            info_list.append(["`join", "[Gets an invite for a user's current VC]", "`join <userid>"])
-            info_list.append(["`find", "[Finds users that have had similar nicknames]", "`find <nick>|<count>"])
-            info_list.append(["`getnicks", "[Gets the previous nicknames of a user]", "`getnicks <id>"])
+            info_list.append(["`kill", "Disconnects bot", "`kill"])
+            info_list.append(["`join", "Gets an invite for a user's current VC", "`join <userid>"])
+            info_list.append(["`find", "Finds users that have had similar nicknames", "`find <nick>|<count>"])
+            info_list.append(["`getnicks", "Gets the previous nicknames of a user", "`getnicks <id>"])
     await client.send_message(args[0].channel, "```prolog\n" + await pretty_column(info_list, True) + "```")
 
 
@@ -789,6 +807,7 @@ async def ping(message):
         "Immer unterbricht mich jemand bei der Arbeit.")
     timestamp = message.timestamp
     channel = message.channel
+    print("asdf")
     await client.delete_message(message)
     voice = random.choice(voiceLines)
     sent = await client.send_message(channel, voice)
