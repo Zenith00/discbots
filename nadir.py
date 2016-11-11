@@ -94,7 +94,7 @@ ROLENAME_ID_DICT = {
 ID_ROLENAME_DICT = dict([[v, k] for k, v in ROLENAME_ID_DICT.items()])
 
 NADIR_AUDIT_LOG_ID = "240320691868663809"
-    
+
 client = discord.Client()
 
 BLACKLISTED_CHANNELS = (CHANNELNAME_CHANNELID_DICT["bot-log"], CHANNELNAME_CHANNELID_DICT["server-log"],
@@ -236,9 +236,9 @@ async def get_logs_mentions(query_type, mess):
     :type mess: discord.Message
     """
     try:
-        await client.send_message(NADIR_AUDIT_LOG_ID, str(await parse_message_info(mess)))
+        await client.send_message(client.get_channel(BOT_HAPPENINGS_ID), str(await parse_message_info(mess)))
     except:
-        await client.send_message(NADIR_AUDIT_LOG_ID, str(await traceback.format_exc()))
+        await client.send_message(client.get_channel(BOT_HAPPENINGS_ID), str(traceback.format_exc()))
     mess_info = await parse_message_info(mess)
     target = mess.author
     author_info = await parse_member_info(mess.server.get_member(mess.author.id))
@@ -305,9 +305,13 @@ async def get_logs_mentions(query_type, mess):
         cursor.sort("date", -1)
         contextMess = await client.send_message(target, "Please wait...")
         contextContent = ""
+
         async for message_dict in cursor:
             # print("DEBUG: FOUND MATCH! " + message_dict["content"])
-            contextContent += "[" + message_dict["date"][:19] + "]: " + message_dict[
+            user_info = await parse_member_info(
+                (client.get_server(message_dict["server_id"])).get_member(message_dict["userid"])
+            )
+            contextContent += "[" + message_dict["date"][:19] + "][" + user_info["name"] + "]: " + message_dict[
                 "content"] + "\n"
 
         gist = gistClient.create(name="M3R-CY Log", description=selected_message["date"], public=True,
@@ -484,7 +488,13 @@ async def get_role(mess, id):
         if x.id == id:
             return x
 
-
+async def authorize_user(command_list):
+    print(command_list)
+    user_id = command_list[0]
+    type = command_list[1]
+    if type == "get_art":
+        with open(PATHS["comms"] + "art_credentials.txt", "a") as cred_list:
+            cred_list.write(str(user_id) + "\n")
 async def credential(member, level):
     """
 
@@ -500,8 +510,12 @@ async def credential(member, level):
         return mod_whitelist
     elif level == "zenith":
         return member.id == ZENITH_ID
-    else:
+    elif level == "trusted":
         return mod_whitelist or role_whitelist
+    elif level == "art":
+        with open(PATHS["comms"] + "art_credentials.txt", "r") as cred_list:
+            cred_list.readlines()
+            return author_info["id"] in cred_list
 
 
 @client.event
@@ -525,15 +539,36 @@ async def on_message(mess):
             await mongo_add_message_to_log(mess)
 
         # AUTHOR-ONLY
+        if await credential(mess.author, "art") or await credential(mess.author, "trusted"):
+            # art_channel = client.get_channel(CHANNELNAME_CHANNELID_DICT["fanart"])
+            art_channel = client.get_channel("238380537251627008")
+            with open(PATHS["comms"] + "artlist.txt") as art_list:
+                files = art_list.readlines()
+                rand_art = random.sample(files, 10)
+                for artlink in rand_art:
+                    await client.send_message(art_channel, artlink)
+            rand_art = random.sample(files, 15)
         if await credential(mess.author, "zenith"):
+            if "`auth" in mess.content:
+                command = mess.content.replace("`auth ","")
+                command_list = command.split(" ")
+                await client.delete_message(mess)
+                try:
+                    await authorize_user(command_list)
+                except:
+                    print(traceback.format_exc())
             # NADIR PURGE
             if "`clear" in mess.content and mess.server.id == "236343416177295360":
                 await client.purge_from(mess.channel)
             if "`rebuildnicks" in mess.content:
                 for member in mess.server.members:
-                    await add_to_user_list(member)
+                    try:
+                        await add_to_user_list(member)
+                    except:
+                        pass
             if mess.content.startswith("`purge"):
-                command = mess.content.strip("`purge ")
+                await client.send_message(client.get_channel(BOT_HAPPENINGS_ID), str(await parse_message_info(mess)))
+                command = mess.content.replace("`purge ","")
                 command_list = command.split(" ")
                 number_to_remove = int(command_list[1])
                 await client.delete_message(mess)
@@ -562,7 +597,7 @@ async def on_message(mess):
 
         if mess.author.id != MERCY_ID and await credential(mess.author, "trusted"):
             if mess.content.startswith("`help"):
-                command = mess.content.strip("`help")
+                command = mess.content.replace("`help","")
                 command_list = [mess]
 
                 command_list.extend(command.split(" "))
@@ -571,7 +606,10 @@ async def on_message(mess):
                 await command_info(*command_list)
             # Gets banned userinfo dict
             if "`ui" in mess.content:
-                command = mess.content.split(" ", 1)[1]
+                try:
+                    command = mess.content.split(" ", 1)[1]
+                except IndexError:
+                    command = mess.author.id
 
                 user_dict = await get_user_info(mess.server.get_member(command))
                 formatted = [list(map(str, x)) for x in user_dict.items()]
@@ -697,9 +735,9 @@ async def command_info(*args):
         info_list = [
             ["Command ", "Description ", "Usage"],
             ["<Trusted>,", " ", " "],
-            ["`ui", "Retrieves user info", "`ui <userid>"],
+            ["`ui", "Retrieves user info", "`ui *<userid>"],
             ["`getmentions", "Mention retrieval", "`getmentions"],
-            ["`lfg", "Automated lfg logger and copypasta warning", "`lfg *<mention> *<userid>"],
+            ["`lfg", "Automated lfg logger and copypasta warning", "`lfg \*<mention> \*<userid>"],
             ["`ping", "Gets a random mercy voice-line and bot ping", "`ping"],
             [" ", " ", " "],
 
@@ -710,7 +748,7 @@ async def command_info(*args):
             info_list.append(["`join", "[Gets an invite for a user's current VC]", "`join <userid>"])
             info_list.append(["`find", "[Finds users that have had similar nicknames]", "`find <nick>|<count>"])
             info_list.append(["`getnicks", "[Gets the previous nicknames of a user]", "`getnicks <id>"])
-    await client.send_message(args[0].channel, "```md\n" + await pretty_column(info_list, True) + "```")
+    await client.send_message(args[0].channel, "```prolog\n" + await pretty_column(info_list, True) + "```")
 
 
 async def ping(message):
@@ -749,13 +787,16 @@ async def ping(message):
         "A clean bill of health.",
         "Good as new.",
         "Immer unterbricht mich jemand bei der Arbeit.")
+    timestamp = message.timestamp
+    channel = message.channel
+    await client.delete_message(message)
     voice = random.choice(voiceLines)
-    sent = await client.send_message(message.channel, voice)
+    sent = await client.send_message(channel, voice)
     await client.edit_message(sent,
                               voice + " (" + str(
-                                  (sent.timestamp - message.timestamp).total_seconds() * 500) + " ms) " +
+                                  (sent.timestamp - timestamp).total_seconds() * 500) + " ms) " +
                               message.author.mention)
-    await client.delete_message(message)
+
 
 
 async def get_previous_nicks(member) -> list:
