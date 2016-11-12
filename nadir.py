@@ -784,7 +784,7 @@ async def command_info(*args):
             ["`getart", "Sends 10 random pieces of mercy fanart into #fanart", "`getart"],
             [" ", " ", " "],
 
-        ] 
+        ]
         if await credential(args[0].author, "mod"):
             info_list.append(["<Moderator>", " ", " "])
             info_list.append(["`kill", "Disconnects bot", "`kill"])
