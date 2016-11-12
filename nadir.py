@@ -115,7 +115,7 @@ BLACKLISTED_CHANNELS = (CHANNELNAME_CHANNELID_DICT["bot-log"], CHANNELNAME_CHANN
 linkReg = reg = re.compile(r"(http(s?)://discord.gg/(\w+))", re.IGNORECASE)
 
 lfgReg = re.compile(
-    (r"(lf(G|\d))|( \d\d\d\d )|(plat|gold|silver|diamond)|(^LF(((NA)|(EU))|(\s?\d)))|((NA|EU) (LF(g|\d)*))|"
+    (r"(lf(G|\d))|(\d\d\d\d)|(plat|gold|silver|diamond)|(^LF(((NA)|(EU))|(\s?\d)))|((NA|EU) (LF(g|\d)*))|"
      "(http(s?)://discord.gg/)|(xbox)|(ps4)"), re.IGNORECASE)
 
 VCInvite = None
@@ -739,6 +739,9 @@ async def get_vc_link(mess):
     instaInvite = await client.create_invite(vc, max_uses=1, max_age=6)
     return instaInvite.url
 
+async def mention_to_id(commands):
+    linkReg = reg = re.compile(r"<@\d*>", re.IGNORECASE)
+    match =
 
 async def log_automated(description):
     action = ("At " + str(datetime.utcnow().strftime("[%Y-%m-%d %H:%m:%S] ")) + ", I automatically "
@@ -754,7 +757,7 @@ async def command_info(*args):
             ["<Trusted>,", " ", " "],
             ["`ui", "Retrieves user info", "`ui *<userid>"],
             ["`getmentions", "Mention retrieval", "`getmentions"],
-            ["`lfg", "Automated lfg logger and copypasta warning", "`lfg \*<mention> \*<userid>"],
+            ["`lfg", "Automated lfg logger and copypasta warning", "`lfg *<mention> *<userid>"],
             ["`ping", "Gets a random mercy voice-line and bot ping", "`ping"],
             ["`getart", "Sends 10 random pieces of mercy fanart into #fanart", "`getart"],
             [" ", " ", " "],
