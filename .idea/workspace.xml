@@ -38,31 +38,13 @@
       <file leaf-file-name="nadir.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/nadir.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="459">
-              <caret line="109" column="25" selection-start-line="109" selection-start-column="25" selection-end-line="109" selection-end-column="25" />
+            <state relative-caret-position="360">
+              <caret line="733" column="0" selection-start-line="733" selection-start-column="0" selection-end-line="733" selection-end-column="0" />
               <folding>
                 <element signature="e#0#10#0" expanded="true" />
-                <element signature="e#2731#3723#0" expanded="false" />
-                <element signature="e#3920#4075#0" expanded="false" />
-                <element signature="e#4181#4327#0" expanded="true" />
-                <element signature="e#4468#5618#0" expanded="false" />
-                <element signature="e#5125#5597#0" expanded="false" />
-                <element signature="e#5666#5984#0" expanded="false" />
-                <element signature="e#6927#7536#0" expanded="false" />
-                <element signature="e#7598#7944#0" expanded="false" />
-                <element signature="e#12509#12939#0" expanded="false" />
-                <element signature="e#12982#13079#0" expanded="false" />
-                <element signature="e#14114#14115#0" expanded="false" />
-                <element signature="e#15719#15720#0" expanded="false" />
-                <element signature="e#25014#25239#0" expanded="false" />
-                <element signature="e#26537#26894#0" expanded="false" />
-                <element signature="e#28643#28689#1" expanded="true" />
-                <element signature="e#31852#32012#0" expanded="false" />
-                <element signature="e#32069#32537#0" expanded="false" />
-                <marker date="1478908901073" expanded="true" signature="14171:14227" placeholder="UPDATE useri... " />
-                <marker date="1478908901073" expanded="true" signature="14400:14446" placeholder="SELECT lfgd useridlist" />
-                <marker date="1478908901073" expanded="true" signature="16043:16089" placeholder="SELECT lfgd useridlist" />
-                <marker date="1478908901073" expanded="true" signature="30571:30609" placeholder="SELECT useri... useridlist" />
+                <element signature="e#4178#4324#0" expanded="true" />
+                <element signature="e#22406#22543#0" expanded="true" />
+                <element signature="e#29000#29046#1" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -187,7 +169,13 @@
       <manualOrder />
       <foldersAlwaysOnTop value="true" />
     </navigator>
-    <panes />
+    <panes>
+      <pane id="ProjectPane">
+        <subPane />
+      </pane>
+      <pane id="Scope" />
+      <pane id="Scratches" />
+    </panes>
   </component>
   <component name="PropertiesComponent">
     <property name="last_opened_file_path" value="E:/Logs/messages.db" />
@@ -494,45 +482,6 @@
     <watches-manager />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/nadir.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding>
-            <element signature="e#0#10#0" expanded="true" />
-            <element signature="e#2731#3723#0" expanded="false" />
-            <element signature="e#3920#4075#0" expanded="false" />
-            <element signature="e#4181#4327#0" expanded="true" />
-            <element signature="e#4468#5618#0" expanded="false" />
-            <element signature="e#5125#5597#0" expanded="false" />
-            <element signature="e#5666#5984#0" expanded="false" />
-            <element signature="e#6927#7536#0" expanded="false" />
-            <element signature="e#7598#7944#0" expanded="false" />
-            <element signature="e#12509#12939#0" expanded="false" />
-            <element signature="e#12982#13079#0" expanded="false" />
-            <element signature="e#14114#14115#0" expanded="false" />
-            <element signature="e#15719#15720#0" expanded="false" />
-            <element signature="e#25014#25239#0" expanded="false" />
-            <element signature="e#26537#26894#0" expanded="false" />
-            <element signature="e#28643#28689#1" expanded="true" />
-            <element signature="e#31852#32012#0" expanded="false" />
-            <element signature="e#32069#32537#0" expanded="false" />
-            <marker date="1478908901073" expanded="true" signature="14171:14227" placeholder="UPDATE useri... " />
-            <marker date="1478908901073" expanded="true" signature="14400:14446" placeholder="SELECT lfgd useridlist" />
-            <marker date="1478908901073" expanded="true" signature="16043:16089" placeholder="SELECT lfgd useridlist" />
-            <marker date="1478908901073" expanded="true" signature="30571:30609" placeholder="SELECT useri... useridlist" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/test.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="38" selection-start-line="0" selection-start-column="33" selection-end-line="0" selection-end-column="38" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/selfbot.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="1751">
@@ -569,165 +518,9 @@
           <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
             <element signature="e#0#10#0" expanded="true" />
-            <element signature="e#2731#3723#0" expanded="false" />
-            <element signature="e#3920#4075#0" expanded="false" />
-            <element signature="e#4181#4327#0" expanded="true" />
-            <element signature="e#4468#5618#0" expanded="false" />
-            <element signature="e#5125#5597#0" expanded="false" />
-            <element signature="e#5666#5984#0" expanded="false" />
-            <element signature="e#6927#7536#0" expanded="false" />
-            <element signature="e#7598#7944#0" expanded="false" />
-            <element signature="e#12509#12939#0" expanded="false" />
-            <element signature="e#12982#13079#0" expanded="false" />
-            <element signature="e#14114#14115#0" expanded="false" />
-            <element signature="e#15719#15720#0" expanded="false" />
-            <element signature="e#25014#25239#0" expanded="false" />
-            <element signature="e#26537#26894#0" expanded="false" />
-            <element signature="e#28643#28689#1" expanded="true" />
-            <element signature="e#31852#32012#0" expanded="false" />
-            <element signature="e#32069#32537#0" expanded="false" />
-            <marker date="1478908901073" expanded="true" signature="14171:14227" placeholder="UPDATE useri... " />
-            <marker date="1478908901073" expanded="true" signature="14400:14446" placeholder="SELECT lfgd useridlist" />
-            <marker date="1478908901073" expanded="true" signature="16043:16089" placeholder="SELECT lfgd useridlist" />
-            <marker date="1478908901073" expanded="true" signature="30571:30609" placeholder="SELECT useri... useridlist" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/test.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="238">
-          <caret line="22" column="19" selection-start-line="22" selection-start-column="19" selection-end-line="22" selection-end-column="19" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/selfbot.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1751">
-          <caret line="104" column="16" selection-start-line="104" selection-start-column="16" selection-end-line="104" selection-end-column="16" />
-          <folding>
-            <element signature="e#1561#1712#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/filechecker.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1224">
-          <caret line="74" column="30" selection-start-line="74" selection-start-column="30" selection-end-line="74" selection-end-column="30" />
-          <folding>
-            <element signature="e#0#9#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/uploader.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="816">
-          <caret line="51" column="33" selection-start-line="51" selection-start-column="33" selection-end-line="51" selection-end-column="33" />
-          <folding>
-            <element signature="e#0#13#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/nadir.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding>
-            <element signature="e#0#10#0" expanded="true" />
-            <element signature="e#2731#3723#0" expanded="false" />
-            <element signature="e#3920#4075#0" expanded="false" />
-            <element signature="e#4181#4327#0" expanded="true" />
-            <element signature="e#4468#5618#0" expanded="false" />
-            <element signature="e#5125#5597#0" expanded="false" />
-            <element signature="e#5666#5984#0" expanded="false" />
-            <element signature="e#6927#7536#0" expanded="false" />
-            <element signature="e#7598#7944#0" expanded="false" />
-            <element signature="e#12509#12939#0" expanded="false" />
-            <element signature="e#12982#13079#0" expanded="false" />
-            <element signature="e#14114#14115#0" expanded="false" />
-            <element signature="e#15719#15720#0" expanded="false" />
-            <element signature="e#25014#25239#0" expanded="false" />
-            <element signature="e#26537#26894#0" expanded="false" />
-            <element signature="e#28643#28689#1" expanded="true" />
-            <element signature="e#31852#32012#0" expanded="false" />
-            <element signature="e#32069#32537#0" expanded="false" />
-            <marker date="1478908901073" expanded="true" signature="14171:14227" placeholder="UPDATE useri... " />
-            <marker date="1478908901073" expanded="true" signature="14400:14446" placeholder="SELECT lfgd useridlist" />
-            <marker date="1478908901073" expanded="true" signature="16043:16089" placeholder="SELECT lfgd useridlist" />
-            <marker date="1478908901073" expanded="true" signature="30571:30609" placeholder="SELECT useri... useridlist" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/test.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="17">
-          <caret line="1" column="13" selection-start-line="1" selection-start-column="13" selection-end-line="1" selection-end-column="13" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/selfbot.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1751">
-          <caret line="104" column="16" selection-start-line="104" selection-start-column="16" selection-end-line="104" selection-end-column="16" />
-          <folding>
-            <element signature="e#1561#1712#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/filechecker.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1224">
-          <caret line="74" column="30" selection-start-line="74" selection-start-column="30" selection-end-line="74" selection-end-column="30" />
-          <folding>
-            <element signature="e#0#9#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/uploader.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="816">
-          <caret line="51" column="33" selection-start-line="51" selection-start-column="33" selection-end-line="51" selection-end-column="33" />
-          <folding>
-            <element signature="e#0#13#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/nadir.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding>
-            <element signature="e#0#10#0" expanded="true" />
-            <element signature="e#2731#3723#0" expanded="false" />
-            <element signature="e#3920#4075#0" expanded="false" />
-            <element signature="e#4181#4327#0" expanded="true" />
-            <element signature="e#4468#5618#0" expanded="false" />
-            <element signature="e#5125#5597#0" expanded="false" />
-            <element signature="e#5666#5984#0" expanded="false" />
-            <element signature="e#6927#7536#0" expanded="false" />
-            <element signature="e#7598#7944#0" expanded="false" />
-            <element signature="e#12509#12939#0" expanded="false" />
-            <element signature="e#12982#13079#0" expanded="false" />
-            <element signature="e#14114#14115#0" expanded="false" />
-            <element signature="e#15719#15720#0" expanded="false" />
-            <element signature="e#25014#25239#0" expanded="false" />
-            <element signature="e#26537#26894#0" expanded="false" />
-            <element signature="e#28643#28689#1" expanded="true" />
-            <element signature="e#31852#32012#0" expanded="false" />
-            <element signature="e#32069#32537#0" expanded="false" />
-            <marker date="1478908901073" expanded="true" signature="14171:14227" placeholder="UPDATE useri... " />
-            <marker date="1478908901073" expanded="true" signature="14400:14446" placeholder="SELECT lfgd useridlist" />
-            <marker date="1478908901073" expanded="true" signature="16043:16089" placeholder="SELECT lfgd useridlist" />
-            <marker date="1478908901073" expanded="true" signature="30571:30609" placeholder="SELECT useri... useridlist" />
+            <element signature="e#4178#4324#0" expanded="true" />
+            <element signature="e#22406#22543#0" expanded="true" />
+            <element signature="e#29000#29046#1" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -776,27 +569,321 @@
           <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
             <element signature="e#0#10#0" expanded="true" />
-            <element signature="e#2731#3723#0" expanded="false" />
-            <element signature="e#3920#4075#0" expanded="false" />
-            <element signature="e#4181#4327#0" expanded="true" />
-            <element signature="e#4468#5618#0" expanded="false" />
-            <element signature="e#5125#5597#0" expanded="false" />
-            <element signature="e#5666#5984#0" expanded="false" />
-            <element signature="e#6927#7536#0" expanded="false" />
-            <element signature="e#7598#7944#0" expanded="false" />
-            <element signature="e#12509#12939#0" expanded="false" />
-            <element signature="e#12982#13079#0" expanded="false" />
-            <element signature="e#14114#14115#0" expanded="false" />
-            <element signature="e#15719#15720#0" expanded="false" />
-            <element signature="e#25014#25239#0" expanded="false" />
-            <element signature="e#26537#26894#0" expanded="false" />
-            <element signature="e#28643#28689#1" expanded="true" />
-            <element signature="e#31852#32012#0" expanded="false" />
-            <element signature="e#32069#32537#0" expanded="false" />
-            <marker date="1478908901073" expanded="true" signature="14171:14227" placeholder="UPDATE useri... " />
-            <marker date="1478908901073" expanded="true" signature="14400:14446" placeholder="SELECT lfgd useridlist" />
-            <marker date="1478908901073" expanded="true" signature="16043:16089" placeholder="SELECT lfgd useridlist" />
-            <marker date="1478908901073" expanded="true" signature="30571:30609" placeholder="SELECT useri... useridlist" />
+            <element signature="e#4178#4324#0" expanded="true" />
+            <element signature="e#22406#22543#0" expanded="true" />
+            <element signature="e#29000#29046#1" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/selfbot.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1751">
+          <caret line="104" column="16" selection-start-line="104" selection-start-column="16" selection-end-line="104" selection-end-column="16" />
+          <folding>
+            <element signature="e#1561#1712#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/filechecker.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1224">
+          <caret line="74" column="30" selection-start-line="74" selection-start-column="30" selection-end-line="74" selection-end-column="30" />
+          <folding>
+            <element signature="e#0#9#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/uploader.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="816">
+          <caret line="51" column="33" selection-start-line="51" selection-start-column="33" selection-end-line="51" selection-end-column="33" />
+          <folding>
+            <element signature="e#0#13#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$APPLICATION_CONFIG_DIR$/consoles/db/566c0891-8068-41f1-9efa-df018161f0d1/console.sql">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/selfbot.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-1003">
+          <caret line="30" column="0" selection-start-line="30" selection-start-column="0" selection-end-line="31" selection-end-column="56" />
+          <folding>
+            <element signature="e#1561#1712#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/uploader.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="363">
+          <caret line="34" column="13" selection-start-line="34" selection-start-column="13" selection-end-line="34" selection-end-column="13" />
+          <folding>
+            <element signature="e#0#13#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/filechecker.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="125">
+          <caret line="27" column="49" selection-start-line="27" selection-start-column="49" selection-end-line="27" selection-end-column="49" />
+          <folding>
+            <element signature="e#0#9#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$APPLICATION_CONFIG_DIR$/consoles/db/5f321448-b859-4839-a7f1-96ce1c8e49b4/console.sql">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/test.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/nadir.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="292">
+          <caret line="471" column="0" selection-start-line="471" selection-start-column="0" selection-end-line="488" selection-end-column="21" />
+          <folding>
+            <element signature="e#0#10#0" expanded="true" />
+            <element signature="e#4178#4324#0" expanded="true" />
+            <element signature="e#22406#22543#0" expanded="true" />
+            <element signature="e#29000#29046#1" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/nadir.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding>
+            <element signature="e#0#10#0" expanded="true" />
+            <element signature="e#4178#4324#0" expanded="true" />
+            <element signature="e#22406#22543#0" expanded="true" />
+            <element signature="e#29000#29046#1" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/test.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="38" selection-start-line="0" selection-start-column="33" selection-end-line="0" selection-end-column="38" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/selfbot.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1751">
+          <caret line="104" column="16" selection-start-line="104" selection-start-column="16" selection-end-line="104" selection-end-column="16" />
+          <folding>
+            <element signature="e#1561#1712#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/filechecker.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1224">
+          <caret line="74" column="30" selection-start-line="74" selection-start-column="30" selection-end-line="74" selection-end-column="30" />
+          <folding>
+            <element signature="e#0#9#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/uploader.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="816">
+          <caret line="51" column="33" selection-start-line="51" selection-start-column="33" selection-end-line="51" selection-end-column="33" />
+          <folding>
+            <element signature="e#0#13#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/nadir.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding>
+            <element signature="e#0#10#0" expanded="true" />
+            <element signature="e#4178#4324#0" expanded="true" />
+            <element signature="e#22406#22543#0" expanded="true" />
+            <element signature="e#29000#29046#1" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/test.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="238">
+          <caret line="22" column="19" selection-start-line="22" selection-start-column="19" selection-end-line="22" selection-end-column="19" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/selfbot.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1751">
+          <caret line="104" column="16" selection-start-line="104" selection-start-column="16" selection-end-line="104" selection-end-column="16" />
+          <folding>
+            <element signature="e#1561#1712#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/filechecker.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1224">
+          <caret line="74" column="30" selection-start-line="74" selection-start-column="30" selection-end-line="74" selection-end-column="30" />
+          <folding>
+            <element signature="e#0#9#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/uploader.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="816">
+          <caret line="51" column="33" selection-start-line="51" selection-start-column="33" selection-end-line="51" selection-end-column="33" />
+          <folding>
+            <element signature="e#0#13#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/nadir.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding>
+            <element signature="e#0#10#0" expanded="true" />
+            <element signature="e#4178#4324#0" expanded="true" />
+            <element signature="e#22406#22543#0" expanded="true" />
+            <element signature="e#29000#29046#1" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/test.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="17">
+          <caret line="1" column="13" selection-start-line="1" selection-start-column="13" selection-end-line="1" selection-end-column="13" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/selfbot.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1751">
+          <caret line="104" column="16" selection-start-line="104" selection-start-column="16" selection-end-line="104" selection-end-column="16" />
+          <folding>
+            <element signature="e#1561#1712#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/filechecker.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1224">
+          <caret line="74" column="30" selection-start-line="74" selection-start-column="30" selection-end-line="74" selection-end-column="30" />
+          <folding>
+            <element signature="e#0#9#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/uploader.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="816">
+          <caret line="51" column="33" selection-start-line="51" selection-start-column="33" selection-end-line="51" selection-end-column="33" />
+          <folding>
+            <element signature="e#0#13#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/nadir.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding>
+            <element signature="e#0#10#0" expanded="true" />
+            <element signature="e#4178#4324#0" expanded="true" />
+            <element signature="e#22406#22543#0" expanded="true" />
+            <element signature="e#29000#29046#1" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/test.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="24" selection-start-line="0" selection-start-column="24" selection-end-line="0" selection-end-column="24" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/selfbot.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1751">
+          <caret line="104" column="16" selection-start-line="104" selection-start-column="16" selection-end-line="104" selection-end-column="16" />
+          <folding>
+            <element signature="e#1561#1712#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/filechecker.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1224">
+          <caret line="74" column="30" selection-start-line="74" selection-start-column="30" selection-end-line="74" selection-end-column="30" />
+          <folding>
+            <element signature="e#0#9#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/uploader.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="816">
+          <caret line="51" column="33" selection-start-line="51" selection-start-column="33" selection-end-line="51" selection-end-column="33" />
+          <folding>
+            <element signature="e#0#13#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/nadir.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding>
+            <element signature="e#0#10#0" expanded="true" />
+            <element signature="e#4178#4324#0" expanded="true" />
+            <element signature="e#22406#22543#0" expanded="true" />
+            <element signature="e#29000#29046#1" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -849,7 +936,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="183">
           <caret line="238" column="23" selection-start-line="238" selection-start-column="23" selection-end-line="238" selection-end-column="23" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -893,31 +979,13 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/nadir.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="459">
-          <caret line="109" column="25" selection-start-line="109" selection-start-column="25" selection-end-line="109" selection-end-column="25" />
+        <state relative-caret-position="360">
+          <caret line="733" column="0" selection-start-line="733" selection-start-column="0" selection-end-line="733" selection-end-column="0" />
           <folding>
             <element signature="e#0#10#0" expanded="true" />
-            <element signature="e#2731#3723#0" expanded="false" />
-            <element signature="e#3920#4075#0" expanded="false" />
-            <element signature="e#4181#4327#0" expanded="true" />
-            <element signature="e#4468#5618#0" expanded="false" />
-            <element signature="e#5125#5597#0" expanded="false" />
-            <element signature="e#5666#5984#0" expanded="false" />
-            <element signature="e#6927#7536#0" expanded="false" />
-            <element signature="e#7598#7944#0" expanded="false" />
-            <element signature="e#12509#12939#0" expanded="false" />
-            <element signature="e#12982#13079#0" expanded="false" />
-            <element signature="e#14114#14115#0" expanded="false" />
-            <element signature="e#15719#15720#0" expanded="false" />
-            <element signature="e#25014#25239#0" expanded="false" />
-            <element signature="e#26537#26894#0" expanded="false" />
-            <element signature="e#28643#28689#1" expanded="true" />
-            <element signature="e#31852#32012#0" expanded="false" />
-            <element signature="e#32069#32537#0" expanded="false" />
-            <marker date="1478908901073" expanded="true" signature="14171:14227" placeholder="UPDATE useri... " />
-            <marker date="1478908901073" expanded="true" signature="14400:14446" placeholder="SELECT lfgd useridlist" />
-            <marker date="1478908901073" expanded="true" signature="16043:16089" placeholder="SELECT lfgd useridlist" />
-            <marker date="1478908901073" expanded="true" signature="30571:30609" placeholder="SELECT useri... useridlist" />
+            <element signature="e#4178#4324#0" expanded="true" />
+            <element signature="e#22406#22543#0" expanded="true" />
+            <element signature="e#29000#29046#1" expanded="true" />
           </folding>
         </state>
       </provider>
