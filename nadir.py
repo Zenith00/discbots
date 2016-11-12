@@ -16,7 +16,7 @@ from imgurpython import ImgurClient
 from pymongo import ReturnDocument
 from simplegist.simplegist import Simplegist
 
-# logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.INFO)
 
 mongo_client = motor.motor_asyncio.AsyncIOMotorClient()
 overwatch_db = mongo_client.overwatch
@@ -170,6 +170,8 @@ async def parse_user_info(user) -> dict:
 
     }
     return info_dict
+
+
 
 
 async def parse_member_info(member) -> dict:
@@ -733,10 +735,14 @@ async def get_vc_link(mess):
     :type mess: discord.Message
     """
     command_list = mess.content.split(" ")[1:]
-    print("command list = " + str(command_list))
-    command_list = await mention_to_id(command_list)
-
-    userID = command_list[0]
+    if len(command_list) == 0:
+        userID = await get_from_find(mess)
+        print("userid = " + userID)
+    else:
+    # print("command list = " + str(command_list))
+        command_list = await mention_to_id(command_list)
+        userID = command_list[0]
+    print("TYPE = " + userID)
     mentionedUser = mess.server.get_member(userID)
     vc = mentionedUser.voice.voice_channel
     instaInvite = await client.create_invite(vc, max_uses=1, max_age=6)
@@ -884,7 +890,7 @@ async def fuzzy_match(*args):
 
     for nick in topNicks:
         userID = nickIdDict[nick]
-        messageToSend = "```\n"
+        messageToSend = "```\nFuzzy Search:\n"
         prettyList = []
         for singleID in userID:
             prettyList.append(["ID: '" + str(singleID) + "'",
@@ -927,6 +933,17 @@ async def pretty_column(list_of_rows, left_just):
     print(output)
     return output
 
+async def get_from_find(message):
+    reg = re.compile(r"(?!ID: ')(\d+)(?=')", re.IGNORECASE)
+    id = ""
+    async for mess in  client.logs_from(message.channel, limit=10):
+        if "Fuzzy Search:" in mess.content:
+            print(message.content)
+            match = reg.search(mess.content)
+            if match is not None:
+                print(match)
+                id = match.group(0)
+    return id
 
 # client.loop.create_task(stream())
 client.run("MjM2MzQxMTkzODQyMDk4MTc3.CvBk5w.gr9Uv5OnhXLL3I14jFmn0IcesUE", bot=True)
