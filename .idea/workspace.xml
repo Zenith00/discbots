@@ -38,31 +38,31 @@
       <file leaf-file-name="nadir.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/nadir.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="462">
-              <caret line="767" column="102" selection-start-line="767" selection-start-column="102" selection-end-line="767" selection-end-column="102" />
+            <state relative-caret-position="459">
+              <caret line="109" column="25" selection-start-line="109" selection-start-column="25" selection-end-line="109" selection-end-column="25" />
               <folding>
                 <element signature="e#0#10#0" expanded="true" />
                 <element signature="e#2731#3723#0" expanded="false" />
                 <element signature="e#3920#4075#0" expanded="false" />
-                <element signature="e#4470#5620#0" expanded="false" />
-                <element signature="e#5127#5599#0" expanded="false" />
-                <element signature="e#5668#5986#0" expanded="false" />
-                <element signature="e#6929#7538#0" expanded="false" />
-                <element signature="e#7600#7946#0" expanded="false" />
-                <element signature="e#12511#12941#0" expanded="false" />
-                <element signature="e#12984#13081#0" expanded="false" />
-                <element signature="e#14017#14113#0" expanded="false" />
-                <element signature="e#14116#14117#0" expanded="false" />
-                <element signature="e#15721#15722#0" expanded="false" />
-                <element signature="e#25016#25241#0" expanded="false" />
-                <element signature="e#26539#26896#0" expanded="false" />
-                <element signature="e#28543#28589#1" expanded="true" />
-                <element signature="e#31752#31912#0" expanded="false" />
-                <element signature="e#31969#32437#0" expanded="false" />
-                <marker date="1478841398332" expanded="true" signature="14173:14229" placeholder="UPDATE useri... " />
-                <marker date="1478841398332" expanded="true" signature="14402:14448" placeholder="SELECT lfgd useridlist" />
-                <marker date="1478841398332" expanded="true" signature="16045:16091" placeholder="SELECT lfgd useridlist" />
-                <marker date="1478841398332" expanded="true" signature="30471:30509" placeholder="SELECT useri... useridlist" />
+                <element signature="e#4181#4327#0" expanded="true" />
+                <element signature="e#4468#5618#0" expanded="false" />
+                <element signature="e#5125#5597#0" expanded="false" />
+                <element signature="e#5666#5984#0" expanded="false" />
+                <element signature="e#6927#7536#0" expanded="false" />
+                <element signature="e#7598#7944#0" expanded="false" />
+                <element signature="e#12509#12939#0" expanded="false" />
+                <element signature="e#12982#13079#0" expanded="false" />
+                <element signature="e#14114#14115#0" expanded="false" />
+                <element signature="e#15719#15720#0" expanded="false" />
+                <element signature="e#25014#25239#0" expanded="false" />
+                <element signature="e#26537#26894#0" expanded="false" />
+                <element signature="e#28643#28689#1" expanded="true" />
+                <element signature="e#31852#32012#0" expanded="false" />
+                <element signature="e#32069#32537#0" expanded="false" />
+                <marker date="1478908901073" expanded="true" signature="14171:14227" placeholder="UPDATE useri... " />
+                <marker date="1478908901073" expanded="true" signature="14400:14446" placeholder="SELECT lfgd useridlist" />
+                <marker date="1478908901073" expanded="true" signature="16043:16089" placeholder="SELECT lfgd useridlist" />
+                <marker date="1478908901073" expanded="true" signature="30571:30609" placeholder="SELECT useri... useridlist" />
               </folding>
             </state>
           </provider>
@@ -502,25 +502,25 @@
             <element signature="e#0#10#0" expanded="true" />
             <element signature="e#2731#3723#0" expanded="false" />
             <element signature="e#3920#4075#0" expanded="false" />
-            <element signature="e#4470#5620#0" expanded="false" />
-            <element signature="e#5127#5599#0" expanded="false" />
-            <element signature="e#5668#5986#0" expanded="false" />
-            <element signature="e#6929#7538#0" expanded="false" />
-            <element signature="e#7600#7946#0" expanded="false" />
-            <element signature="e#12511#12941#0" expanded="false" />
-            <element signature="e#12984#13081#0" expanded="false" />
-            <element signature="e#14017#14113#0" expanded="false" />
-            <element signature="e#14116#14117#0" expanded="false" />
-            <element signature="e#15721#15722#0" expanded="false" />
-            <element signature="e#25016#25241#0" expanded="false" />
-            <element signature="e#26539#26896#0" expanded="false" />
-            <element signature="e#28543#28589#1" expanded="true" />
-            <element signature="e#31752#31912#0" expanded="false" />
-            <element signature="e#31969#32437#0" expanded="false" />
-            <marker date="1478841398332" expanded="true" signature="14173:14229" placeholder="UPDATE useri... " />
-            <marker date="1478841398332" expanded="true" signature="14402:14448" placeholder="SELECT lfgd useridlist" />
-            <marker date="1478841398332" expanded="true" signature="16045:16091" placeholder="SELECT lfgd useridlist" />
-            <marker date="1478841398332" expanded="true" signature="30471:30509" placeholder="SELECT useri... useridlist" />
+            <element signature="e#4181#4327#0" expanded="true" />
+            <element signature="e#4468#5618#0" expanded="false" />
+            <element signature="e#5125#5597#0" expanded="false" />
+            <element signature="e#5666#5984#0" expanded="false" />
+            <element signature="e#6927#7536#0" expanded="false" />
+            <element signature="e#7598#7944#0" expanded="false" />
+            <element signature="e#12509#12939#0" expanded="false" />
+            <element signature="e#12982#13079#0" expanded="false" />
+            <element signature="e#14114#14115#0" expanded="false" />
+            <element signature="e#15719#15720#0" expanded="false" />
+            <element signature="e#25014#25239#0" expanded="false" />
+            <element signature="e#26537#26894#0" expanded="false" />
+            <element signature="e#28643#28689#1" expanded="true" />
+            <element signature="e#31852#32012#0" expanded="false" />
+            <element signature="e#32069#32537#0" expanded="false" />
+            <marker date="1478908901073" expanded="true" signature="14171:14227" placeholder="UPDATE useri... " />
+            <marker date="1478908901073" expanded="true" signature="14400:14446" placeholder="SELECT lfgd useridlist" />
+            <marker date="1478908901073" expanded="true" signature="16043:16089" placeholder="SELECT lfgd useridlist" />
+            <marker date="1478908901073" expanded="true" signature="30571:30609" placeholder="SELECT useri... useridlist" />
           </folding>
         </state>
       </provider>
@@ -571,25 +571,25 @@
             <element signature="e#0#10#0" expanded="true" />
             <element signature="e#2731#3723#0" expanded="false" />
             <element signature="e#3920#4075#0" expanded="false" />
-            <element signature="e#4470#5620#0" expanded="false" />
-            <element signature="e#5127#5599#0" expanded="false" />
-            <element signature="e#5668#5986#0" expanded="false" />
-            <element signature="e#6929#7538#0" expanded="false" />
-            <element signature="e#7600#7946#0" expanded="false" />
-            <element signature="e#12511#12941#0" expanded="false" />
-            <element signature="e#12984#13081#0" expanded="false" />
-            <element signature="e#14017#14113#0" expanded="false" />
-            <element signature="e#14116#14117#0" expanded="false" />
-            <element signature="e#15721#15722#0" expanded="false" />
-            <element signature="e#25016#25241#0" expanded="false" />
-            <element signature="e#26539#26896#0" expanded="false" />
-            <element signature="e#28543#28589#1" expanded="true" />
-            <element signature="e#31752#31912#0" expanded="false" />
-            <element signature="e#31969#32437#0" expanded="false" />
-            <marker date="1478841398332" expanded="true" signature="14173:14229" placeholder="UPDATE useri... " />
-            <marker date="1478841398332" expanded="true" signature="14402:14448" placeholder="SELECT lfgd useridlist" />
-            <marker date="1478841398332" expanded="true" signature="16045:16091" placeholder="SELECT lfgd useridlist" />
-            <marker date="1478841398332" expanded="true" signature="30471:30509" placeholder="SELECT useri... useridlist" />
+            <element signature="e#4181#4327#0" expanded="true" />
+            <element signature="e#4468#5618#0" expanded="false" />
+            <element signature="e#5125#5597#0" expanded="false" />
+            <element signature="e#5666#5984#0" expanded="false" />
+            <element signature="e#6927#7536#0" expanded="false" />
+            <element signature="e#7598#7944#0" expanded="false" />
+            <element signature="e#12509#12939#0" expanded="false" />
+            <element signature="e#12982#13079#0" expanded="false" />
+            <element signature="e#14114#14115#0" expanded="false" />
+            <element signature="e#15719#15720#0" expanded="false" />
+            <element signature="e#25014#25239#0" expanded="false" />
+            <element signature="e#26537#26894#0" expanded="false" />
+            <element signature="e#28643#28689#1" expanded="true" />
+            <element signature="e#31852#32012#0" expanded="false" />
+            <element signature="e#32069#32537#0" expanded="false" />
+            <marker date="1478908901073" expanded="true" signature="14171:14227" placeholder="UPDATE useri... " />
+            <marker date="1478908901073" expanded="true" signature="14400:14446" placeholder="SELECT lfgd useridlist" />
+            <marker date="1478908901073" expanded="true" signature="16043:16089" placeholder="SELECT lfgd useridlist" />
+            <marker date="1478908901073" expanded="true" signature="30571:30609" placeholder="SELECT useri... useridlist" />
           </folding>
         </state>
       </provider>
@@ -640,25 +640,25 @@
             <element signature="e#0#10#0" expanded="true" />
             <element signature="e#2731#3723#0" expanded="false" />
             <element signature="e#3920#4075#0" expanded="false" />
-            <element signature="e#4470#5620#0" expanded="false" />
-            <element signature="e#5127#5599#0" expanded="false" />
-            <element signature="e#5668#5986#0" expanded="false" />
-            <element signature="e#6929#7538#0" expanded="false" />
-            <element signature="e#7600#7946#0" expanded="false" />
-            <element signature="e#12511#12941#0" expanded="false" />
-            <element signature="e#12984#13081#0" expanded="false" />
-            <element signature="e#14017#14113#0" expanded="false" />
-            <element signature="e#14116#14117#0" expanded="false" />
-            <element signature="e#15721#15722#0" expanded="false" />
-            <element signature="e#25016#25241#0" expanded="false" />
-            <element signature="e#26539#26896#0" expanded="false" />
-            <element signature="e#28543#28589#1" expanded="true" />
-            <element signature="e#31752#31912#0" expanded="false" />
-            <element signature="e#31969#32437#0" expanded="false" />
-            <marker date="1478841398332" expanded="true" signature="14173:14229" placeholder="UPDATE useri... " />
-            <marker date="1478841398332" expanded="true" signature="14402:14448" placeholder="SELECT lfgd useridlist" />
-            <marker date="1478841398332" expanded="true" signature="16045:16091" placeholder="SELECT lfgd useridlist" />
-            <marker date="1478841398332" expanded="true" signature="30471:30509" placeholder="SELECT useri... useridlist" />
+            <element signature="e#4181#4327#0" expanded="true" />
+            <element signature="e#4468#5618#0" expanded="false" />
+            <element signature="e#5125#5597#0" expanded="false" />
+            <element signature="e#5666#5984#0" expanded="false" />
+            <element signature="e#6927#7536#0" expanded="false" />
+            <element signature="e#7598#7944#0" expanded="false" />
+            <element signature="e#12509#12939#0" expanded="false" />
+            <element signature="e#12982#13079#0" expanded="false" />
+            <element signature="e#14114#14115#0" expanded="false" />
+            <element signature="e#15719#15720#0" expanded="false" />
+            <element signature="e#25014#25239#0" expanded="false" />
+            <element signature="e#26537#26894#0" expanded="false" />
+            <element signature="e#28643#28689#1" expanded="true" />
+            <element signature="e#31852#32012#0" expanded="false" />
+            <element signature="e#32069#32537#0" expanded="false" />
+            <marker date="1478908901073" expanded="true" signature="14171:14227" placeholder="UPDATE useri... " />
+            <marker date="1478908901073" expanded="true" signature="14400:14446" placeholder="SELECT lfgd useridlist" />
+            <marker date="1478908901073" expanded="true" signature="16043:16089" placeholder="SELECT lfgd useridlist" />
+            <marker date="1478908901073" expanded="true" signature="30571:30609" placeholder="SELECT useri... useridlist" />
           </folding>
         </state>
       </provider>
@@ -709,25 +709,25 @@
             <element signature="e#0#10#0" expanded="true" />
             <element signature="e#2731#3723#0" expanded="false" />
             <element signature="e#3920#4075#0" expanded="false" />
-            <element signature="e#4470#5620#0" expanded="false" />
-            <element signature="e#5127#5599#0" expanded="false" />
-            <element signature="e#5668#5986#0" expanded="false" />
-            <element signature="e#6929#7538#0" expanded="false" />
-            <element signature="e#7600#7946#0" expanded="false" />
-            <element signature="e#12511#12941#0" expanded="false" />
-            <element signature="e#12984#13081#0" expanded="false" />
-            <element signature="e#14017#14113#0" expanded="false" />
-            <element signature="e#14116#14117#0" expanded="false" />
-            <element signature="e#15721#15722#0" expanded="false" />
-            <element signature="e#25016#25241#0" expanded="false" />
-            <element signature="e#26539#26896#0" expanded="false" />
-            <element signature="e#28543#28589#1" expanded="true" />
-            <element signature="e#31752#31912#0" expanded="false" />
-            <element signature="e#31969#32437#0" expanded="false" />
-            <marker date="1478841398332" expanded="true" signature="14173:14229" placeholder="UPDATE useri... " />
-            <marker date="1478841398332" expanded="true" signature="14402:14448" placeholder="SELECT lfgd useridlist" />
-            <marker date="1478841398332" expanded="true" signature="16045:16091" placeholder="SELECT lfgd useridlist" />
-            <marker date="1478841398332" expanded="true" signature="30471:30509" placeholder="SELECT useri... useridlist" />
+            <element signature="e#4181#4327#0" expanded="true" />
+            <element signature="e#4468#5618#0" expanded="false" />
+            <element signature="e#5125#5597#0" expanded="false" />
+            <element signature="e#5666#5984#0" expanded="false" />
+            <element signature="e#6927#7536#0" expanded="false" />
+            <element signature="e#7598#7944#0" expanded="false" />
+            <element signature="e#12509#12939#0" expanded="false" />
+            <element signature="e#12982#13079#0" expanded="false" />
+            <element signature="e#14114#14115#0" expanded="false" />
+            <element signature="e#15719#15720#0" expanded="false" />
+            <element signature="e#25014#25239#0" expanded="false" />
+            <element signature="e#26537#26894#0" expanded="false" />
+            <element signature="e#28643#28689#1" expanded="true" />
+            <element signature="e#31852#32012#0" expanded="false" />
+            <element signature="e#32069#32537#0" expanded="false" />
+            <marker date="1478908901073" expanded="true" signature="14171:14227" placeholder="UPDATE useri... " />
+            <marker date="1478908901073" expanded="true" signature="14400:14446" placeholder="SELECT lfgd useridlist" />
+            <marker date="1478908901073" expanded="true" signature="16043:16089" placeholder="SELECT lfgd useridlist" />
+            <marker date="1478908901073" expanded="true" signature="30571:30609" placeholder="SELECT useri... useridlist" />
           </folding>
         </state>
       </provider>
@@ -778,25 +778,25 @@
             <element signature="e#0#10#0" expanded="true" />
             <element signature="e#2731#3723#0" expanded="false" />
             <element signature="e#3920#4075#0" expanded="false" />
-            <element signature="e#4470#5620#0" expanded="false" />
-            <element signature="e#5127#5599#0" expanded="false" />
-            <element signature="e#5668#5986#0" expanded="false" />
-            <element signature="e#6929#7538#0" expanded="false" />
-            <element signature="e#7600#7946#0" expanded="false" />
-            <element signature="e#12511#12941#0" expanded="false" />
-            <element signature="e#12984#13081#0" expanded="false" />
-            <element signature="e#14017#14113#0" expanded="false" />
-            <element signature="e#14116#14117#0" expanded="false" />
-            <element signature="e#15721#15722#0" expanded="false" />
-            <element signature="e#25016#25241#0" expanded="false" />
-            <element signature="e#26539#26896#0" expanded="false" />
-            <element signature="e#28543#28589#1" expanded="true" />
-            <element signature="e#31752#31912#0" expanded="false" />
-            <element signature="e#31969#32437#0" expanded="false" />
-            <marker date="1478841398332" expanded="true" signature="14173:14229" placeholder="UPDATE useri... " />
-            <marker date="1478841398332" expanded="true" signature="14402:14448" placeholder="SELECT lfgd useridlist" />
-            <marker date="1478841398332" expanded="true" signature="16045:16091" placeholder="SELECT lfgd useridlist" />
-            <marker date="1478841398332" expanded="true" signature="30471:30509" placeholder="SELECT useri... useridlist" />
+            <element signature="e#4181#4327#0" expanded="true" />
+            <element signature="e#4468#5618#0" expanded="false" />
+            <element signature="e#5125#5597#0" expanded="false" />
+            <element signature="e#5666#5984#0" expanded="false" />
+            <element signature="e#6927#7536#0" expanded="false" />
+            <element signature="e#7598#7944#0" expanded="false" />
+            <element signature="e#12509#12939#0" expanded="false" />
+            <element signature="e#12982#13079#0" expanded="false" />
+            <element signature="e#14114#14115#0" expanded="false" />
+            <element signature="e#15719#15720#0" expanded="false" />
+            <element signature="e#25014#25239#0" expanded="false" />
+            <element signature="e#26537#26894#0" expanded="false" />
+            <element signature="e#28643#28689#1" expanded="true" />
+            <element signature="e#31852#32012#0" expanded="false" />
+            <element signature="e#32069#32537#0" expanded="false" />
+            <marker date="1478908901073" expanded="true" signature="14171:14227" placeholder="UPDATE useri... " />
+            <marker date="1478908901073" expanded="true" signature="14400:14446" placeholder="SELECT lfgd useridlist" />
+            <marker date="1478908901073" expanded="true" signature="16043:16089" placeholder="SELECT lfgd useridlist" />
+            <marker date="1478908901073" expanded="true" signature="30571:30609" placeholder="SELECT useri... useridlist" />
           </folding>
         </state>
       </provider>
@@ -893,31 +893,31 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/nadir.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="462">
-          <caret line="767" column="102" selection-start-line="767" selection-start-column="102" selection-end-line="767" selection-end-column="102" />
+        <state relative-caret-position="459">
+          <caret line="109" column="25" selection-start-line="109" selection-start-column="25" selection-end-line="109" selection-end-column="25" />
           <folding>
             <element signature="e#0#10#0" expanded="true" />
             <element signature="e#2731#3723#0" expanded="false" />
             <element signature="e#3920#4075#0" expanded="false" />
-            <element signature="e#4470#5620#0" expanded="false" />
-            <element signature="e#5127#5599#0" expanded="false" />
-            <element signature="e#5668#5986#0" expanded="false" />
-            <element signature="e#6929#7538#0" expanded="false" />
-            <element signature="e#7600#7946#0" expanded="false" />
-            <element signature="e#12511#12941#0" expanded="false" />
-            <element signature="e#12984#13081#0" expanded="false" />
-            <element signature="e#14017#14113#0" expanded="false" />
-            <element signature="e#14116#14117#0" expanded="false" />
-            <element signature="e#15721#15722#0" expanded="false" />
-            <element signature="e#25016#25241#0" expanded="false" />
-            <element signature="e#26539#26896#0" expanded="false" />
-            <element signature="e#28543#28589#1" expanded="true" />
-            <element signature="e#31752#31912#0" expanded="false" />
-            <element signature="e#31969#32437#0" expanded="false" />
-            <marker date="1478841398332" expanded="true" signature="14173:14229" placeholder="UPDATE useri... " />
-            <marker date="1478841398332" expanded="true" signature="14402:14448" placeholder="SELECT lfgd useridlist" />
-            <marker date="1478841398332" expanded="true" signature="16045:16091" placeholder="SELECT lfgd useridlist" />
-            <marker date="1478841398332" expanded="true" signature="30471:30509" placeholder="SELECT useri... useridlist" />
+            <element signature="e#4181#4327#0" expanded="true" />
+            <element signature="e#4468#5618#0" expanded="false" />
+            <element signature="e#5125#5597#0" expanded="false" />
+            <element signature="e#5666#5984#0" expanded="false" />
+            <element signature="e#6927#7536#0" expanded="false" />
+            <element signature="e#7598#7944#0" expanded="false" />
+            <element signature="e#12509#12939#0" expanded="false" />
+            <element signature="e#12982#13079#0" expanded="false" />
+            <element signature="e#14114#14115#0" expanded="false" />
+            <element signature="e#15719#15720#0" expanded="false" />
+            <element signature="e#25014#25239#0" expanded="false" />
+            <element signature="e#26537#26894#0" expanded="false" />
+            <element signature="e#28643#28689#1" expanded="true" />
+            <element signature="e#31852#32012#0" expanded="false" />
+            <element signature="e#32069#32537#0" expanded="false" />
+            <marker date="1478908901073" expanded="true" signature="14171:14227" placeholder="UPDATE useri... " />
+            <marker date="1478908901073" expanded="true" signature="14400:14446" placeholder="SELECT lfgd useridlist" />
+            <marker date="1478908901073" expanded="true" signature="16043:16089" placeholder="SELECT lfgd useridlist" />
+            <marker date="1478908901073" expanded="true" signature="30571:30609" placeholder="SELECT useri... useridlist" />
           </folding>
         </state>
       </provider>
