@@ -582,7 +582,8 @@ async def on_message(mess):
                     except:
                         pass
             if mess.content.startswith("`purge"):
-                await client.send_message(client.get_channel(BOT_HAPPENINGS_ID), str(await parse_message_info(mess)))
+                await client.send_message(client.get_channel(BOT_HAPPENINGS_ID), "PURGING:\n" +  str(await parse_message_info(mess)))
+
                 command = mess.content.replace("`purge ", "")
                 command_list = command.split(" ")
                 number_to_remove = int(command_list[1])
@@ -622,7 +623,9 @@ async def on_message(mess):
             # Gets banned userinfo dict
             if "`ui" in mess.content:
                 try:
-                    command = mess.content.split(" ", 1)[1]
+                    command_list = mess.content.split(" ", 1)[1:]
+                    command_list = await mention_to_id(command_list)
+                    command = command_list[0]
                 except IndexError:
                     command = mess.author.id
 
@@ -729,8 +732,9 @@ async def get_vc_link(mess):
 
     :type mess: discord.Message
     """
-    command_list = mess.content.split(" ")[1]
-    command_list = mention_to_id(command_list)
+    command_list = mess.content.split(" ")[1:]
+    print("command list = " + str(command_list))
+    command_list = await mention_to_id(command_list)
 
     userID = command_list[0]
     mentionedUser = mess.server.get_member(userID)
@@ -749,10 +753,13 @@ async def mention_to_id(command):
     for item in command:
         match = reg.search(item)
         if match is None:
+            print("no match found")
             newCommand.append(item)
         else:
             idmatch = re.compile(r"\d")
             id_chars = "".join(idmatch.findall(item))
+            print("id chars")
+            print(id_chars)
             newCommand.append(id_chars)
     print(newCommand)
     return newCommand
@@ -770,9 +777,9 @@ async def command_info(*args):
         info_list = [
             ["Command ", "Description ", "Usage"],
             ["<Trusted>,", " ", " "],
-            ["`ui", "Retrieves user info", "`ui *<userid>"],
+            ["`ui", "Retrieves user info", "`ui *<user>"],
             ["`getmentions", "Mention retrieval", "`getmentions"],
-            ["`lfg", "Automated lfg logger and copypasta warning", "`lfg *<mention> *<userid>"],
+            ["`lfg", "Automated lfg logger and copypasta warning", "`lfg *<user>"],
             ["`ping", "Gets a random mercy voice-line and bot ping", "`ping"],
             ["`getart", "Sends 10 random pieces of mercy fanart into #fanart", "`getart"],
             [" ", " ", " "],
@@ -781,7 +788,7 @@ async def command_info(*args):
         if await credential(args[0].author, "mod"):
             info_list.append(["<Moderator>", " ", " "])
             info_list.append(["`kill", "Disconnects bot", "`kill"])
-            info_list.append(["`join", "Gets an invite for a user's current VC", "`join <userid>"])
+            info_list.append(["`join", "Gets an invite for a user's current VC", "`join <user>"])
             info_list.append(["`find", "Finds users that have had similar nicknames", "`find <nick>|<count>"])
             info_list.append(["`getnicks", "Gets the previous nicknames of a user", "`getnicks <id>"])
     await client.send_message(args[0].channel, "```prolog\n" + await pretty_column(info_list, True) + "```")
