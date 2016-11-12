@@ -23,9 +23,6 @@ overwatch_db = mongo_client.overwatch
 message_log_collection = overwatch_db.message_log
 userinfo_collection = overwatch_db.userinfo
 
-
-
-
 refreshToken = "5c52c0f6a47da6fb599e2835bf228c59c68dd902"
 accessToken = "4c80c2924ddeb63d3f1c99d19ae04e01e438b5fb"
 imgur = ImgurClient("5e1b2fcfcf0f36e",
@@ -500,6 +497,7 @@ async def get_role(mess, id):
         if x.id == id:
             return x
 
+
 async def authorize_user(command_list):
     print(command_list)
     user_id = command_list[0]
@@ -507,6 +505,8 @@ async def authorize_user(command_list):
     if type == "get_art":
         with open(PATHS["comms"] + "art_credentials.txt", "a") as cred_list:
             cred_list.write(str(user_id) + "\n")
+
+
 async def credential(member, level):
     """
 
@@ -563,10 +563,9 @@ async def on_message(mess):
                 for artlink in rand_art:
                     await client.send_message(art_channel, artlink)
 
-
         if await credential(mess.author, "zenith"):
             if "`auth" in mess.content:
-                command = mess.content.replace("`auth ","")
+                command = mess.content.replace("`auth ", "")
                 command_list = command.split(" ")
                 await client.delete_message(mess)
                 try:
@@ -584,7 +583,7 @@ async def on_message(mess):
                         pass
             if mess.content.startswith("`purge"):
                 await client.send_message(client.get_channel(BOT_HAPPENINGS_ID), str(await parse_message_info(mess)))
-                command = mess.content.replace("`purge ","")
+                command = mess.content.replace("`purge ", "")
                 command_list = command.split(" ")
                 number_to_remove = int(command_list[1])
                 await client.delete_message(mess)
@@ -613,7 +612,7 @@ async def on_message(mess):
 
         if mess.author.id != MERCY_ID and await credential(mess.author, "trusted"):
             if mess.content.startswith("`help"):
-                command = mess.content.replace("`help","")
+                command = mess.content.replace("`help", "")
                 command_list = [mess]
 
                 command_list.extend(command.split(" "))
@@ -730,18 +729,34 @@ async def get_vc_link(mess):
 
     :type mess: discord.Message
     """
-    if len(mess.mentions) > 0:
-        mentionedUser = mess.mentions[0]
-    else:
-        userID = mess.content[6:]
-        mentionedUser = mess.server.get_member(userID)
+    command_list = mess.content.split(" ")[1]
+    command_list = mention_to_id(command_list)
+
+    userID = command_list[0]
+    mentionedUser = mess.server.get_member(userID)
     vc = mentionedUser.voice.voice_channel
     instaInvite = await client.create_invite(vc, max_uses=1, max_age=6)
     return instaInvite.url
 
-async def mention_to_id(commands):
-    linkReg = reg = re.compile(r"<@\d*>", re.IGNORECASE)
-    match =
+
+async def mention_to_id(command):
+    """
+
+    :type command: list
+    """
+    newCommand = []
+    reg = re.compile(r"<@\d*>", re.IGNORECASE)
+    for item in command:
+        match = reg.search(item)
+        if match is None:
+            newCommand.append(item)
+        else:
+            idmatch = re.compile(r"\d")
+            id_chars = "".join(idmatch.findall(item))
+            newCommand.append(id_chars)
+    print(newCommand)
+    return newCommand
+
 
 async def log_automated(description):
     action = ("At " + str(datetime.utcnow().strftime("[%Y-%m-%d %H:%m:%S] ")) + ", I automatically "
@@ -818,7 +833,6 @@ async def ping(message):
                               voice + " (" + str(
                                   (sent.timestamp - timestamp).total_seconds() * 500) + " ms) " +
                               message.author.mention)
-
 
 
 async def get_previous_nicks(member) -> list:
