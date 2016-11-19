@@ -126,18 +126,21 @@ async def on_message(mess):
             redirected_output = sys.stdout = StringIO()
             output = redirected_output
             try:
-                exec(code)
-            except Exception:
-                formatted_lines = traceback.format_exc().splitlines()
-                output = '```py\n{}\n{}\n```'.format(formatted_lines[-1], '\n'.join(formatted_lines[4:-1]))
-            finally:
-                sys.stdout = old_stdout
+                try:
+                    exec(code)
+                except Exception:
+                    formatted_lines = traceback.format_exc().splitlines()
+                    output = '```py\n{}\n{}\n```'.format(formatted_lines[-1], '\n'.join(formatted_lines[4:-1]))
+                finally:
+                    sys.stdout = old_stdout
 
-            if not isinstance(output, str):
-                await client.edit_message(mess, output.getvalue())
-            else:
-                await client.edit_message(mess, str(output))
-                print(output)
+                if not isinstance(output, str):
+                    await client.edit_message(mess, output.getvalue())
+                else:
+                    await client.edit_message(mess, str(output))
+                    print(output)
+            except:
+                pass
 
         if mess.content == '!count':
             asyncio.sleep(.5)

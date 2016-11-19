@@ -8,13 +8,14 @@ import time, shutil, fileinput
 from concurrent.futures import ProcessPoolExecutor
 import sys
 import traceback
+import utils_file
+import threading
 
 # FANARTBOT
 path = "C:\\Users\\Austin\\Dropbox\\Zenith's Fanart\\"
 refreshToken = "5c52c0f6a47da6fb599e2835bf228c59c68dd902"
 accessToken = "4c80c2924ddeb63d3f1c99d19ae04e01e438b5fb"
 
-global PATHS
 PATHS = {}
 
 imgur = ImgurClient("5e1b2fcfcf0f36e",
@@ -22,6 +23,12 @@ imgur = ImgurClient("5e1b2fcfcf0f36e",
 print(imgur.credits)
 
 print("IMGUR INIT")
+
+
+def utils_file_prepend_line_wrapper(line, file):
+    utils_file.prepend_line(line, file).send(None)
+
+
 with open("paths.txt", "r") as f:
     global PATHS
     pathList = f.read()
@@ -30,7 +37,6 @@ with open("paths.txt", "r") as f:
 
 while True:
     print("uploader init")
-    # grab first line
     with open(PATHS["comms"] + "toUpload.txt", "r+") as f:
         f.seek(0)
         fileToUpload = str(f.readline())
@@ -42,12 +48,9 @@ while True:
         time.sleep(5)
         continue
 
-    # for x in imgur.get_album_images('umuvY'):
-    #     print(x.link)
+
     print("File to upload found:")
     print(fileToUpload)
-    print()
-    # start imgur uploader
 
     if "\\mercy\\" in fileToUpload:
         config = {
@@ -63,31 +66,16 @@ while True:
     fileToUpload = fileToUpload.strip("\n")
     try:
         if fileToUpload != "":
-
             image = imgur.upload_from_path(fileToUpload, config=config, anon=False)
-            for line_number, line in enumerate(fileinput.input(PATHS["comms"] + "toUpload.txt", inplace=1)):
-                if line_number == 0:
-                    pass
-                else:
-                    sys.stdout.write(line)
-            print("WRITING LINK")
-            # write link to botdata.txt and master image list
-            with open(PATHS["comms"] + "botdata.txt", "a") as f:
-                f.write(image['link'] + "\n")
-            with open(PATHS["comms"] + "artlist.txt", "a") as f:
-                f.write(image['link'] + "\n")
-
-        if fileToDelete != "":
-            fileToDelete = fileToDelete.replace("http://imgur.com/","")
-            imgur.delete_image(fileToDelete)
-            for line_number, line in enumerate(fileinput.input(PATHS["comms"] + "toDelete.txt", inplace=1)):
-                if line_number == 0:
-                    pass
-                else:
-                    sys.stdout.write(line)
-
+            with open(PATHS["comms"] + "toUpload.txt", "a") as toUpload:
+                fileToUpload = toUpload.readline()
+            utils_file.delete_lines(1, PATHS["comms"] + "toUpload.txt").send(None)
+            utils_file_prepend_line_wrapper(image['link'], PATHS["comms"] + "auto_art_list.txt")
+            print("WRITING LINK: " + image['link'])
         print(imgur.credits)
     except:
         print(traceback.format_exc())
         print("oops")
         continue
+
+
