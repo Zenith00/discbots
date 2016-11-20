@@ -95,3 +95,6 @@ LFG_REGEX = re.compile(
     (r"(lf(G|\d))|(\d\d\d\d)|(plat|gold|silver|diamond)|(^LF(((NA)|(EU))|(\s?\d)))|((NA|EU) (LF(g|\d)*))|"
      "(http(s?)://discord.gg/)|(xbox)|(ps4)"), re.IGNORECASE)
 LINK_REGEX = re.compile(r"(http(s?)://discord.gg/(\w+))", re.IGNORECASE)
+
+HOTS_REGEX = re.compile(r"(heroes of the storm)|(storm)|(heros)|(hots)|(heroes)|(genji)|(oni)",
+                        re.IGNORECASE)
