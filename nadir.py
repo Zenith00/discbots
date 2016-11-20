@@ -87,7 +87,7 @@ async def get_mentions(mess, auth):
     await client.send_message(target, "Please respond with the number in the parentheses (X)")
     if auth == "mod":
         await client.send_message(target,
-                              "Would you like to query personal mentions (1), admin/mod mentions (2), or both (3)?")
+                                  "Would you like to query personal mentions (1), admin/mod mentions (2), or both (3)?")
 
         response_mess = await get_response_int(target)
         if response_mess is not None:
@@ -316,7 +316,8 @@ async def on_message(message):
     if message.server is None:
         await client.send_message(await client.get_user_info(constants.ZENITH_ID),
                                   "[" + message.author.name + "]: " + message.content)
-    elif message.author.id != client.user.id:
+    else:
+        print("message received")
         if message.content.startswith("`help"):
             command = message.content.replace("`help ", "")
             command_list = command.split(" ")
@@ -442,7 +443,7 @@ async def on_message(message):
         if "mod" in auths:
             # Generate Join Link
             if "`join" == message.content[0:5]:
-                command = message.content.replace("`join ","")
+                command = message.content.replace("`join ", "")
                 command_list = command.split(" ")
                 VCMess = message
                 instainvite = await get_vc_link(message)
@@ -485,7 +486,7 @@ async def on_message(message):
                 gist = gistClient.create(name="User Log", description=member.name + "'s Logs", public=False,
                                          content="\n".join(logs))
                 await client.send_message(message.channel, gist["Gist-Link"])
-                await log_action_to_nadir(message=message, action_type="userlogs", *(member))
+                await log_action_to_nadir(message=message, action_type="userlogs", target=member)
                 # await client.edit_message(contextMess, gist["Gist-Link"])
         if "trusted" in auths:
             # User info
@@ -499,9 +500,10 @@ async def on_message(message):
                 user_dict = await get_user_info(userid)
                 if user_dict is not None:
                     formatted = [list(map(str, x)) for x in user_dict.items()]
-                    await client.send_message(message.channel,
-                                              "```Found:\n" + await pretty_column(formatted, True) + "\n```")
-                    await asyncio.sleep(10)
+                    ui_mess = await client.send_message(message.channel,
+                                                        "```Found:\n" + await pretty_column(formatted, True) + "\n```")
+                    await asyncio.sleep(20)
+                    await client.delete_message(ui_mess)
                 else:
                     await client.send_message(message.channel, "User not found")
                 return
@@ -513,18 +515,20 @@ async def on_message(message):
                     await get_mentions(message, "trusted")
                 return
             if message.content == "`ping":
+                print("tester")
                 await ping(message)
         if "lfg" in auths:
             if message.content.startswith("`lfg"):
-                found_mess = None
-
+                found_message = None
+                warn_user = None
                 author = None
-                author = await find_author(message=message, regex=constants.LFG_REGEX, blacklist="mod")
-
+                if len(message.mentions) == 0:
+                    found_message = await finder(message=message, regex=constants.LFG_REGEX, blacklist="mod")
+                else:
+                    warn_user = message.mentions[0]
                 await client.send_message(client.get_channel(BOT_HAPPENINGS_ID),
                                           "`lfg called by " + message.author.name)
-                await lfg_warner(found_message=found_mess, warn_type="targeted", warn_user=author,
-                                 channel=message.channel)
+                await lfg_warner(found_message=found_message, warn_type="targeted", warn_user=warn_user, channel=message.channel)
                 await client.delete_message(message)
         if "hots" in auths:
             if message.content.startswith("`hots"):
@@ -566,6 +570,18 @@ async def on_message(message):
                 found_message = await finder(message, command, "none")
                 if message is not None:
                     await client.delete_message(found_message)
+        if "mod" not in auths:
+            # EXTRA-SERVER INVITE CHECKER
+            if message.channel.id not in BLACKLISTED_CHANNELS:
+                match = constants.LINK_REGEX.search(message.content)
+                if match is not None:
+                    await invite_checker(message, match)
+            # LFG -> Audit
+            # if message.channel.id == constants.CHANNELNAME_CHANNELID_DICT["general-discussion"]:
+            #     match = constants.LINK_REGEX.search(message.content)
+            #     if match is not None:
+            #         await client.send_message(client.get_channel(constants.NADIR_AUDIT_LOG_ID), message.content)
+            #         await invite_checker(message, match)
 
 
 async def find_author(message, regex, blacklist):
@@ -862,47 +878,49 @@ async def find_author(message, regex, blacklist):
 #                 # await client.edit_message(contextMess, gist["Gist-Link"])
 
 
-async def log_action_to_nadir(message, action_type, *action_args):
+async def log_action_to_nadir(message, action_type, target):
     text = "a"
     if action_type == "userlogs":
-        text = "Userlogs called by " + message.author.name + " on " + action_args[0].name
+        text = "Userlogs called by " + message.author.name + " on " + target.name
     elif action_type == "reboot":
         text = "Rebooted by " + message.author.name
     await client.send_message(client.get_channel(BOT_HAPPENINGS_ID), text)
 
 
 # noinspection PyBroadException
-async def invite_checker(mess, regex_match):
+async def invite_checker(message, regex_match):
     """
 
     :type regex_match: re.match
-    :type mess: discord.Message
+    :type message: discord.Message
     """
     try:
-        invite = await client.get_invite(regex_match.group(1))
+        print("matchgrp = " + str(regex_match.group(1)))
+        invite = await client.get_invite(str(regex_match.group(1)))
         if invite.server.id != constants.OVERWATCH_SERVER_ID:
-            channel = mess.channel
+            channel = message.channel
             # await client.send_message(mess.channel, serverID + " " + OVERWATCH_ID)
-            warn = await client.send_message(mess.channel,
+            warn = await client.send_message(message.channel,
                                              "Please don't link other discord servers here " +
-                                             mess.author.mention + "\n" +
-                                             mess.server.get_member(constants.ZENITH_ID).mention)
-            await client.delete_message(mess)
+                                             message.author.mention + "\n" +
+                                             message.server.get_member(constants.ZENITH_ID).mention)
+            await client.delete_message(message)
 
-            await log_automated("deleted an external invite: " + str(invite.url) + " from " + mess.author.mention)
+            await log_automated("deleted an external invite: " + str(invite.url) + " from " + message.author.mention)
             skycoder_mess = await client.send_message(
                 client.get_channel(constants.CHANNELNAME_CHANNELID_DICT["spam-channel"]),
-                "~an " + mess.author.mention +
+                "~an " + message.author.mention +
                 " AUTOMATED: Posted a link to another server")
-            await client.send_message(skycoder_mess.channel, "~rn " + mess.author.mention)
-        elif mess.channel.id == constants.CHANNELNAME_CHANNELID_DICT["general-discussion"]:
+            await client.send_message(skycoder_mess.channel, "~rn " + message.author.mention)
+        elif message.channel.id == constants.CHANNELNAME_CHANNELID_DICT["general-discussion"]:
 
             channel_name = invite.channel.name
             party_vc_reg = re.compile(r"(^\[)\w+.\w+\]", re.IGNORECASE)
             match = party_vc_reg.search(channel_name)
             if match is not None:
-                await lfg_warner(found_message=mess, warn_type="automated", warn_user=mess.author, channel=mess.channel)
-                await client.delete_message(mess)
+                print("channelname = " + message.channel.name)
+                await lfg_warner(found_message=message, warn_type="automated", warn_user=message.author, channel=message.channel)
+                await client.delete_message(message)
     except discord.errors.NotFound:
         pass
     except:
@@ -915,7 +933,7 @@ async def get_vc_link(mess):
 
     :type mess: discord.Message
     """
-    command = mess.content.replace("`join","")
+    command = mess.content.replace("`join", "")
     if command[0:1] == " ": command = command[1:]
     print(command)
     if len(command) == 0:
@@ -1088,7 +1106,7 @@ async def get_from_find(message):
     return user_id
 
 
-async def finder(message, reg, exclude):
+async def finder(message, regex, blacklist):
     """
 
     :type exclude: str
@@ -1100,18 +1118,18 @@ async def finder(message, reg, exclude):
     found_message = None
     async for messageCheck in client.logs_from(message.channel, 20):
         if messageCheck.author.id != message.author.id:
-            if exclude == "none":
+            if blacklist == "none":
                 auth = False
-            elif exclude == "mod":
+            elif blacklist == "mod":
                 auth = await credential(messageCheck.author, "mod")
             else:
                 auth = False
             if not auth:
-                if isinstance(reg, str):
-                    if messageCheck.content == reg:
+                if isinstance(regex, str):
+                    if messageCheck.content == regex:
                         match = messageCheck
                 else:
-                    match = reg.search(messageCheck.content)
+                    match = regex.search(messageCheck.content)
                 if match is not None:
                     found_message = messageCheck
                     return found_message
@@ -1121,39 +1139,33 @@ async def finder(message, reg, exclude):
     # noinspection PyBroadException
 
 
-async def lfg_warner(**kwargs):
+# (found_message=found_message, warn_type="targeted", warn_user=warn_user
+async def lfg_warner(found_message, warn_type, warn_user, channel):
     """
 
+    :param channel: discord.Channel
+    :param warn_user: discord.Member
     :param found_message: discord.Message
     :type warn_type: str
     """
-    print(kwargs)
-    found_message = warn_type = warn_user = None
-    if "found_message" in kwargs.keys():
-        found_message = kwargs["found_message"]
-    if "warn_type" in kwargs.keys():
-        warn_type = kwargs["warn_type"]
-    if "warn_user" in kwargs.keys():
-        warn_user = kwargs["warn_user"]
-    if "channel" in kwargs.keys():
-        channel = kwargs["channel"]
 
     lfg_text = ("You're probably looking for <#182420486582435840> or <#185665683009306625>."
                 " Please avoid posting LFGs in ")
-    if found_message is not None:
-        channel_string = found_message.channel.mention
-        lfg_text += channel_string
-        warn_user = found_message.author
+    if found_message:
+        author = found_message.author
+        channel = found_message.channel
+    else:
+        author = warn_user
+        channel = channel
+    lfg_text += channel.mention
     author_mention = ""
+    count = 0
+    try:
+        count = await increment_lfgd_mongo(author)
+        author_mention += ", " + author.mention + " (" + str(count) + ")"
+    except:
+        print(traceback.format_exc())
 
-    count = None
-    if warn_user is not None:
-        try:
-            count = await increment_lfgd_mongo(warn_user)
-            author_mention += ", " + warn_user.mention + " (" + str(count) + ")"
-        except:
-            print(traceback.format_exc())
-            return
 
     if warn_type == "automated":
         print("AUTOMATED")
@@ -1161,7 +1173,7 @@ async def lfg_warner(**kwargs):
         ordinal = lambda n: "%d%s" % (n, "tsnrhtdd"[(math.floor(n / 10) % 10 != 1) * (n % 10 < 4) * n % 10::4])
         ordinal_count = ordinal(count)
         await log_automated(
-            "warned " + warn_user.mention + " for the " + ordinal_count + " time because of the message\n" +
+            "warned " + author.mention + " for the " + ordinal_count + " time because of the message\n" +
             found_message.content)
 
     lfg_text += author_mention

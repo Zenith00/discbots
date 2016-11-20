@@ -1,5 +1,4 @@
-import ast
-
 print(
-    str(ast.literal_eval("2*2"))
+    str(len("blah ".split(" ",1)[1:])) +
+    str("blah asdf".split(" ")[1:])
 )
