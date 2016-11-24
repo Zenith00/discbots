@@ -40,10 +40,11 @@ while True:
     with open(PATHS["comms"] + "toUpload.txt", "r+") as f:
         f.seek(0)
         fileToUpload = str(f.readline())
+        f.close()
     with open(PATHS["comms"] + "toDelete.txt", "r+") as f:
         f.seek(0)
         fileToDelete = str(f.readline())
-
+        f.close()
     if fileToUpload == "" and fileToDelete == "":
         time.sleep(5)
         continue
@@ -51,7 +52,9 @@ while True:
 
     print("File to upload found:")
     print(fileToUpload)
-
+    if "nsfw" in fileToUpload:
+        print("nsfw")
+        continue
     if "\\mercy\\" in fileToUpload:
         config = {
             'album': 'umuvY'
@@ -67,10 +70,10 @@ while True:
     try:
         if fileToUpload != "":
             image = imgur.upload_from_path(fileToUpload, config=config, anon=False)
-            with open(PATHS["comms"] + "toUpload.txt", "a") as toUpload:
-                fileToUpload = toUpload.readline()
-            utils_file.delete_lines(1, PATHS["comms"] + "toUpload.txt").send(None)
-            utils_file_prepend_line_wrapper(image['link'], PATHS["comms"] + "auto_art_list.txt")
+            # with open(PATHS["comms"] + "toUpload.txt", "r+") as toUpload:
+            #     fileToUpload = toUpload.readline()
+            utils_file.delete_lines(PATHS["comms"] + "toUpload.txt",1)
+            utils_file_prepend_line_wrapper(PATHS["comms"] + "auto_art_list.txt", image['link'])
             print("WRITING LINK: " + image['link'])
         print(imgur.credits)
     except:

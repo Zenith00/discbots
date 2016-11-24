@@ -44,8 +44,8 @@ while True:
     # print(added)
 
     fix_names()
-    before = [];
-    after = [];
+    before = []
+    after = []
     if count == 100:
         f = open(PATHS["comms"] + "fileList.txt", "w")
     for folderTuple in os.walk(PATHS["art"]):

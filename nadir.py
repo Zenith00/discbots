@@ -41,6 +41,8 @@ aeval = Interpreter()
 
 PATHS = {}
 
+id_channel_dict = {}
+
 gistClient = Simplegist()
 with open("paths.txt", "r") as f:
     # global PATHS
@@ -124,6 +126,7 @@ async def initialize():
     for channel in client.get_server(constants.OVERWATCH_SERVER_ID).channels:
         if channel.type == discord.ChannelType.text:
             channel_dict[await ascii_string(channel.name)] = channel.id
+
     INITIALIZED = True
 
 
@@ -317,7 +320,7 @@ async def on_message(message):
         await client.send_message(await client.get_user_info(constants.ZENITH_ID),
                                   "[" + message.author.name + "]: " + message.content)
     else:
-        print("message received")
+        # print("message received")
         if message.content.startswith("`help"):
             command = message.content.replace("`help ", "")
             command_list = command.split(" ")
@@ -363,6 +366,24 @@ async def on_message(message):
                 # if redirected_output.getvalue():
                 #     response_str += redirected_output.getvalue()
 
+                if response_str:
+                    await client.send_message(message.channel, response_str)
+            elif message.content.startswith("`exec_n"):
+                input_command = message.content.replace("`exec_n ", "")
+
+                old_stdout = sys.stdout
+                redirected_output = sys.stdout = StringIO()
+                response_str = None
+                try:
+                    exec(input_command)
+                    response_str = "```py\nInput:\n" + input_command + "\nOutput:\n"
+                    # response_str += traceback.format_exc()
+
+                finally:
+                    sys.stdout = old_stdout
+                if redirected_output.getvalue():
+                    response_str += redirected_output.getvalue()
+                response_str += "\n```"
                 if response_str:
                     await client.send_message(message.channel, response_str)
             # Wipe all gists
@@ -441,6 +462,28 @@ async def on_message(message):
                     else:
                         return
         if "mod" in auths:
+            if message.content.startswith("`fixperms"):
+                await initialize()
+                black_voice_perms = discord.PermissionOverwrite()
+                black_voice_perms.connect = False
+                black_voice_perms.speak = False
+                black_voice_perms.mute_members = False
+                black_voice_perms.deafen_members = False
+                black_voice_perms.move_members = False
+                black_voice_perms.use_voice_activation = False
+
+                for channel in message.server.channels:
+                    if channel.type == discord.ChannelType.voice:
+                        await client.edit_channel_permissions(channel, ROLENAME_ROLE_DICT["MUTED_ROLE"], overwrite=black_voice_perms)
+                        print("running")
+
+            if message.content.startswith("`moveafk"):
+                command = message.content.replace("`moveafk ","")
+                command_list = await mention_to_id([command])
+                target = message.server.get_member(command_list[0])
+                afk = message.server.get_channel("94939166399270912")
+                # print(afk.name)
+                await client.move_member(target, afk)
             # Generate Join Link
             if "`join" == message.content[0:5]:
                 command = message.content.replace("`join ", "")
@@ -528,7 +571,8 @@ async def on_message(message):
                     warn_user = message.mentions[0]
                 await client.send_message(client.get_channel(BOT_HAPPENINGS_ID),
                                           "`lfg called by " + message.author.name)
-                await lfg_warner(found_message=found_message, warn_type="targeted", warn_user=warn_user, channel=message.channel)
+                await lfg_warner(found_message=found_message, warn_type="targeted", warn_user=warn_user,
+                                 channel=message.channel)
                 await client.delete_message(message)
         if "hots" in auths:
             if message.content.startswith("`hots"):
@@ -537,7 +581,7 @@ async def on_message(message):
                 if author is not None:
                     hots_message += ", " + author.mention
                 await client.send_message(message.channel, hots_message)
-                await log_action_to_nadir(message=message, action_type="hots")
+                await log_action_to_nadir(message=message, action_type="hots", target=author)
                 await client.delete_message(message)
         if "art" in auths:
             if message.content == "`getart":
@@ -576,12 +620,12 @@ async def on_message(message):
                 match = constants.LINK_REGEX.search(message.content)
                 if match is not None:
                     await invite_checker(message, match)
-            # LFG -> Audit
-            # if message.channel.id == constants.CHANNELNAME_CHANNELID_DICT["general-discussion"]:
-            #     match = constants.LINK_REGEX.search(message.content)
-            #     if match is not None:
-            #         await client.send_message(client.get_channel(constants.NADIR_AUDIT_LOG_ID), message.content)
-            #         await invite_checker(message, match)
+                    # LFG -> Audit
+                    # if message.channel.id == constants.CHANNELNAME_CHANNELID_DICT["general-discussion"]:
+                    #     match = constants.LINK_REGEX.search(message.content)
+                    #     if match is not None:
+                    #         await client.send_message(client.get_channel(constants.NADIR_AUDIT_LOG_ID), message.content)
+                    #         await invite_checker(message, match)
 
 
 async def find_author(message, regex, blacklist):
@@ -880,7 +924,7 @@ async def find_author(message, regex, blacklist):
 
 async def log_action_to_nadir(message, action_type, target):
     text = "a"
-    if action_type == "userlogs":
+    if action_type == "userlogs" or action_type == "hots":
         text = "Userlogs called by " + message.author.name + " on " + target.name
     elif action_type == "reboot":
         text = "Rebooted by " + message.author.name
@@ -919,7 +963,8 @@ async def invite_checker(message, regex_match):
             match = party_vc_reg.search(channel_name)
             if match is not None:
                 print("channelname = " + message.channel.name)
-                await lfg_warner(found_message=message, warn_type="automated", warn_user=message.author, channel=message.channel)
+                await lfg_warner(found_message=message, warn_type="automated", warn_user=message.author,
+                                 channel=message.channel)
                 await client.delete_message(message)
     except discord.errors.NotFound:
         pass
@@ -1166,7 +1211,6 @@ async def lfg_warner(found_message, warn_type, warn_user, channel):
     except:
         print(traceback.format_exc())
 
-
     if warn_type == "automated":
         print("AUTOMATED")
         # noinspection PyPep8
@@ -1198,10 +1242,22 @@ async def get_user_logs(member, count):
 async def message_to_log(message_dict):
     cursor = await overwatch_db.userinfo.find_one({"userid": message_dict["userid"]})
     name = cursor["names"][-1]
+    content = message_dict["content"].replace("```", "")
     return "[" + message_dict["date"][:19] + "][" + constants.CHANNELID_CHANNELNAME_DICT[
         str(message_dict["channel_id"])] + "][" + name + "]:" + \
-           message_dict["content"]
+           content
 
+async def get_logs_mentions_2(query_type, message):
+    await log_action_to_nadir(message, "logs", message.author)
+    author_info = await parse_member_info(message.server.get_member(message.author.id))
+    target = message.author
+    if query_type == "1":
+        cursor = overwatch_db.message_log.find({"mentioned_users": author_info["id"]})
+    elif query_type == "2":
+        cursor = overwatch_db.message_log.find({"mentioned_roles": {"$in": author_info["role_ids"]}})
+    else:  # query_type == "3":
+        cursor = overwatch_db.message_log.find(
+            {"$or": [{"mentioned_users": author_info["id"]}, {"mentioned_roles": {"$in": author_info["role_ids"]}}]})
 
 async def get_logs_mentions(query_type, mess):
     """
@@ -1233,18 +1289,23 @@ async def get_logs_mentions(query_type, mess):
     mention_choices_message = await client.send_message(target, "Please wait...")
     response = 0
     async for message_dict in cursor:
-        user_info = await parse_member_info(target.server.get_member(message_dict["userid"]))
+        # user_info = await parse_member_info(target.server.get_member(message_dict["userid"]))
         # await client.send_message(target, "DEBUG: FOUND MATCH! " + message_dict["content"])
         number_message_dict[count] = message_dict
         message_choices_text += "(" + str(count) + ")" + await message_to_log(message_dict) + "\n"
         if count % 5 == 0:
             message_choices_text += "\n```"
-            await client.edit_message(mention_choices_message, message_choices_text)
+            try:
+                await client.edit_message(mention_choices_message, message_choices_text)
+            except discord.errors.HTTPException:
+                message_choices_text
+                await client.send_message(target, message_choices_text)
             response = await get_response_int(target)
             if response is None:
                 await client.send_message(target, "You have taken too long to respond! Please restart.")
                 return
             elif response.content == "0":
+                count = 1
                 message_choices_text = message_choices_text[:-4]
                 continue
             else:
