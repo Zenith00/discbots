@@ -14,3 +14,9 @@ async def asdf():
 
 asyncio.get_event_loop().run_until_complete(main())
 asyncio.get_event_loop().close()
+
+
+
+
+`exec_a
+    asyncio.get_event_loop().create_task(print(client.get_server("256217155362619393")).result())

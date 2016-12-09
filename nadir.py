@@ -333,7 +333,7 @@ async def on_message(message):
         #     command = message.content.replace("`help ", "")
         #     command_list = command.split(" ")
         #     await command_info(*[message, command_list])
-        if message.channel.id not in BLACKLISTED_CHANNELS:
+        if message.channel.id not in BLACKLISTED_CHANNELS and message.server.id == constants.OVERWATCH_SERVER_ID:
             await mongo_add_message_to_log(message)
         auths = await get_auths(message.author)
         if "zenith" in auths:
@@ -347,7 +347,10 @@ async def on_message(message):
                 async for retrieved_message in client.logs_from(channel, limit=1000000000000):
                     if count % 100 == 0:
                         print("Message got " + str(count))
-                    await mongo_add_message_to_log(retrieved_message)
+                    try:
+                        await mongo_add_message_to_log(retrieved_message)
+                    except pymongo.errors.DuplicateKeyError:
+                        print("duplicate")
                     count += 1
             # Clear Mongo Nick List
             if message.content.startswith("`clearnicks"):
@@ -368,6 +371,32 @@ async def on_message(message):
                            '    import asyncio\n'
                            '    def do_task(message):\n'
                            '        asyncio.get_event_loop().create_task({command})\n'
+                           '\n'
+                           '    asyncio.get_event_loop().call_soon_threadsafe(do_task, message, client)\n'
+                           'except RuntimeError:\n'
+                           '    pass\n').format(command=input_command)
+                old_stdout = sys.stdout
+                redirected_output = sys.stdout = StringIO()
+                response_str = None
+                try:
+                    exec(command)
+                except Exception:
+                    response_str = "```py\nInput:\n" + input_command + "\nOutput:\n"
+                    response_str += traceback.format_exc()
+                    response_str += "\n```"
+                # finally:
+                #     sys.stdout = old_stdout
+                # if redirected_output.getvalue():
+                #     response_str += redirected_output.getvalue()
+
+                if response_str:
+                    await client.send_message(message.channel, response_str)
+            elif message.content.startswith("`exec_a"):
+                input_command = message.content.replace("`exec_a ", "")
+                command = ('try:\n'
+                           '    import asyncio\n'
+                           '    def do_task(message):\n'
+                           '        {command}'
                            '\n'
                            '    asyncio.get_event_loop().call_soon_threadsafe(do_task, message)\n'
                            'except RuntimeError:\n'
@@ -1015,7 +1044,7 @@ async def invite_checker(message, regex_match):
             await client.delete_message(message)
 
             await log_automated("deleted an external invite: " + str(
-                invite.url) + " from " + message.author.mention + "in " + message.channel.mention)
+                invite.url) + " from " + message.author.mention + " in " + message.channel.mention)
             skycoder_mess = await client.send_message(
                 client.get_channel(constants.CHANNELNAME_CHANNELID_DICT["spam-channel"]),
                 "~an " + message.author.mention +
@@ -1282,7 +1311,7 @@ async def lfg_warner(found_message, warn_type, warn_user, channel):
         ordinal = lambda n: "%d%s" % (n, "tsnrhtdd"[(math.floor(n / 10) % 10 != 1) * (n % 10 < 4) * n % 10::4])
         ordinal_count = ordinal(count)
         await log_automated(
-            "warned " + author.mention + " in " + found_message.channel.mention + "for the " + ordinal_count + " time because of the message\n" +
+            "warned " + author.mention + " in " + found_message.channel.mention + " for the " + ordinal_count + " time because of the message\n" +
             found_message.content)
 
     lfg_text += author_mention
