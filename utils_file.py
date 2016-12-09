@@ -9,3 +9,13 @@ def prepend_line(file, line):
     with open(file, 'r') as original: data = original.read()
     with open(file, 'w') as modified: modified.write(line + "\n" + data)
     return "success"
+
+
+def append_line(file, line):
+    with open(file, "a") as file: file.write(line + "\n")
+
+
+def read_file(file) -> str:
+    with open(file, "r") as file:
+        return file.readlines()
+

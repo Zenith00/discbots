@@ -8,7 +8,10 @@ import sqlite3
 import sys
 import traceback
 from datetime import datetime
+import time
 from io import StringIO
+
+import pymongo
 from asteval import Interpreter
 
 from pyshorteners import Shortener
@@ -16,6 +19,7 @@ import discord
 import motor.motor_asyncio
 from fuzzywuzzy import fuzz
 from imgurpython import ImgurClient
+import pymongo
 from pymongo import ReturnDocument
 from simplegist.simplegist import Simplegist
 
@@ -29,30 +33,27 @@ logging.basicConfig(level=logging.INFO)
 
 client = discord.Client()
 
-imgur = ImgurClient("5e1b2fcfcf0f36e",
-                    "d919f14c31fa97819b1e9c82e2be40aef8bd9682", constants.ACCESS_TOKEN, constants.REFRESH_TOKEN)
+imgur = ImgurClient("5e1b2fcfcf0f36e","d919f14c31fa97819b1e9c82e2be40aef8bd9682", constants.ACCESS_TOKEN, constants.REFRESH_TOKEN)
 
 mongo_client = motor.motor_asyncio.AsyncIOMotorClient()
 overwatch_db = mongo_client.overwatch
 message_log_collection = overwatch_db.message_log
 userinfo_collection = overwatch_db.userinfo
 
-aeval = Interpreter()
+auths_collection = overwatch_db.auths
+trigger_str_collection = overwatch_db.trigger_str
 
-PATHS = {}
+aeval = Interpreter()
 
 id_channel_dict = {}
 
+STREAM = None
 gistClient = Simplegist()
-with open("paths.txt", "r") as f:
-    # global PATHS
-    pathList = f.read()
-    # noinspection PyRedeclaration
-    PATHS = ast.literal_eval(pathList)
-
-database = sqlite3.connect(PATHS["comms"] + "userIDlist.db")
-
-messageBase = sqlite3.connect("E:\\Logs\\messages.db")
+# with open("paths.txt", "r") as f:
+#     # global PATHS
+#     pathList = f.read()
+#     # noinspection PyRedeclaration
+#     PATHS = ast.literal_eval(pathList)
 
 BOT_HAPPENINGS_ID = "245415914600661003"
 
@@ -119,6 +120,8 @@ async def get_response_int(target) -> discord.Message:
 
 async def initialize():
     global INITIALIZED
+    global STREAM
+
     for role in client.get_server(constants.OVERWATCH_SERVER_ID).roles:
         if role.id in ID_ROLENAME_DICT.keys():
             ROLENAME_ROLE_DICT[ID_ROLENAME_DICT[role.id]] = role
@@ -126,7 +129,7 @@ async def initialize():
     for channel in client.get_server(constants.OVERWATCH_SERVER_ID).channels:
         if channel.type == discord.ChannelType.text:
             channel_dict[await ascii_string(channel.name)] = channel.id
-
+    STREAM = client.get_channel("255970182881738762")
     INITIALIZED = True
 
 
@@ -156,7 +159,6 @@ async def on_ready():
 async def on_member_join(member):
     # await add_to_nick_id_list(member)
     await add_to_user_list(member)
-    database.commit()
     return
 
 
@@ -208,49 +210,54 @@ async def authorize_user(command_list):
     print(command_list)
     user_id = command_list[0]
     auth_type = command_list[1]
-    if auth_type == "get_art":
-        with open(PATHS["comms"] + "art_credentials.txt", "a") as cred_list:
-            cred_list.write(str(user_id) + "\n")
-    if auth_type == "hots":
-        with open(PATHS["comms"] + "hots_credentials.txt", "a") as cred_list:
-            cred_list.write(str(user_id) + "\n")
-    if auth_type == "lfg":
-        with open(PATHS["comms"] + "lfg_credentials.txt", "a") as cred_list:
-            cred_list.write(str(user_id) + "\n")
+
+    # if auth_type == "get_art":
+    #     utils_persist.set("art_auths", user_id)
+    #     # with open(PATHS["comms"] + "art_credentials.txt", "a") as cred_list:
+    #     #     cred_list.write(str(user_id) + "\n")
+    # if auth_type == "hots":
+    #     utils_persist.set("hots_auths", user_id)
+    #     # with open(PATHS["comms"] + "hots_credentials.txt", "a") as cred_list:
+    #     #     cred_list.write(str(user_id) + "\n")
+    # if auth_type == "lfg":
+    #     utils_persist.set("lfg_auths", user_id)
+    #     # with open(PATHS["comms"] + "lfg_credentials.txt", "a") as cred_list:
+    #     #     cred_list.write(str(user_id) + "\n")
 
 
-async def credential(member, level):
-    """
-
-    :type level: str
-    :type member: discord.Member
-    """
-
-    author_info = await parse_member_info(member)
-    role_whitelist = any(x in [constants.ROLENAME_ID_DICT["TRUSTED_ROLE"], constants.ROLENAME_ID_DICT["MVP_ROLE"]]
-                         for x in author_info["role_ids"])
-    mod_whitelist = member.server_permissions.manage_roles
-    # print("auth: " + level)
-    if level == "mod":
-        return mod_whitelist and not any(x in "138132942542077952" for x in author_info["role_ids"])
-    elif level == "zenith":
-        return member.id == constants.ZENITH_ID
-    elif level == "trusted":
-        return mod_whitelist or role_whitelist
-    elif level == "lfg":
-        with open(PATHS["comms"] + "lfg_credentials.txt", "r") as cred_list:
-            creds = cred_list.readlines()
-            return (author_info["id"] + "\n") in creds or role_whitelist or mod_whitelist
-    elif level == "hots":
-        with open(PATHS["comms"] + "hots_credentials.txt", "r") as cred_list:
-            creds = cred_list.readlines()
-            return (author_info["id"] + "\n") in creds or role_whitelist or mod_whitelist
-    elif level == "get_art":
-
-        with open(PATHS["comms"] + "art_credentials.txt", "r") as cred_list:
-            creds = cred_list.readlines()
-
-            return (author_info["id"] + "\n") in creds or role_whitelist or mod_whitelist
+# async def credential(member, level):
+#     """
+#
+#     :type level: str
+#     :type member: discord.Member
+#     """
+#
+#     author_info = await parse_member_info(member)
+#     role_whitelist = any(x in [constants.ROLENAME_ID_DICT["TRUSTED_ROLE"], constants.ROLENAME_ID_DICT["MVP_ROLE"]]
+#                          for x in author_info["role_ids"])
+#     mod_whitelist = member.server_permissions.manage_roles  and not any(x in "138132942542077952" for x in author_info["role_ids"])
+#     zenith = member.id == constants.ZENITH_ID
+#     # print("auth: " + level)
+#     if level == "mod":
+#         return mod_whitelist or zenith
+#     elif level == "zenith":
+#         return zenith
+#     elif level == "trusted":
+#         return mod_whitelist or role_whitelist or zenith
+#     elif level == "lfg":
+#         with open(PATHS["comms"] + "lfg_credentials.txt", "r") as cred_list:
+#             creds = cred_list.readlines()
+#             return (author_info["id"] + "\n") in creds or role_whitelist or mod_whitelist
+#     elif level == "hots":
+#         with open(PATHS["comms"] + "hots_credentials.txt", "r") as cred_list:
+#             creds = cred_list.readlines()
+#             return (author_info["id"] + "\n") in creds or role_whitelist or mod_whitelist
+#     elif level == "get_art":
+#
+#         with open(PATHS["comms"] + "art_credentials.txt", "r") as cred_list:
+#             creds = cred_list.readlines()
+#
+#             return (author_info["id"] + "\n") in creds or role_whitelist or mod_whitelist
 
 
 async def get_auths(member):
@@ -261,34 +268,30 @@ async def get_auths(member):
     author_info = await parse_member_info(member)
     role_whitelist = any(x in [constants.ROLENAME_ID_DICT["TRUSTED_ROLE"], constants.ROLENAME_ID_DICT["MVP_ROLE"]]
                          for x in author_info["role_ids"])
-    mod_whitelist = member.server_permissions.manage_roles
+    mod_whitelist = member.server_permissions.manage_roles and not any(x in "138132942542077952" for x in author_info["role_ids"])
     auths = set()
     if member.id == constants.ZENITH_ID:
         auths |= {"zenith"}
-    if mod_whitelist and not any(x in "138132942542077952" for x in author_info["role_ids"]):
+        auths |= {"trusted"}
+        auths |= {"lfg"}
         auths |= {"mod"}
+    if mod_whitelist:
+        auths |= {"mod"}
+        auths |= {"lfg"}
         auths |= {"trusted"}
     if role_whitelist:
         auths |= {"trusted"}
+        auths |= {"lfg"}
     # unspaggheti
-    with open(PATHS["comms"] + "lfg_credentials.txt", "r") as cred_list:
-        creds = cred_list.readlines()
-        if (author_info["id"] + "\n") in creds:
-            auths |= {"lfg"}
-        if any(x in auths for x in ["mod", "zenith", "trusted"]):
-            auths |= {"lfg"}
-    with open(PATHS["comms"] + "art_credentials.txt", "r") as cred_list:
-        creds = cred_list.readlines()
-        if (author_info["id"] + "\n") in creds:
-            auths |= {"art"}
-        if any(x in auths for x in ["mod", "zenith", "trusted"]):
-            auths |= {"art"}
-    with open(PATHS["comms"] + "hots_credentials.txt", "r") as cred_list:
-        creds = cred_list.readlines()
-        if (author_info["id"] + "\n") in creds:
-            auths |= {"hots"}
-        if any(x in auths for x in ["mod", "zenith", "trusted"]):
-            auths |= {"hots"}
+    warn_auths = await overwatch_db.auths.find_one({"type": "warn"})
+    if warn_auths:
+        try:
+            auth_list = warn_auths["ids"]
+            if member.id in auth_list:
+                auths |= {"warn"}
+        except (KeyError, TypeError):
+            print("ids not found")
+            pass
     return auths
 
 
@@ -319,16 +322,33 @@ async def on_message(message):
     if message.server is None:
         await client.send_message(await client.get_user_info(constants.ZENITH_ID),
                                   "[" + message.author.name + "]: " + message.content)
+        return
+    if message.channel.id in BLACKLISTED_CHANNELS:
+        return
+    if not INITIALIZED and message.server.id == constants.OVERWATCH_SERVER_ID:
+        await initialize()
     else:
         # print("message received")
-        if message.content.startswith("`help"):
-            command = message.content.replace("`help ", "")
-            command_list = command.split(" ")
-            await command_info(*[message, command_list])
+        # if message.content.startswith("`help"):
+        #     command = message.content.replace("`help ", "")
+        #     command_list = command.split(" ")
+        #     await command_info(*[message, command_list])
         if message.channel.id not in BLACKLISTED_CHANNELS:
             await mongo_add_message_to_log(message)
         auths = await get_auths(message.author)
         if "zenith" in auths:
+            if message.content.startswith("`wipemessages"):
+                await message_log_collection.delete_many({})
+                await message_log_collection.create_index(("message_id", pymongo.DESCENDING), unique=True)
+            if message.content.startswith("`superlog"):
+                channel = message.channel
+                await client.delete_message(message)
+                count = 0
+                async for retrieved_message in client.logs_from(channel, limit=1000000000000):
+                    if count % 100 == 0:
+                        print("Message got " + str(count))
+                    await mongo_add_message_to_log(retrieved_message)
+                    count += 1
             # Clear Mongo Nick List
             if message.content.startswith("`clearnicks"):
                 await clear_nicknames()
@@ -461,24 +481,46 @@ async def on_message(message):
                         number_to_remove -= 1
                     else:
                         return
+        # if (message.author.id == "180041371544059905" or message.author.id == constants.ZENITH_ID) and message.content == "`start9":
+        #     stop = time.time() + 10
+        #     while time.time() < stop:
+        #         msg = await client.wait_for_message(channel= message.channel, timeout=.1)
+        #         if msg:
+        #             await client.delete_message(msg)
         if "mod" in auths:
-            if message.content.startswith("`fixperms"):
-                await initialize()
-                black_voice_perms = discord.PermissionOverwrite()
-                black_voice_perms.connect = False
-                black_voice_perms.speak = False
-                black_voice_perms.mute_members = False
-                black_voice_perms.deafen_members = False
-                black_voice_perms.move_members = False
-                black_voice_perms.use_voice_activation = False
-
-                for channel in message.server.channels:
-                    if channel.type == discord.ChannelType.voice:
-                        await client.edit_channel_permissions(channel, ROLENAME_ROLE_DICT["MUTED_ROLE"], overwrite=black_voice_perms)
-                        print("running")
+            # if message.content.startswith("`fixperms"):
+            #     await initialize()
+            #     black_voice_perms = discord.PermissionOverwrite()
+            #     black_voice_perms.connect = False
+            #     black_voice_perms.speak = False
+            #     black_voice_perms.mute_members = False
+            #     black_voice_perms.deafen_members = False
+            #     black_voice_perms.move_members = False
+            #     black_voice_perms.use_voice_activation = False
+            #
+            #     for channel in message.server.channels:
+            #         if channel.type == discord.ChannelType.voice:
+            #             await client.edit_channel_permissions(channel, ROLENAME_ROLE_DICT["MUTED_ROLE"],
+            #                                                   overwrite=black_voice_perms)
+            #             print("running")
+            if message.content.startswith("`fixmsg"):
+                await overwatch_db.message_log2.create_index([("message_id", pymongo.DESCENDING)], unique=True)
+                cursor = overwatch_db.message_log.find()
+                async for x in cursor:
+                    try:
+                        await overwatch_db.message_log2.insert_one(x)
+                        print("added_one")
+                    except:
+                        print("duplicate")
+                        pass
+                # await overwatch_db.drop_collection("message_log")
+                print("inserted new")
+                await overwatch_db.message_log2.rename("message_log", dropTarget="message_log")
+                await mongo_client.fsync()
+                print("done")
 
             if message.content.startswith("`moveafk"):
-                command = message.content.replace("`moveafk ","")
+                command = message.content.replace("`moveafk ", "")
                 command_list = await mention_to_id([command])
                 target = message.server.get_member(command_list[0])
                 afk = message.server.get_channel("94939166399270912")
@@ -510,7 +552,7 @@ async def on_message(message):
                 await client.send_message(message.channel, str(nicklist)[1:-1])
                 pass
                 # Reboot
-            if "`reboot" == message.content:
+            if "`reboot" == message.content and message.author.id == constants.ZENITH_ID:
                 await client.send_message(message.channel, "Rebooting, " + message.author.mention)
                 await client.send_message(client.get_channel(BOT_HAPPENINGS_ID), "Shut down by " + message.author.name)
                 await client.logout()
@@ -518,19 +560,23 @@ async def on_message(message):
             if "`kill" == message.content:
                 with open(PATHS["comms"] + "bootstate.txt", "w") as f:
                     f.write("killed")
-                client.logout()
+                await client.logout()
             # Get user logs
             if message.content.startswith("`userlogs"):
                 command = message.content.replace("`userlogs ", "")
                 command_list = command.split(" ")
                 command_list = await mention_to_id(command_list)
-                member = message.server.get_member(command_list[0])
+                member = await client.get_user_info(command_list[0])
                 logs = await get_user_logs(member, int(command_list[1]))
                 gist = gistClient.create(name="User Log", description=member.name + "'s Logs", public=False,
                                          content="\n".join(logs))
                 await client.send_message(message.channel, gist["Gist-Link"])
                 await log_action_to_nadir(message=message, action_type="userlogs", target=member)
                 # await client.edit_message(contextMess, gist["Gist-Link"])
+
+            if message.content.startswith("`tag"):
+                # command = message.content.replace("`blacklist ","")
+                await tag_str(message)
         if "trusted" in auths:
             # User info
             if message.content.startswith("`ui"):
@@ -543,10 +589,17 @@ async def on_message(message):
                 user_dict = await get_user_info(userid)
                 if user_dict is not None:
                     formatted = [list(map(str, x)) for x in user_dict.items()]
-                    ui_mess = await client.send_message(message.channel,
-                                                        "```Found:\n" + await pretty_column(formatted, True) + "\n```")
-                    await asyncio.sleep(20)
-                    await client.delete_message(ui_mess)
+                    text = await pretty_column(formatted, True)
+                    # split = text.replace("\n", "|")
+                    # split = split.replace(" ", "+")
+                    # google_chart = "http://chart.apis.google.com/chart?chst=d_text_outline&chld=000000|12|h|FFFFFF|_|" + split
+                    # await client.send_message(message.channel,google_chart)
+                    text = re.sub(r'\s+$', '', text, 0, re.M)
+                    await client.send_message(message.channel, "```\nFound:\n" + text.strip() + "```")
+                    # for x in split:
+                    # await client.send_message(message.channel,"`" + x + "`")
+                    # await asyncio.sleep(20)
+                    # await client.delete_message(ui_mess)
                 else:
                     await client.send_message(message.channel, "User not found")
                 return
@@ -583,39 +636,48 @@ async def on_message(message):
                 await client.send_message(message.channel, hots_message)
                 await log_action_to_nadir(message=message, action_type="hots", target=author)
                 await client.delete_message(message)
-        if "art" in auths:
-            if message.content == "`getart":
-                await client.delete_message(message)
-                art_channel = client.get_channel(constants.CHANNELNAME_CHANNELID_DICT["fanart"])
-                rand_art = []
-                count = 8
-                with open(PATHS["comms"] + "auto_art_list.txt", "r+") as art_list:
-                    if len(art_list.readlines()) <= count:
-                        link_list = [x.link for x in imgur.get_album_images("umuvY")]
-                        random.shuffle(link_list)
-                        for link in link_list:
-                            art_list.write(link + "\n")
-                with open(PATHS["comms"] + "auto_art_list.txt", "r") as art_list:
-                    for x in range(1, count):
-                        line = art_list.readline()
-                        rand_art.append(line)
-                await delete_lines(PATHS["comms"] + "auto_art_list.txt", count)
-                for artlink in rand_art:
-                    await client.send_message(art_channel, artlink)
-            if message.content.startswith("`flagart"):
-                command = message.content.replace("`flagart ", "")
-                imgur_id_reg = re.compile("(?<=http://i.imgur.com/)(\w+)", re.IGNORECASE)
-                match = imgur_id_reg.search(command)
-                if "zenith" in auths:
-                    if match is not None:
-                        imgur_id = match.group(0)
-                        imgur.delete_image(imgur_id)
-                        log_action_to_nadir(message, "flagart")
-                found_message = await finder(message, command, "none")
-                if message is not None:
-                    await client.delete_message(found_message)
+        # if "art" in auths:
+        #     if message.content == "`getart" and False:
+        #         await client.delete_message(message)
+        #         art_channel = client.get_channel(constants.CHANNELNAME_CHANNELID_DICT["fanart"])
+        #         rand_art = []
+        #         count = 8
+        #         with open(PATHS["comms"] + "auto_art_list.txt", "r+") as art_list:
+        #             if len(art_list.readlines()) <= count:
+        #                 link_list = [x.link for x in imgur.get_album_images("umuvY")]
+        #                 random.shuffle(link_list)
+        #                 for link in link_list:
+        #                     art_list.write(link + "\n")
+        #         with open(PATHS["comms"] + "auto_art_list.txt", "r") as art_list:
+        #             for x in range(1, count):
+        #                 line = art_list.readline()
+        #                 rand_art.append(line)
+        #         await delete_lines(PATHS["comms"] + "auto_art_list.txt", count)
+        #         for artlink in rand_art:
+        #             await client.send_message(art_channel, artlink)
+        #     if message.content.startswith("`flagart"):
+        #         command = message.content.replace("`flagart ", "")
+        #         imgur_id_reg = re.compile("(?<=http://i.imgur.com/)(\w+)", re.IGNORECASE)
+        #         match = imgur_id_reg.search(command)
+        #         if "zenith" in auths:
+        #             if match is not None:
+        #                 imgur_id = match.group(0)
+        #                 imgur.delete_image(imgur_id)
+        #                 log_action_to_nadir(message, "flagart", target=imgur_id)
+        #         found_message = await finder(message, command, "none")
+        #         if message is not None:
+        #             await client.delete_message(found_message)
+
         if "mod" not in auths:
             # EXTRA-SERVER INVITE CHECKER
+            if "chaos vanguard" in message.content.lower():
+                await log_automated("logged a message containing Chaos Vanguard in " + message.channel.name + ":\n[" +
+                                    message.author.name + "]: " + message.content)
+                # await client.delete_message(message)
+                skycoder_mess = await client.send_message(
+                    client.get_channel(constants.CHANNELNAME_CHANNELID_DICT["spam-channel"]),
+                    "~an " + message.author.mention +
+                    " AUTOMATED: Posted a message containing chaos vanguard: " + message.content)
             if message.channel.id not in BLACKLISTED_CHANNELS:
                 match = constants.LINK_REGEX.search(message.content)
                 if match is not None:
@@ -928,6 +990,8 @@ async def log_action_to_nadir(message, action_type, target):
         text = "Userlogs called by " + message.author.name + " on " + target.name
     elif action_type == "reboot":
         text = "Rebooted by " + message.author.name
+    elif action_type == "flagart":
+        text = "Art flagged " + target
     await client.send_message(client.get_channel(BOT_HAPPENINGS_ID), text)
 
 
@@ -950,7 +1014,8 @@ async def invite_checker(message, regex_match):
                                              message.server.get_member(constants.ZENITH_ID).mention)
             await client.delete_message(message)
 
-            await log_automated("deleted an external invite: " + str(invite.url) + " from " + message.author.mention)
+            await log_automated("deleted an external invite: " + str(
+                invite.url) + " from " + message.author.mention + "in " + message.channel.mention)
             skycoder_mess = await client.send_message(
                 client.get_channel(constants.CHANNELNAME_CHANNELID_DICT["spam-channel"]),
                 "~an " + message.author.mention +
@@ -1023,32 +1088,31 @@ async def mention_to_id(command_list):
 async def log_automated(description: object) -> None:
     action = ("At " + str(datetime.utcnow().strftime("[%Y-%m-%d %H:%m:%S] ")) + ", I automatically " +
               str(description) + "\n" + "`kill to disable me")
-    await client.send_message(client.get_channel(constants.CHANNELNAME_CHANNELID_DICT["spam-channel"]), action)
+    await client.send_message(client.get_channel(constants.CHANNELNAME_CHANNELID_DICT["alerts"]), action)
     await client.send_message(client.get_channel(BOT_HAPPENINGS_ID), action)
 
-
-async def command_info(*args):
-    info_list = []
-    if len(args) == 2:
-        info_list = [
-            ["Command ", "Description ", "Usage"],
-            ["<Trusted>,", " ", " "],
-            ["`ui", "Retrieves user info", "`ui *<user>"],
-            ["`getmentions", "Mention retrieval", "`getmentions"],
-            ["`lfg", "Automated lfg logger and copypasta warning", "`lfg *<user>"],
-            ["`ping", "Gets a random mercy voice-line and bot ping", "`ping"],
-            ["`getart", "Sends 10 random pieces of mercy fanart into #fanart", "`getart"],
-            ["`userlogs", "Gets logs from a user", "`userlogs <user> <count>"],
-            [" ", " ", " "],
-
-        ]
-        if await credential(args[0].author, "mod"):
-            info_list.append(["<Moderator>", " ", " "])
-            info_list.append(["`kill", "Disconnects bot", "`kill"])
-            info_list.append(["`join", "Gets an invite for a user's current VC", "`join <user>"])
-            info_list.append(["`find", "Finds users that have had similar nicknames", "`find <nick>|<count>"])
-            info_list.append(["`getnicks", "Gets the previous nicknames of a user", "`getnicks <id>"])
-    await client.send_message(args[0].channel, "```prolog\n" + await pretty_column(info_list, True) + "```")
+#
+# async def command_info(*args):
+#     info_list = []
+#     if len(args) == 2:
+#         info_list = [
+#             ["Command ", "Description ", "Usage"],
+#             ["<Trusted>,", " ", " "],
+#             ["`ui", "Retrieves user info", "`ui *<user>"],
+#             ["`getmentions", "Mention retrieval", "`getmentions"],
+#             ["`lfg", "Automated lfg logger and copypasta warning", "`lfg *<user>"],
+#             ["`ping", "Gets a random mercy voice-line and bot ping", "`ping"],
+#             ["`userlogs", "Gets logs from a user", "`userlogs <user> <count>"],
+#             [" ", " ", " "],
+#
+#         ]
+#         if await credential(args[0].author, "mod"):
+#             info_list.append(["<Moderator>", " ", " "])
+#             info_list.append(["`kill", "Disconnects bot", "`kill"])
+#             info_list.append(["`join", "Gets an invite for a user's current VC", "`join <user>"])
+#             info_list.append(["`find", "Finds users that have had similar nicknames", "`find <nick>|<count>"])
+#             info_list.append(["`getnicks", "Gets the previous nicknames of a user", "`getnicks <id>"])
+#     await client.send_message(args[0].channel, "```prolog\n" + await pretty_column(info_list, True) + "```")
 
 
 async def ping(message):
@@ -1108,19 +1172,19 @@ async def fuzzy_match(*args):
         nick_fuzz[str(nick)] = int(ratio)
 
     top_nicks = heapq.nlargest(int(count), nick_fuzz, key=lambda k: nick_fuzz[k])
-
+    message_to_send = "`Fuzzy Search:`\n"
+    pretty_list = []
     for nick in top_nicks:
         user_id = nick_id_dict[nick]
-        message_to_send = "```\nFuzzy Search:\n"
-        pretty_list = []
-        for singleID in user_id:
-            pretty_list.append(["ID: '" + str(singleID) + "'",
-                                "| Nickname: " + nick,
-                                " (" + str(nick_fuzz[nick]) + ")"])
 
-        message_to_send += await pretty_column(pretty_list, True)
-        message_to_send += "```"
-        await client.send_message(mess.channel, message_to_send)
+        for singleID in user_id:
+            pretty_list.append(["`ID: '" + str(singleID) + "'",
+                                "| Nickname: " + nick,
+                                " (" + str(nick_fuzz[nick]) + ")",
+                                "` | " + "<@!" + singleID + ">"])
+
+    message_to_send += await pretty_column(pretty_list, True)
+    await client.send_message(mess.channel, message_to_send)
 
 
 async def pretty_column(list_of_rows, left_just):
@@ -1162,11 +1226,12 @@ async def finder(message, regex, blacklist):
     match = None
     found_message = None
     async for messageCheck in client.logs_from(message.channel, 20):
-        if messageCheck.author.id != message.author.id:
+        if messageCheck.author.id != message.author.id and messageCheck.author.id != constants.MERCY_ID:
             if blacklist == "none":
                 auth = False
             elif blacklist == "mod":
-                auth = await credential(messageCheck.author, "mod")
+                auth = "mod" in await get_auths(messageCheck.author)
+                # auth = await credential(messageCheck.author, "mod")
             else:
                 auth = False
             if not auth:
@@ -1217,7 +1282,7 @@ async def lfg_warner(found_message, warn_type, warn_user, channel):
         ordinal = lambda n: "%d%s" % (n, "tsnrhtdd"[(math.floor(n / 10) % 10 != 1) * (n % 10 < 4) * n % 10::4])
         ordinal_count = ordinal(count)
         await log_automated(
-            "warned " + author.mention + " for the " + ordinal_count + " time because of the message\n" +
+            "warned " + author.mention + " in " + found_message.channel.mention + "for the " + ordinal_count + " time because of the message\n" +
             found_message.content)
 
     lfg_text += author_mention
@@ -1243,9 +1308,13 @@ async def message_to_log(message_dict):
     cursor = await overwatch_db.userinfo.find_one({"userid": message_dict["userid"]})
     name = cursor["names"][-1]
     content = message_dict["content"].replace("```", "")
-    return "[" + message_dict["date"][:19] + "][" + constants.CHANNELID_CHANNELNAME_DICT[
-        str(message_dict["channel_id"])] + "][" + name + "]:" + \
+    try:
+        channel_name = constants.CHANNELID_CHANNELNAME_DICT[str(message_dict["channel_id"])]
+    except KeyError:
+        channel_name = "Unknown"
+    return "[" + message_dict["date"][:19] + "][" + channel_name + "][" + name + "]:" + \
            content
+
 
 async def get_logs_mentions_2(query_type, message):
     await log_action_to_nadir(message, "logs", message.author)
@@ -1258,6 +1327,32 @@ async def get_logs_mentions_2(query_type, message):
     else:  # query_type == "3":
         cursor = overwatch_db.message_log.find(
             {"$or": [{"mentioned_users": author_info["id"]}, {"mentioned_roles": {"$in": author_info["role_ids"]}}]})
+
+
+async def tag_str(message):
+    string = message.content
+    interact = await client.send_message(message.channel, "Blacklisting string: \n `" + string + "`\n" +
+                                         "What action should I take? (kick, delete, mute <duration>")
+    action_response = (await client.wait_for_message(author=message.author, channel=message.channel)).content
+    if action_response in ["kick", "delete", "mute"]:
+        database_entry = {"trigger_str": string, "action": action_response}
+    else:
+        await client.edit_message(interact, "Syntax not recognized. Please restart")
+        return
+    result = await trigger_str_collection.insert_one(database_entry)
+
+
+async def process_tags(message):
+    tag_list = await trigger_str_collection.find(query={}, projection="trigger_str").to_list()
+    action = None
+    for tag in tag_list:
+        if tag in message.content:
+            tag_doc = trigger_str_collection.find_one({"trigger_str": tag})
+            action = tag_doc["action"]
+            break
+    if action:
+        pass
+
 
 async def get_logs_mentions(query_type, mess):
     """
@@ -1326,7 +1421,7 @@ async def get_logs_mentions(query_type, mess):
         # print("Response = " + str(response))
         cursor = overwatch_db.message_log.find(
             {
-                "date"      : {"$lt": selected_message["date"]},
+                "date": {"$lt": selected_message["date"]},
                 "channel_id": selected_message["channel_id"]
             }, limit=response
         )
@@ -1362,6 +1457,8 @@ async def get_logs_mentions(query_type, mess):
 async def mongo_add_message_to_log(mess):
     messInfo = await parse_message_info(mess)
     result = await message_log_collection.insert_one(messInfo)
+    messText = await message_to_log(messInfo)
+    await client.send_message(STREAM, messText[21:])
 
 
 async def increment_lfgd_mongo(author):
@@ -1402,12 +1499,12 @@ async def add_to_user_list(member):
     result = await userinfo_collection.update_one(
         {"userid": member.id},
         {
-            "$addToSet": {"nicks"       : {"$each": [user_info["nick"], user_info["name"]]},
-                          "names"       : user_info["name"],
-                          "avatar_urls" : user_info["avatar_url"],
+            "$addToSet": {"nicks": {"$each": [user_info["nick"], user_info["name"]]},
+                          "names": user_info["name"],
+                          "avatar_urls": user_info["avatar_url"],
                           "server_joins": user_info["joined_at"]},
-            "$set"     : {"mention_str": user_info["mention_str"],
-                          "created_at" : user_info["created_at"]},
+            "$set": {"mention_str": user_info["mention_str"],
+                     "created_at": user_info["created_at"]},
 
         }
         , upsert=True
@@ -1417,7 +1514,7 @@ async def add_to_user_list(member):
 
 async def get_previous_nicks(member) -> list:
     """
-
+paste
     :type member: discord.Member
     """
     userinfo_dict = await userinfo_collection.find_one({"userid": member.id})
@@ -1430,8 +1527,10 @@ async def get_user_info(member_id):
     :type member: discord.Member
     """
     mongo_cursor = await userinfo_collection.find_one(
-        {"userid": member_id}
+        {"userid": member_id}, projection={"_id": False, "mention_str": False}
     )
+    if not mongo_cursor:
+        return None
     list = mongo_cursor["avatar_urls"]
     if len(list) > 0 and len(list[0]) > 0:
         shortened_list = []
@@ -1441,12 +1540,10 @@ async def get_user_info(member_id):
     return mongo_cursor
 
 
-with open(PATHS["comms"] + "bootstate.txt", "r") as f:
-    line = f.readline().strip()
-    if line == "killed":
-        ENABLED = False
+# with open(PATHS["comms"] + "bootstate.txt", "r") as f:
+#     line = f.readline().strip()
+#     if line == "killed":
+#         ENABLED = False
 # client.loop.create_task(stream())
 
 client.run("MjM2MzQxMTkzODQyMDk4MTc3.CvBk5w.gr9Uv5OnhXLL3I14jFmn0IcesUE", bot=True)
-
-print("OOPS RIP")

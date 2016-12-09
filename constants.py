@@ -27,6 +27,7 @@ CHANNELNAME_CHANNELID_DICT = {
     "warning-log"            : "170179130694828032",
     "bot-log"                : "147153976687591424",
     "nadir_audit_log"        : "240320691868663809",
+    "alerts" : "252976184344838144",
 }
 
 CHANNELID_CHANNELNAME_DICT = dict([v, k] for k, v in CHANNELNAME_CHANNELID_DICT.items())
