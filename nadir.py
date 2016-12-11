@@ -22,7 +22,7 @@ from imgurpython import ImgurClient
 import pymongo
 from pymongo import ReturnDocument
 from simplegist.simplegist import Simplegist
-
+import wolframalpha
 import constants
 from utils_file import delete_lines
 from utils_parse import *
@@ -33,8 +33,10 @@ logging.basicConfig(level=logging.INFO)
 
 client = discord.Client()
 
-imgur = ImgurClient("5e1b2fcfcf0f36e","d919f14c31fa97819b1e9c82e2be40aef8bd9682", constants.ACCESS_TOKEN, constants.REFRESH_TOKEN)
-
+imgur = ImgurClient("5e1b2fcfcf0f36e", "d919f14c31fa97819b1e9c82e2be40aef8bd9682", constants.ACCESS_TOKEN,
+                    constants.REFRESH_TOKEN)
+WA_ID = "W7TP9T-A9QJ2QGLJQ"
+WA_client = wolframalpha.Client(WA_ID)
 mongo_client = motor.motor_asyncio.AsyncIOMotorClient()
 overwatch_db = mongo_client.overwatch
 message_log_collection = overwatch_db.message_log
@@ -108,7 +110,7 @@ async def get_response_int(target) -> discord.Message:
     """
 
     def check(msg):
-        if msg.server is None and msg.author.id == target.id:
+        if msg.server == None and msg.author.id == target.id:
             try:
                 int(msg.content)
                 return True
@@ -116,6 +118,15 @@ async def get_response_int(target) -> discord.Message:
                 return False
 
     return await client.wait_for_message(timeout=30, author=target, check=check)
+
+
+async def get_response(message):
+    def check(msg):
+        if message.server == msg.server and msg.author.id == message.author.id and message.channel == msg.channel:
+            return True
+        return False
+
+    return await client.wait_for_message(timeout=30, check=check)
 
 
 async def initialize():
@@ -130,6 +141,7 @@ async def initialize():
         if channel.type == discord.ChannelType.text:
             channel_dict[await ascii_string(channel.name)] = channel.id
     STREAM = client.get_channel("255970182881738762")
+
     INITIALIZED = True
 
 
@@ -268,7 +280,8 @@ async def get_auths(member):
     author_info = await parse_member_info(member)
     role_whitelist = any(x in [constants.ROLENAME_ID_DICT["TRUSTED_ROLE"], constants.ROLENAME_ID_DICT["MVP_ROLE"]]
                          for x in author_info["role_ids"])
-    mod_whitelist = member.server_permissions.manage_roles and not any(x in "138132942542077952" for x in author_info["role_ids"])
+    mod_whitelist = member.server_permissions.manage_roles and not any(
+        x in "138132942542077952" for x in author_info["role_ids"])
     auths = set()
     if member.id == constants.ZENITH_ID:
         auths |= {"zenith"}
@@ -309,6 +322,45 @@ async def remind_me(command_list, message):
         print(traceback.format_exc())
 
 
+async def wolfram(message):
+    command = message.content.replace("`wa ", "")
+    res = WA_client.query(command)
+    podlist = res["pod"]
+
+    keydict = {}
+    options = ""
+    for num in range(0, len(podlist) - 1):
+        pod = podlist[num]
+        options += "[" + str(num) + "] " + pod["@title"] + "\n"
+
+        keydict[num] = pod
+    await client.send_message(message.channel, options)
+    response = await get_response(message)
+    try:
+        response = int(response.content)
+        pod = podlist[response]
+        subpods = []
+        text = ""
+        if pod["@numsubpods"] == "1":
+            subpods.append(pod["subpod"])
+
+        else:
+            for x in pod["subpod"]:
+                subpods.append(x)
+
+        for subpod in subpods:
+
+            img = (subpod["img"])["@src"]
+            img = await shorten_link(img)
+            text += img + "\n"
+        await client.send_message(message.channel, text)
+
+    except:
+        print(traceback.format_exc())
+
+    pass
+
+
 @client.event
 async def on_message(message):
     global VCMess
@@ -337,6 +389,9 @@ async def on_message(message):
             await mongo_add_message_to_log(message)
         auths = await get_auths(message.author)
         if "zenith" in auths:
+            if message.content.startswith("`wa"):
+                await wolfram(message)
+
             if message.content.startswith("`wipemessages"):
                 await message_log_collection.delete_many({})
                 await message_log_collection.create_index(("message_id", pymongo.DESCENDING), unique=True)
@@ -1118,7 +1173,8 @@ async def log_automated(description: object) -> None:
     action = ("At " + str(datetime.utcnow().strftime("[%Y-%m-%d %H:%m:%S] ")) + ", I automatically " +
               str(description) + "\n" + "`kill to disable me")
     await client.send_message(client.get_channel(constants.CHANNELNAME_CHANNELID_DICT["alerts"]), action)
-    await client.send_message(client.get_channel(BOT_HAPPENINGS_ID), action)
+    # await client.send_message(client.get_channel(BOT_HAPPENINGS_ID), action)
+
 
 #
 # async def command_info(*args):
@@ -1550,6 +1606,10 @@ paste
     return list(userinfo_dict["nicks"])
 
 
+async def shorten_link(link) -> str:
+    return Shortener('Tinyurl').short(link)
+
+
 async def get_user_info(member_id):
     """
 
@@ -1564,7 +1624,7 @@ async def get_user_info(member_id):
     if len(list) > 0 and len(list[0]) > 0:
         shortened_list = []
         for link in list:
-            shortened_list.append(Shortener('Tinyurl').short(link))
+            shortened_list.append(await shorten_link(link))
         mongo_cursor["avatar_urls"] = shortened_list
     return mongo_cursor
 
