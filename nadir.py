@@ -286,11 +286,11 @@ async def get_auths(member):
     if member.id == constants.ZENITH_ID:
         auths |= {"zenith"}
         auths |= {"trusted"}
-        auths |= {"lfg"}
+        auths |= {"warn"}
         auths |= {"mod"}
     if mod_whitelist:
         auths |= {"mod"}
-        auths |= {"lfg"}
+        auths |= {"warn"}
         auths |= {"trusted"}
     if role_whitelist:
         auths |= {"trusted"}
@@ -325,7 +325,13 @@ async def remind_me(command_list, message):
 async def wolfram(message):
     command = message.content.replace("`wa ", "")
     res = WA_client.query(command)
-    podlist = res["pod"]
+    try:
+        podlist = res["pod"]
+        print(ascii(res))
+    except:
+        print(ascii(res))
+        print("LOLFAIL")
+        return
 
     keydict = {}
     options = ""
@@ -388,9 +394,11 @@ async def on_message(message):
         if message.channel.id not in BLACKLISTED_CHANNELS and message.server.id == constants.OVERWATCH_SERVER_ID:
             await mongo_add_message_to_log(message)
         auths = await get_auths(message.author)
-        if "zenith" in auths:
+        if "zenith" in auths or message.author.id == "203455531162009600":
             if message.content.startswith("`wa"):
                 await wolfram(message)
+        if "zenith" in auths:
+
 
             if message.content.startswith("`wipemessages"):
                 await message_log_collection.delete_many({})
@@ -479,7 +487,7 @@ async def on_message(message):
                 redirected_output = sys.stdout = StringIO()
                 response_str = None
                 try:
-                    exec(input_command)
+                    eval = aeval(input_command)
                     response_str = "```py\nInput:\n" + input_command + "\nOutput:\n"
                     # response_str += traceback.format_exc()
 
@@ -487,6 +495,7 @@ async def on_message(message):
                     sys.stdout = old_stdout
                 if redirected_output.getvalue():
                     response_str += redirected_output.getvalue()
+                    response_str += eval
                 response_str += "\n```"
                 if response_str:
                     await client.send_message(message.channel, response_str)
@@ -641,10 +650,10 @@ async def on_message(message):
                 await client.send_message(client.get_channel(BOT_HAPPENINGS_ID), "Shut down by " + message.author.name)
                 await client.logout()
             # Kill bot
-            if "`kill" == message.content:
-                with open(PATHS["comms"] + "bootstate.txt", "w") as f:
-                    f.write("killed")
-                await client.logout()
+            # if "`kill" == message.content:
+            #     with open(PATHS["comms"] + "bootstate.txt", "w") as f:
+            #         f.write("killed")
+            #     await client.logout()
             # Get user logs
             if message.content.startswith("`userlogs"):
                 command = message.content.replace("`userlogs ", "")
@@ -697,7 +706,7 @@ async def on_message(message):
             if message.content == "`ping":
                 print("tester")
                 await ping(message)
-        if "lfg" in auths:
+        if "warn" in auths:
             if message.content.startswith("`lfg"):
                 found_message = None
                 warn_user = None
@@ -711,7 +720,7 @@ async def on_message(message):
                 await lfg_warner(found_message=found_message, warn_type="targeted", warn_user=warn_user,
                                  channel=message.channel)
                 await client.delete_message(message)
-        if "hots" in auths:
+        if "warn" in auths:
             if message.content.startswith("`hots"):
                 hots_message = "Please keep Heroes of the Storm party-ups to <#247769594155106304>"
                 author = await find_author(message=message, regex=constants.HOTS_REGEX, blacklist="mod")
@@ -1543,7 +1552,7 @@ async def mongo_add_message_to_log(mess):
     messInfo = await parse_message_info(mess)
     result = await message_log_collection.insert_one(messInfo)
     messText = await message_to_log(messInfo)
-    await client.send_message(STREAM, messText[21:])
+    # await client.send_message(STREAM, messText[21:])
 
 
 async def increment_lfgd_mongo(author):
