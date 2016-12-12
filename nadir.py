@@ -295,6 +295,8 @@ async def get_auths(member):
     if role_whitelist:
         auths |= {"trusted"}
         auths |= {"lfg"}
+    if any(x in "138132942542077952" for x in author_info["role_ids"]):
+        auths |= {"bot"}
     # unspaggheti
     warn_auths = await overwatch_db.auths.find_one({"type": "warn"})
     if warn_auths:
@@ -377,6 +379,7 @@ async def on_message(message):
         return
     if message.author.id == client.user.id:
         return
+
     if message.server is None:
         await client.send_message(await client.get_user_info(constants.ZENITH_ID),
                                   "[" + message.author.name + "]: " + message.content)
@@ -393,12 +396,14 @@ async def on_message(message):
         #     await command_info(*[message, command_list])
         if message.channel.id not in BLACKLISTED_CHANNELS and message.server.id == constants.OVERWATCH_SERVER_ID:
             await mongo_add_message_to_log(message)
+
         auths = await get_auths(message.author)
+        if "bot" in auths:
+            return
         if "zenith" in auths or message.author.id == "203455531162009600":
             if message.content.startswith("`wa"):
                 await wolfram(message)
         if "zenith" in auths:
-
 
             if message.content.startswith("`wipemessages"):
                 await message_log_collection.delete_many({})
