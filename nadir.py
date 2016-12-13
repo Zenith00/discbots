@@ -294,6 +294,7 @@ async def get_auths(member):
         auths |= {"trusted"}
     if role_whitelist:
         auths |= {"trusted"}
+        auths |= {"warn"}
         auths |= {"lfg"}
     if any(x in "138132942542077952" for x in author_info["role_ids"]):
         auths |= {"bot"}
@@ -334,13 +335,18 @@ async def wolfram(message):
         print(ascii(res))
         print("LOLFAIL")
         return
-
+    numpods = int(res["@numpods"])
     keydict = {}
     options = ""
-    for num in range(0, len(podlist) - 1):
+    print("numpods = " + str(numpods))
+    print(res["@numpods"])
+    for num in range(0, numpods - 1):
         pod = podlist[num]
         options += "[" + str(num) + "] " + pod["@title"] + "\n"
-
+        for sub_num in range(0,int(pod["@numsubpods"])):
+            subpod = pod["subpod"]
+            if subpod["@title"] != "":
+                options += "    [" + str(num) + "." + str(sub_num) + "] " + subpod["@title"] + "\n"
         keydict[num] = pod
     await client.send_message(message.channel, options)
     response = await get_response(message)
@@ -1405,7 +1411,18 @@ async def get_user_logs(member, count):
 
 async def message_to_log(message_dict):
     cursor = await overwatch_db.userinfo.find_one({"userid": message_dict["userid"]})
-    name = cursor["names"][-1]
+    try:
+        name = cursor["names"][-1]
+    except:
+        try:
+            add_to_user_list((client.get_server(message_dict["server_id"])).get_member(message_dict["userid"]))
+            cursor = await overwatch_db.userinfo.find_one({"userid": message_dict["userid"]})
+            name = cursor["names"][-1]
+        except:
+            print(traceback.format_exc())
+            return
+
+
     content = message_dict["content"].replace("```", "")
     try:
         channel_name = constants.CHANNELID_CHANNELNAME_DICT[str(message_dict["channel_id"])]
