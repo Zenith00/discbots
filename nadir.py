@@ -343,6 +343,7 @@ async def wolfram(message):
     for num in range(0, numpods - 1):
         pod = podlist[num]
         options += "[" + str(num) + "] " + pod["@title"] + "\n"
+        print("NUM = " + str(pod["@numsubpods"]))
         for sub_num in range(0,int(pod["@numsubpods"])):
             subpod = pod["subpod"]
             if subpod["@title"] != "":
@@ -1418,8 +1419,10 @@ async def message_to_log(message_dict):
             add_to_user_list((client.get_server(message_dict["server_id"])).get_member(message_dict["userid"]))
             cursor = await overwatch_db.userinfo.find_one({"userid": message_dict["userid"]})
             name = cursor["names"][-1]
+
         except:
-            print(traceback.format_exc())
+            name = cursor["userid"]
+
             return
 
 
@@ -1625,6 +1628,7 @@ async def add_to_user_list(member):
         }
         , upsert=True
     )
+    print(result.raw_result)
     pass
 
 
