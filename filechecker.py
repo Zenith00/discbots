@@ -1,12 +1,30 @@
 import os
 import time
 import sys, string, ast
+import xxhash
+import pymongo
+import imgurpython
+from pymongo import ReturnDocument
+from imgurpython import ImgurClient
+# import motor.motor_asyncio
+import utils_file
 
 path = "C:\\Users\\Austin\\Dropbox\\Zenith's Fanart\\"
 global before
 
 global PATHS
 PATHS = {}
+refreshToken = "5c52c0f6a47da6fb599e2835bf228c59c68dd902"
+accessToken = "4c80c2924ddeb63d3f1c99d19ae04e01e438b5fb"
+
+PATHS = {}
+
+imgur = ImgurClient("5e1b2fcfcf0f36e",
+                    "d919f14c31fa97819b1e9c82e2be40aef8bd9682", accessToken, refreshToken)
+mongo_client = pymongo.MongoClient()
+
+art_db = mongo_client.art
+mercy_collection = art_db.mercy_collection
 
 with open("paths.txt", "r") as f:
     global PATHS
@@ -22,6 +40,10 @@ def clean_string(string):
 count = 99
 
 
+def create():
+    mercy_collection.create_index([('hash', pymongo.ASCENDING)], unique=True)
+
+
 def fix_names():
     for folderTuple in os.walk(PATHS["art"]):
         for file in folderTuple[2]:
@@ -32,48 +54,32 @@ def fix_names():
     return
 
 
+def new():
+    fix_names()
+    for folderTuple in os.walk(PATHS["art"]):
+        for file in folderTuple[2]:
+            if "NSFW" not in folderTuple[0]:
+                # print("call")
+                filepath = os.path.join(folderTuple[0], file)
+                x = xxhash.xxh32()
+                with open(filepath, "rb") as image:
+                    data = image.read()
+                x.update(data)
+                digest = x.digest()
+
+                result = mercy_collection.update_one(
+                    {"hash": digest},
+                    {"$set": {"path": filepath}}, upsert=True
+                )
+                if not result.raw_result["updatedExisting"]:
+                    config = {
+                        'album': 'umuvY'
+                    }
+                    print("New file found. Uploading...")
+                    image = imgur.upload_from_path(filepath, config=config, anon=False)
+                    utils_file.append_line(PATHS["comms"] + "artlist.txt", image['link'])
+create()
+
 while True:
-    count = count + 1
-    print("FILECHECKER START")
-    # while True:
-    # before = dict ([(f, None) for f in os.listdir (path)])
-    # time.sleep(5)
-    # after = dict ([(f, None) for f in os.listdir (path)])
-    # added = [f for f in after if not f in before]
-    # added = list(set(added))
-    # print(added)
-
-    fix_names()
-    before = []
-    after = []
-    if count == 100:
-        f = open(PATHS["comms"] + "fileList.txt", "w")
-    for folderTuple in os.walk(PATHS["art"]):
-        for file in folderTuple[2]:
-            if "NSFW" not in folderTuple[0]:
-                before.append(os.path.join(folderTuple[0], file))
-                if count == 100:
-                    f.write(os.path.join(folderTuple[0], file) + "^")
-    if count == 100:
-        f.close()
-        count = 1
-
+    new()
     time.sleep(5)
-    fix_names()
-    for folderTuple in os.walk(PATHS["art"]):
-        for file in folderTuple[2]:
-            if "NSFW" not in folderTuple[0]:
-                after.append(os.path.join(folderTuple[0], file))
-
-    added = [f for f in after if f not in before]
-
-    print(added)
-    list = open(PATHS["comms"] + "fileList.txt", "a")
-    f = open(PATHS["comms"] + "toUpload.txt", "a")
-    for x in added:
-        print("FILE REGISTERED. ADDING")
-        f.write(str(x) + "\n")
-        list.write(str(x) + "^")
-    f.close()
-    list.close()
-    fix_names()
