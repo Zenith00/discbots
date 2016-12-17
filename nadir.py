@@ -51,11 +51,7 @@ id_channel_dict = {}
 
 STREAM = None
 gistClient = Simplegist()
-# with open("paths.txt", "r") as f:
-#     # global PATHS
-#     pathList = f.read()
-#     # noinspection PyRedeclaration
-#     PATHS = ast.literal_eval(pathList)
+
 
 BOT_HAPPENINGS_ID = "245415914600661003"
 
@@ -71,9 +67,29 @@ BLACKLISTED_CHANNELS = (
     constants.CHANNELNAME_CHANNELID_DICT["bot-log"], constants.CHANNELNAME_CHANNELID_DICT["server-log"],
     constants.CHANNELNAME_CHANNELID_DICT["voice-channel-output"])
 
+SERVERS = {}
+CHANNELNAME_CHANNEL_DICT = {}
 VCInvite = None
 VCMess = None
 INITIALIZED = False
+
+
+async def initialize():
+    global INITIALIZED
+    global STREAM
+
+    SERVERS["OW"] = client.get_server(constants.OVERWATCH_SERVER_ID)
+    for role in SERVERS["OW"].roles:
+        if role.id in ID_ROLENAME_DICT.keys():
+            ROLENAME_ROLE_DICT[ID_ROLENAME_DICT[role.id]] = role
+
+    for name in constants.CHANNELNAME_CHANNELID_DICT.keys():
+        CHANNELNAME_CHANNEL_DICT[name] = SERVERS["OW"].get_channel(constants.CHANNELNAME_CHANNELID_DICT[name])
+
+
+    STREAM = client.get_channel("255970182881738762")
+
+    INITIALIZED = True
 
 
 async def get_redirected_url(url):
@@ -129,22 +145,6 @@ async def get_response(message):
     return await client.wait_for_message(timeout=30, check=check)
 
 
-async def initialize():
-    global INITIALIZED
-    global STREAM
-
-    for role in client.get_server(constants.OVERWATCH_SERVER_ID).roles:
-        if role.id in ID_ROLENAME_DICT.keys():
-            ROLENAME_ROLE_DICT[ID_ROLENAME_DICT[role.id]] = role
-    channel_dict = {}
-    for channel in client.get_server(constants.OVERWATCH_SERVER_ID).channels:
-        if channel.type == discord.ChannelType.text:
-            channel_dict[await ascii_string(channel.name)] = channel.id
-    STREAM = client.get_channel("255970182881738762")
-
-    INITIALIZED = True
-
-
 @client.event
 async def on_member_remove(member):
     await add_to_user_set(member=member, set_name="server_leaves", entry=datetime.utcnow().isoformat(" "))
@@ -198,10 +198,10 @@ async def on_member_update(before, after):
     :type after: discord.Member
     :type before: discord.Member
     """
-    if before.nick is not after.nick:
-        # await add_to_nick_id_list(after)
-        if after.nick is not None:
-            await add_to_user_list(after)
+    try:
+        await add_to_user_list(after)
+    except:
+        pass
 
 
 async def ascii_string(toascii):
@@ -748,7 +748,7 @@ async def on_message(message):
         # if "art" in auths:
         #     if message.content == "`getart" and False:
         #         await client.delete_message(message)
-        #         art_channel = client.get_channel(constants.CHANNELNAME_CHANNELID_DICT["fanart"])
+        #         art_channel = CHANNELNAME_CHANNEL_DICT["fanart"])
         #         rand_art = []
         #         count = 8
         #         with open(PATHS["comms"] + "auto_art_list.txt", "r+") as art_list:
@@ -784,7 +784,7 @@ async def on_message(message):
                                     message.author.name + "]: " + message.content)
                 # await client.delete_message(message)
                 skycoder_mess = await client.send_message(
-                    client.get_channel(constants.CHANNELNAME_CHANNELID_DICT["spam-channel"]),
+                    CHANNELNAME_CHANNEL_DICT["spam-channel"],
                     "~an " + message.author.mention +
                     " AUTOMATED: Posted a message containing chaos vanguard: " + message.content)
             if message.channel.id not in BLACKLISTED_CHANNELS:
@@ -836,7 +836,7 @@ async def find_author(message, regex, blacklist):
 #         if mess.content == "`getart":
 #             if await credential(mess.author, "get_art"):
 #                 await client.delete_message(mess)
-#                 art_channel = client.get_channel(constants.CHANNELNAME_CHANNELID_DICT["fanart"])
+#                 art_channel = CHANNELNAME_CHANNEL_DICT["fanart"])
 #                 rand_art = []
 #                 count = 8
 #                 with open(PATHS["comms"] + "auto_art_list.txt", "r+") as art_list:
@@ -1126,11 +1126,11 @@ async def invite_checker(message, regex_match):
             await log_automated("deleted an external invite: " + str(
                 invite.url) + " from " + message.author.mention + " in " + message.channel.mention)
             skycoder_mess = await client.send_message(
-                client.get_channel(constants.CHANNELNAME_CHANNELID_DICT["spam-channel"]),
+                CHANNELNAME_CHANNEL_DICT["spam-channel"],
                 "~an " + message.author.mention +
                 " AUTOMATED: Posted a link to another server")
             await client.send_message(skycoder_mess.channel, "~rn " + message.author.mention)
-        elif message.channel.id == constants.CHANNELNAME_CHANNELID_DICT["general-discussion"]:
+        elif message.channel == CHANNELNAME_CHANNEL_DICT["general-discussion"]:
 
             channel_name = invite.channel.name
             party_vc_reg = re.compile(r"(^\[)\w+.\w+\]", re.IGNORECASE)
@@ -1197,7 +1197,7 @@ async def mention_to_id(command_list):
 async def log_automated(description: object) -> None:
     action = ("At " + str(datetime.utcnow().strftime("[%Y-%m-%d %H:%m:%S] ")) + ", I automatically " +
               str(description) + "\n" + "`kill to disable me")
-    await client.send_message(client.get_channel(constants.CHANNELNAME_CHANNELID_DICT["alerts"]), action)
+    await client.send_message(CHANNELNAME_CHANNEL_DICT["alerts"], action)
     # await client.send_message(client.get_channel(BOT_HAPPENINGS_ID), action)
 
 
@@ -1266,7 +1266,7 @@ async def fuzzy_match(*args):
         except KeyError:
             try:
                 await add_to_user_list(
-                    client.get_server(constants.OVERWATCH_SERVER_ID).get_member(userinfo_dict["userid"]))
+                    SERVERS["OW"].get_member(userinfo_dict["userid"]))
             except:
                 pass
     print("DONE")
@@ -1452,29 +1452,7 @@ async def get_logs_mentions_2(query_type, message):
             {"$or": [{"mentioned_users": author_info["id"]}, {"mentioned_roles": {"$in": author_info["role_ids"]}}]})
 
 
-async def tag_str(message):
-    string = message.content
-    interact = await client.send_message(message.channel, "Blacklisting string: \n `" + string + "`\n" +
-                                         "What action should I take? (kick, delete, mute <duration>")
-    action_response = (await client.wait_for_message(author=message.author, channel=message.channel)).content
-    if action_response in ["kick", "delete", "mute"]:
-        database_entry = {"trigger_str": string, "action": action_response}
-    else:
-        await client.edit_message(interact, "Syntax not recognized. Please restart")
-        return
-    result = await trigger_str_collection.insert_one(database_entry)
 
-
-async def process_tags(message):
-    tag_list = await trigger_str_collection.find(query={}, projection="trigger_str").to_list()
-    action = None
-    for tag in tag_list:
-        if tag in message.content:
-            tag_doc = trigger_str_collection.find_one({"trigger_str": tag})
-            action = tag_doc["action"]
-            break
-    if action:
-        pass
 
 
 async def get_logs_mentions(query_type, mess):
@@ -1632,7 +1610,7 @@ async def add_to_user_list(member):
         }
         , upsert=True
     )
-    print(result.raw_result)
+    # print(result.raw_result)
     pass
 
 
@@ -1666,6 +1644,59 @@ async def get_user_info(member_id):
             shortened_list.append(await shorten_link(link))
         mongo_cursor["avatar_urls"] = shortened_list
     return mongo_cursor
+
+
+async def tag_str(message):
+    string = message.content.replace("`tag ","")
+    if string == "reset":
+        await trigger_str_collection.remove({})
+        await trigger_str_collection.create_index([("trigger", pymongo.DESCENDING)], unique=True)
+        return
+
+    interact = await client.send_message(message.channel, "Tagging string: \n `" + string + "`\n" +
+                                         "What action should I take? (kick, delete, alert, ping, mute <duration>")
+    action_response = (await client.wait_for_message(author=message.author, channel=message.channel)).content
+    if action_response in ["kick", "delete", "mute"]:
+        database_entry = {"trigger": string, "action": action_response, "type": "punishment"}
+    else:
+        await client.edit_message(interact, "Syntax not recognized. Please restart")
+        return
+    result = await trigger_str_collection.insert_one(database_entry)
+    print(result)
+
+async def remove_tag():
+    pass
+
+async def show_tags():
+    pass
+
+async def message_check(message):
+    responses = message_check(message)
+    parse_responses(responses)
+
+async def parse_triggers(message) -> list:
+    response_list = []
+    content = message.content
+    async for doc in trigger_str_collection.find():
+        if doc["trigger"] in content:
+            response_list.append(doc)
+    return response_list
+
+async def mute_user(interface_channel, action):
+    """
+
+    :type action: list
+    """
+    await client.send_message(interface_channel, "!!mute " + SERVERS["OW"].get_member)
+
+
+async def parse_responses(response_list):
+    for response in response_list: # trigger action type
+        action = response["action"].split(" ")
+        if action[0] == "mute":
+            mute_user(CHANNELNAME_CHANNEL_DICT["spam-channel"], action)
+    pass
+
 
 
 # with open(PATHS["comms"] + "bootstate.txt", "r") as f:
