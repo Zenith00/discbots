@@ -416,17 +416,21 @@ async def on_message(message):
                 await message_log_collection.delete_many({})
                 await message_log_collection.create_index(("message_id", pymongo.DESCENDING), unique=True)
             if message.content.startswith("`superlog"):
-                channel = message.channel
+                server = message.server
                 await client.delete_message(message)
-                count = 0
-                async for retrieved_message in client.logs_from(channel, limit=1000000000000):
-                    if count % 100 == 0:
-                        print("Message got " + str(count))
+                for channel in server.channels:
                     try:
-                        await mongo_add_message_to_log(retrieved_message)
-                    except pymongo.errors.DuplicateKeyError:
-                        print("duplicate")
-                    count += 1
+                        count = 0
+                        async for retrieved_message in client.logs_from(channel, limit=1000000000000):
+                            if count % 100 == 0:
+                                print("Message got " + str(count))
+                            try:
+                                await mongo_add_message_to_log(retrieved_message)
+                            except pymongo.errors.DuplicateKeyError:
+                                print("duplicate")
+                            count += 1
+                    except:
+                        print(traceback.format_exc())
             # Clear Mongo Nick List
             if message.content.startswith("`clearnicks"):
                 await clear_nicknames()
