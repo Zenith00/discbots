@@ -27,6 +27,8 @@ import constants
 from utils_file import delete_lines
 from utils_parse import *
 import urllib.request
+from collections import Counter
+from collections import defaultdict
 
 ENABLED = True
 logging.basicConfig(level=logging.INFO)
@@ -51,7 +53,6 @@ id_channel_dict = {}
 
 STREAM = None
 gistClient = Simplegist()
-
 
 BOT_HAPPENINGS_ID = "245415914600661003"
 
@@ -85,7 +86,6 @@ async def initialize():
 
     for name in constants.CHANNELNAME_CHANNELID_DICT.keys():
         CHANNELNAME_CHANNEL_DICT[name] = SERVERS["OW"].get_channel(constants.CHANNELNAME_CHANNELID_DICT[name])
-
 
     STREAM = client.get_channel("255970182881738762")
 
@@ -212,9 +212,9 @@ async def ascii_string(toascii):
     return toascii.encode('ascii', 'ignore').decode("utf-8")
 
 
-async def get_role(mess, userid):
-    for x in mess.server.roles:
-        if x.id == userid:
+async def get_role(server, roleid):
+    for x in server.roles:
+        if x.id == roleid:
             return x
 
 
@@ -344,7 +344,7 @@ async def wolfram(message):
         pod = podlist[num]
         options += "[" + str(num) + "] " + pod["@title"] + "\n"
         print("NUM = " + str(pod["@numsubpods"]))
-        for sub_num in range(0,int(pod["@numsubpods"])):
+        for sub_num in range(0, int(pod["@numsubpods"])):
             subpod = pod["subpod"]
             if subpod["@title"] != "":
                 options += "    [" + str(num) + "." + str(sub_num) + "] " + subpod["@title"] + "\n"
@@ -364,7 +364,6 @@ async def wolfram(message):
                 subpods.append(x)
 
         for subpod in subpods:
-
             img = (subpod["img"])["@src"]
             img = await shorten_link(img)
             text += img + "\n"
@@ -374,6 +373,21 @@ async def wolfram(message):
         print(traceback.format_exc())
 
     pass
+
+
+async def get_role_members(role) -> list:
+    members = []
+    async for member in role.server:
+        if role in member.roles:
+            members.append(member)
+    return members
+
+async def get_moderators(server):
+    users = []
+    for role in server.roles:
+        members = await get_role_members(role)
+        users.extend(members)
+    return users
 
 
 @client.event
@@ -401,6 +415,8 @@ async def on_message(message):
         #     command = message.content.replace("`help ", "")
         #     command_list = command.split(" ")
         #     await command_info(*[message, command_list])
+        if message.channel == CHANNELNAME_CHANNEL_DICT["spam-channel"]:
+            await message_check(message)
         if message.channel.id not in BLACKLISTED_CHANNELS and message.server.id == constants.OVERWATCH_SERVER_ID:
             await mongo_add_message_to_log(message)
 
@@ -411,7 +427,54 @@ async def on_message(message):
             if message.content.startswith("`wa"):
                 await wolfram(message)
         if "zenith" in auths:
+            if message.content.startswith("`scrim"):
+                await scrim_manage(message)
+            if message.content.startswith("`mostactive"):
+                messagelist = []
+                activity = defaultdict(int)
 
+                async for mess in message_log_collection.find():
+                    content = mess["content"]
+                    length = len(content)
+                    activity[mess["userid"]] += length
+                    print("message found")
+                activty = dict(activity)
+
+                newactivity = {}
+                hist = ""
+                for x in activity.keys():
+                    name = x
+                    try:
+                        name = (await userinfo_collection.find_one({"userid": x}))["names"][-1]
+                    except:
+                        continue
+                        print("fail")
+                        try:
+                            user = await client.get_user_info(str(x))
+                            name = user.name
+                        except:
+                            print("superfail")
+                    newactivity[name] = activity[x]
+                    print(ascii(name))
+                sort = sorted(newactivity.items(), key=lambda x: x[1])
+                hist = "\n".join("%s,%s" % tup for tup in sort)
+
+                gist = gistClient.create(name="Userhist",
+                                         description=str(datetime.utcnow().strftime("[%Y-%m-%d %H:%m:%S] ")),
+                                         public=False,
+                                         content=hist)
+                await client.send_message(message.channel, gist["Gist-Link"])
+            if message.content.startswith("`stats"):
+                command = message.content.replace("`stats ", "")
+                if command == "trusted":
+                    pass
+            if message.content.startswith("`linesplit"):
+                command = message.content.replace("`linesplit ", "")
+                command = command.split("\n")
+                channel = message.channel
+                await client.delete_message(message)
+                for x in command:
+                    await client.send_message(channel, x)
             if message.content.startswith("`wipemessages"):
                 await message_log_collection.delete_many({})
                 await message_log_collection.create_index(("message_id", pymongo.DESCENDING), unique=True)
@@ -580,6 +643,7 @@ async def on_message(message):
 
                 command = message.content.replace("`purge ", "")
                 command_list = command.split(" ")
+                command_list = await mention_to_id(command_list)
                 number_to_remove = int(command_list[1])
                 await client.delete_message(message)
                 async for message in client.logs_from(message.channel):
@@ -589,7 +653,7 @@ async def on_message(message):
                         await client.delete_message(message)
                         number_to_remove -= 1
                     else:
-                        return
+                        continue
         # if (message.author.id == "180041371544059905" or message.author.id == constants.ZENITH_ID) and message.content == "`start9":
         #     stop = time.time() + 10
         #     while time.time() < stop:
@@ -612,6 +676,7 @@ async def on_message(message):
             #             await client.edit_channel_permissions(channel, ROLENAME_ROLE_DICT["MUTED_ROLE"],
             #                                                   overwrite=black_voice_perms)
             #             print("running")
+
             if message.content.startswith("`fixmsg"):
                 await overwatch_db.message_log2.create_index([("message_id", pymongo.DESCENDING)], unique=True)
                 cursor = overwatch_db.message_log.find()
@@ -627,6 +692,9 @@ async def on_message(message):
                 await overwatch_db.message_log2.rename("message_log", dropTarget="message_log")
                 await mongo_client.fsync()
                 print("done")
+
+            if message.content.startswith("`getroles"):
+                await get_roles(message)
 
             if message.content.startswith("`moveafk"):
                 command = message.content.replace("`moveafk ", "")
@@ -652,7 +720,7 @@ async def on_message(message):
                 command = command.split("|", 2)
                 await fuzzy_match(message, *command)
                 await client.send_message(client.get_channel(BOT_HAPPENINGS_ID),
-                                          "Fuzzysearch called by " + message.author.name + " on " + message.author.name)
+                                          "Fuzzysearch called by " + message.author.name + " on " + command)
 
             # Get previous nicknames
             if message.content.startswith("`getnicks"):
@@ -703,8 +771,7 @@ async def on_message(message):
                     # split = split.replace(" ", "+")
                     # google_chart = "http://chart.apis.google.com/chart?chst=d_text_outline&chld=000000|12|h|FFFFFF|_|" + split
                     # await client.send_message(message.channel,google_chart)
-                    text = re.sub(r'\s+$', '', text, 0, re.M)
-                    await client.send_message(message.channel, "```\nFound:\n" + text.strip() + "```")
+                    await client.send_message(message.channel, "```\nFound:\n" + text + "```")
                     # for x in split:
                     # await client.send_message(message.channel,"`" + x + "`")
                     # await asyncio.sleep(20)
@@ -1296,13 +1363,34 @@ async def fuzzy_match(*args):
     message_to_send += await pretty_column(pretty_list, True)
     await client.send_message(mess.channel, message_to_send)
 
+async def generate_widths(list_of_rows):
+    widths = [max(map(len, col)) for col in zip(*list_of_rows)]
+    return widths
+
+async def multi_column(list_of_list_of_rows, left_just):
+    widths = await generate_widths(list_of_list_of_rows[0])
+    output = []
+    for list_of_rows in list_of_list_of_rows:
+        output.append(await format_list_to_widths(list_of_rows, widths, left_just))
+    return output
+
+
 
 async def pretty_column(list_of_rows, left_just):
     """
     :type list_of_rows: list
     :type left_just: bool
     """
-    widths = [max(map(len, col)) for col in zip(*list_of_rows)]
+    widths = await generate_widths(list_of_rows)
+    output = await format_list_to_widths(list_of_rows, widths, left_just)
+    # print(output)
+
+    text = re.sub(r'\s+$', '', output, 0, re.M)
+    text = text.strip()
+    return text
+
+
+async def format_list_to_widths(list_of_rows, widths, left_just):
     output = ""
     if left_just:
         for row in list_of_rows:
@@ -1310,9 +1398,7 @@ async def pretty_column(list_of_rows, left_just):
     else:
         for row in list_of_rows:
             output += ("  ".join((val.rjust(width) for val, width in zip(row, widths)))) + "\n"
-    # print(output)
     return output
-
 
 async def get_from_find(message):
     reg = re.compile(r"(?!ID: ')(\d+)(?=')", re.IGNORECASE)
@@ -1429,7 +1515,6 @@ async def message_to_log(message_dict):
 
             return
 
-
     content = message_dict["content"].replace("```", "")
     try:
         channel_name = constants.CHANNELID_CHANNELNAME_DICT[str(message_dict["channel_id"])]
@@ -1450,9 +1535,6 @@ async def get_logs_mentions_2(query_type, message):
     else:  # query_type == "3":
         cursor = overwatch_db.message_log.find(
             {"$or": [{"mentioned_users": author_info["id"]}, {"mentioned_roles": {"$in": author_info["role_ids"]}}]})
-
-
-
 
 
 async def get_logs_mentions(query_type, mess):
@@ -1627,6 +1709,119 @@ async def shorten_link(link) -> str:
     return Shortener('Tinyurl').short(link)
 
 
+scrim = None
+
+
+async def scrim_end():
+    global scrim
+    await scrim.end()
+
+async def get_roles(message):
+    message_list = []
+    role_list = []
+    role_list.append(["Name", "ID", "Position", "Color", "Hoisted", "Mentionable"])
+    widths = None
+    for role in message.server.role_hierarchy:
+        old_list = role_list
+        new_entry = [role.name, str(role.id), str(role.position), str(role.colour.to_tuple()), str(role.hoist), str(role.mentionable)]
+        role_list.append(new_entry)
+        print(len(str(await pretty_column(role_list, True))))
+        if len(str(await pretty_column(role_list, True))) >= 1000:
+            message_list.append(old_list)
+            role_list = [new_entry]
+    message_list.append(role_list)
+    # print(message_list)
+    multi = await multi_column(message_list, True)
+    # print(multi)
+    for mess in multi:
+        await pretty_send(message.channel, mess)
+
+
+
+
+
+
+async def pretty_send(destination, text):
+    await client.send_message(destination, "```\n" + text.strip() + "\n```")
+
+
+async def scrim_reset():
+    global scrim
+
+    for pair in scrim.team1.vc.overwrites:
+        await client.delete_channel_permissions(scrim.team1.vc, pair[0])
+    for pair in scrim.team2.vc.overwrites:
+        await client.delete_channel_permissions(scrim.team2.vc, pair[0])
+
+
+async def scrim_manage(message):
+    command = message.content.replace("`scrim ", "")
+    if command == "start":
+        await scrim_start(message)
+    if command == "reset":
+        await scrim_reset()
+    if command == "end":
+        await scrim_end()
+    if command.startswith("move") and message.author.id in scrim.masters:
+        command = command.replace("move ","")
+        command = command.split(" ")
+        target_member = message.mentions[0]
+        await scrim.deauth(target_member)
+        await scrim.auth(target_member, command[1])
+
+    pass
+
+
+
+
+async def scrim_start(message):
+    global scrim
+    server = message.server
+    mod_role = ROLENAME_ROLE_DICT["MODERATOR_ROLE"]
+    mod_role = await get_role(client.get_server("236343416177295360"), "240314209085292544")
+
+    vc_overwrite_everyone = discord.PermissionOverwrite(connect=False)
+    vc_overwrite_mod = discord.PermissionOverwrite(connect=True)
+    admin_perms = discord.PermissionOverwrite(connect=True)
+
+    text_overwrite_everyone = discord.PermissionOverwrite(read_messages=False)
+    text_overwrite_mod = discord.PermissionOverwrite(read_messages=True)
+    admin_perms_text = discord.PermissionOverwrite(read_messages=True)
+
+
+    vc_permission_everyone = discord.ChannelPermissions(target=server.default_role, overwrite=vc_overwrite_everyone)
+    vc_permission_mod = discord.ChannelPermissions(target=mod_role, overwrite=vc_overwrite_mod)
+    # admin = discord.ChannelPermissions(target=ROLENAME_ROLE_DICT["ADMINISTRATOR_ROLE"], overwrite=admin_perms)
+
+    text_permission_everyone = discord.ChannelPermissions(target=server.default_role, overwrite=text_overwrite_everyone)
+    text_permission_everyone = discord.ChannelPermissions(target=mod_role, overwrite=text_overwrite_mod)
+
+
+
+    # admin_text = discord.ChannelPermissions(target=ROLENAME_ROLE_DICT["ADMINISTRATOR_ROLE"], overwrite=admin_perms_text)
+
+    scrim1_vc = await client.create_channel(server, "[Scrim] Team 1", vc_permission_everyone, vc_permission_mod,
+                                            type=discord.ChannelType.voice)
+    scrim2_vc = await client.create_channel(server, "[Scrim] Team 2", vc_permission_everyone, vc_permission_mod,
+                                            type=discord.ChannelType.voice)
+    scrim1 = scrim_team("Team 1", scrim1_vc)
+    scrim2 = scrim_team("Team 2", scrim2_vc)
+
+    scrim_spectate = await client.create_channel(server, "[Scrim] Spectate", type=discord.ChannelType.voice)
+
+    scrim_text = await client.create_channel(server, "Scrim", text_permission_everyone, text_permission_everyone, type=discord.ChannelType.text)
+
+    scrim = scrim_master(scr1=scrim1, scr2=scrim2, txt=scrim_text, spec=scrim_spectate)
+
+
+
+    await client.move_channel(scrim.spectate, 1)
+    await client.move_channel(scrim.team1.vc, 2)
+    await client.move_channel(scrim.team2.vc, 3)
+
+    pass
+
+
 async def get_user_info(member_id):
     """
 
@@ -1647,7 +1842,7 @@ async def get_user_info(member_id):
 
 
 async def tag_str(message):
-    string = message.content.replace("`tag ","")
+    string = message.content.replace("`tag ", "")
     if string == "reset":
         await trigger_str_collection.remove({})
         await trigger_str_collection.create_index([("trigger", pymongo.DESCENDING)], unique=True)
@@ -1656,7 +1851,7 @@ async def tag_str(message):
     interact = await client.send_message(message.channel, "Tagging string: \n `" + string + "`\n" +
                                          "What action should I take? (kick, delete, alert, ping, mute <duration>")
     action_response = (await client.wait_for_message(author=message.author, channel=message.channel)).content
-    if action_response in ["kick", "delete", "mute"]:
+    if any(["kick", "delete", "mute"]) in action_response:
         database_entry = {"trigger": string, "action": action_response, "type": "punishment"}
     else:
         await client.edit_message(interact, "Syntax not recognized. Please restart")
@@ -1664,15 +1859,19 @@ async def tag_str(message):
     result = await trigger_str_collection.insert_one(database_entry)
     print(result)
 
+
 async def remove_tag():
     pass
+
 
 async def show_tags():
     pass
 
+
 async def message_check(message):
-    responses = message_check(message)
-    parse_responses(responses)
+    responses = await parse_triggers(message)
+    await parse_responses(responses)
+
 
 async def parse_triggers(message) -> list:
     response_list = []
@@ -1682,21 +1881,26 @@ async def parse_triggers(message) -> list:
             response_list.append(doc)
     return response_list
 
+
 async def mute_user(interface_channel, action):
     """
 
     :type action: list
     """
-    await client.send_message(interface_channel, "!!mute " + SERVERS["OW"].get_member)
+    await client.send_message(interface_channel, "!!mute " + SERVERS["OW"].get_member.mention + " + " + action[1])
 
+async def move_member_to_vc(member, target_id):
+    pass
+
+async def id_to_mention(id):
+    return "<@!" + id + ">"
 
 async def parse_responses(response_list):
-    for response in response_list: # trigger action type
+    for response in response_list:  # trigger action type
         action = response["action"].split(" ")
         if action[0] == "mute":
             mute_user(CHANNELNAME_CHANNEL_DICT["spam-channel"], action)
     pass
-
 
 
 # with open(PATHS["comms"] + "bootstate.txt", "r") as f:
@@ -1704,5 +1908,73 @@ async def parse_responses(response_list):
 #     if line == "killed":
 #         ENABLED = False
 # client.loop.create_task(stream())
+
+
+class scrim_team:
+    def __init__(self, id, channel):
+        self.members = []
+        self.name = id
+        self.vc = channel
+
+
+class scrim_master:
+    def __init__(self, scr1, scr2, txt, spec):
+        self.team1 = scr1
+        self.team2 = scr2
+        self.members = {}
+        self.text = txt
+        self.spectate = spec
+        self.masters = []
+
+    async def end(self):
+        await client.delete_channel(self.team1.vc)
+        await client.delete_channel(self.team2.vc)
+        await client.delete_channel(self.text)
+        await client.delete_channel(self.spectate)
+
+    async def assign(self, member, team):
+
+        if member.id in self.members.keys():
+            if self.members[member.id] == team:
+                return member.mention + " is already in team " + team
+
+
+    async def auth(self, member, team):
+        if team == "1":
+            target_team = self.team1
+        else:
+            target_team = self.team2
+
+        self.members[member.id] = team
+        target_team.members.append(member.id)
+        print(target_team.members)
+        print(target_team.name)
+        user_overwrite_vc = discord.PermissionOverwrite(connect=True)
+        await client.edit_channel_permissions(target_team.vc, member, user_overwrite_vc)
+        return member.mention + " added to team " + target_team.name
+
+    async def deauth(self, member):
+        try:
+            target = self.members[member.id]
+        except KeyError:
+            return "User is not in a team"
+        if target == "1":
+            target_team = self.team1
+        elif target == "2":
+            target_team = self.team2
+        else:
+            return
+        try:
+            target_team.members.remove(member.id)
+        except:
+            print(traceback.format_exc())
+            print(target_team.members)
+        del self.members[member.id]
+
+        await client.delete_channel_permissions(target_team.vc, member)
+        return member.mention + " removed from team " + target_team.name
+
+
+
 
 client.run("MjM2MzQxMTkzODQyMDk4MTc3.CvBk5w.gr9Uv5OnhXLL3I14jFmn0IcesUE", bot=True)
