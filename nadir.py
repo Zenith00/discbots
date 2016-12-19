@@ -377,7 +377,7 @@ async def wolfram(message):
 
 async def get_role_members(role) -> list:
     members = []
-    async for member in role.server:
+    for member in role.server.members:
         if role in member.roles:
             members.append(member)
     return members
@@ -385,8 +385,9 @@ async def get_role_members(role) -> list:
 async def get_moderators(server):
     users = []
     for role in server.roles:
-        members = await get_role_members(role)
-        users.extend(members)
+        if role.permissions.manage_roles:
+            members = await get_role_members(role)
+            users.extend(members)
     return users
 
 
@@ -1758,10 +1759,12 @@ async def scrim_manage(message):
     command = message.content.replace("`scrim ", "")
     if command == "start":
         await scrim_start(message)
+
     if command == "reset":
         await scrim_reset()
     if command == "end":
         await scrim_end()
+
     if command.startswith("move") and message.author.id in scrim.masters:
         command = command.replace("move ","")
         command = command.split(" ")
@@ -1812,8 +1815,9 @@ async def scrim_start(message):
     scrim_text = await client.create_channel(server, "Scrim", text_permission_everyone, text_permission_everyone, type=discord.ChannelType.text)
 
     scrim = scrim_master(scr1=scrim1, scr2=scrim2, txt=scrim_text, spec=scrim_spectate)
-
-
+    mod_list = await get_moderators(message.server)
+    scrim.masters.extend(mod.id for mod in mod_list)
+    print(scrim.masters)
 
     await client.move_channel(scrim.spectate, 1)
     await client.move_channel(scrim.team1.vc, 2)
