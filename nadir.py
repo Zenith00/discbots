@@ -1754,14 +1754,11 @@ async def scrim_reset():
         await client.delete_channel_permissions(scrim.team2.vc, pair[0])
 
 
-
-
 async def scrim_manage(message):
     auths = await get_auths(message.author)
 
     command = message.content.replace("`scrim ", "")
     command_list = command.split(" ")
-
 
     if "mod" in auths:
         if not scrim and command_list[0] == "start":
@@ -1783,11 +1780,29 @@ async def scrim_manage(message):
                                                              {"$bit": {"manager": {"xor": 1}}})
     if scrim:
         managers = await scrim.get_managers()
+        if command_list[0] == "list":
+            cursor = overwatch_db.scrim.find({"active":True})
+            userlist = [["Name", "ID", "Manager", "SR"]]
+            async for user in cursor:
+                user_entry = []
+                user_entry.append(message.server.get_member(user["userid"]).name)
+                user_entry.append(user["userid"])
+                if user["manager"] == 1:
+                    user_entry.append("True")
+                else:
+                    user_entry.append("False")
+                user_entry.append("0")
+                userlist.append(user_entry)
+            text = await pretty_column(userlist, True)
+            await pretty_send(message.channel, text)
+
         if command_list[0] == "join":
-            await overwatch_db.scrim.update_one({"userid": message.author.id}, {"$set": {"team": "0", "active": True}})
+            await scrim.add_user(message.author.id)
+
         if command_list[0] == "add":
             command_list = await mention_to_id(command_list)
-            await overwatch_db.scrim.update_one({"userid": command_list[1]}, {"$set": {"team": "0", "active": True}})
+            await scrim.add_user(command_list[1])
+
         if message.author.id in managers:
             if command_list[0] == "init":
                 await overwatch_db.scrim.create_index([("userid", pymongo.DESCENDING)], unique=True)
@@ -1796,8 +1811,6 @@ async def scrim_manage(message):
             if command_list[0] == "end":
                 await overwatch_db.scrim.update_many({}, {"$set": {"active": False}})
                 await scrim_end()
-
-
 
             if command_list[0] == "kick":
                 command_list = await mention_to_id(command_list)
@@ -1838,8 +1851,8 @@ async def scrim_start(message):
                                             type=discord.ChannelType.voice)
     scrim2_vc = await client.create_channel(server, "[Scrim] Team 2", vc_permission_everyone, vc_permission_mod,
                                             type=discord.ChannelType.voice)
-    scrim1 = scrim_team("Team 1", scrim1_vc)
-    scrim2 = scrim_team("Team 2", scrim2_vc)
+    scrim1 = scrim_team("1", scrim1_vc)
+    scrim2 = scrim_team("2", scrim2_vc)
 
     scrim_spectate = await client.create_channel(server, "[Scrim] Spectate", type=discord.ChannelType.voice)
 
@@ -1849,7 +1862,7 @@ async def scrim_start(message):
     scrim = scrim_master(scr1=scrim1, scr2=scrim2, txt=scrim_text, spec=scrim_spectate)
     mod_list = await get_moderators(message.server)
     for mod in mod_list:
-        await overwatch_db.scrim.update_one({"userid": mod.id}, {"$set" : {"manager": 1}}, upsert=True)
+        await overwatch_db.scrim.update_one({"userid": mod.id}, {"$set": {"manager": 1}}, upsert=True)
 
     print(await scrim.get_managers())
 
@@ -1969,7 +1982,7 @@ class scrim_master:
 
     async def get_managers(self):
         managers = []
-        manager_cursor = overwatch_db.scrim.find({"manager":1})
+        manager_cursor = overwatch_db.scrim.find({"manager": 1})
         async for manager in manager_cursor:
             managers.append(manager["userid"])
 
@@ -1992,7 +2005,7 @@ class scrim_master:
             target_team = self.team2
 
         # self.members[member.id] = team
-        await overwatch_db.scrim.update_one({"userid": member.id}, {"$set":{"team": target_team.name}})
+        await overwatch_db.scrim.update_one({"userid": member.id}, {"$set": {"team": target_team.name}})
 
         target_team.members.append(member.id)
         # print(target_team.members)
@@ -2022,9 +2035,13 @@ class scrim_master:
         #     print(target_team.members)
         # del self.members[member.id]
 
-        await overwatch_db.scrim.update_one({"userid": member.id}, {"$set":{"team": "0"}})
+        await overwatch_db.scrim.update_one({"userid": member.id}, {"$set": {"team": "0"}})
         await client.delete_channel_permissions(target_team.vc, member)
         return member.mention + " removed from team " + target_team.name
+
+    async def add_user(self, id):
+         await overwatch_db.scrim.update_one({"userid": id},
+                                                {"$set": {"team": "0", "active": True, "manager": 0}}, upsert=True)
 
 
 client.run("MjM2MzQxMTkzODQyMDk4MTc3.CvBk5w.gr9Uv5OnhXLL3I14jFmn0IcesUE", bot=True)
