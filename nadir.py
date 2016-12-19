@@ -382,6 +382,7 @@ async def get_role_members(role) -> list:
             members.append(member)
     return members
 
+
 async def get_moderators(server):
     users = []
     for role in server.roles:
@@ -1364,9 +1365,11 @@ async def fuzzy_match(*args):
     message_to_send += await pretty_column(pretty_list, True)
     await client.send_message(mess.channel, message_to_send)
 
+
 async def generate_widths(list_of_rows):
     widths = [max(map(len, col)) for col in zip(*list_of_rows)]
     return widths
+
 
 async def multi_column(list_of_list_of_rows, left_just):
     widths = await generate_widths(list_of_list_of_rows[0])
@@ -1374,7 +1377,6 @@ async def multi_column(list_of_list_of_rows, left_just):
     for list_of_rows in list_of_list_of_rows:
         output.append(await format_list_to_widths(list_of_rows, widths, left_just))
     return output
-
 
 
 async def pretty_column(list_of_rows, left_just):
@@ -1400,6 +1402,7 @@ async def format_list_to_widths(list_of_rows, widths, left_just):
         for row in list_of_rows:
             output += ("  ".join((val.rjust(width) for val, width in zip(row, widths)))) + "\n"
     return output
+
 
 async def get_from_find(message):
     reg = re.compile(r"(?!ID: ')(\d+)(?=')", re.IGNORECASE)
@@ -1717,6 +1720,7 @@ async def scrim_end():
     global scrim
     await scrim.end()
 
+
 async def get_roles(message):
     message_list = []
     role_list = []
@@ -1724,7 +1728,8 @@ async def get_roles(message):
     widths = None
     for role in message.server.role_hierarchy:
         old_list = role_list
-        new_entry = [role.name, str(role.id), str(role.position), str(role.colour.to_tuple()), str(role.hoist), str(role.mentionable)]
+        new_entry = [role.name, str(role.id), str(role.position), str(role.colour.to_tuple()), str(role.hoist),
+                     str(role.mentionable)]
         role_list.append(new_entry)
         print(len(str(await pretty_column(role_list, True))))
         if len(str(await pretty_column(role_list, True))) >= 1000:
@@ -1736,10 +1741,6 @@ async def get_roles(message):
     # print(multi)
     for mess in multi:
         await pretty_send(message.channel, mess)
-
-
-
-
 
 
 async def pretty_send(destination, text):
@@ -1756,25 +1757,33 @@ async def scrim_reset():
 
 
 async def scrim_manage(message):
+    if message.author.id not in scrim.masters:
+        return
     command = message.content.replace("`scrim ", "")
-    if command == "start":
+    command_list = command.split(" ")
+    if command_list[0] == "start":
         await scrim_start(message)
 
-    if command == "reset":
+    if command_list[0] == "reset":
         await scrim_reset()
-    if command == "end":
+    if command_list[0] == "end":
         await scrim_end()
 
-    if command.startswith("move") and message.author.id in scrim.masters:
-        command = command.replace("move ","")
-        command = command.split(" ")
+    if command_list[0] == "master":
+        command_list = await mention_to_id(command_list)
+        if command_list[1] == "list":
+            await client.send_message(message.channel, scrim.masters)
+        elif command_list[1] in scrim.masters:
+            scrim.masters.remove(command_list[1])
+        else:
+            scrim.masters.append(command_list[1])
+
+    if command_list[0] == "move":
         target_member = message.mentions[0]
         await scrim.deauth(target_member)
-        await scrim.auth(target_member, command[1])
+        await scrim.auth(target_member, command_list[2])
 
     pass
-
-
 
 
 async def scrim_start(message):
@@ -1791,15 +1800,12 @@ async def scrim_start(message):
     text_overwrite_mod = discord.PermissionOverwrite(read_messages=True)
     admin_perms_text = discord.PermissionOverwrite(read_messages=True)
 
-
     vc_permission_everyone = discord.ChannelPermissions(target=server.default_role, overwrite=vc_overwrite_everyone)
     vc_permission_mod = discord.ChannelPermissions(target=mod_role, overwrite=vc_overwrite_mod)
     # admin = discord.ChannelPermissions(target=ROLENAME_ROLE_DICT["ADMINISTRATOR_ROLE"], overwrite=admin_perms)
 
     text_permission_everyone = discord.ChannelPermissions(target=server.default_role, overwrite=text_overwrite_everyone)
     text_permission_everyone = discord.ChannelPermissions(target=mod_role, overwrite=text_overwrite_mod)
-
-
 
     # admin_text = discord.ChannelPermissions(target=ROLENAME_ROLE_DICT["ADMINISTRATOR_ROLE"], overwrite=admin_perms_text)
 
@@ -1812,7 +1818,8 @@ async def scrim_start(message):
 
     scrim_spectate = await client.create_channel(server, "[Scrim] Spectate", type=discord.ChannelType.voice)
 
-    scrim_text = await client.create_channel(server, "Scrim", text_permission_everyone, text_permission_everyone, type=discord.ChannelType.text)
+    scrim_text = await client.create_channel(server, "Scrim", text_permission_everyone, text_permission_everyone,
+                                             type=discord.ChannelType.text)
 
     scrim = scrim_master(scr1=scrim1, scr2=scrim2, txt=scrim_text, spec=scrim_spectate)
     mod_list = await get_moderators(message.server)
@@ -1893,11 +1900,14 @@ async def mute_user(interface_channel, action):
     """
     await client.send_message(interface_channel, "!!mute " + SERVERS["OW"].get_member.mention + " + " + action[1])
 
+
 async def move_member_to_vc(member, target_id):
     pass
 
+
 async def id_to_mention(id):
     return "<@!" + id + ">"
+
 
 async def parse_responses(response_list):
     for response in response_list:  # trigger action type
@@ -1942,7 +1952,6 @@ class scrim_master:
             if self.members[member.id] == team:
                 return member.mention + " is already in team " + team
 
-
     async def auth(self, member, team):
         if team == "1":
             target_team = self.team1
@@ -1977,8 +1986,6 @@ class scrim_master:
 
         await client.delete_channel_permissions(target_team.vc, member)
         return member.mention + " removed from team " + target_team.name
-
-
 
 
 client.run("MjM2MzQxMTkzODQyMDk4MTc3.CvBk5w.gr9Uv5OnhXLL3I14jFmn0IcesUE", bot=True)
