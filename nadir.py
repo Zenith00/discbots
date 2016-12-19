@@ -1762,46 +1762,51 @@ async def scrim_manage(message):
     command = message.content.replace("`scrim ", "")
     command_list = command.split(" ")
 
-    if not scrim:
-        if command_list[0] == "start":
-            await scrim_start(message)
-    else:
-        masters = await scrim.get_masters()
-        if command_list[0] == "join":
-            await overwatch_db.scrim.update_one({"userid": message.author.id}, {"$set": {"team": "0", "active": True}})
-    if scrim and message.author.id in masters:
-        if command_list[0] == "init":
-            await overwatch_db.scrim.create_index([("userid", pymongo.DESCENDING)], unique=True)
-        if command_list[0] == "reset":
-            await scrim_reset()
-        if command_list[0] == "end":
-            await overwatch_db.scrim.update_many({}, {"$set": {"active": False}})
-            await scrim_end()
 
+    if "mod" in auths:
+        if not scrim and command_list[0] == "start":
+            await scrim_start(message)
         if command_list[0] == "manager":
             command_list = await mention_to_id(command_list)
             if command_list[1] == "list":
-                managers = scrim.get_managers()
-                manager_list = []
+                managers = await scrim.get_managers()
+                manager_list = [["Name", "ID"]]
                 for manager_id in managers:
-                    userdict = await get_user_info(manager_id)
-                    manager_list.append([userdict["names"][-1], userdict["userid"]])
-                text = await pretty_column(managers, True)
+                    member = message.server.get_member(manager_id)
+                    manager_list.append([member.name, member.id])
+                text = await pretty_column(manager_list, True)
                 await pretty_send(message.channel, text)
 
 
             else:
-                await overwatch_db.scrim.find_one_and_update({"userid": command_list[2]},
+                await overwatch_db.scrim.find_one_and_update({"userid": command_list[1]},
                                                              {"$bit": {"manager": {"xor": 1}}})
-
-        if command_list[0] == "kick":
+    if scrim:
+        managers = await scrim.get_managers()
+        if command_list[0] == "join":
+            await overwatch_db.scrim.update_one({"userid": message.author.id}, {"$set": {"team": "0", "active": True}})
+        if command_list[0] == "add":
             command_list = await mention_to_id(command_list)
-            target = message.server.get_member(command_list[1])
-        if command_list[0] == "move":
-            target_member = message.mentions[0]
-            await scrim.assign(target_member, command_list[2])
-            # await scrim.deauth(target_member)
-            # await scrim.auth(target_member, command_list[2])
+            await overwatch_db.scrim.update_one({"userid": command_list[1]}, {"$set": {"team": "0", "active": True}})
+        if message.author.id in managers:
+            if command_list[0] == "init":
+                await overwatch_db.scrim.create_index([("userid", pymongo.DESCENDING)], unique=True)
+            if command_list[0] == "reset":
+                await scrim_reset()
+            if command_list[0] == "end":
+                await overwatch_db.scrim.update_many({}, {"$set": {"active": False}})
+                await scrim_end()
+
+
+
+            if command_list[0] == "kick":
+                command_list = await mention_to_id(command_list)
+                target = message.server.get_member(command_list[1])
+            if command_list[0] == "move":
+                target_member = message.mentions[0]
+                await scrim.assign(target_member, command_list[2])
+                # await scrim.deauth(target_member)
+                # await scrim.auth(target_member, command_list[2])
 
     pass
 
@@ -1844,9 +1849,9 @@ async def scrim_start(message):
     scrim = scrim_master(scr1=scrim1, scr2=scrim2, txt=scrim_text, spec=scrim_spectate)
     mod_list = await get_moderators(message.server)
     for mod in mod_list:
-        await overwatch_db.scrim.update_one({"userid": mod.id}, {"manager": 1})
-    scrim.masters.extend(mod.id for mod in mod_list)
-    print(scrim.masters)
+        await overwatch_db.scrim.update_one({"userid": mod.id}, {"$set" : {"manager": 1}}, upsert=True)
+
+    print(await scrim.get_managers())
 
     await client.move_channel(scrim.spectate, 1)
     await client.move_channel(scrim.team1.vc, 2)
@@ -1964,9 +1969,9 @@ class scrim_master:
 
     async def get_managers(self):
         managers = []
-        manager_cursor = await overwatch_db.scrim.find({"manager":1})
+        manager_cursor = overwatch_db.scrim.find({"manager":1})
         async for manager in manager_cursor:
-            managers += manager["userid"]
+            managers.append(manager["userid"])
 
         return managers
 
@@ -1987,7 +1992,7 @@ class scrim_master:
             target_team = self.team2
 
         # self.members[member.id] = team
-        await overwatch_db.scrim.update_one({"userid": member.id}, {"team": target_team.name})
+        await overwatch_db.scrim.update_one({"userid": member.id}, {"$set":{"team": target_team.name}})
 
         target_team.members.append(member.id)
         # print(target_team.members)
@@ -2017,7 +2022,7 @@ class scrim_master:
         #     print(target_team.members)
         # del self.members[member.id]
 
-        await overwatch_db.scrim.update_one({"userid": member.id}, {"team": "0"})
+        await overwatch_db.scrim.update_one({"userid": member.id}, {"$set":{"team": "0"}})
         await client.delete_channel_permissions(target_team.vc, member)
         return member.mention + " removed from team " + target_team.name
 
