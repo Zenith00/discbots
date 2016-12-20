@@ -30,6 +30,8 @@ import urllib.request
 from collections import Counter
 from collections import defaultdict
 
+from overwatch_api import OverwatchAPI, PC, AMERICAS, QUICK, heroes
+
 ENABLED = True
 logging.basicConfig(level=logging.INFO)
 
@@ -398,12 +400,19 @@ async def on_message(message):
     global VCInvite
     global PATHS
     global ENABLED
+
     if not ENABLED:
         return
     if message.author.id == client.user.id:
         return
 
     if message.server is None:
+        if message.content.startswith("`scrim"):
+            command = message.content.replace("`scrim ", "")
+            if regex_test(reg_str=r"^\D.{2,11}#\d{4}$", string=command):
+                command = command.replace("#", "-")
+                scrim.register(message.author, command)
+
         await client.send_message(await client.get_user_info(constants.ZENITH_ID),
                                   "[" + message.author.name + "]: " + message.content)
         return
@@ -1781,7 +1790,7 @@ async def scrim_manage(message):
     if scrim:
         managers = await scrim.get_managers()
         if command_list[0] == "list":
-            cursor = overwatch_db.scrim.find({"active":True})
+            cursor = overwatch_db.scrim.find({"active": True})
             userlist = [["Name", "ID", "Manager", "SR"]]
             async for user in cursor:
                 user_entry = []
@@ -1957,11 +1966,25 @@ async def parse_responses(response_list):
     pass
 
 
+async def get_sr(tag):
+    ow = OverwatchAPI("")
+    result = ow.get_profile(platform="pc", region="eu", battle_tag=tag)
+    eu_rank = result["data"]["competitive"]["rank"]
+    result = ow.get_profile(platform="pc", region="us", battle_tag=tag)
+    na_rank = result["data"]["competitive"]["rank"]
+    return max([eu_rank, na_rank])
+
+
 # with open(PATHS["comms"] + "bootstate.txt", "r") as f:
 #     line = f.readline().strip()
 #     if line == "killed":
 #         ENABLED = False
 # client.loop.create_task(stream())
+
+def regex_test(reg_str, string):
+    reg = re.compile(reg_str)
+    match = reg.search(string)
+    return match
 
 
 class scrim_team:
@@ -2040,8 +2063,15 @@ class scrim_master:
         return member.mention + " removed from team " + target_team.name
 
     async def add_user(self, id):
-         await overwatch_db.scrim.update_one({"userid": id},
-                                                {"$set": {"team": "0", "active": True, "manager": 0}}, upsert=True)
+        await overwatch_db.scrim.update_one({"userid": id},
+                                            {"$set": {"team": "0", "active": True, "manager": 0}}, upsert=True)
+
+    async def register(self, member, btag):
+        sr = get_sr(btag)
+        await overwatch_db.scrim.update_one({"userid": member.id}, {"$set": {"rank": sr, "btag": btag}})
+
+    async def refresh(self, member):
+        user = await overwatch_db.scrim.find_one({"userid": member.id})
 
 
 client.run("MjM2MzQxMTkzODQyMDk4MTc3.CvBk5w.gr9Uv5OnhXLL3I14jFmn0IcesUE", bot=True)
