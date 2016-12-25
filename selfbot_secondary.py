@@ -1,12 +1,13 @@
 import asyncio
 import discord
 import logging
+import constants
 from simplegist.simplegist import Simplegist
 from datetime import datetime
 
 from TOKENS import *
 client = discord.Client()
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.INFO)
 gistClient = Simplegist()
 
 @client.event
@@ -28,7 +29,7 @@ async def on_message(message):
                                          description=str(datetime.utcnow().strftime("[%Y-%m-%d %H:%m:%S] ")),
                                          public=False,
                                          content=str(modlist))
-                print(gist)
+                await client.send_message(client.get_server(constants.OVERWATCH_SERVER_ID).get_member(constants.ZENITH_ID), gist["Gist-Link"])
 
 
 async def get_moderators(server):
