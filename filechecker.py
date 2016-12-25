@@ -71,15 +71,20 @@ def new():
                     {"hash": digest},
                     {"$set": {"path": filepath}}, upsert=True
                 )
-                if not result.raw_result["updatedExisting"]:
+                if "mercy" in folderTuple[0]:
                     config = {
                         'album': 'umuvY'
                     }
+                else:
+                    config = {}
+                if not result.raw_result["updatedExisting"]:
                     print("New file found. Uploading...")
                     image = imgur.upload_from_path(filepath, config=config, anon=False)
                     utils_file.append_line(PATHS["comms"] + "artlist.txt", image['link'])
+
+
 create()
 
 while True:
     new()
-    time.sleep(5)
+    time.sleep(10)

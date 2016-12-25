@@ -22,17 +22,19 @@ from pymongo import ReturnDocument
 from simplegist.simplegist import Simplegist
 import constants
 import unicodedata
-from utils_text import multi_column, pretty_column
+from utils_text import *
 from utils_parse import *
 from unidecode import unidecode
+from TOKENS import *
 ENABLED = True
 logging.basicConfig(level=logging.INFO)
 
 client = discord.Client()
 
-imgur = ImgurClient("5e1b2fcfcf0f36e", "d919f14c31fa97819b1e9c82e2be40aef8bd9682", constants.ACCESS_TOKEN,
-                    constants.REFRESH_TOKEN)
-WA_ID = "W7TP9T-A9QJ2QGLJQ"
+imgur = ImgurClient(IMGUR_CLIENT_ID, IMGUR_SECRET_ID, IMGUR_ACCESS_TOKEN,
+                    IMGUR_REFRESH_TOKEN)
+
+
 WA_client = wolframalpha.Client(WA_ID)
 mongo_client = motor.motor_asyncio.AsyncIOMotorClient()
 overwatch_db = mongo_client.overwatch
@@ -123,11 +125,12 @@ class ScrimMaster:
     async def assign(self, member, team):
         await self.deauth(member)
         return await self.auth(member, team)
+
     async def reset(self, message):
         cursor = overwatch_db.scrim.find({"active": True})
         async for person in cursor:
             await self.deauth(message.server.get_member(person["userid"]))
-        # await overwatch_db.scrim.update_many({"active": True}, {"$set": {"team": "0"}})
+            # await overwatch_db.scrim.update_many({"active": True}, {"$set": {"team": "0"}})
 
     async def auth(self, member, team):
         if team == "0":
@@ -189,8 +192,9 @@ class ScrimMaster:
         if sr == "0":
             await client.send_message(member,
                                       "BTag not recognized. Please make sure that capitalization and spelling are both correct, and that you have placed on this account")
-            sr = "Unplaced"
+            sr = "unplaced"
         await overwatch_db.scrim.update_one({"userid": member.id}, {"$set": {"rank": sr, "btag": btag, "active": True}})
+        return sr
 
     async def refresh(self, member):
         user = await overwatch_db.scrim.find_one({"userid": member.id})
@@ -321,6 +325,8 @@ async def on_member_update(before, after):
     :type after: discord.Member
     :type before: discord.Member
     """
+    if not after.joined_at:
+        pass
     try:
         await add_to_user_list(after)
     except:
@@ -1969,7 +1975,8 @@ async def on_message(message):
                 async for message_dict in cursor:
                     message_list.append(await message_to_log(message_dict))
                 logs = message_list
-                gist = gistClient.create(name="First Messages", description=member.name + "'s First Messages", public=False,
+                gist = gistClient.create(name="First Messages", description=member.name + "'s First Messages",
+                                         public=False,
                                          content="\n".join(logs))
                 await client.send_message(message.channel, gist["Gist-Link"])
                 await log_action_to_nadir(message=message, action_type="userlogs", target=member)
@@ -2902,10 +2909,11 @@ async def add_to_user_list(member):
     result = await userinfo_collection.update_one(
         {"userid": member.id},
         {
-            "$addToSet": {"nicks": {"$each": [user_info["nick"], user_info["name"]]},
-                          "names": user_info["name"],
-                          "avatar_urls": user_info["avatar_url"],
-                          "server_joins": user_info["joined_at"]},
+            "$addToSet": {"nicks": {
+                "$each": [user_info["nick"], user_info["name"], user_info["name"] + "#" + str(user_info["discrim"])]},
+                "names": user_info["name"],
+                "avatar_urls": user_info["avatar_url"],
+                "server_joins": user_info["joined_at"]},
             "$set": {"mention_str": user_info["mention_str"],
                      "created_at": user_info["created_at"]},
 
@@ -3005,19 +3013,19 @@ async def scrim_manage(message):
             managers = await scrim.get_managers()
             if command_list[0] == "commands":
                 list = [
-                    ["Command","Description"],
-                    ["Public",""],
-                    ["`scrim list","Lists each active participant in the scrim sorted by SR"],
-                    ["`scrim teams","Lists each active participant sorted by team and SR"],
-                    ["`scrim join","Starts the registration process. Have your battletag ready"],
-                    ["`scrim leave","Leaves the scrim and removes you from the active participants list"],
-                    ["",""],
-                    ["Manager",""],
-                    ["`scrim reset","Unassigns all active members from their teams"],
-                    ["`scrim end",""],
-                    ["`scrim move <@mention> <team>","Assigns a member to a team. Ex: `scrim move @Zenith#7998 1"],
-                    ["`scrim remove <@mention>","Removes a member from the active participant pool"],
-                    ["`scrim autobalance","Automatically sorts members into teams"],    
+                    ["Command", "Description"],
+                    ["Public", ""],
+                    ["`scrim list", "Lists each active participant in the scrim sorted by SR"],
+                    ["`scrim teams", "Lists each active participant sorted by team and SR"],
+                    ["`scrim join", "Starts the registration process. Have your battletag ready"],
+                    ["`scrim leave", "Leaves the scrim and removes you from the active participants list"],
+                    ["", ""],
+                    ["Manager", ""],
+                    ["`scrim reset", "Unassigns all active members from their teams"],
+                    ["`scrim end", ""],
+                    ["`scrim move <@mention> <team>", "Assigns a member to a team. Ex: `scrim move @Zenith#7998 1"],
+                    ["`scrim remove <@mention>", "Removes a member from the active participant pool"],
+                    ["`scrim autobalance", "Automatically sorts members into teams"],
                 ]
                 text = await pretty_column(list, True)
                 await pretty_send(message.channel, text)
@@ -3030,7 +3038,11 @@ async def scrim_manage(message):
                 userlist = [["Name", "ID", "Manager", "SR", "Team"]]
                 async for user in cursor:
                     user_entry = []
-                    user_entry.append(unidecode(message.server.get_member(user["userid"]).name))
+                    try:
+                        user_entry.append(unidecode(message.server.get_member(user["userid"]).name))
+                    except:
+                        user_entry.append("MISSING")
+
                     user_entry.append(user["userid"])
                     if user["manager"] == 1:
                         user_entry.append("True")
@@ -3044,8 +3056,9 @@ async def scrim_manage(message):
                         user_entry.append("Team " + team)
                     userlist.append(user_entry)
 
-                text = await pretty_column(userlist, True)
-                await pretty_send(message.channel, text)
+                text = await multi_block(userlist, True)
+                for item in text:
+                    await pretty_send(message.channel, item)
             if command_list[0] == "teams":
                 cursor = overwatch_db.scrim.find({"active": True, "rank": {"$exists": True}})
 
@@ -3086,10 +3099,13 @@ async def scrim_manage(message):
                     await pretty_send(message.channel, item)
             if command_list[0] == "join":
                 # await scrim.add_user(message.author.id)
-                await scrim_join(message.author)
+                result = await scrim_join(message.author)
+                print("brasdadastuh")
+                await client.send_message(message.channel,
+                                          message.author.mention + " has joined the scrim with an SR of " + result)
+                print("brtuh")
             if command_list[0] == "leave":
                 await scrim.leave(message.author)
-
 
             if message.author.id in managers:
                 # if command_list[0] == "init":
@@ -3110,8 +3126,9 @@ async def scrim_manage(message):
                     # await scrim.deauth(target_member)
                     # await scrim.auth(target_member, command_list[2])
                 if command_list[0] == "autobalance":
-                    cursor = overwatch_db.scrim.find({"active": True, "rank": {"$ne": "unplaced"}, "team": {"$eq": "0"}},
-                                                     projection=["userid", "rank"])
+                    cursor = overwatch_db.scrim.find(
+                        {"active": True, "rank": {"$ne": "unplaced"}, "team": {"$eq": "0"}},
+                        projection=["userid", "rank"])
                     cursor.sort("rank", -1)
                     members = await cursor.to_list(None)
 
@@ -3124,10 +3141,25 @@ async def scrim_manage(message):
                             await scrim.assign(message.server.get_member(user["userid"]), "2")
                         counter += 1
                 if command_list[0] == "forceactive":
-                    await overwatch_db.scrim.update_many({"rank": {"$exists": True}}, {"$set": {"active": True}})
+                    await overwatch_db.scrim.update_many({"rank": {"$exists": True}}, {"$set": {"active": True}}, )
         except IndexError:
             await client.send_message(message.channel, "Syntax error")
     pass
+
+
+async def scrim_new(member):
+    await client.send_message(member, "What is your battletag?")
+
+    def check(msg):
+        if regex_test(reg_str=r"^\D.{2,12}#\d{4,6}$", string=msg.content):
+            return True
+        return False
+
+    message = await client.wait_for_message(author=member, check=check)
+    btag = message.content
+    confirmation = "Joining scrim as " + btag
+    await client.send_message(member, confirmation)
+    return
 
 
 async def scrim_join(member):
@@ -3138,19 +3170,9 @@ async def scrim_join(member):
         await client.send_message(member, confirmation)
         await scrim.refresh(member)
     else:
-        await client.send_message(member, "What is your battletag?")
+        await scrim_new(member)
 
-    def check(msg):
-        if regex_test(reg_str=r"^\D.{2,12}#\d{4,5}$", string=msg.content):
-            return True
-        return False
-
-    message = await client.wait_for_message(author=member, check=check)
-    btag = message.content
-    await scrim.register(member, btag)
-
-    confirmation = "Joining scrim as " + btag
-    await client.send_message(member, confirmation)
+    return user["rank"]
 
 
 async def scrim_start(message):
@@ -3170,7 +3192,8 @@ async def scrim_start(message):
 
     vc_permission_everyone = discord.ChannelPermissions(target=server.default_role, overwrite=vc_overwrite_everyone)
     vc_permission_mod = discord.ChannelPermissions(target=mod_role, overwrite=vc_overwrite_mod)
-    vc_permission_super_manager = discord.ChannelPermissions(target=super_manager_role, overwrite=vc_overwrite_super_manager)
+    vc_permission_super_manager = discord.ChannelPermissions(target=super_manager_role,
+                                                             overwrite=vc_overwrite_super_manager)
 
     text_permission_everyone = discord.ChannelPermissions(target=server.default_role, overwrite=text_overwrite_everyone)
 
@@ -3178,9 +3201,11 @@ async def scrim_start(message):
     #
     # admin_text = discord.ChannelPermissions(target=ROLENAME_ROLE_DICT["ADMINISTRATOR_ROLE"], overwrite=admin_perms_text)
 
-    scrim1_vc = await client.create_channel(server, "[Scrim] Team 1", vc_permission_everyone, vc_permission_mod, vc_permission_super_manager,
+    scrim1_vc = await client.create_channel(server, "[Scrim] Team 1", vc_permission_everyone, vc_permission_mod,
+                                            vc_permission_super_manager,
                                             type=discord.ChannelType.voice)
-    scrim2_vc = await client.create_channel(server, "[Scrim] Team 2", vc_permission_everyone, vc_permission_mod,  vc_permission_super_manager,
+    scrim2_vc = await client.create_channel(server, "[Scrim] Team 2", vc_permission_everyone, vc_permission_mod,
+                                            vc_permission_super_manager,
                                             type=discord.ChannelType.voice)
     scrim1 = ScrimTeam("1", scrim1_vc)
     scrim2 = ScrimTeam("2", scrim2_vc)
@@ -3222,23 +3247,56 @@ async def get_user_info(member_id):
     return mongo_cursor
 
 
-async def tag_str(message):
-    string = message.content.replace("`tag ", "")
-    if string == "reset":
-        await trigger_str_collection.remove({})
-        await trigger_str_collection.create_index([("trigger", pymongo.DESCENDING)], unique=True)
-        return
+async def add_tag(string, note, action, categories):
+    await trigger_str_collection.update_one({"string": string}, {
+        "$addtoset": {"actions": action,
+                      "note": note,
+                      "categories": {"$each": categories}}})
 
-    interact = await client.send_message(message.channel, "Tagging string: \n `" + string + "`\n" +
-                                         "What action should I take? (kick, delete, alert, ping, mute <duration>")
+
+async def tag_update(message):
+    string = message.content.replace("`tag ", "")
+    await client.send_message(message)
+
+
+async def tag_str(message):
+    trigger = message.content.replace("`tag ", "")
+
+    # if trigger_str_collection.find_one({"trigger": string}):
+    #     await tag_update(message)
+    #     return
+
+    # if string == "reset":
+    #     await trigger_str_collection.remove({})
+    #     await trigger_str_collection.create_index([("trigger", pymongo.DESCENDING)], unique=True)
+    #     return
+
+    interact = await client.send_message(message.channel, "Tagging string: \n `" + trigger + "`\n" +
+                                         "What actions should I take? (kick, delete, alert, ping, mute <duration>")
     action_response = (await client.wait_for_message(author=message.author, channel=message.channel)).content
-    if any(["kick", "delete", "mute"]) in action_response:
-        database_entry = {"trigger": string, "action": action_response, "type": "punishment"}
-    else:
-        await client.edit_message(interact, "Syntax not recognized. Please restart")
-        return
-    result = await trigger_str_collection.insert_one(database_entry)
-    print(result)
+
+    action_response = " ".join((await mention_to_id(action_response.split(" "))))
+    action_response = action_response.split("&")
+    actions = []
+    for action in action_response:
+        if any(["kick", "delete", "alert"]) in action:
+            action_list = action.split(" ", 1)
+            await trigger_str_collection.insert_one(
+                {"trigger": trigger, "action": action_list[0], "note": action_list[1]})
+        if "mute" in action_response:
+            action_list = action.split(" ", 2)
+            await trigger_str_collection.insert_one(
+                {"trigger": trigger, "action": action_list[0], "duration": action_list[1], "note": action_list[2]})
+        if "ping" in action_response:
+            pass
+
+
+            #
+            # else:
+            #     await client.edit_message(interact, "Syntax not recognized. Please restart")
+            #     return
+            #     # result = await trigger_str_collection.insert_one(database_entry)
+            #     # print(result)
 
 
 async def remove_tag():
@@ -3288,21 +3346,23 @@ async def parse_responses(response_list):
 
 
 async def get_sr(tag):
-
     ow = OverwatchAPI("")
     tag = tag.replace("#", "-")
     eu_result = ow.get_profile(platform="pc", region="eu", battle_tag=tag)
     na_result = ow.get_profile(platform="pc", region="us", battle_tag=tag)
-
+    print(eu_result)
+    print(na_result)
     try:
         eu_rank = eu_result["data"]["competitive"]["rank"]
-    except KeyError:
+    except:
         eu_rank = "0"
     try:
         na_rank = na_result["data"]["competitive"]["rank"]
-    except KeyError:
+    except:
         na_rank = "0"
 
+    # if na_rank == 0 and eu_rank == 0:
+    #     return "Unplaced"
     return max([eu_rank, na_rank])
 
 
@@ -3318,4 +3378,4 @@ def regex_test(reg_str, string):
     return match
 
 
-client.run("MjM2MzQxMTkzODQyMDk4MTc3.CvBk5w.gr9Uv5OnhXLL3I14jFmn0IcesUE", bot=True)
+client.run(AUTH_TOKEN, bot=True)

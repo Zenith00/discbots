@@ -1,5 +1,6 @@
 import asyncio
 from pyshorteners import Shortener
+import traceback
 async def parse_message_info(mess) -> dict:
     """
     :type mess: discord.Message
@@ -27,6 +28,7 @@ async def parse_message_info(mess) -> dict:
         "channel_id"        : mess.channel.id,
         "server_id"         : mess.server.id,
         "message_id"           : mess.id
+
     }
     return info_dict
 
@@ -42,6 +44,7 @@ async def parse_user_info(user) -> dict:
         "avatar_url" : user.avatar_url,
         "mention_str": user.mention,
         "created_at" : user.created_at.isoformat(" "),
+        "discrim" : user.discriminator,
 
     }
     return info_dict
@@ -72,5 +75,9 @@ async def parse_member_info(member) -> dict:
     info_dict["role_names"] = roleNames
     info_dict["color"] = member.color
     info_dict["nick"] = userNick
-    info_dict["joined_at"] = member.joined_at.isoformat(" ")
+    try:
+        info_dict["joined_at"] = member.joined_at.isoformat(" ")
+    except:
+        print(info_dict["name"])
+        print(traceback.format_exc())
     return info_dict
