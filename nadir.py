@@ -3318,7 +3318,6 @@ async def parse_responses(response_list):
             mute_user(CHANNELNAME_CHANNEL_DICT["spam-channel"], action)
     pass
 
-
 async def get_sr(tag):
     ow = OverwatchAPI("")
     tag = tag.replace("#", "-")
