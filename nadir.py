@@ -28,50 +28,33 @@ from unidecode import unidecode
 from TOKENS import *
 ENABLED = True
 logging.basicConfig(level=logging.INFO)
-
 client = discord.Client()
-
 imgur = ImgurClient(IMGUR_CLIENT_ID, IMGUR_SECRET_ID, IMGUR_ACCESS_TOKEN,
                     IMGUR_REFRESH_TOKEN)
-
-
 WA_client = wolframalpha.Client(WA_ID)
 mongo_client = motor.motor_asyncio.AsyncIOMotorClient()
 overwatch_db = mongo_client.overwatch
 message_log_collection = overwatch_db.message_log
 userinfo_collection = overwatch_db.userinfo
-
 auths_collection = overwatch_db.auths
 trigger_str_collection = overwatch_db.trigger_str
-
 aeval = Interpreter()
-
 id_channel_dict = {}
-
 STREAM = None
-stream = None
+
 gistClient = Simplegist()
 
 BOT_HAPPENINGS_ID = "245415914600661003"
-
-# noinspection PyPep8
-
 ROLENAME_ROLE_DICT = {}
-# noinspection PyPep8
-
-# noinspection PyTypeChecker
 ID_ROLENAME_DICT = dict([[v, k] for k, v in constants.ROLENAME_ID_DICT.items()])
-
 BLACKLISTED_CHANNELS = (
     constants.CHANNELNAME_CHANNELID_DICT["bot-log"], constants.CHANNELNAME_CHANNELID_DICT["server-log"],
     constants.CHANNELNAME_CHANNELID_DICT["voice-channel-output"])
-
 SERVERS = {}
 CHANNELNAME_CHANNEL_DICT = {}
 VCInvite = None
 VCMess = None
 INITIALIZED = False
-
 
 class Streamer:
     def __init__(self, chann, thresh):
@@ -91,13 +74,11 @@ class Streamer:
         else:
             self.counter += 1
 
-
 class ScrimTeam:
     def __init__(self, id, channel):
         self.members = []
         self.name = id
         self.vc = channel
-
 
 class ScrimMaster:
     def __init__(self, scr1, scr2, txt, spec):
@@ -1668,10 +1649,7 @@ async def on_message(message):
                                          public=False,
                                          content=hist)
                 await client.send_message(message.channel, gist["Gist-Link"])
-            if message.content.startswith("`stats"):
-                command = message.content.replace("`stats ", "")
-                if command == "trusted":
-                    pass
+
             if message.content.startswith("`linesplit"):
                 command = message.content.replace("`linesplit ", "")
                 command = command.split("\n")
@@ -1704,7 +1682,7 @@ async def on_message(message):
             elif message.content.startswith("`remindme"):
                 command = message.content.replace("`remindme ", "")
                 command_list = command.split(" | ", 1)
-                remind_me(command_list, message)
+                await remind_me(command_list, message)
             # XKCD now
             elif message.content.startswith("`timenow"):
                 redirected = await get_redirected_url("http://imgs.xkcd.com/comics/now.png")
@@ -1858,15 +1836,11 @@ async def on_message(message):
                         number_to_remove -= 1
                     else:
                         continue
+            # Fully wipes a channel. Use with caution.
             if message.content.startswith("`fullpurge"):
                 async for found_mess in client.logs_from(message.channel, limit=10000000):
                     await client.delete_message(found_mess)
-        # if (message.author.id == "180041371544059905" or message.author.id == constants.ZENITH_ID) and message.content == "`start9":
-        #     stop = time.time() + 10
-        #     while time.time() < stop:
-        #         msg = await client.wait_for_message(channel= message.channel, timeout=.1)
-        #         if msg:
-        #             await client.delete_message(msg)
+
         if "mod" in auths:
             # if message.content.startswith("`fixperms"):
             #     await initialize()
