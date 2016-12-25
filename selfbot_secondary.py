@@ -1,11 +1,13 @@
 import asyncio
 import discord
 import logging
+from simplegist.simplegist import Simplegist
+from datetime import datetime
 
 from TOKENS import *
 client = discord.Client()
 logging.basicConfig(level=logging.DEBUG)
-
+gistClient = Simplegist()
 
 @client.event
 async def on_ready():
@@ -22,7 +24,11 @@ async def on_message(message):
 
             if command == "1":
                 modlist = await get_moderators(message.server)
-
+                gist = gistClient.create(name="Mods of " + message.server.name,
+                                         description=str(datetime.utcnow().strftime("[%Y-%m-%d %H:%m:%S] ")),
+                                         public=False,
+                                         content=str(modlist))
+                print(gist)
 
 
 async def get_moderators(server):

@@ -2415,7 +2415,7 @@ async def invite_checker(message, regex_match):
                 "~an " + message.author.mention +
                 " AUTOMATED: Posted a link to another server")
             await client.send_message(skycoder_mess.channel, "~rn " + message.author.mention)
-        elif message.channel == CHANNELNAME_CHANNEL_DICT["general-discussion"]:
+        elif message.channel == CHANNELNAME_CHANNEL_DICT["general-discussion"] or message.channel == CHANNELNAME_CHANNEL_DICT["overwatch-discussion"]:
 
             channel_name = invite.channel.name
             party_vc_reg = re.compile(r"(^\[)\w+.\w+\]", re.IGNORECASE)
