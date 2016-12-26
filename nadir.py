@@ -260,12 +260,20 @@ async def on_member_remove(member):
 
 @client.event
 async def on_member_ban(member):
+    # print("ban detected")
     await add_to_user_set(member=member, set_name="bans", entry=datetime.utcnow().isoformat(" "))
+    await client.send_message(CHANNELNAME_CHANNEL_DICT["spam-channel"], "Ban detected, user id = " + member.id)
+    # await log_automated("registered a user ban: \n```" + str(await parse_user_info(member)) + "```")
 
 
 @client.event
-async def on_member_unban(member):
-    await add_to_user_set(member=member, set_name="unbans", entry=datetime.utcnow().isoformat(" "))
+async def on_member_unban(server, member):
+    if server.id == constants.OVERWATCH_SERVER_ID:
+        # print("unban detected")
+        await add_to_user_set(member=member, set_name="unbans", entry=datetime.utcnow().isoformat(" "))
+        await client.send_message(CHANNELNAME_CHANNEL_DICT["spam-channel"], "Unban detected, user id = " + member.id)
+
+        # await log_automated("registered a user unban: \n```" + str(await get_user_info(member.id)) + "```")
 
 
 @client.event
@@ -2865,9 +2873,8 @@ async def add_to_user_set(member, set_name, entry):
     :param set_name: str
     :type member: discord.Member
     """
-    user_info = await parse_member_info(member)
     result = await userinfo_collection.update_one(
-        {"userid": user_info["id"]},
+        {"userid": member.id},
         {
             "$addToSet": {set_name: entry}
         }
