@@ -10,6 +10,11 @@ def prepend_line(file, line):
     with open(file, 'w') as modified: modified.write(line + "\n" + data)
     return "success"
 
+def extract_line(file):
+    with open(file, "r") as f:
+        first_line = f.readline()
+    delete_lines(file, 1)
+    return first_line
 
 def append_line(file, line):
     with open(file, "a") as file: file.write(line + "\n")
