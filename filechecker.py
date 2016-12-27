@@ -49,7 +49,10 @@ def fix_names():
         for file in folderTuple[2]:
             new_file_name = ''.join(c for c in file if c in string.printable)
             if new_file_name != file:
-                os.rename(os.path.join(folderTuple[0], file), os.path.join(folderTuple[0], new_file_name))
+                try:
+                    os.rename(os.path.join(folderTuple[0], file), os.path.join(folderTuple[0], new_file_name))
+                except FileExistsError:
+                    os.remove(os.path.join(folderTuple[0], file))
                 print("renaming to " + new_file_name)
     return
 
@@ -79,8 +82,19 @@ def new():
                     config = {}
                 if not result.raw_result["updatedExisting"]:
                     print("New file found. Uploading...")
-                    image = imgur.upload_from_path(filepath, config=config, anon=False)
+                    success = False
+                    while not success:
+                        try:
+                            image = imgur.upload_from_path(filepath, config=config, anon=False)
+                            success = True
+                        except:
+                            success = False
+                            print("FAIL")
+
                     utils_file.append_line(PATHS["comms"] + "artlist.txt", image['link'])
+                    print("Done")
+
+    print("End Sweep")
 
 
 create()
