@@ -7,7 +7,7 @@ import re
 import sys
 import urllib.request
 from collections import defaultdict
-from datetime import datetime
+from datetime import datetime, timedelta
 from io import StringIO
 
 import discord
@@ -1768,6 +1768,8 @@ async def on_message(message):
                 response_str += "\n```"
                 if response_str:
                     await client.send_message(message.channel, response_str)
+            elif message.content.startswith("`vetlist"):
+                await get_veterans(message)
             # Wipe all gists
             elif message.content.startswith("`wipegists"):
                 gist = gistClient.profile().list(30)
@@ -1848,6 +1850,8 @@ async def on_message(message):
             if message.content.startswith("`fullpurge"):
                 async for found_mess in client.logs_from(message.channel, limit=10000000):
                     await client.delete_message(found_mess)
+            if message.content.startswith("`raw"):
+                command = message.content.replace("`raw")
 
         if "mod" in auths:
             # if message.content.startswith("`fixperms"):
@@ -3344,6 +3348,31 @@ async def get_sr(tag):
     # if na_rank == 0 and eu_rank == 0:
     #     return "Unplaced"
     return max([eu_rank, na_rank])
+
+async def get_veterans(message):
+    d = timedelta(days=365)
+    year = datetime.utcnow() - d
+    print(year.timetuple())
+    vets = set()
+    cursor = overwatch_db.message_log.find(
+        {
+            "date": {"$lt": year.strftime("[%Y-%m-%d %H:%m:%S] ")},
+        }
+    )
+    async for item in cursor:
+        print("gotone")
+
+        vets.add(str(item["userid"]))
+    print(vets)
+    vetlist = list(vets)
+    print("\n\n\n\n\n")
+
+    vetlist = [["<@!" + x + ">"] for x in vetlist]
+
+    text = await multi_block(vetlist, True)
+    for item in text:
+        await client.send_message(message.channel, item)
+    print(text)
 
 
 # with open(PATHS["comms"] + "bootstate.txt", "r") as f:
