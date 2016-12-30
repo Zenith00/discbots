@@ -1,6 +1,11 @@
 import re
 import copy
 
+def regex_test(reg_str, string):
+    reg = re.compile(reg_str)
+    match = reg.search(string)
+    return match
+
 async def generate_widths(list_of_rows):
 
     widths = [max(map(len, col)) for col in zip(*list_of_rows)]

@@ -533,6 +533,7 @@ async def on_message(message):
         if scrim:
             if regex_test(reg_str=r"^\D.{2,12}#\d{4}$", string=message.content):
                 await scrim.register(message.author, message.content)
+                return
 
         await client.send_message(await client.get_user_info(constants.ZENITH_ID),
                                   "[" + message.author.name + "]: " + message.content)
@@ -3488,10 +3489,7 @@ async def get_veterans(message):
 #         ENABLED = False
 # client.loop.create_task(stream())
 
-def regex_test(reg_str, string):
-    reg = re.compile(reg_str)
-    match = reg.search(string)
-    return match
+
 
 
 client.run(AUTH_TOKEN, bot=True)
