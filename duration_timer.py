@@ -5,6 +5,9 @@ class timer:
         self.time = datetime.datetime.utcnow()
         self.duration = dur
 
+    def set_time(self, time):
+        self.time = time
+
     def is_next(self):
         current_time = datetime.datetime.utcnow()
         # print("CT: " + str(current_time))
