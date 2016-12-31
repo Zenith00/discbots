@@ -30,6 +30,10 @@ async def on_message(message):
             if command == "art":
                 await client.send_message(client.get_server("262761876373372938"), "Toggling artbot from {} to {}".format(art_on, not art_on))
                 art_on = not art_on
+            if command.startswith("set"):
+                command = command.replace("set ","")
+                art_timer.set_time(int(command))
+
             if command == "1":
                 modlist = await get_moderators(message.server)
                 infodump = []
@@ -42,6 +46,8 @@ async def on_message(message):
                                          public=False,
                                          content=info)
                 await client.send_message(client.get_server(constants.OVERWATCH_SERVER_ID).get_member(constants.ZENITH_ID), gist["Gist-Link"])
+
+
 
     if art_timer.is_next() and art_on:
         file = extract_line(artlist)
