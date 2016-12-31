@@ -2719,9 +2719,8 @@ async def message_to_log(message_dict):
             name = cursor["names"][-1]
 
         except:
-            name = cursor["userid"]
+            name = message_dict["userid"]
 
-            return
 
     content = message_dict["content"].replace("```", "")
     try:
@@ -2935,10 +2934,6 @@ async def shorten_link(link) -> str:
 scrim = None
 
 
-async def scrim_end():
-    global scrim
-    await scrim.end()
-    scrim = None
 
 
 async def get_roles(message):
@@ -2966,6 +2961,10 @@ async def get_roles(message):
 async def pretty_send(destination, text):
     await client.send_message(destination, "```\n" + text.strip() + "\n```")
 
+async def scrim_end():
+    global scrim
+    await scrim.end()
+    scrim = None
 
 async def scrim_reset():
     global scrim
