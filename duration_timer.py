@@ -5,8 +5,8 @@ class timer:
         self.time = datetime.datetime.utcnow()
         self.duration = dur
 
-    def set_time(self, time):
-        self.time = time
+    def set_time(self, duration):
+        self.duration = duration
 
     def is_next(self):
         current_time = datetime.datetime.utcnow()
