@@ -16,7 +16,6 @@ CHANNELNAME_CHANNELID_DICT = {
     "general-discussion"     : "94882524378968064",
     "lf-scrim"               : "177136656846028801",
     "console-lfg"            : "185665683009306625",
-    "sombra-discussion"      : "244000157916463104",
     "fanart"                 : "168567769573490688",
     "competitive-discussion" : "107255001163788288",
     "lore-discussion"        : "180471683759472640",
@@ -27,7 +26,7 @@ CHANNELNAME_CHANNELID_DICT = {
     "warning-log"            : "170179130694828032",
     "bot-log"                : "147153976687591424",
     "nadir_audit_log"        : "240320691868663809",
-    "alerts" : "252976184344838144",
+    "alerts"                 : "252976184344838144",
 }
 
 CHANNELID_CHANNELNAME_DICT = dict([v, k] for k, v in CHANNELNAME_CHANNELID_DICT.items())
