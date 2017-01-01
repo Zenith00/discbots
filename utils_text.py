@@ -6,6 +6,12 @@ def regex_test(reg_str, string):
     match = reg.search(string)
     return match
 
+def multi_regex(reg_list, string):
+    for reg in reg_list:
+        if regex_test(reg, string):
+            return True
+    return False
+
 async def generate_widths(list_of_rows):
 
     widths = [max(map(len, col)) for col in zip(*list_of_rows)]
