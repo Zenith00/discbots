@@ -6,6 +6,16 @@ def regex_test(reg_str, string):
     match = reg.search(string)
     return match
 
+def parse_bool(string) -> bool:
+    """
+
+    :type string: str
+    """
+    if any(substring in string for substring in ["yes", "y", "true"]):
+        return True
+    return False
+
+
 def multi_regex(reg_list, string):
     for reg in reg_list:
         if regex_test(reg, string):
