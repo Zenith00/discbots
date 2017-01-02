@@ -191,7 +191,7 @@ class ScrimMaster:
     async def leave(self, member):
         userid = member.id
         await overwatch_db.scrim.update_one({"userid": userid},
-                                            {"$set": {"team": "0", "active": False, "manager": 0, "sequential":0}})
+                                            {"$set": {"team": "0", "active": False, "manager": 0, "sequential": 0}})
         return "Removed " + member.mention + " from the active user pool"
 
     async def register(self, member, btag, sr, region):
@@ -547,12 +547,12 @@ async def on_message(message):
         return
     if message.author.id == client.user.id:
         return
-
+    if message.server.id == "236343416177295360":
+        await parse_triggers(message)
     if message.server is None:
         def scrim_register(msg):
             content = msg.content
             items = content.split(" ")
-            print(items)
             if len(items) == 3 and regex_test(reg_str=r"^\D.{2,12}#\d{4,6}$", string=items[0]) and \
                     regex_test(reg_str=r"^(\d{1,4})|(unplaced)$", string=items[1]) and \
                     regex_test(reg_str=r"^(EU|NA|KR)$", string=items[2]):
@@ -562,7 +562,6 @@ async def on_message(message):
             return False
 
         if scrim and scrim_register(message):
-            print("success!!@#!")
             await scrim_new(message)
 
         await client.send_message(await client.get_user_info(constants.ZENITH_ID),
@@ -1074,6 +1073,7 @@ async def on_message(message):
 
         if "mod" not in auths:
             # EXTRA-SERVER INVITE CHECKER
+
             if "chaos vanguard" in message.content.lower():
                 await log_automated("logged a message containing Chaos Vanguard in " + message.channel.name + ":\n[" +
                                     message.author.name + "]: " + message.content)
@@ -1435,7 +1435,6 @@ async def invite_checker(message, regex_match):
                                              message.author.mention + "\n" +
                                              message.server.get_member(constants.ZENITH_ID).mention)
             await client.delete_message(message)
-
             await log_automated("deleted an external invite: " + str(
                 invite.url) + " from " + message.author.mention + " in " + message.channel.mention)
             skycoder_mess = await client.send_message(
@@ -1511,8 +1510,8 @@ async def mention_to_id(command_list):
 async def log_automated(description: object) -> None:
     action = ("At " + str(datetime.utcnow().strftime("[%Y-%m-%d %H:%m:%S] ")) + ", I automatically " +
               str(description) + "\n" + "`kill to disable me")
-    await client.send_message(CHANNELNAME_CHANNEL_DICT["alerts"], action)
-    # await client.send_message(client.get_channel(BOT_HAPPENINGS_ID), action)
+    # await client.send_message(CHANNELNAME_CHANNEL_DICT["alerts"], action)
+    await client.send_message(client.get_channel(BOT_HAPPENINGS_ID), action)
 
 
 #
@@ -2215,7 +2214,8 @@ async def scrim_new(message):
     # await client.send_message(member, confirmation)
     # return
     command_list = message.content.split(" ")
-    await scrim.register(member=message.author, btag=command_list[0], sr=command_list[1].lower(), region=command_list[2])
+    await scrim.register(member=message.author, btag=command_list[0], sr=command_list[1].lower(),
+                         region=command_list[2])
     await scrim.add_user(message.author)
 
 
@@ -2225,7 +2225,8 @@ async def scrim_join(member):
     user = await overwatch_db.scrim.find_one({"userid": member.id, "btag": {"$exists": True}})
     if user:
         confirmation = "Joining scrim as [{region}] {btag} with an SR of {sr}".format(region=user["region"],
-                                                                                      btag=user["btag"], sr=user["rank"])
+                                                                                      btag=user["btag"],
+                                                                                      sr=user["rank"])
         await client.send_message(member, confirmation)
         await scrim.add_user(member)
     else:
@@ -2315,14 +2316,9 @@ async def add_tag(string, note, action, categories):
                       "categories": {"$each": categories}}})
 
 
-async def tag_update(message):
-    string = message.content.replace("`tag ", "")
-    await client.send_message(message)
-
-
 async def tag_str(message):
     trigger = message.content.replace("`tag ", "")
-
+    trigger = re.escape(trigger)
     # if trigger_str_collection.find_one({"trigger": string}):
     #     await tag_update(message)
     #     return
@@ -2332,24 +2328,50 @@ async def tag_str(message):
     #     await trigger_str_collection.create_index([("trigger", pymongo.DESCENDING)], unique=True)
     #     return
 
-    interact = await client.send_message(message.channel, "Tagging string: \n `" + trigger + "`\n" +
-                                         "What actions should I take? (kick, delete, alert, ping, mute <duration>")
+    interact = await client.send_message(message.channel,
+                                         "Tagging string: \n `{trigger}`\nShould I match whole words only? \n (yes/no)".format(
+                                             trigger=trigger))
+    answer = (await client.wait_for_message(author=message.author, channel=message.channel)).content
+
+    bounded = parse_bool(answer)
+
+    await client.send_message(message.channel,
+                              "Registering `{trigger}` as a{bounded}bounded string".format(trigger=trigger,
+                                                                                           bounded=" " if bounded else "n un"))
+
+    trigger = "{b}{trigger}{b}".format(b=r"\b" if bounded else "", trigger=trigger)
+
+    await client.send_message(message.channel,
+                              "What actions should I take? (kick, delete, alert")
     action_response = (await client.wait_for_message(author=message.author, channel=message.channel)).content
 
     action_response = " ".join((await mention_to_id(action_response.split(" "))))
     action_response = action_response.split("&")
     actions = []
+    print("Action response")
+    print(action_response)
     for action in action_response:
-        if any(["kick", "delete", "alert"]) in action:
-            action_list = action.split(" ", 1)
-            await trigger_str_collection.insert_one(
-                {"trigger": trigger, "action": action_list[0], "note": action_list[1]})
-        if "mute" in action_response:
-            action_list = action.split(" ", 2)
+        action_list = action.split(" ", 1)
+        print(action_list)
+
+        if action_list[0] in ["kick", "delete", "alert"]:
+            if len(action_list) == 1:
+                note = "containing the {b}bounded string {trigger}".format(b="" if bounded else "un", trigger=trigger[
+                                                                                                              2:-2] if bounded else trigger)
+            else:
+                note = action_list[1]
+            result = await trigger_str_collection.insert_one(
+                {"trigger": trigger, "action": action_list[0], "note": note})
+            print(result.raw_result)
+        if action_list[0] == "mute":
+            if len(action_list) == 2:
+                note = "containing the string {}".format(trigger)
+            else:
+                note = action_list[2]
+            action_list = (" ".join(action_list)).split(" ", 2)
             await trigger_str_collection.insert_one(
                 {"trigger": trigger, "action": action_list[0], "duration": action_list[1], "note": action_list[2]})
-        if "ping" in action_response:
-            pass
+
 
 
             #
@@ -2374,12 +2396,39 @@ async def message_check(message):
 
 
 async def parse_triggers(message) -> list:
-    response_list = []
+    response_docs = []
     content = message.content
+    # trigger_cursor = trigger_str_collection.find()
+    # trigger_dict = await trigger_cursor.to_list()
+    # trigger_list = [item["trigger"] for item in trigger_dict]
+
     async for doc in trigger_str_collection.find():
-        if doc["trigger"] in content:
-            response_list.append(doc)
-    return response_list
+        if regex_test(doc["trigger"], content):
+            response_docs.append(doc)
+    await act_triggers(response_docs, message)
+
+
+async def act_triggers(response_docs, message):
+    if len(response_docs) == 0:
+        return
+
+    for doc in response_docs:
+        try:
+            if doc["action"] == "delete":
+                # await client.delete_message(message)
+                await log_automated("deleted {author}'s message ```{content}```because: {note}".format(
+                    author=message.author.mention, content=message.content.replace("```", ""), note=doc["note"]))
+            if doc["action"] == "kick":
+                # await client.kick(message.author)
+                await log_automated("kicked {author} because of the message ```{content}```because: {note}".format(
+                    author=message.author.mention, content=message.content.replace("```", ""), note=doc["note"]))
+            if doc["action"] == "alert":
+                await log_automated("registered {author}'s message ```{content}```because: {note}".format(
+                    author=message.author.mention, content=message.content.replace("```", ""), note=doc["note"]))
+            if doc["action"] == "mute":
+                pass
+        except (discord.Forbidden, discord.HTTPException):
+            print(traceback.format_exc())
 
 
 async def mute_user(interface_channel, action):
@@ -2388,6 +2437,10 @@ async def mute_user(interface_channel, action):
     :type action: list
     """
     await client.send_message(interface_channel, "!!mute " + SERVERS["OW"].get_member.mention + " + " + action[1])
+
+
+async def alert(message):
+    await client.send_message
 
 
 async def move_member_to_vc(member, target_id):
