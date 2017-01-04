@@ -1,6 +1,7 @@
 import copy
 import heapq
 import logging
+
 import math
 import random
 import re
@@ -783,8 +784,7 @@ async def on_message(message):
                 response_str += "\n```"
                 if response_str:
                     await client.send_message(message.channel, response_str)
-            elif message.content.startswith("`t-vet-list"):
-                await get_veterans(message)
+
             # Wipe all gists
             elif message.content.startswith("`wipegists"):
                 gist = gistClient.profile().list(30)
@@ -1493,10 +1493,11 @@ async def mention_to_id(command_list):
 
 async def log_automated(description: object, type) -> None:
     action = ("At " + str(datetime.utcnow().strftime("[%Y-%m-%d %H:%m:%S] ")) + ", I automatically " +
-              str(description) + "\n" + "`kill to disable me")
+              str(description))
     if type == "alert":
-
         await client.send_message(CHANNELNAME_CHANNEL_DICT["alerts"], action)
+    if type == "deletion":
+        await client.send_message(CHANNELNAME_CHANNEL_DICT["bot-log"], action)
     else:
         await client.send_message(CHANNELNAME_CHANNEL_DICT["spam-channel"], action)
     # await client.send_message(client.get_channel(BOT_HAPPENINGS_ID), action)
@@ -1527,14 +1528,11 @@ async def log_automated(description: object, type) -> None:
 
 
 async def ping(message):
-    # lag = (datetime.utcnow() - message).timestamp.total_seconds() * 1000) + " ms")
     """
     :type message: discord.Message
     """
-
     timestamp = message.timestamp
     channel = message.channel
-
     await client.delete_message(message)
     voice = random.choice(constants.VOICE_LINES)
     sent = await client.send_message(channel, voice)
@@ -1949,8 +1947,31 @@ async def get_roles(message):
         await pretty_send(message.channel, mess)
 
 
-async def pretty_send(destination, text):
-    await client.send_message(destination, "```\n" + text.strip() + "\n```")
+
+
+
+
+async def get_user_info(member_id):
+    """
+
+    :type member: discord.Member
+    """
+    userinfo = await userinfo_collection.find_one(
+        {"userid": member_id}, projection={"_id": False, "mention_str": False}
+    )
+    if not userinfo:
+        return None
+    list = userinfo["avatar_urls"]
+    if len(list) > 0 and len(list[0]) > 0:
+        try:
+            shortened_list = []
+            for link in list:
+                shortened_list.append(await shorten_link(link))
+            userinfo["avatar_urls"] = shortened_list
+        except:
+            pass
+    return userinfo
+
 
 
 async def scrim_end():
@@ -2275,26 +2296,15 @@ async def scrim_start(message):
     pass
 
 
-async def get_user_info(member_id):
-    """
 
-    :type member: discord.Member
-    """
-    mongo_cursor = await userinfo_collection.find_one(
-        {"userid": member_id}, projection={"_id": False, "mention_str": False}
-    )
-    if not mongo_cursor:
-        return None
-    list = mongo_cursor["avatar_urls"]
-    if len(list) > 0 and len(list[0]) > 0:
-        try:
-            shortened_list = []
-            for link in list:
-                shortened_list.append(await shorten_link(link))
-            mongo_cursor["avatar_urls"] = shortened_list
-        except:
-            pass
-    return mongo_cursor
+
+async def pretty_send(channel, text):
+    text = text.replace("```", "")
+    await client.send_message(channel, text)
+
+
+
+
 
 
 async def add_tag(string, note, action, categories):
@@ -2379,9 +2389,12 @@ async def show_tags():
     pass
 
 
-# async def message_check(message):
-#     responses = await parse_triggers(message)
-#     await parse_responses(responses)
+
+
+
+
+
+
 
 
 async def parse_triggers(message) -> list:
@@ -2402,8 +2415,10 @@ async def act_triggers(response_docs, message):
     for doc in response_docs:
         try:
             if doc["action"] == "delete":
-                await log_automated("deleted {author}'s message ```{content}```because: {note}".format(
-                    author=message.author.mention, content=message.content.replace("```", ""), note=doc["note"]), "action")
+                await log_automated("deleted {author}'s message from {channel} ```{content}``` because: {note}".format(
+                    author=message.author.mention, content=message.content.replace("```", ""), channel=message.channel.mention, note=doc["note"]), "deletion")
+                await client.delete_message(message)
+
             if doc["action"] == "kick":
                 # await client.kick(message.author)
                 await log_automated("kicked {author} because of the message ```{content}```because: {note}".format(
@@ -2416,138 +2431,131 @@ async def act_triggers(response_docs, message):
         except (discord.Forbidden, discord.HTTPException):
             print(traceback.format_exc())
 
-
-async def mute_user(interface_channel, action):
-    """
-
-    :type action: list
-    """
-    await client.send_message(interface_channel, "!!mute " + SERVERS["OW"].get_member.mention + " + " + action[1])
-
-
-async def alert(message):
-    await client.send_message
+#
+# async def mute_user(interface_channel, action):
+#     """
+#
+#     :type action: list
+#     """
+#     await client.send_message(interface_channel, "!!mute " + SERVERS["OW"].get_member.mention + " + " + action[1])
 
 
-async def move_member_to_vc(member, target_id):
-    pass
 
 
-async def id_to_mention(id):
-    return "<@!" + id + ">"
+#
+# async def move_member_to_vc(member, target_id):
+#     pass
+
+#
+# async def id_to_mention(id):
+#     return "<@!" + id + ">"
 
 
-async def parse_responses(response_list):
-    for response in response_list:  # trigger action type
-        action = response["action"].split(" ")
-        if action[0] == "mute":
-            mute_user(CHANNELNAME_CHANNEL_DICT["spam-channel"], action)
-    pass
 
 
-async def get_sr(tag):
-    ow = OverwatchAPI("")
-    tag = tag.replace("#", "-")
-    eu_result = ow.get_profile(platform="pc", region="eu", battle_tag=tag)
-    na_result = ow.get_profile(platform="pc", region="us", battle_tag=tag)
-    print(eu_result)
-    print(na_result)
-    try:
-        eu_rank = eu_result["data"]["competitive"]["rank"]
-    except:
-        eu_rank = "0"
-    try:
-        na_rank = na_result["data"]["competitive"]["rank"]
-    except:
-        na_rank = "0"
+# async def get_sr(tag):
+#     ow = OverwatchAPI("")
+#     tag = tag.replace("#", "-")
+#     eu_result = ow.get_profile(platform="pc", region="eu", battle_tag=tag)
+#     na_result = ow.get_profile(platform="pc", region="us", battle_tag=tag)
+#     print(eu_result)
+#     print(na_result)
+#     try:
+#         eu_rank = eu_result["data"]["competitive"]["rank"]
+#     except:
+#         eu_rank = "0"
+#     try:
+#         na_rank = na_result["data"]["competitive"]["rank"]
+#     except:
+#         na_rank = "0"
+#
+#     if int(eu_rank) < 1000:
+#         eu_rank = "0" + eu_rank
+#     if int(na_rank) < 1000:
+#         na_rank = "0" + na_rank
+#
+#     # if na_rank == 0 and eu_rank == 0:
+#     #     return "Unplaced"
+#     return max([eu_rank, na_rank])
 
-    if int(eu_rank) < 1000:
-        eu_rank = "0" + eu_rank
-    if int(na_rank) < 1000:
-        na_rank = "0" + na_rank
 
-    # if na_rank == 0 and eu_rank == 0:
-    #     return "Unplaced"
-    return max([eu_rank, na_rank])
-
-
-async def get_veterans(message):
-    d = timedelta(days=365)
-    year = datetime.utcnow() - d
-    print(year.timetuple())
-    vets = set()
-    trusted_list = ["163008912348413953",
-                    "133260197899534336",
-                    "98773463384207360",
-                    "108502117316083712",
-                    "154292345804816387",
-                    "183603736965414921",
-                    "187123419043725312",
-                    "170624581923504128",
-                    "97771062690865152",
-                    "91639231486623744",
-                    "139697252712054784",
-                    "154830443156340739",
-                    "215094448009248768",
-                    "122317844875706370",
-                    "258500747732189185",
-                    "66697400403623936",
-                    "188025061171527680",
-                    "216548128701153291",
-                    "131150836528054272",
-                    "232921983317180416",
-                    "185106988957564928",
-                    "108611736176726016",
-                    "195671081065906176",
-                    "161931898191478785",
-                    "211343735315759104",
-                    "147454963117719552",
-                    "185031197066264576",
-                    "182888650055352320",
-                    "195876139678433280",
-                    "203455531162009600",
-                    "133884121830129664",
-                    "109475514497933312",
-                    "147617541555093504",
-                    "180526293421391872",
-                    "186547391166414848",
-                    "128926571653234688",
-                    "180499097223036939",
-                    "174875522885615616",
-                    "91361811382685696",
-                    "105250002154098688",
-                    "109032564840226816",
-                    "234830800447602688",
-                    "109713556513009664",
-                    "72490462002290688",
-                    "100447011131654144",
-                    "66021157416992768",
-                    "93785357971107840",
-                    "55197013377036288",
-                    "114068227390308356"]
-    thresh = year.isoformat(" ")
-    print(year)
-    cursor = overwatch_db.message_log.find(
-        {
-            "date": {"$lt": thresh},
-            "userid": {"$in": trusted_list}
-        }
-    )
-
-    async for item in cursor:
-        print(item["date"])
-        if item["userid"] in trusted_list:
-            vets.add(str(item["userid"]))
-    print(vets)
-    vetlist = list(vets)
-    print("\n\n\n\n\n")
-
-    vetlist = [["<@!" + x + ">"] for x in vetlist]
-
-    text = await multi_block(vetlist, True)
-    for item in text:
-        await client.send_message(message.channel, item)
-    print(text)
+# async def get_veterans(message):
+#     d = timedelta(days=365)
+#     year = datetime.utcnow() - d
+#     print(year.timetuple())
+#     vets = set()
+#     trusted_list = ["163008912348413953",
+#                     "133260197899534336",
+#                     "98773463384207360",
+#                     "108502117316083712",
+#                     "154292345804816387",
+#                     "183603736965414921",
+#                     "187123419043725312",
+#                     "170624581923504128",
+#                     "97771062690865152",
+#                     "91639231486623744",
+#                     "139697252712054784",
+#                     "154830443156340739",
+#                     "215094448009248768",
+#                     "122317844875706370",
+#                     "258500747732189185",
+#                     "66697400403623936",
+#                     "188025061171527680",
+#                     "216548128701153291",
+#                     "131150836528054272",
+#                     "232921983317180416",
+#                     "185106988957564928",
+#                     "108611736176726016",
+#                     "195671081065906176",
+#                     "161931898191478785",
+#                     "211343735315759104",
+#                     "147454963117719552",
+#                     "185031197066264576",
+#                     "182888650055352320",
+#                     "195876139678433280",
+#                     "203455531162009600",
+#                     "133884121830129664",
+#                     "109475514497933312",
+#                     "147617541555093504",
+#                     "180526293421391872",
+#                     "186547391166414848",
+#                     "128926571653234688",
+#                     "180499097223036939",
+#                     "174875522885615616",
+#                     "91361811382685696",
+#                     "105250002154098688",
+#                     "109032564840226816",
+#                     "234830800447602688",
+#                     "109713556513009664",
+#                     "72490462002290688",
+#                     "100447011131654144",
+#                     "66021157416992768",
+#                     "93785357971107840",
+#                     "55197013377036288",
+#                     "114068227390308356"]
+#     thresh = year.isoformat(" ")
+#     print(year)
+#     cursor = overwatch_db.message_log.find(
+#         {
+#             "date": {"$lt": thresh},
+#             "userid": {"$in": trusted_list}
+#         }
+#     )
+#
+#     async for item in cursor:
+#         print(item["date"])
+#         if item["userid"] in trusted_list:
+#             vets.add(str(item["userid"]))
+#     print(vets)
+#     vetlist = list(vets)
+#     print("\n\n\n\n\n")
+#
+#     vetlist = [["<@!" + x + ">"] for x in vetlist]
+#
+#     text = await multi_block(vetlist, True)
+#     for item in text:
+#         await client.send_message(message.channel, item)
+#     print(text)
 
 
 # with open(PATHS["comms"] + "bootstate.txt", "r") as f:
@@ -2555,6 +2563,56 @@ async def get_veterans(message):
 #     if line == "killed":
 #         ENABLED = False
 # client.loop.create_task(stream())
+
+
+class ChannelPlex:
+    CHANNELNAME_CHANNELID_DICT = {
+        "overwatch_discussion": "109672661671505920",
+        "modchat": "106091034852794368",
+        "server_log": "152757147288076297",
+        "voice_channel_output": "200185170249252865",
+        "moderation_notes": "188949683589218304",
+        "pc_lfg": "182420486582435840",
+        "esports_discussion": "233904315247362048",
+        "content_creation": "95324409270636544",
+        "support": "241964387609477120",
+        "competitive_recruitment": "170983565146849280",
+        "tournament_announcement": "184770081333444608",
+        "trusted_chat": "170185225526181890",
+        "general_discussion": "94882524378968064",
+        "lf_scrim": "177136656846028801",
+        "console_lfg": "185665683009306625",
+        "fanart": "168567769573490688",
+        "competitive_discussion": "107255001163788288",
+        "lore_discussion": "180471683759472640",
+        "announcements": "95632031966310400",
+        "spam_channel": "209609220084072450",
+        "jukebox": "176236425384034304",
+        "rules_and_info": "174457179850539009",
+        "warning_log": "170179130694828032",
+        "bot_log": "147153976687591424",
+        "alerts": "252976184344838144",
+    }
+    async def __init__(self, server):
+        self.server = await client.get_server(server)
+        for key in constants.ROLENAME_ID_DICT.keys():
+            self.__setattr__(key, await client.get_channel(constants.ROLENAME_ID_DICT[key]))
+
+
+class RolePlex:
+    ROLENAME_ID_DICT = {
+        "muted": "110595961490792448",
+        "mvp": "117291830810247170",
+        "omnic": "138132942542077952",
+        "trusted": "169728613216813056",
+        "admin": "172949857164722176",
+        "moderator": "172950000412655616",
+    }
+    async def __init__(self, server):
+        self.server = await client.get_server(server)
+        for key in constants.ROLENAME_ID_DICT.keys():
+            self.__setattr__(key, await get_role(server, constants.ROLENAME_ID_DICT[key]))
+
 
 
 
