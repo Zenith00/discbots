@@ -424,15 +424,15 @@ async def get_auths(member):
     author_info = await parse_member_info(member)
     role_whitelist = any(x in [constants.ROLENAME_ID_DICT["TRUSTED_ROLE"], constants.ROLENAME_ID_DICT["MVP_ROLE"]]
                          for x in author_info["role_ids"])
-    mod_whitelist = member.server_permissions.manage_roles and not any(
-        x in "138132942542077952" for x in author_info["role_ids"])
+    mods = await get_moderators(member.server)
+
     auths = set()
     if member.id == constants.ZENITH_ID:
         auths |= {"zenith"}
         auths |= {"trusted"}
         auths |= {"warn"}
         auths |= {"mod"}
-    if mod_whitelist:
+    if member in mods:
         auths |= {"mod"}
         auths |= {"warn"}
         auths |= {"trusted"}
@@ -536,6 +536,7 @@ async def get_moderators(server):
     return users
 
 
+
 @client.event
 async def on_message(message):
     global VCMess
@@ -548,7 +549,7 @@ async def on_message(message):
     if message.author.id == client.user.id:
         return
     if message.server.id == "236343416177295360":
-        await parse_triggers(message)
+        pass
     if message.server is None:
         def scrim_register(msg):
             content = msg.content
@@ -581,7 +582,7 @@ async def on_message(message):
                 await scrim_manage(message)
 
         if message.channel == CHANNELNAME_CHANNEL_DICT["spam-channel"]:
-            await message_check(message)
+            await parse_triggers(message)
         if message.channel.id not in BLACKLISTED_CHANNELS and message.server.id == constants.OVERWATCH_SERVER_ID:
             await mongo_add_message_to_log(message)
 
@@ -961,7 +962,7 @@ async def on_message(message):
 
             if message.content.startswith("`tag"):
                 # command = message.content.replace("`blacklist ","")
-                await tag_str(message)
+                await tag_str(message, False)
             if message.content.startswith("`generate_veterans"):
                 pass
             if message.content.startswith("`firstmsgs"):
@@ -1073,15 +1074,7 @@ async def on_message(message):
 
         if "mod" not in auths:
             # EXTRA-SERVER INVITE CHECKER
-
-            if "chaos vanguard" in message.content.lower():
-                await log_automated("logged a message containing Chaos Vanguard in " + message.channel.name + ":\n[" +
-                                    message.author.name + "]: " + message.content)
-                # await client.delete_message(message)
-                skycoder_mess = await client.send_message(
-                    CHANNELNAME_CHANNEL_DICT["spam-channel"],
-                    "~an " + message.author.mention +
-                    " AUTOMATED: Posted a message containing chaos vanguard: " + message.content)
+            await parse_triggers(message)
             if message.channel.id not in BLACKLISTED_CHANNELS:
                 match = constants.LINK_REGEX.search(message.content)
                 if match is not None:
@@ -1403,14 +1396,7 @@ async def on_message_edit(before, after):
     auths = await get_auths(after.author)
     if "mod" not in auths:
         # EXTRA-SERVER INVITE CHECKER
-        if "chaos vanguard" in after.content.lower():
-            await log_automated("logged a message containing Chaos Vanguard in " + after.channel.name + ":\n[" +
-                                after.author.name + "]: " + after.content)
-            # await client.delete_message(message)
-            skycoder_mess = await client.send_message(
-                CHANNELNAME_CHANNEL_DICT["spam-channel"],
-                "~an " + after.author.mention +
-                " AUTOMATED: Posted a message containing chaos vanguard: " + after.content)
+        await parse_triggers(after)
         if after.channel.id not in BLACKLISTED_CHANNELS:
             match = constants.LINK_REGEX.search(after.content)
             if match is not None:
@@ -1431,12 +1417,10 @@ async def invite_checker(message, regex_match):
             channel = message.channel
             # await client.send_message(mess.channel, serverID + " " + OVERWATCH_ID)
             warn = await client.send_message(message.channel,
-                                             "Please don't link other discord servers here " +
-                                             message.author.mention + "\n" +
-                                             message.server.get_member(constants.ZENITH_ID).mention)
+                                             "Please don't link other discord servers here " +  message.author.mention)
             await client.delete_message(message)
             await log_automated("deleted an external invite: " + str(
-                invite.url) + " from " + message.author.mention + " in " + message.channel.mention)
+                invite.url) + " from " + message.author.mention + " in " + message.channel.mention, "alert")
             skycoder_mess = await client.send_message(
                 CHANNELNAME_CHANNEL_DICT["spam-channel"],
                 "~an " + message.author.mention +
@@ -1507,11 +1491,15 @@ async def mention_to_id(command_list):
     return new_command
 
 
-async def log_automated(description: object) -> None:
+async def log_automated(description: object, type) -> None:
     action = ("At " + str(datetime.utcnow().strftime("[%Y-%m-%d %H:%m:%S] ")) + ", I automatically " +
               str(description) + "\n" + "`kill to disable me")
-    # await client.send_message(CHANNELNAME_CHANNEL_DICT["alerts"], action)
-    await client.send_message(client.get_channel(BOT_HAPPENINGS_ID), action)
+    if type == "alert":
+
+        await client.send_message(CHANNELNAME_CHANNEL_DICT["alerts"], action)
+    else:
+        await client.send_message(CHANNELNAME_CHANNEL_DICT["spam-channel"], action)
+    # await client.send_message(client.get_channel(BOT_HAPPENINGS_ID), action)
 
 
 #
@@ -1689,7 +1677,7 @@ async def lfg_warner(found_message, warn_type, warn_user, channel):
         ordinal_count = ordinal(count)
         await log_automated(
             "warned " + author.mention + " in " + found_message.channel.mention + " for the " + ordinal_count + " time because of the message\n" +
-            found_message.content)
+            found_message.content, "alert")
 
     lfg_text += author_mention
     await client.send_message(channel, lfg_text)
@@ -2316,9 +2304,10 @@ async def add_tag(string, note, action, categories):
                       "categories": {"$each": categories}}})
 
 
-async def tag_str(message):
+async def tag_str(message, regex):
     trigger = message.content.replace("`tag ", "")
-    trigger = re.escape(trigger)
+    if not regex:
+        trigger = re.escape(trigger)
     # if trigger_str_collection.find_one({"trigger": string}):
     #     await tag_update(message)
     #     return
@@ -2342,7 +2331,7 @@ async def tag_str(message):
     trigger = "{b}{trigger}{b}".format(b=r"\b" if bounded else "", trigger=trigger)
 
     await client.send_message(message.channel,
-                              "What actions should I take? (kick, delete, alert")
+                              "What actions should I take? (kick, delete, alert)")
     action_response = (await client.wait_for_message(author=message.author, channel=message.channel)).content
 
     action_response = " ".join((await mention_to_id(action_response.split(" "))))
@@ -2390,9 +2379,9 @@ async def show_tags():
     pass
 
 
-async def message_check(message):
-    responses = await parse_triggers(message)
-    await parse_responses(responses)
+# async def message_check(message):
+#     responses = await parse_triggers(message)
+#     await parse_responses(responses)
 
 
 async def parse_triggers(message) -> list:
@@ -2405,26 +2394,23 @@ async def parse_triggers(message) -> list:
     async for doc in trigger_str_collection.find():
         if regex_test(doc["trigger"], content):
             response_docs.append(doc)
+
     await act_triggers(response_docs, message)
 
 
 async def act_triggers(response_docs, message):
-    if len(response_docs) == 0:
-        return
-
     for doc in response_docs:
         try:
             if doc["action"] == "delete":
-                # await client.delete_message(message)
                 await log_automated("deleted {author}'s message ```{content}```because: {note}".format(
-                    author=message.author.mention, content=message.content.replace("```", ""), note=doc["note"]))
+                    author=message.author.mention, content=message.content.replace("```", ""), note=doc["note"]), "action")
             if doc["action"] == "kick":
                 # await client.kick(message.author)
                 await log_automated("kicked {author} because of the message ```{content}```because: {note}".format(
-                    author=message.author.mention, content=message.content.replace("```", ""), note=doc["note"]))
+                    author=message.author.mention, content=message.content.replace("```", ""), note=doc["note"]), "action")
             if doc["action"] == "alert":
                 await log_automated("registered {author}'s message ```{content}```because: {note}".format(
-                    author=message.author.mention, content=message.content.replace("```", ""), note=doc["note"]))
+                    author=message.author.mention, content=message.content.replace("```", ""), note=doc["note"]), "alert")
             if doc["action"] == "mute":
                 pass
         except (discord.Forbidden, discord.HTTPException):
