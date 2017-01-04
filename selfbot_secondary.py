@@ -21,12 +21,12 @@ async def on_ready():
     print('ID: ' + client.user.id)
 
 @client.event
-async def on_message(message):
+async def on_message(message_in):
     global art_on
-    if message.author == client.user:
-        if message.content.startswith("]]"):
-            command = message.content.replace("]]", "")
-            await client.delete_message(message)
+    if message_in.author == client.user:
+        if message_in.content.startswith("]]"):
+            command = message_in.content.replace("]]", "")
+            await client.delete_message(message_in)
             if command == "art":
                 await client.send_message(client.get_server("262761876373372938"), "Toggling artbot from {} to {}".format(art_on, not art_on))
                 art_on = not art_on
@@ -35,18 +35,24 @@ async def on_message(message):
                 art_timer.set_time(int(command))
 
             if command == "1":
-                modlist = await get_moderators(message.server)
+                modlist = await get_moderators(message_in.server)
                 infodump = []
                 for mod in modlist:
                     infodump.append([ascii(mod.name), mod.id])
                 info = await pretty_column(infodump, True)
                 print(str(info))
                 # info = info.replace("'","")
-                gist = gistClient.create(name="Modlist", description=message.server.name + " moderators",
+                gist = gistClient.create(name="Modlist", description=message_in.server.name + " moderators",
                                          public=False,
                                          content=info)
                 await client.send_message(client.get_server(constants.OVERWATCH_SERVER_ID).get_member(constants.ZENITH_ID), gist["Gist-Link"])
 
+            if command == "linesplit":
+                command = command.split("\n")
+                channel = message_in.channel
+                await client.delete_message(message_in)
+                for x in command:
+                    await client.send_message(channel, x)
 
 
     if art_timer.is_next() and art_on:
