@@ -26,7 +26,6 @@ from utils_parse import *
 from utils_text import *
 from utils_text import shorten_link
 
-ENABLED = True
 logging.basicConfig(level=logging.INFO)
 client = discord.Client()
 imgur = ImgurClient(IMGUR_CLIENT_ID, IMGUR_SECRET_ID, IMGUR_ACCESS_TOKEN,
@@ -334,6 +333,8 @@ async def on_member_update(before, after):
     :type after: discord.Member
     :type before: discord.Member
     """
+    if not INITIALIZED:
+        return
     if not after.joined_at:
         pass
     try:
@@ -512,8 +513,9 @@ async def on_message(message_in):
     global VCInvite
     global PATHS
     global ENABLED
+    global INITIALIZED
 
-    if not ENABLED:
+    if not INITIALIZED:
         return
     if message_in.author.id == client.user.id:
         return
@@ -537,6 +539,17 @@ async def on_message(message_in):
                                   "[" + message_in.author.name + "]: " + message_in.content)
         return
 
+    auths = await get_auths(message_in.author)
+    trigger = "]]"
+
+    if message_in.content.startswith(trigger):
+
+        full_command = message_in.content.replace(trigger, "")
+        segmented_command = full_command.split(" ",1)
+        command = segmented_command[0]
+        params = segmented_command[1] if len(segmented_command) == 2 else None
+        print("Firing command [{command}] from {author}".format(command=segmented_command[0], author=message_in.author.name))
+        await perform_command(command=command, params=params, auths=auths, message_in=message_in)
 
     else:
         if message_in.content.startswith("`scrim start"):
@@ -548,7 +561,7 @@ async def on_message(message_in):
         if message_in.channel.id not in BLACKLISTED_CHANNELS and message_in.server.id == constants.OVERWATCH_SERVER_ID:
             await import_message(message_in)
 
-        auths = await get_auths(message_in.author)
+
 
         if "mod" not in auths:
             await parse_triggers(message_in)
@@ -561,9 +574,11 @@ async def on_message(message_in):
 
 
 async def perform_command(command, params, auths, message_in):
-    params = await mention_to_id(params.split(" "))
+    if params:
+        params = await mention_to_id(params.split(" "))
     output = None
     send_type = None
+
     if "mod" in auths:
         if scrim and command == "scrim":
             await scrim_manage(message_in)
@@ -582,7 +597,7 @@ async def perform_command(command, params, auths, message_in):
         elif command == "rebuildnicks":
             await rebuild_nicks(message_in)
         elif command == "raw":
-            output = await output_message_raw(message_in)
+            output = await output_message_raw(channel=message_in.channel, message_id=params[0])
         elif command == "getroles":
             output = await output_roles(message_in)
             send_type = "rows"
@@ -596,7 +611,7 @@ async def perform_command(command, params, auths, message_in):
         elif command == "find":
             output = await output_find_user(message_in)
         elif command == "reboot":
-            client.logout()
+            await client.logout()
         elif command == "tag":
             await tag_str(message_in, False)
         elif command == "ui":
@@ -616,7 +631,7 @@ async def perform_command(command, params, auths, message_in):
             else:
                 await get_mentions(message_in, "trusted")
             return
-
+    await client.delete_message(message_in)
     if output:
         await send(destination=message_in.channel, text=output, send_type=send_type)
 
@@ -716,11 +731,10 @@ async def generate_activity_hist(message):
                                  public=False,
                                  content=hist)
         return gist["Gist-Link"]
-async def output_message_raw(message_in):
-    command = message_in.content.replace("`raw ", "")
-    text = (await client.get_message(message_in.channel, command)).content
+async def output_message_raw(channel, message_id):
+    text = (await client.get_message(channel, message_id)).content
     text = text.replace("```", "")
-    return text
+    return "```{text}```".format(text=text)
 async def move_to_afk(user, server):
     target = server.get_member(user)
     afk = server.get_channel("94939166399270912")
@@ -1430,6 +1444,7 @@ async def send(destination, text, send_type):
         message_list = multi_block(text, True)
         for message in message_list:
             await client.send_message(destination, message)
+        return
     if send_type == "list":
         text = str(text)[1:-1]
 
@@ -1440,6 +1455,7 @@ async def send(destination, text, send_type):
         if len(line) > 2000:
             print("TEXTWRAPFAIL")
             continue
+        print("Line:" + line)
         await client.send_message(destination, line)
 
 
