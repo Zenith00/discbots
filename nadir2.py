@@ -227,6 +227,7 @@ class ScrimMaster:
         overwatch_db.scrim.update_many({"active": True, "team": {"$ne": "-1"}}, {"$inc": {"sequential": 1}})
 
     async def autobalance(self):
+        server = self.output.server
         cursor = overwatch_db.scrim.find(
             {"active": True, "rank": {"$ne": "unplaced"}, "team": {"$eq": "0"}},
             projection=["userid", "rank"])
@@ -241,25 +242,24 @@ class ScrimMaster:
             if spaggheti_counter == 5:
                 spaggheti_counter = 1
             if counter == 0:
-                await scrim.assign(message.server.get_member(user["userid"]), "2")
+                await scrim.assign(server.get_member(user["userid"]), "2")
                 counter += 1
                 continue
             elif counter == len(members) - 1:
-                await scrim.assign(message.server.get_member(user["userid"]), "2")
+                await scrim.assign(server.get_member(user["userid"]), "2")
                 continue
             elif spaggheti_counter == 1:
-                await scrim.assign(message.server.get_member(user["userid"]), "1")
+                await scrim.assign(server.get_member(user["userid"]), "1")
             elif spaggheti_counter == 2:
-                await scrim.assign(message.server.get_member(user["userid"]), "1")
+                await scrim.assign(server.get_member(user["userid"]), "1")
             elif spaggheti_counter == 3:
-                await scrim.assign(message.server.get_member(user["userid"]), "2")
+                await scrim.assign(server.get_member(user["userid"]), "2")
             else:
-                await scrim.assign(message.server.get_member(user["userid"]), "2")
+                await scrim.assign(server.get_member(user["userid"]), "2")
             spaggheti_counter += 1
             print("Count = {}".format(counter))
             counter += 1
         await client.send_message(self.output, "Autobalancing completed")
-
 
     async def output_teams_list(self):
         cursor = overwatch_db.scrim.find({"active": True, "team":{"$ne":"-1"}})
