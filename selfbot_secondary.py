@@ -24,8 +24,8 @@ async def on_ready():
 async def on_message(message_in):
     global art_on
     if message_in.author == client.user:
-        if message_in.content.startswith("]]"):
-            command = message_in.content.replace("]]", "")
+        if message_in.content.startswith("@@"):
+            command = message_in.content.replace("@@", "")
             await client.delete_message(message_in)
             if command == "art":
                 await client.send_message(client.get_server("262761876373372938"), "Toggling artbot from {} to {}".format(art_on, not art_on))

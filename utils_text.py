@@ -1,8 +1,11 @@
 import re
 import copy
 
+from pyshorteners import Shortener
+
+
 def regex_test(reg_str, string):
-    reg = re.compile(reg_str)
+    reg = re.compile(reg_str, re.IGNORECASE)
     match = reg.search(string)
     return match
 
@@ -76,3 +79,7 @@ async def format_list_to_widths(list_of_rows, widths, left_just):
         for row in list_of_rows:
             output += ("  ".join((val.rjust(width) for val, width in zip(row, widths)))) + "\n"
     return output
+
+
+def shorten_link(link) -> str:
+    return Shortener('Tinyurl').short(link)
