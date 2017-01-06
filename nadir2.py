@@ -270,7 +270,7 @@ class ScrimMaster:
         async for user in cursor:
             user_entry = []
             try:
-                user_entry.append(unidecode(message.server.get_member(user["userid"]).name))
+                user_entry.append(unidecode(self.output.server.get_member(user["userid"]).name))
             except:
                 user_entry.append("MISSING")
 
@@ -289,7 +289,7 @@ class ScrimMaster:
             user_entry.append(str(user["sequential"]))
             userlist.append(user_entry)
 
-        await send(destination=message.channel, text=userlist, send_type="rows")
+        await send(destination=self.output, text=userlist, send_type="rows")
 
     async def output_teams(self):
         cursor = overwatch_db.scrim.find({"active": True, "team": {"$ne": "-1"}})
@@ -297,9 +297,8 @@ class ScrimMaster:
         team2 = [["Team 2", "", "", ""], ["Name", "Batletag", "SR", "ID"]]
         async for user in cursor:
             team = user["team"]
-            if team == "0":
-                target_team = unassigned
-            elif team == "1":
+            
+            if team == "1":
                 target_team = team1
             elif team == "2":
                 target_team = team2
@@ -311,7 +310,7 @@ class ScrimMaster:
 
             user_entry = []
 
-            user_entry.append(unidecode(message.server.get_member(user["userid"]).name))
+            user_entry.append(unidecode(self.output.server.get_member(user["userid"]).name))
             user_entry.append(user["btag"])
             user_entry.append(user["rank"])
             user_entry.append(user["userid"])
@@ -1570,7 +1569,7 @@ async def message_to_stream(mess_dict):
 async def import_message(mess):
     messInfo = await parse_message_info(mess)
     result = await message_log_collection.insert_one(messInfo)
-    # messText = await message_to_log(messInfo)
+    # messText = await format_message_to_log(messInfo)
     # await message_to_stream(messInfo)
     # await client.send_message(STREAM, await message_to_stream(messInfo))
 
@@ -1734,7 +1733,7 @@ async def scrim_manage(message):
 
             if command_list[0] == "join":
                 # await scrim.add_user(message.author.id)
-                await scrim_join(message.author)
+                await scrim.scrim_join(message.author)
 
             if command_list[0] == "leave":
                 await scrim.leave(message.author)
@@ -2206,7 +2205,7 @@ async def get_logs_mentions(query_type, mess):
         # user_info = await parse_member_info(target.server.get_member(message_dict["userid"]))
         # await client.send_message(target, "DEBUG: FOUND MATCH! " + message_dict["content"])
         number_message_dict[count] = message_dict
-        message_choices_text += "(" + str(count) + ")" + await message_to_log(message_dict) + "\n"
+        message_choices_text += "(" + str(count) + ")" + await format_message_to_log(message_dict) + "\n"
         if count % 5 == 0:
             message_choices_text += "\n```"
             try:
@@ -2232,7 +2231,7 @@ async def get_logs_mentions(query_type, mess):
                                       "You have no (more) logged mentions!")
             response = await get_response_int(target)
         selected_message = number_message_dict[int(response.content)]
-        await client.send_message(target, " \n Selected Message: \n[" + await message_to_log(selected_message))
+        await client.send_message(target, " \n Selected Message: \n[" + await format_message_to_log(selected_message))
         await client.send_message(target,
                                   "\n\n\n\nHow many messages of context would you like to retrieve? Enter an integer")
         response = await get_response_int(target)
@@ -2283,58 +2282,58 @@ async def get_from_find(message):
                 user_id = match.group(0)
     return user_id
 
-
-class ChannelPlex:
-    CHANNELNAME_CHANNELID_DICT = {
-        "overwatch_discussion": "109672661671505920",
-        "modchat": "106091034852794368",
-        "server_log": "152757147288076297",
-        "voice_channel_output": "200185170249252865",
-        "moderation_notes": "188949683589218304",
-        "pc_lfg": "182420486582435840",
-        "esports_discussion": "233904315247362048",
-        "content_creation": "95324409270636544",
-        "support": "241964387609477120",
-        "competitive_recruitment": "170983565146849280",
-        "tournament_announcement": "184770081333444608",
-        "trusted_chat": "170185225526181890",
-        "general_discussion": "94882524378968064",
-        "lf_scrim": "177136656846028801",
-        "console_lfg": "185665683009306625",
-        "fanart": "168567769573490688",
-        "competitive_discussion": "107255001163788288",
-        "lore_discussion": "180471683759472640",
-        "announcements": "95632031966310400",
-        "spam_channel": "209609220084072450",
-        "jukebox": "176236425384034304",
-        "rules_and_info": "174457179850539009",
-        "warning_log": "170179130694828032",
-        "bot_log": "147153976687591424",
-        "alerts": "252976184344838144",
-    }
-
-    async def __init__(self, server):
-        self.server = await client.get_server(server)
-        for key in constants.ROLENAME_ID_DICT.keys():
-            self.__setattr__(key, await client.get_channel(constants.ROLENAME_ID_DICT[key]))
-
-
-
-
-class RolePlex:
-    ROLENAME_ID_DICT = {
-        "muted": "110595961490792448",
-        "mvp": "117291830810247170",
-        "omnic": "138132942542077952",
-        "trusted": "169728613216813056",
-        "admin": "172949857164722176",
-        "moderator": "172950000412655616",
-    }
-
-    async def __init__(self, server):
-        self.server = await client.get_server(server)
-        for key in constants.ROLENAME_ID_DICT.keys():
-            self.__setattr__(key, await get_role(server, constants.ROLENAME_ID_DICT[key]))
-
+#
+# class ChannelPlex:
+#     CHANNELNAME_CHANNELID_DICT = {
+#         "overwatch_discussion": "109672661671505920",
+#         "modchat": "106091034852794368",
+#         "server_log": "152757147288076297",
+#         "voice_channel_output": "200185170249252865",
+#         "moderation_notes": "188949683589218304",
+#         "pc_lfg": "182420486582435840",
+#         "esports_discussion": "233904315247362048",
+#         "content_creation": "95324409270636544",
+#         "support": "241964387609477120",
+#         "competitive_recruitment": "170983565146849280",
+#         "tournament_announcement": "184770081333444608",
+#         "trusted_chat": "170185225526181890",
+#         "general_discussion": "94882524378968064",
+#         "lf_scrim": "177136656846028801",
+#         "console_lfg": "185665683009306625",
+#         "fanart": "168567769573490688",
+#         "competitive_discussion": "107255001163788288",
+#         "lore_discussion": "180471683759472640",
+#         "announcements": "95632031966310400",
+#         "spam_channel": "209609220084072450",
+#         "jukebox": "176236425384034304",
+#         "rules_and_info": "174457179850539009",
+#         "warning_log": "170179130694828032",
+#         "bot_log": "147153976687591424",
+#         "alerts": "252976184344838144",
+#     }
+#
+#     async def __init__(self, server):
+#         self.server = await client.get_server(server)
+#         for key in constants.ROLENAME_ID_DICT.keys():
+#             self.__setattr__(key, await client.get_channel(constants.ROLENAME_ID_DICT[key]))
+#
+#
+#
+#
+# class RolePlex:
+#     ROLENAME_ID_DICT = {
+#         "muted": "110595961490792448",
+#         "mvp": "117291830810247170",
+#         "omnic": "138132942542077952",
+#         "trusted": "169728613216813056",
+#         "admin": "172949857164722176",
+#         "moderator": "172950000412655616",
+#     }
+#
+#     async def __init__(self, server):
+#         self.server = await client.get_server(server)
+#         for key in constants.ROLENAME_ID_DICT.keys():
+#             self.__setattr__(key, await get_role(server, constants.ROLENAME_ID_DICT[key]))
+#
 
 client.run(AUTH_TOKEN, bot=True)
