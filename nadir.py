@@ -300,7 +300,7 @@ async def on_member_unban(server, member):
         await add_to_user_set(member=member, set_name="unbans", entry=datetime.utcnow().isoformat(" "))
         await client.send_message(CHANNELNAME_CHANNEL_DICT["spam-channel"], "Unban detected, user id = " + member.id)
 
-        # await log_automated("registered a user unban: \n```" + str(await get_user_info(member.id)) + "```")
+        # await log_automated("registered a user unban: \n```" + str(await export_user(member.id)) + "```")
 
 
 @client.event
@@ -1303,7 +1303,7 @@ async def find_author(message, regex, blacklist):
 #                     command = command_list[0]
 #                 except IndexError:
 #                     command = mess.author.id
-#                 user_dict = await get_user_info(command)
+#                 user_dict = await export_user(command)
 #                 if user_dict is not None:
 #                     formatted = [list(map(str, x)) for x in user_dict.items()]
 #                     await client.send_message(mess.channel,
