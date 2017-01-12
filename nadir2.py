@@ -1601,7 +1601,7 @@ async def fuzzy_match(*args):
     nick_fuzz = {}
 
     for nick in nick_id_dict.keys():
-        ratio = fuzz.ratio(nick_to_find, str(nick))
+        ratio = fuzz.ratio(nick_to_find.lower(), str(nick).lower())
         nick_fuzz[str(nick)] = int(ratio)
 
     top_nicks = heapq.nlargest(int(count), nick_fuzz, key=lambda k: nick_fuzz[k])
