@@ -555,8 +555,6 @@ async def perform_command(command, params, message_in):
 
     send_type = None
     called = True
-    print(auths)
-    print(command)
     if command == "scrim":
         await scrim_manage(message_in)
     if "trusted" not in auths:
@@ -1004,7 +1002,6 @@ async def generate_user_channel_activity_hist(message_in, userid):
                 named_hist[name] = hist[key]
 
     sort = sorted(named_hist.items(), key=lambda x: x[1])
-    print(sort)
     hist = "\n".join("%s,%s" % tup for tup in sort)
 
     gist = gistClient.create(name="Channelhist",
@@ -1697,13 +1694,10 @@ async def log_action(action, detail):
             match = re.match(r"(<@!?\d+>)|(@everyone)|(@here)", word)
             if match:
                 id = match.group(0)
-                print(id)
                 if id not in ["@everyone", "@here"]:
                     id = re.search(r"\d+", id)
-                    print(id)
                     id = id.group(0)
                     member = client.get_server(constants.OVERWATCH_SERVER_ID).get_member(id)
-                    print(member.id)
                     perms = target_channel.permissions_for(member)
                     if perms.read_messages:
                         new_words.append(r"\@" + member.name)
@@ -1722,13 +1716,10 @@ async def log_action(action, detail):
             match = re.match(r"(<@!?\d+>)|(@everyone)|(@here)", word)
             if match:
                 id = match.group(0)
-                print(id)
                 if id not in ["@everyone", "@here"]:
                     id = re.search(r"\d+", id)
-                    print(id)
                     id = id.group(0)
                     member = client.get_server(constants.OVERWATCH_SERVER_ID).get_member(id)
-                    print(member.id)
                     perms = target_channel.permissions_for(member)
                     if perms.read_messages:
                         new_words.append(r"\@" + member.name)
@@ -1746,14 +1737,11 @@ async def log_action(action, detail):
             match = re.match(r"(<@!?\d+>)|(@everyone)|(@here)", word)
             if match:
                 id = match.group(0)
-                print(id)
 
                 if id not in ["@everyone", "@here"]:
                     id = re.search(r"\d+", id)
-                    print(id)
                     id = id.group(0)
                     member = client.get_server(constants.OVERWATCH_SERVER_ID).get_member(id)
-                    print(member.id)
                     perms = target_channel.permissions_for(member)
                     if perms.read_messages:
                         new_words.append(r"\@" + member.name)
@@ -1766,13 +1754,11 @@ async def log_action(action, detail):
         detail["after"] = " ".join(new_words)
 
     if "mention" in detail.keys():
-
         id = re.search(r"\d+", detail["mention"])
         id = id.group(0)
         member = client.get_server(constants.OVERWATCH_SERVER_ID).get_member(id)
-        print(member.id)
         perms = target_channel.permissions_for(member)
-        if perms.read_messages:
+        if perms and perms.read_messages:
             detail["mention"] = member.name
 
     time = "`" + time + "`"
