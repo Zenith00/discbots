@@ -55,9 +55,7 @@ VCInvite = None
 VCMess = None
 INITIALIZED = False
 
-
 tagger = Tagger(client)
-
 
 
 class Streamer:
@@ -108,18 +106,18 @@ class ScrimMaster:
         await client.delete_channel(self.team2.vc)
         await client.delete_channel(self.text)
         await client.delete_channel(self.spectate)
+        await overwatch_db.scrim.update_many({}, {"$set": {"active": False, "pos": 0, "team": ""}})
 
     async def assign(self, member, team):
         await self.deauth(member)
         return await self.auth(member, team)
 
-    async def reset(self, message):
+    async def reset(self):
         cursor = overwatch_db.scrim.find({"active": True})
+        server = self.output.server
         async for person in cursor:
-            await self.deauth(message.server.get_member(person["userid"]))
-        await overwatch_db.scrim.update_many
-        await overwatch_db.scrim.update_many({"active": True, "team":{"$ne":"-1"}}, {"$set": {"team": "0"}, "$inc" : {"unplayed":1}})
-
+            await self.deauth(server.get_member(person["userid"]))
+        await overwatch_db.scrim.update_many({"team": "playing"}, {"$set": {"active": False}})
 
     async def auth(self, member, team):
         print("Assigning {} to {}".format(member.id, team))
@@ -142,7 +140,7 @@ class ScrimMaster:
         target_team.members.append(member.id)
         user_overwrite_vc = discord.PermissionOverwrite(connect=True)
         await client.edit_channel_permissions(target_team.vc, member, user_overwrite_vc)
-        return member.mention + " added to team " + target_team.nameah
+        return member.mention + " added to team " + target_team.name
 
     async def deauth(self, member):
 
@@ -161,8 +159,9 @@ class ScrimMaster:
 
     async def register(self, message):
         command_list = message.content.split(" ")
-        await overwatch_db.scrim.update_one({"userid": message.author},
-                                            {"$set": {"rank": command_list[1].lower(), "btag": command_list[0], "region": command_list[2], "active": True}}, upsert=True)
+        await overwatch_db.scrim.update_one({"userid": message.author.id},
+                                            {"$set": {"rank": command_list[1].lower(), "btag": command_list[0],
+                                                      "region": command_list[2], "active": True}}, upsert=True)
         await scrim.add_user(message.author)
 
     async def serve_scrim_prompt(self, member):
@@ -178,34 +177,40 @@ class ScrimMaster:
                                       "Please enter your battletag, highest SR, and region (EU, NA, KR) in the format:\nBattleTag#0000 2500 EU\n or Battletag#00000 unplaced NA")
 
     async def add_user(self, member):
-        cursor = overwatch_db.scrim.find({"active": True, "team":"pending"})
-        cursor.sort("pos", 1)
+        size = 4
+        cursor = overwatch_db.scrim.find({"active": True})
         count = await cursor.count()
+        cursor.sort("pos", 1)
 
-        await overwatch_db.scrim.update_one({"userid": member.id}, {"$set": {"active": True, "pos":count}})
+        await overwatch_db.scrim.update_one({"userid": member.id},
+                                            {"$set": {"active": True, "pos": count+1, "team": "pending"}})
 
         new_joined = await overwatch_db.scrim.find_one({"userid": member.id})
+        cursor = overwatch_db.scrim.find({"active": True})
+        count = await cursor.count()
 
-
-
-
-        update = "[{region}] {btag} ({mention}) has joined the scrim with an SR of {sr} ({count}/12)".format(
-            region=new_joined["region"], btag=new_joined["btag"], mention=member.mention, sr=new_joined["rank"], count=count + 1)
+        update = "[{region}] {btag} ({mention}) has joined the scrim with an SR of {sr} ({count}/{size})".format(
+            region=new_joined["region"], btag=new_joined["btag"], mention=member.mention, sr=new_joined["rank"],
+            count=count, size=size)
         await client.send_message(self.output, update)
 
-
     async def start(self):
-        cursor = overwatch_db.scrim.find({"active": True, "team":"pending"})
+
+        await self.reset()
+        # overwatch_db.scrim.update_many({"active": True}, {"$set":{"team":"pending"}})
+        size = 4
+        cursor = overwatch_db.scrim.find({"active": True, "pos": {"$lt": size + 1}})
         count = await cursor.count()
-        if count < 12:
-            await client.send_message(self.output, "Not enough players: ({count}/12)".format(count=count))
+        if count < size:
+            await client.send_message(self.output,
+                                      "Not enough players: ({count}/{size})".format(count=count, size=size))
             return
         else:
             await client.send_message(self.output, "Starting...")
-            cursor = overwatch_db.scrim.update_many({"active":True, "pos": {"$lt":13}, "team":"pending"})
+            await overwatch_db.scrim.update_many({"active": True, "pos": {"$lt": size + 1}}, {"$set":{"team": "playing"}})
             await self.autobalance()
             await self.output_teams()
-            await overwatch_db.scrim.update_many({"active":True, "pos": {"$lt": 13}}, {"$inc":{"pos":count}})
+            await overwatch_db.scrim.update_many({"active": True, "pos": {"$lt": size + 1}}, {"$inc": {"pos": count}})
 
             cursor = overwatch_db.scrim.find({"active": True})
             cursor.sort("pos", 1)
@@ -214,7 +219,7 @@ class ScrimMaster:
             if base["pos"] != 1:
                 start = 1 - base["pos"]
                 cursor.rewind()
-                await overwatch_db.scrim.update_many({"active":True}, {"$inc":{"pos":start}})
+                await overwatch_db.scrim.update_many({"active": True}, {"$inc": {"pos": start}})
 
     async def leave(self, member):
         userid = member.id
@@ -232,11 +237,11 @@ class ScrimMaster:
         user = await overwatch_db.scrim.find_one({"userid": member.id})
         await self.register(member, user["btag"])
 
-
     async def autobalance(self):
         server = self.output.server
+
         cursor = overwatch_db.scrim.find(
-            {"active": True, "team":"pending"},
+            {"active": True, "team": "playing"},
             projection=["userid", "rank"])
 
         cursor.sort("rank", -1)
@@ -269,7 +274,7 @@ class ScrimMaster:
         await client.send_message(self.output, "Autobalancing completed")
 
     async def output_teams_list(self):
-        cursor = overwatch_db.scrim.find({"active": True, "team":{"$ne":"-1"}})
+        cursor = overwatch_db.scrim.find({"active": True, "team": {"$ne": "-1"}})
 
         cursor.sort("rank", pymongo.DESCENDING)
 
@@ -299,9 +304,9 @@ class ScrimMaster:
         await send(destination=self.output, text=userlist, send_type="rows")
 
     async def output_teams(self):
-        cursor = overwatch_db.scrim.find({"active": True, "team": {"$ne": "-1"}})
+        cursor = overwatch_db.scrim.find({"active": True, "team": "playing"})
         team1 = [["Team 1", "", "", ""], ["Name", "Battletag", "SR", "ID"]]
-        team2 = [["Team 2", "", "", ""], ["Name", "Batletag", "SR", "ID"]]
+        team2 = [["Team 2", "", "", ""], ["Name", "Battletag", "SR", "ID"]]
         async for user in cursor:
             team = user["team"]
 
@@ -312,8 +317,6 @@ class ScrimMaster:
             else:
                 print("fail - check teams")
                 return
-
-
 
             user_entry = []
 
@@ -329,21 +332,17 @@ class ScrimMaster:
             await send(destination=self.output, text=item, send_type="rows")
 
 
-
 async def get_redirected_url(url):
     opener = urllib.request.build_opener(urllib.request.HTTPRedirectHandler)
     request = opener.open(url)
     return request.url
 
 
-
-
-
 @client.event
 async def on_member_remove(member):
     if member.server.id == constants.OVERWATCH_SERVER_ID:
         await import_to_user_set(member=member, set_name="server_leaves", entry=datetime.utcnow().isoformat(" "))
-        await log_action("leave", {"mention":member.mention, "id":member.id})
+        await log_action("leave", {"mention": member.mention, "id": member.id})
 
 
 @client.event
@@ -425,10 +424,6 @@ async def on_member_update(before, after):
             pass
 
 
-
-
-
-
 @client.event
 async def on_message_edit(before, after):
     if before.server.id == constants.OVERWATCH_SERVER_ID:
@@ -441,11 +436,17 @@ async def on_message_edit(before, after):
                 match = constants.LINK_REGEX.search(after.content)
                 if match is not None:
                     await invite_checker(after, match)
-        await log_action("edit", {"channel":before.channel.mention, "mention":before.author.mention, "id":before.author.id, "before":before.content, "after":after.content})
+        await log_action("edit",
+                         {"channel": before.channel.mention, "mention": before.author.mention, "id": before.author.id,
+                          "before": before.content, "after": after.content})
+
 
 @client.event
 async def on_message_delete(message):
-    await log_action("delete", {"channel": message.channel.mention, "mention": message.author.mention, "id": message.author.id, "content": message.content})
+    await log_action("delete",
+                     {"channel": message.channel.mention, "mention": message.author.mention, "id": message.author.id,
+                      "content": message.content})
+
 
 @client.event
 async def on_message(message_in):
@@ -490,7 +491,7 @@ async def on_message(message_in):
         params = segmented_command[1] if len(segmented_command) == 2 else None
         print("Firing command [{command}] from {author}".format(command=segmented_command[0],
                                                                 author=message_in.author.name))
-        await perform_command(command=command, params=params, auths=auths, message_in=message_in)
+        await perform_command(command=command, params=params, message_in=message_in)
 
     elif message_in.server.id == constants.OVERWATCH_SERVER_ID:
         if message_in.content.startswith("`scrim start"):
@@ -505,6 +506,7 @@ async def on_message(message_in):
                 match = constants.LINK_REGEX.search(message_in.content)
                 if match is not None:
                     await invite_checker(message_in, match)
+
 
 async def get_auths(member):
     """
@@ -544,16 +546,22 @@ async def get_auths(member):
             pass
     return auths
 
-async def perform_command(command, params, auths, message_in):
+
+async def perform_command(command, params, message_in):
     if params:
         params = await mention_to_id(params.split(" "))
     output = []
+    auths = await get_auths(message_in.author)
+
     send_type = None
     called = True
     print(auths)
     print(command)
+    if command == "scrim":
+        await scrim_manage(message_in)
     if "trusted" not in auths:
         return
+
     if "zenith" in auths:
         if command == "mostactive":
             output.append(await generate_activity_hist(message_in))
@@ -568,7 +576,13 @@ async def perform_command(command, params, auths, message_in):
         elif command == "reboot":
             await client.logout()
         elif command == "rebuild":
+            count = 0
+            memberlist = []
             for member in message_in.server.members:
+                memberlist.append(member)
+            for member in memberlist:
+                print(count)
+                count += 1
                 await import_to_user_set(member, "server_joins", member.joined_at.isoformat(" "))
         else:
             called = False
@@ -583,10 +597,10 @@ async def perform_command(command, params, auths, message_in):
             await serve_lfg(message_in)
         else:
             called = False
+
     if "mod" in auths:
-        if command == "scrim":
-            await scrim_manage(message_in)
-        elif command == "get_role_members":
+
+        if command == "get_role_members":
             pass
 
 
@@ -634,6 +648,7 @@ async def perform_command(command, params, auths, message_in):
         for item in output:
             await send(destination=message_in.channel, text=item[0], send_type=item[1])
 
+
 async def serve_say(message_in):
     command = message_in.content.replace("`say ", "")
     command_list = command.split(" | ")
@@ -642,21 +657,31 @@ async def serve_say(message_in):
         await client.send_message(message_in.channel, command_list[0])
     else:
         await client.send_message(message_in.channel_mentions[0], command_list[1])
+
+
 async def output_timenow():
     return (await get_redirected_url("http://imgs.xkcd.com/comics/now.png"), None)
+
+
 async def output_message_raw(channel, message_id):
     text = (await client.get_message(channel, message_id)).content
     text = text.replace("```", "")
     return ("```{text}```".format(text=text), None)
+
+
 async def move_to_afk(user, server):
     target = server.get_member(user)
     afk = server.get_channel("94939166399270912")
     await client.move_member(target, afk)
+
+
 async def output_find_user(message_in):
     command = message_in.content[6:]
     command = command.lower()
     command = command.split("|", 2)
     await fuzzy_match(message_in, *command)
+
+
 async def output_join_link(member):
     vc = member.voice.voice_channel
     invite = await client.create_invite(vc, max_uses=1, max_age=6)
@@ -664,8 +689,12 @@ async def output_join_link(member):
         return (invite.link, None)
     else:
         return "User not in a visible voice channel"
+
+
 async def output_user_embed(member_id, message_in):
     target_member = message_in.server.get_member(member_id)
+    if not target_member:
+        target_member = client.get_user_info(member_id)
     if not target_member:
         target_member = message_in.author
 
@@ -702,6 +731,8 @@ async def output_user_embed(member_id, message_in):
 
     embed.set_thumbnail(url=shorten_link(target_member.avatar_url))
     return embed
+
+
 async def serve_lfg(message_in):
     found_message = None
     warn_user = None
@@ -714,6 +745,8 @@ async def serve_lfg(message_in):
     await lfg_warner(found_message=found_message, warn_type="targeted", warn_user=warn_user,
                      channel=message_in.channel)
     await client.delete_message(message_in)
+
+
 async def ping(message):
     """
     :type message: discord.Message
@@ -728,6 +761,8 @@ async def ping(message):
                               voice + " (" + str(
                                   (sent.timestamp - timestamp).total_seconds() * 500) + " ms) " +
                               message.author.mention)
+
+
 async def output_roles(message):
     role_list = []
     role_list.append(["Name", "ID", "Position", "Color", "Hoisted", "Mentionable"])
@@ -767,6 +802,8 @@ async def get_role_members(role) -> list:
         if role in member.roles:
             members.append(member)
     return members
+
+
 async def get_moderators(server):
     users = []
     for role in server.roles:
@@ -774,24 +811,23 @@ async def get_moderators(server):
             members = await get_role_members(role)
             users.extend(members)
     return users
+
+
 async def get_role(server, roleid):
     for x in server.roles:
         if x.id == roleid:
             return x
 
 
-
-
-
-
 # Tagging
 async def add_tag(string, note, action, categories):
     await trigger_str_collection.update_one({"string": string}, {
-            "$addtoset": {"actions": action,
-                          "note": note,
-                          "categories": {"$each": categories}}})
-async def tag_str(trigger, message, regex):
+        "$addtoset": {"actions": action,
+                      "note": note,
+                      "categories": {"$each": categories}}})
 
+
+async def tag_str(trigger, message, regex):
     if not regex:
         trigger = re.escape(trigger)
 
@@ -856,6 +892,8 @@ async def tag_str(trigger, message, regex):
             #     return
             #     # result = await trigger_str_collection.insert_one(database_entry)
             #     # print(result)
+
+
 async def parse_triggers(message) -> list:
     response_docs = []
     content = message.content
@@ -868,6 +906,8 @@ async def parse_triggers(message) -> list:
             response_docs.append(doc)
 
     await act_triggers(response_docs, message)
+
+
 async def act_triggers(response_docs, message):
     for doc in response_docs:
         try:
@@ -892,7 +932,6 @@ async def act_triggers(response_docs, message):
             print(traceback.format_exc())
 
 
-
 # Log Based
 async def output_logs(userid, count, message_in):
     cursor = overwatch_db.message_log.find({"userid": userid}, limit=int(count))
@@ -904,9 +943,11 @@ async def output_logs(userid, count, message_in):
             print(count)
         count += 1
         message_list.append(await format_message_to_log(message_dict))
-    gist = gistClient.create(name="User Log", description=message_in.get_member(userid).name + "'s Logs", public=False,
+    gist = gistClient.create(name="User Log", description=message_in.server.get_member(userid).name + "'s Logs", public=False,
                              content="\n".join(message_list))
     return (gist["Gist-Link"], None)
+
+
 async def output_first_messages(userid, message_in):
     member = message_in.server.get_member(userid)
     cursor = overwatch_db.message_log.find({"userid": member.id}, limit=50)
@@ -920,6 +961,8 @@ async def output_first_messages(userid, message_in):
                              public=False,
                              content="\n".join(logs))
     return (gist["Gist-Link"], None)
+
+
 async def rebuild_logs(message_in):
     if message_in.content.startswith("`superlog"):
         server = message_in.server
@@ -931,6 +974,8 @@ async def rebuild_logs(message_in):
                     print("Message got " + str(count))
                 await import_message(retrieved_message)
                 count += 1
+
+
 async def rebuild_nicks(message_in):
     memberlist = []
     for member in message_in.server.members:
@@ -938,6 +983,8 @@ async def rebuild_nicks(message_in):
     for member in memberlist:
         print(member.name)
         await import_user(member)
+
+
 async def generate_user_channel_activity_hist(message_in, userid):
     hist = defaultdict(int)
     async for doc in message_log_collection.find({"userid": userid}):
@@ -965,6 +1012,8 @@ async def generate_user_channel_activity_hist(message_in, userid):
                              public=False,
                              content=hist)
     return (gist["Gist-Link"], None)
+
+
 async def generate_activity_hist(message):
     if message.content.startswith("`mostactive"):
         print("STARTING")
@@ -1005,6 +1054,8 @@ async def generate_activity_hist(message):
                                  public=False,
                                  content=hist)
         return (gist["Gist-Link"], None)
+
+
 async def format_message_to_log(message_dict):
     cursor = await overwatch_db.userinfo.find_one({"userid": message_dict["userid"]})
     try:
@@ -1026,13 +1077,14 @@ async def format_message_to_log(message_dict):
     return "[" + message_dict["date"][:19] + "][" + channel_name + "][" + name + "]:" + \
            content
 
-async def output_channel_dist(channel, days ):
+
+async def output_channel_dist(channel, days):
     activity = defaultdict(int)
     count = 0
     date = datetime.utcnow() - timedelta(days=int(days))
     date = date.isoformat(" ")
     print(date)
-    async for mess in message_log_collection.find({"date": {"$gt": date}, "channel_id":channel.id}):
+    async for mess in message_log_collection.find({"date": {"$gt": date}, "channel_id": channel.id}):
         activity[mess["userid"]] += len(mess["content"].split(" "))
         print(mess["date"])
         print(mess["channel_id"])
@@ -1047,7 +1099,7 @@ async def output_channel_dist(channel, days ):
         else:
             name = key
         newact[name] = newactivity[key]
-    sort = sorted(newact.items(), key=lambda x: x[1])
+    sort = sorted(newact.items(), key=lambda x: x[1], reversed=True)
     print(sort)
     hist = "\n".join("%s,%s" % tup for tup in sort)
 
@@ -1204,6 +1256,7 @@ async def output_channel_dist(channel, days ):
 #                 await client.purge_from(mess.channel)
 #             if "`rebuildnicks" in mess.content:
 #                 memberlist = []
+
 #                 for member in mess.server.members:
 #                     memberlist.append(member)
 #                 for member in memberlist:
@@ -1356,7 +1409,7 @@ async def output_channel_dist(channel, days ):
 
 
 
-#Cooperative Functions
+# Cooperative Functions
 
 
 
@@ -1368,6 +1421,8 @@ async def import_message(mess):
     # messText = await format_message_to_log(messInfo)
     # await message_to_stream(messInfo)
     # await client.send_message(STREAM, await message_to_stream(messInfo))
+
+
 async def import_to_user_set(member, set_name, entry):
     await userinfo_collection.update_one(
         {"userid": member.id},
@@ -1375,6 +1430,8 @@ async def import_to_user_set(member, set_name, entry):
             "$addToSet": {set_name: entry}
         }
     )
+
+
 async def import_user(member):
     """
 
@@ -1396,6 +1453,8 @@ async def import_user(member):
         , upsert=True
     )
     pass
+
+
 async def export_user(member_id):
     """
 
@@ -1416,6 +1475,7 @@ async def export_user(member_id):
         except:
             pass
     return userinfo
+
 
 # Utils
 async def send(destination, text, send_type):
@@ -1442,6 +1502,8 @@ async def send(destination, text, send_type):
         print("Line:" + line)
         line = line.replace("<NL<", "\n")
         await client.send_message(destination, line)
+
+
 async def mention_to_id(command_list):
     """
 
@@ -1462,6 +1524,8 @@ async def mention_to_id(command_list):
             new_command.append(id_chars)
     print(new_command)
     return new_command
+
+
 async def invite_checker(message, regex_match):
     """
 
@@ -1499,15 +1563,19 @@ async def invite_checker(message, regex_match):
         pass
     except:
         print(traceback.format_exc())
+
+
 async def log_automated(description: object, type) -> None:
     action = ("At " + str(datetime.utcnow().strftime("[%Y-%m-%d %H:%m:%S] ")) + ", I automatically " + str(description))
     if type == "alert":
-        target= constants.CHANNELNAME_CHANNELID_DICT["alerts"]
+        target = constants.CHANNELNAME_CHANNELID_DICT["alerts"]
     elif type == "deletion":
         target = constants.CHANNELNAME_CHANNELID_DICT["bot-log"]
     else:
         target = constants.CHANNELNAME_CHANNELID_DICT["spam-channel"]
     await client.send_message(client.get_channel(target), action)
+
+
 async def fuzzy_match(*args):
     if len(args) == 2:
         count = 1
@@ -1553,6 +1621,8 @@ async def fuzzy_match(*args):
 
     message_to_send += pretty_column(pretty_list, True)
     await client.send_message(mess.channel, message_to_send)
+
+
 async def finder(message, regex, blacklist):
     """
 
@@ -1583,6 +1653,7 @@ async def finder(message, regex, blacklist):
                     return found_message
     return found_message
 
+
 async def log_action(action, detail):
     target_channel = client.get_channel(constants.CHANNELNAME_CHANNELID_DICT["server-log"])
     # target_channel = client.get_channel("152757147288076297")
@@ -1593,15 +1664,19 @@ async def log_action(action, detail):
     if "before" in detail.keys():
         bef = []
 
-        for word in re.split(r"\s" , detail["before"]):
-            if regex_test(r"https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)", word):
+        for word in re.split(r"\s", detail["before"]):
+            if regex_test(
+                    r"https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)",
+                    word):
                 word = "<" + word + ">"
             bef.append(word)
         detail["before"] = " ".join(bef)
     if "after" in detail.keys():
         aft = []
         for word in re.split(r"\s", detail["after"]):
-            if regex_test(r"https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)", word):
+            if regex_test(
+                    r"https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)",
+                    word):
                 word = "<" + word + ">"
             aft.append(word)
         detail["after"] = " ".join(aft)
@@ -1614,7 +1689,6 @@ async def log_action(action, detail):
                 word = "<" + word + ">"
             cont.append(word)
         detail["content"] = " ".join(cont)
-
 
     if "content" in detail.keys():
         new_words = []
@@ -1701,25 +1775,35 @@ async def log_action(action, detail):
         if perms.read_messages:
             detail["mention"] = member.name
 
-
-
     time = "`" + time + "`"
     if action == "delete":
-        message = "{time} :wastebasket: [DELETE] [{channel}] [{mention}] [{id}]:\n{content}".format(time=time, channel=detail["channel"], mention=detail["mention"], id=detail["id"], content=detail["content"])
+        message = "{time} :wastebasket: [DELETE] [{channel}] [{mention}] [{id}]:\n{content}".format(time=time,
+                                                                                                    channel=detail[
+                                                                                                        "channel"],
+                                                                                                    mention=detail[
+                                                                                                        "mention"],
+                                                                                                    id=detail["id"],
+                                                                                                    content=detail[
+                                                                                                        "content"])
     elif action == "edit":
-        message = "{time} :pencil: [EDIT] [{channel}] [{mention}] [{id}]:\n`-BEFORE:` {before}\n`+ AFTER:` {after}".format(time=time, channel=detail["channel"], mention=detail["mention"], id=detail["id"], before=detail["before"], after=detail["after"])
+        message = "{time} :pencil: [EDIT] [{channel}] [{mention}] [{id}]:\n`-BEFORE:` {before}\n`+ AFTER:` {after}".format(
+            time=time, channel=detail["channel"], mention=detail["mention"], id=detail["id"], before=detail["before"],
+            after=detail["after"])
     elif action == "join":
-        message = "{time} :inbox_tray: [JOIN] [{mention}] [{id}]".format(time=time, mention=detail["mention"], id=detail["id"])
+        message = "{time} :inbox_tray: [JOIN] [{mention}] [{id}]".format(time=time, mention=detail["mention"],
+                                                                         id=detail["id"])
     elif action == "leave":
-        message = "{time} :outbox_tray: [LEAVE] [{mention}] [{id}]".format(time=time, mention=detail["mention"], id=detail["id"])
+        message = "{time} :outbox_tray: [LEAVE] [{mention}] [{id}]".format(time=time, mention=detail["mention"],
+                                                                           id=detail["id"])
     elif action == "ban":
-        message = "{time} :no_entry_sign: [BAN] [{mention}] [{id}]".format(time=time, mention=detail["mention"], id=detail["id"])
+        message = "{time} :no_entry_sign: [BAN] [{mention}] [{id}]".format(time=time, mention=detail["mention"],
+                                                                           id=detail["id"])
     elif action == "unban":
-        message = "{time} :white_check_mark:  [UNBAN] [{mention}] [{id}]".format(time=time, mention=detail["mention"], id=detail["id"])
+        message = "{time} :white_check_mark:  [UNBAN] [{mention}] [{id}]".format(time=time, mention=detail["mention"],
+                                                                                 id=detail["id"])
     else:
         print("fail")
         return
-
 
     await client.send_message(target_channel, message)
 
@@ -1728,14 +1812,13 @@ async def delay_delete():
     pass
 
 
-
-
-
 # Scrim
 async def scrim_end():
     global scrim
     await scrim.end()
     scrim = None
+
+
 async def scrim_reset():
     global scrim
 
@@ -1743,6 +1826,8 @@ async def scrim_reset():
         await client.delete_channel_permissions(scrim.team1.vc, pair[0])
     for pair in scrim.team2.vc.overwrites:
         await client.delete_channel_permissions(scrim.team2.vc, pair[0])
+
+
 async def scrim_manage(message):
     auths = await get_auths(message.author)
 
@@ -1753,22 +1838,22 @@ async def scrim_manage(message):
         if not scrim and command_list[0] == "start":
             print("starting scrim")
             await scrim_start(message)
-        # if command_list[0] == "manager":
-        #     command_list = await mention_to_id(command_list)
-        #     if command_list[1] == "list":
-        #         managers = await scrim.get_managers()
-        #         manager_list = [["Name", "ID"]]
-        #         for manager_id in managers:
-        #             member = message.server.get_member(manager_id)
-        #             manager_list.append([member.name, member.id])
-        #         await send(destination=message.channel, text=manager_list, send_type="rows")
+            # if command_list[0] == "manager":
+            #     command_list = await mention_to_id(command_list)
+            #     if command_list[1] == "list":
+            #         managers = await scrim.get_managers()
+            #         manager_list = [["Name", "ID"]]
+            #         for manager_id in managers:
+            #             member = message.server.get_member(manager_id)
+            #             manager_list.append([member.name, member.id])
+            #         await send(destination=message.channel, text=manager_list, send_type="rows")
 
 
             # else:
             #     await overwatch_db.scrim.find_one_and_update({"userid": command_list[1]},
             #                                                  {"$bit": {"manager": {"xor": 1}}})
         if command_list[0] == "end":
-            await overwatch_db.scrim.update_many({}, {"$set": {"active": False, "pos":0}})
+            await overwatch_db.scrim.update_many({}, {"$set": {"active": False, "pos": 0}})
             await scrim_end()
     if scrim:
         try:
@@ -1800,55 +1885,58 @@ async def scrim_manage(message):
                 pass
 
             if command_list[0] == "join":
-                await scrim.add_user(message.author)
+                # await scrim.add_user(message.author)
+                await scrim.serve_scrim_prompt(message.author)
 
             if command_list[0] == "leave":
                 await scrim.leave(message.author)
 
             if command_list[0] == "next":
                 await scrim.start()
-            #
-            # if message.author.id in managers:
-            #     # if command_list[0] == "init":
-            #     #     await overwatch_db.scrim.create_index([("userid", pymongo.DESCENDING)], unique=True)
-            #     if command_list[0] == "round":
-            #         await scrim.increment()
-            #     if command_list[0] == "reset":
-            #         await scrim.reset(message)
-            #
-            #     if command_list[0] == "ping":
-            #
-            #         cursor = overwatch_db.scrim.find({"team": "1", "active": True})
-            #         userlist = []
-            #         async for user in cursor:
-            #             userlist.append("<@!" + user["userid"] + ">")
-            #
-            #         await client.send_message(message.channel, "Team 1:\n" + " ".join(userlist))
-            #         cursor = overwatch_db.scrim.find({"team": "2", "active": True})
-            #         userlist = []
-            #         async for user in cursor:
-            #             userlist.append("<@!" + user["userid"] + ">")
-            #
-            #         await client.send_message(message.channel, "Team 2:\n" + " ".join(userlist))
-            #
-            #     if command_list[0] == "remove":
-            #         command_list = await mention_to_id(command_list)
-            #         target = message.server.get_member(command_list[1])
-            #         result = await scrim.leave(target)
-            #         await client.send_message(message.channel, result)
-            #
-            #     if command_list[0] == "move":
-            #         target_member = message.mentions[0]
-            #         response = await scrim.assign(target_member, command_list[2])
-            #         await client.send_message(message.channel, response)
-            #         # await scrim.deauth(target_member)
-            #         # await scrim.auth(target_member, command_list[2])
-            #
-            #     if command_list[0] == "forceactive":
-            #         await overwatch_db.scrim.update_many({"rank": {"$exists": True}}, {"$set": {"active": True}}, )
+                #
+                # if message.author.id in managers:
+                #     # if command_list[0] == "init":
+                #     #     await overwatch_db.scrim.create_index([("userid", pymongo.DESCENDING)], unique=True)
+                #     if command_list[0] == "round":
+                #         await scrim.increment()
+                #     if command_list[0] == "reset":
+                #         await scrim.reset(message)
+                #
+                #     if command_list[0] == "ping":
+                #
+                #         cursor = overwatch_db.scrim.find({"team": "1", "active": True})
+                #         userlist = []
+                #         async for user in cursor:
+                #             userlist.append("<@!" + user["userid"] + ">")
+                #
+                #         await client.send_message(message.channel, "Team 1:\n" + " ".join(userlist))
+                #         cursor = overwatch_db.scrim.find({"team": "2", "active": True})
+                #         userlist = []
+                #         async for user in cursor:
+                #             userlist.append("<@!" + user["userid"] + ">")
+                #
+                #         await client.send_message(message.channel, "Team 2:\n" + " ".join(userlist))
+                #
+                #     if command_list[0] == "remove":
+                #         command_list = await mention_to_id(command_list)
+                #         target = message.server.get_member(command_list[1])
+                #         result = await scrim.leave(target)
+                #         await client.send_message(message.channel, result)
+                #
+                #     if command_list[0] == "move":
+                #         target_member = message.mentions[0]
+                #         response = await scrim.assign(target_member, command_list[2])
+                #         await client.send_message(message.channel, response)
+                #         # await scrim.deauth(target_member)
+                #         # await scrim.auth(target_member, command_list[2])
+                #
+                #     if command_list[0] == "forceactive":
+                #         await overwatch_db.scrim.update_many({"rank": {"$exists": True}}, {"$set": {"active": True}}, )
         except IndexError:
             await client.send_message(message.channel, "Syntax error")
     pass
+
+
 async def scrim_start(message):
     global scrim
     print("blah")
@@ -1899,8 +1987,6 @@ async def scrim_start(message):
     await client.move_channel(scrim.team2.vc, 3)
 
     pass
-
-
 
 
 # Coroutine exec
@@ -2076,6 +2162,8 @@ async def get_logs_mentions(query_type, mess):
         await client.send_message(target, "You entered something wrong! Oops!")
         print(traceback.format_exc())
     pass
+
+
 async def get_response_int(target) -> discord.Message:
     """
 
@@ -2091,6 +2179,8 @@ async def get_response_int(target) -> discord.Message:
                 return False
 
     return await client.wait_for_message(timeout=30, author=target, check=check)
+
+
 async def get_mentions(mess, auth):
     target = mess.author
 
@@ -2135,6 +2225,7 @@ async def wolfram(message):
                 options += "    [" + str(num) + "." + str(sub_num) + "] " + subpod["@title"] + "\n"
         keydict[num] = pod
     options = await client.send_message(message.channel, options)
+
     def check(msg):
         if message.server == msg.server and msg.author.id == message.author.id and message.channel == msg.channel:
             if re.match(r"^\d*$", msg.content):
@@ -2163,6 +2254,7 @@ async def wolfram(message):
     except:
         print(traceback.format_exc())
     await client.delete_message(options)
+
 
 async def lfg_warner(found_message, warn_type, warn_user, channel):
     """
@@ -2207,7 +2299,9 @@ async def lfg_warner(found_message, warn_type, warn_user, channel):
     lfg_text += author_mention
     await client.send_message(channel, lfg_text)
 
+
 pass
+
 
 async def message_to_stream(mess_dict):
     string = ""
@@ -2222,6 +2316,7 @@ async def message_to_stream(mess_dict):
     # await stream.add(string=string)
     return string
 
+
 async def get_from_find(message):
     reg = re.compile(r"(?!ID: ')(\d+)(?=')", re.IGNORECASE)
     user_id = ""
@@ -2231,6 +2326,7 @@ async def get_from_find(message):
             if match is not None:
                 user_id = match.group(0)
     return user_id
+
 
 #
 # class ChannelPlex:
