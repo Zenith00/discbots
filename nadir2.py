@@ -674,7 +674,7 @@ async def move_to_afk(user, server):
 
 
 async def output_find_user(message_in):
-    command = message_in.content[6:]
+    command = message_in.content[7:]
     command = command.lower()
     command = command.split("|", 2)
     await fuzzy_match(message_in, *command)
@@ -1511,7 +1511,6 @@ async def mention_to_id(command_list):
     for item in command_list:
         match = reg.search(item)
         if match is None:
-            print("no match found")
             new_command.append(item)
         else:
             idmatch = re.compile(r"\d")
