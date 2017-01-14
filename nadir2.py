@@ -172,7 +172,7 @@ class ScrimMaster:
                                       "Please enter your battletag, highest SR, and region (EU, NA, KR) in the format:\nBattleTag#0000 2500 EU\n or Battletag#00000 unplaced NA")
 
     async def add_user(self, member):
-        size = 12
+        size = 6
         base = await overwatch_db.scrim.find_one({"active": True}, sort=[("pos", pymongo.DESCENDING)])
         if base:
             count = base["pos"]
@@ -196,7 +196,7 @@ class ScrimMaster:
 
         await self.reset()
         # overwatch_db.scrim.update_many({"active": True}, {"$set":{"team":"pending"}})
-        size = 12
+        size = 6
         cursor = overwatch_db.scrim.find({"active": True})
         count = await cursor.count()
         if count < size:
@@ -254,28 +254,14 @@ class ScrimMaster:
         members = await cursor.to_list(None)
         print(members)
         counter = 0
-        spaggheti_counter = 1
         for user in members:
-            print("Processing... {}".format(user["userid"]))
-            if spaggheti_counter == 5:
-                spaggheti_counter = 1
-            if counter == 0:
-                await scrim.assign(server.get_member(user["userid"]), "2")
-                counter += 1
-                continue
-            elif counter == len(members) - 1:
-                await scrim.assign(server.get_member(user["userid"]), "2")
-                continue
-            elif spaggheti_counter == 1:
+            if counter == 4:
+                counter = 0
+            if counter == 0 or counter == 3:
                 await scrim.assign(server.get_member(user["userid"]), "1")
-            elif spaggheti_counter == 2:
-                await scrim.assign(server.get_member(user["userid"]), "1")
-            elif spaggheti_counter == 3:
+
+            elif counter == 1 or counter == 2:
                 await scrim.assign(server.get_member(user["userid"]), "2")
-            else:
-                await scrim.assign(server.get_member(user["userid"]), "2")
-            spaggheti_counter += 1
-            print("Count = {}".format(counter))
             counter += 1
         await client.send_message(self.output, "Autobalancing completed")
 
