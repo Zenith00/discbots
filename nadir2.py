@@ -172,7 +172,7 @@ class ScrimMaster:
                                       "Please enter your battletag, highest SR, and region (EU, NA, KR) in the format:\nBattleTag#0000 2500 EU\n or Battletag#00000 unplaced NA")
 
     async def add_user(self, member):
-        size = 6
+        size = 12
         base = await overwatch_db.scrim.find_one({"active": True}, sort=[("pos", pymongo.DESCENDING)])
         if base:
             count = base["pos"]
@@ -196,7 +196,7 @@ class ScrimMaster:
 
         await self.reset()
         # overwatch_db.scrim.update_many({"active": True}, {"$set":{"team":"pending"}})
-        size = 6
+        size = 12
         cursor = overwatch_db.scrim.find({"active": True})
         count = await cursor.count()
         if count < size:
