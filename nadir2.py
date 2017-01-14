@@ -106,7 +106,7 @@ class ScrimMaster:
         await client.delete_channel(self.team2.vc)
         await client.delete_channel(self.text)
         await client.delete_channel(self.spectate)
-        await overwatch_db.scrim.update_many({}, {"$set": {"active": False, "pos": 0, "team": ""}})
+        await overwatch_db.scrim.update_many({}, {"$set": {"active": False, "pos": 0, "status": ""}})
 
     async def assign(self, member, team):
         await self.deauth(member)
@@ -117,18 +117,11 @@ class ScrimMaster:
         server = self.output.server
         async for person in cursor:
             await self.deauth(server.get_member(person["userid"]))
-        await overwatch_db.scrim.update_many({"team": "playing"}, {"$set": {"active": False}})
+        await overwatch_db.scrim.update_many({"status": "playing"}, {"$set": {"active": False}})
 
     async def auth(self, member, team):
         print("Assigning {} to {}".format(member.id, team))
-        if team == "-1":
-            await overwatch_db.scrim.update_one({"userid": member.id}, {"$set": {"team": "-1"}})
-            print("setting to wait")
-            return member.mention + " set to wait queue"
-        if team == "0":
-            await overwatch_db.scrim.update_one({"userid": member.id}, {"$set": {"team": "0"}})
-            return member.mention + " unassigned"
-        elif team == "1":
+        if team == "1":
             target_team = self.team1
         elif team == "2":  # team == "2":
             target_team = self.team2
@@ -147,6 +140,8 @@ class ScrimMaster:
         target_member = await overwatch_db.scrim.find_one({"userid": member.id})
         if not target_member:
             print("FAILED TO FIND {}".format(member.id))
+            return
+        if "team" not in target_member.keys():
             return
         target = target_member["team"]
         if target == "1":
@@ -177,13 +172,16 @@ class ScrimMaster:
                                       "Please enter your battletag, highest SR, and region (EU, NA, KR) in the format:\nBattleTag#0000 2500 EU\n or Battletag#00000 unplaced NA")
 
     async def add_user(self, member):
-        size = 4
-        cursor = overwatch_db.scrim.find({"active": True})
-        count = await cursor.count()
-        cursor.sort("pos", 1)
+        size = 12
+        base = await overwatch_db.scrim.find_one({"active": True}, sort=[("pos", pymongo.DESCENDING)])
+        if base:
+            count = base["pos"]
+        else:
+            count=0
+
 
         await overwatch_db.scrim.update_one({"userid": member.id},
-                                            {"$set": {"active": True, "pos": count+1, "team": "pending"}})
+                                            {"$set": {"active": True, "pos": count+1, "status": "pending", "team":""}})
 
         new_joined = await overwatch_db.scrim.find_one({"userid": member.id})
         cursor = overwatch_db.scrim.find({"active": True})
@@ -198,33 +196,41 @@ class ScrimMaster:
 
         await self.reset()
         # overwatch_db.scrim.update_many({"active": True}, {"$set":{"team":"pending"}})
-        size = 4
-        cursor = overwatch_db.scrim.find({"active": True, "pos": {"$lt": size + 1}})
+        size = 12
+        cursor = overwatch_db.scrim.find({"active": True})
         count = await cursor.count()
         if count < size:
             await client.send_message(self.output,
                                       "Not enough players: ({count}/{size})".format(count=count, size=size))
             return
         else:
+            base = await overwatch_db.scrim.find_one({"active": True}, sort=[("pos", pymongo.ASCENDING)])
+            if not base:
+                print("BLAHAHAHAH")
+                return
+            if base["pos"] != 1:
+                print(str(base["pos"]) + " " + base["btag"])
+                start = 1 - base["pos"]
+                await overwatch_db.scrim.update_many({"active": True}, {"$inc": {"pos": start}})
+
             await client.send_message(self.output, "Starting...")
-            await overwatch_db.scrim.update_many({"active": True, "pos": {"$lt": size + 1}}, {"$set":{"team": "playing"}})
+            await overwatch_db.scrim.update_many({"active": True, "pos": {"$lt": size + 1}}, {"$set":{"status": "playing"}})
             await self.autobalance()
             await self.output_teams()
-            await overwatch_db.scrim.update_many({"active": True, "pos": {"$lt": size + 1}}, {"$inc": {"pos": count}})
-
-            cursor = overwatch_db.scrim.find({"active": True})
-            cursor.sort("pos", 1)
-            count = await cursor.count()
-            base = cursor.next_object()
+            await overwatch_db.scrim.update_many({"status": "playing"}, {"active": False, "pos": ""})
+            base = await overwatch_db.scrim.find_one({"active": True}, sort=[("pos", pymongo.ASCENDING)])
+            if not base:
+                print("BLAHAHAHAH")
+                return
             if base["pos"] != 1:
                 start = 1 - base["pos"]
-                cursor.rewind()
                 await overwatch_db.scrim.update_many({"active": True}, {"$inc": {"pos": start}})
+
 
     async def leave(self, member):
         userid = member.id
         await overwatch_db.scrim.update_one({"userid": userid},
-                                            {"$set": {"team": "0", "active": False, "manager": 0, "sequential": 0}})
+                                            {"$set": {"team": "0", "active": False, "manager": 0, "status": "",}})
         return "Removed " + member.mention + " from the active user pool"
 
     # async def register(self, member, btag, sr, region):
@@ -241,7 +247,7 @@ class ScrimMaster:
         server = self.output.server
 
         cursor = overwatch_db.scrim.find(
-            {"active": True, "team": "playing"},
+            {"active": True, "status": "playing"},
             projection=["userid", "rank"])
 
         cursor.sort("rank", -1)
@@ -304,7 +310,7 @@ class ScrimMaster:
         await send(destination=self.output, text=userlist, send_type="rows")
 
     async def output_teams(self):
-        cursor = overwatch_db.scrim.find({"active": True, "team": "playing"})
+        cursor = overwatch_db.scrim.find({"active": True, "status": "playing"})
         team1 = [["Team 1", "", "", ""], ["Name", "Battletag", "SR", "ID"]]
         team2 = [["Team 2", "", "", ""], ["Name", "Battletag", "SR", "ID"]]
         async for user in cursor:
@@ -347,11 +353,14 @@ async def on_member_remove(member):
 
 @client.event
 async def on_member_ban(member):
+    print("ban detected")
+    print(member.name)
     if member.server.id == constants.OVERWATCH_SERVER_ID:
         await import_to_user_set(member=member, set_name="bans", entry=datetime.utcnow().isoformat(" "))
-        spam_ch = await client.get_channel(constants.CHANNELNAME_CHANNELID_DICT["spam-channel"])
-        await client.send_message(spam_ch, "Ban detected, user id = " + member.id)
+        spam_ch =  client.get_channel(constants.CHANNELNAME_CHANNELID_DICT["spam-channel"])
+        # await client.send_message(spam_ch, "Ban detected, user id = " + member.id)
         await log_action("ban", {"mention": member.mention, "id": member.id})
+        print("ban")
 
 
 @client.event
@@ -386,7 +395,9 @@ async def on_member_join(member):
     # await add_to_nick_id_list(member)
     if member.server.id == constants.OVERWATCH_SERVER_ID:
         await import_user(member)
-        await log_action("join", {"mention": member.mention, "id": member.id})
+        current_date = datetime.utcnow()
+        age = abs(current_date - member.created_at)
+        await log_action("join", {"mention": member.mention, "id": member.id, "age":str(age)[:-7]})
 
 
 # noinspection PyUnusedLocal
@@ -601,7 +612,8 @@ async def perform_command(command, params, message_in):
         if command == "get_role_members":
             pass
 
-
+        elif command == "jukeskip":
+            await skip_jukebox(" ".join(params), message_in)
         elif command == "timenow":
             output.append(await output_timenow())
         elif command == "say":
@@ -646,6 +658,24 @@ async def perform_command(command, params, message_in):
         for item in output:
             await send(destination=message_in.channel, text=item[0], send_type=item[1])
 
+
+async def skip_jukebox(song_name, message_in):
+    jukebox = client.get_server(constants.OVERWATCH_SERVER_ID).get_channel(constants.CHANNELNAME_CHANNELID_DICT["jukebox"])
+    await client.send_message(jukebox, "Skipping song `{songname}`, {mention}".format(songname = song_name.replace("`",""), mention = message_in.author.mention ))
+    def check(msg):
+
+        if msg.author.id != "248841864831041547":
+            return False
+        content = msg.content
+        content = content[13:]
+        match = re.match(r".+?(?=added by)", content)
+        if match:
+            song_title = match.group(0)
+            if int(fuzz.ratio(song_name.lower(), song_title.lower())) > 90:
+                return True
+        return False
+    await client.wait_for_message(channel=jukebox, check=check)
+    await client.send_message(jukebox, ".skip")
 
 async def serve_say(message_in):
     command = message_in.content.replace("`say ", "")
@@ -805,7 +835,7 @@ async def get_role_members(role) -> list:
 async def get_moderators(server):
     users = []
     for role in server.roles:
-        if role.permissions.manage_roles:
+        if role.permissions.manage_roles or role.permissions.ban_members:
             members = await get_role_members(role)
             users.extend(members)
     return users
@@ -1533,10 +1563,11 @@ async def invite_checker(message, regex_match):
         invite = await client.get_invite(str(regex_match.group(1)))
         if invite.server.id != constants.OVERWATCH_SERVER_ID:
             channel = message.channel
-            # await client.send_message(mess.channel, serverID + " " + OVERWATCH_ID)
-            warn = await client.send_message(message.channel,
-                                             "Please don't link other discord servers here " + message.author.mention)
-            await client.delete_message(message)
+            # warn = await client.send_message(message.channel,
+            #                                  "Please don't link other discord servers here " + message.author.mention)
+            # await log_action()
+            await act_triggers(response_docs=[{"note":"External server invite", "action":"delete"}], message=message)
+            # await client.delete_message(message)
             await log_automated("deleted an external invite: " + str(
                 invite.url) + " from " + message.author.mention + " in " + message.channel.mention, "alert")
             skycoder_mess = await client.send_message(
@@ -1778,8 +1809,8 @@ async def log_action(action, detail):
             time=time, channel=detail["channel"], mention=detail["mention"], id=detail["id"], before=detail["before"],
             after=detail["after"])
     elif action == "join":
-        message = "{time} :inbox_tray: [JOIN] [{mention}] [{id}]".format(time=time, mention=detail["mention"],
-                                                                         id=detail["id"])
+        message = "{time} :inbox_tray: [JOIN] [{mention}] [{id}]. Account Age: {age}".format(time=time, mention=detail["mention"],
+                                                                         id=detail["id"], age=detail["age"])
     elif action == "leave":
         message = "{time} :outbox_tray: [LEAVE] [{mention}] [{id}]".format(time=time, mention=detail["mention"],
                                                                            id=detail["id"])
@@ -1879,7 +1910,7 @@ async def scrim_manage(message):
             if command_list[0] == "leave":
                 await scrim.leave(message.author)
 
-            if command_list[0] == "next":
+            if command_list[0] == "next" and ("mod" in auths):
                 await scrim.start()
                 #
                 # if message.author.id in managers:
