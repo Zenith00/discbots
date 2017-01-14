@@ -497,8 +497,8 @@ async def on_message(message_in):
         if message_in.content.startswith("`scrim start"):
             await scrim_start(message_in)
             return
-        if message_in.channel.id not in BLACKLISTED_CHANNELS and message_in.server.id == constants.OVERWATCH_SERVER_ID:
-            await import_message(message_in)
+        # if message_in.channel.id not in BLACKLISTED_CHANNELS and message_in.server.id == constants.OVERWATCH_SERVER_ID:
+        await import_message(message_in)
 
         if "mod" not in auths:
             await parse_triggers(message_in)
@@ -1755,10 +1755,13 @@ async def log_action(action, detail):
     if "mention" in detail.keys():
         id = re.search(r"\d+", detail["mention"])
         id = id.group(0)
+        if id == "129706966460137472":
+            return
         member = client.get_server(constants.OVERWATCH_SERVER_ID).get_member(id)
-        perms = target_channel.permissions_for(member)
-        if perms and perms.read_messages:
-            detail["mention"] = member.name
+        if member:
+            perms = target_channel.permissions_for(member)
+            if perms and perms.read_messages:
+                detail["mention"] = member.name
 
     time = "`" + time + "`"
     if action == "delete":
