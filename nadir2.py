@@ -621,7 +621,7 @@ async def perform_command(command, params, message_in):
         elif command == "raw":
             output.append(await output_message_raw(channel=message_in.channel, message_id=params[0]))
         elif command == "getroles":
-            output.append(output_roles(message_in))
+            output.append(await output_roles(message_in))
         elif command == "moveafk":
             await move_to_afk(params[0], message_in.server)
         elif command == "help":
@@ -1679,6 +1679,57 @@ async def finder(message, regex, blacklist):
                     found_message = messageCheck
                     return found_message
     return found_message
+#
+# async def scrub_text(text, channel):
+#     new_words = []
+#     words = re.split(r"\s", text)
+#     for word in words:
+#         #Roles
+#         match = re.match(r"(<@&\d+>)", word)
+#         if match:
+#             id = match.group(0)
+#             id = re.search(r"\d+", id)
+#             id = id.group(0)
+#
+#                 member = client.get_server(constants.OVERWATCH_SERVER_ID).get_member(id)
+#                 perms = target_channel.permissions_for(member)
+#                 if perms.read_messages:
+#                     new_words.append(r"\@" + member.name)
+#                 else:
+#                     new_words.append(word)
+#             else:
+#                 new_words.append("\\" + word)
+#         else:
+#             new_words.append(word)
+#
+#
+#         match = re.match(r"(<@!?\d+>)|(@everyone)|(@here)", word)
+#         if match:
+#             id = match.group(0)
+#             if id not in ["@everyone", "@here"]:
+#                 id = re.search(r"\d+", id)
+#                 id = id.group(0)
+#                 member = client.get_server(constants.OVERWATCH_SERVER_ID).get_member(id)
+#                 perms = target_channel.permissions_for(member)
+#                 if perms.read_messages:
+#                     new_words.append(r"\@" + member.name)
+#                 else:
+#                     new_words.append(word)
+#             else:
+#                 new_words.append("\\" + word)
+#         else:
+#             new_words.append(word)
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#     detail["content"] = " ".join(new_words)
+#     pass
 
 
 async def log_action(action, detail):
