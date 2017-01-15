@@ -628,6 +628,9 @@ async def perform_command(command, params, message_in):
             output.append(await output_channel_dist(message_in.channel, params[0]))
         elif command == "firstmsgs":
             output.append(await output_first_messages(userid=params[0], message_in=message_in))
+        elif command == "unmute":
+            member = message_in.server.get_member(params[0])
+            await unmute(member)
         elif command == "getmentions":
             if "mod" in auths:
                 await get_mentions(message_in, "mod")
@@ -644,6 +647,8 @@ async def perform_command(command, params, message_in):
         for item in output:
             await send(destination=message_in.channel, text=item[0], send_type=item[1])
 
+async def unmute(member):
+    await client.server_voice_state(member, mute=False)
 
 async def skip_jukebox(song_name, message_in):
     jukebox = client.get_server(constants.OVERWATCH_SERVER_ID).get_channel(constants.CHANNELNAME_CHANNELID_DICT["jukebox"])
