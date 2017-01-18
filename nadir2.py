@@ -329,7 +329,7 @@ async def get_redirected_url(url):
 async def on_member_remove(member):
     if member.server.id == constants.OVERWATCH_SERVER_ID:
         await import_to_user_set(member=member, set_name="server_leaves", entry=datetime.utcnow().isoformat(" "))
-        await log_action("leave", {"mention": member.mention, "id": member.id})
+        # await log_action("leave", {"mention": member.mention, "id": member.id})
 
 @client.event
 async def on_member_ban(member):
