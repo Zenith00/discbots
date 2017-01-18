@@ -1121,9 +1121,10 @@ async def output_channel_dist(channel, days):
         else:
             name = key
         newact[name] = newactivity[key]
-    sort = sorted(newact.items(), key=lambda x: x[1], reversed=True)
-    print(sort)
+    sort = sorted(newact.items(), key=lambda x: x[1], reverse=True)
+
     hist = "\n".join("%s,%s" % tup for tup in sort)
+
 
     gist = gistClient.create(name="Userhist",
                              description="Words sent, Last month",
@@ -2087,7 +2088,9 @@ async def scrim_start(message):
     #     await overwatch_db.scrim.update_one({"userid": mod.id}, {"$set": {"manager": 1}}, upsert=True)
 
     # print(await scrim.get_managers())
-
+    time = datetime.utcnow().isoformat(" ")
+    pin_marker = await client.send_message(client.get_channel("262494034252005377"), "Highlights from " + time[5:10])
+    await client.pin_message(pin_marker)
     await client.move_channel(scrim.spectate, 1)
     await client.move_channel(scrim.team1.vc, 2)
     await client.move_channel(scrim.team2.vc, 3)
