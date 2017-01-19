@@ -3,6 +3,7 @@
 # from . import compat
 import discord
 import logging
+from TOKENS import *
 
 logging.basicConfig(level=logging.INFO)
 
@@ -16,16 +17,25 @@ from pip.utils import logging
 client = discord.Client()
 
 @client.event
-async def on_channel_create(channel):
-    if channel.server.id == "255438591214223362":
-        await client.send_message(client.get_channel("255438591214223362"), "Registered channel creation, \n{}".format(channel.name))
+async def on_message(message_in):
+    if message_in.author == client.user:
+        if message_in.content.startswith("%%"):
+            print(message_in.content)
+            command = message_in.content.replace("%%", "")
+            if command == "on":
+                print("on")
+                await client.delete_message(message_in)
+                with open("on.png", "rb") as pfp:
+                    await client.edit_profile(password=PASS, avatar=pfp.read())
+                await client.change_nickname(message_in.server.get_member(client.user.id), "ZENITH")
+            if command == "off":
+                print("off")
+                await client.delete_message(message_in)
+                with open("off.png", "rb") as pfp:
+                    await client.edit_profile(password=PASS, avatar=pfp.read())
+                await client.change_nickname(message_in.server.get_member(client.user.id), "Zenith")
 
 
-@client.event
-async def on_channel_delete(channel):
-    if channel.server.id == "255438591214223362":
-        await client.send_message(client.get_channel("255438591214223362"),
-                                  "Registered channel deletion, \n{}\n{}".format(channel.name, channel.topic))
 
 @client.event
 async def on_ready():
@@ -34,10 +44,5 @@ async def on_ready():
     print('ID: ' + client.user.id)
 
 
-# noinspection PyShadowingNames,PyBroadException,PyBroadException,PyBroadException
-@client.event
-async def on_message(mess):
-    pass
 
-
-client.run("mfa.IJIfgMg4yJJX3hAmWEKLTT7KvOmBokyWayEw5BrOj6SkVz4RYFxJZK5GXAQe8UbH_CCN9o7thVJFD7H6ErHZ", bot=False)
+client.run(ZENITH_AUTH_TOKEN, bot=False)

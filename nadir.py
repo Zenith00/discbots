@@ -1076,7 +1076,7 @@ async def on_message(message):
             # EXTRA-SERVER INVITE CHECKER
             await parse_triggers(message)
             if message.channel.id not in BLACKLISTED_CHANNELS:
-                match = constants.LINK_REGEX.search(message.content)
+                match = constants.INVITE_REGEX.search(message.content)
                 if match is not None:
                     await invite_checker(message, match)
                     # LFG -> Audit
@@ -1398,7 +1398,7 @@ async def on_message_edit(before, after):
         # EXTRA-SERVER INVITE CHECKER
         await parse_triggers(after)
         if after.channel.id not in BLACKLISTED_CHANNELS:
-            match = constants.LINK_REGEX.search(after.content)
+            match = constants.INVITE_REGEX.search(after.content)
             if match is not None:
                 await invite_checker(after, match)
 

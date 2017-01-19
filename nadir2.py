@@ -329,7 +329,7 @@ async def get_redirected_url(url):
 async def on_member_remove(member):
     if member.server.id == constants.OVERWATCH_SERVER_ID:
         await import_to_user_set(member=member, set_name="server_leaves", entry=datetime.utcnow().isoformat(" "))
-        # await log_action("leave", {"mention": member.mention, "id": member.id})
+        await log_action("leave", {"mention": member.mention, "id": member.id})
 
 @client.event
 async def on_member_ban(member):
@@ -536,7 +536,7 @@ async def perform_command(command, params, message_in):
 
     send_type = None
     called = True
-    if message_in.server.id == "266279338305912832":
+    if message_in.server.id == "266279338305912832" or "zenith" in auths:
         if command == "big":
             text = str(" ".join(params))
             big_text = ""
@@ -553,6 +553,24 @@ async def perform_command(command, params, message_in):
         return
 
     if "zenith" in auths:
+        if command == "names":
+            count = 0
+            text = ""
+            for member in message_in.server.members:
+                if count >= int(params[0]):
+                    break
+                else:
+                    count+=1
+                text += member.name + "\n"
+            output.append((text, None))
+        if command == "purge":
+            await client.delete_message(message_in)
+            while True:
+                # await client.purge_from(message_in.channel)
+                async for message in client.logs_from(message_in.channel):
+                    await client.delete_message(message)
+
+
         if command == "mostactive":
             output.append(await generate_activity_hist(message_in))
 
@@ -595,7 +613,7 @@ async def perform_command(command, params, message_in):
             pass
 
         elif command == "jukeskip":
-            await skip_jukebox(" ".join(params), message_in)
+            await skip_jukebox(" ".join(params[1:]), params[0], message_in)
         elif command == "timenow":
             output.append(await output_timenow())
         elif command == "say":
@@ -645,23 +663,25 @@ async def perform_command(command, params, message_in):
 async def unmute(member):
     await client.server_voice_state(member, mute=False)
 
-async def skip_jukebox(song_name, message_in):
+async def skip_jukebox(song_name, member_id, message_in):
     jukebox = client.get_server(constants.OVERWATCH_SERVER_ID).get_channel(
         constants.CHANNELNAME_CHANNELID_DICT["jukebox"])
     await client.send_message(jukebox,
                               "Skipping song `{songname}`, {mention}".format(songname=song_name.replace("`", ""),
                                                                              mention=message_in.author.mention))
-
+    target_member = message_in.server.get_member(member_id)
     def check(msg):
-
+        if not regex_test(r"<@!?{id}>".format(id=member_id), msg.content):
+            return False
         if msg.author.id != "248841864831041547":
             return False
-        content = msg.content
-        content = content[13:]
-        match = re.match(r".+?(?=added by)", content)
+
+        match = re.search(r"(?<=your song \*\*)(.+?)(?=\*\* is now playing in ♫ Jukebox!)", msg.content)
         if match:
             song_title = match.group(0)
-            if int(fuzz.ratio(song_name.lower(), song_title.lower())) > 90:
+            print(song_title)
+            print(int(fuzz.ratio(song_name.lower(), song_title.lower())))
+            if int(fuzz.ratio(song_name.lower(), song_title.lower())) > 85:
                 return True
         return False
 
@@ -705,9 +725,8 @@ async def output_join_link(member):
         return "User not in a visible voice channel"
 
 async def output_user_embed(member_id, message_in):
-    target_member = message_in.server.get_member(member_id)
-    if not target_member:
-        target_member = client.get_user_info(member_id)
+    # target_member = message_in.author
+    target_member = await client.get_user_info(member_id)
     if not target_member:
         target_member = message_in.author
 
@@ -1351,308 +1370,6 @@ async def log_action(action, detail):
         return
     message = await scrub_text(message, voice_log)
     await client.send_message(target_channel, message)
-#
-# async def find_author(message, regex, blacklist):
-#     author = None
-#     if len(message.mentions) > 0:
-#         author = message.mentions[0]
-#     else:
-#         found_mess = await finder(message, regex, blacklist)
-#         if found_mess is not None:
-#             author = found_mess.author
-#     return author
-
-
-#
-# @client.event
-# async def on_message(mess):
-#     """
-#     Called on client message reception
-#     :type mess: discord.Message
-#     """
-#     global VCMess
-#     global VCInvite
-#     global PATHS
-#     global ENABLED
-#     if not ENABLED:
-#         return
-#     # Not a PM
-#     if mess.server is None:
-#         await client.send_message(client.get_user(constants.ZENITH_ID), "[" + mess.author.name + "]: " + mess.content)
-#     if mess.server is not None:
-#         if not INITIALIZED and mess.server.id == constants.OVERWATCH_SERVER_ID:
-#             await initialize()
-#
-#         if mess.channel.id not in BLACKLISTED_CHANNELS:
-#             await mongo_add_message_to_log(mess)
-#
-#         if mess.content == "`getart":
-#             if await credential(mess.author, "get_art"):
-#                 await client.delete_message(mess)
-#                 art_channel = CHANNELNAME_CHANNEL_DICT["fanart"])
-#                 rand_art = []
-#                 count = 8
-#                 with open(PATHS["comms"] + "auto_art_list.txt", "r+") as art_list:
-#                     if len(art_list.readlines()) <= count:
-#                         link_list = [x.link for x in imgur.get_album_images("umuvY")]
-#                         random.shuffle(link_list)
-#                         for link in link_list:
-#                             art_list.write(link + "\n")
-#                 with open(PATHS["comms"] + "auto_art_list.txt", "r") as art_list:
-#                     for x in range(1, count):
-#                         line = art_list.readline()
-#                         rand_art.append(line)
-#                 await delete_lines(PATHS["comms"] + "auto_art_list.txt", count)
-#
-#                 for artlink in rand_art:
-#                     await client.send_message(art_channel, artlink)
-#         if mess.content.startswith("`flagart"):
-#             command = mess.content.replace("`flagart ", "")
-#             imgur_id_reg = re.compile("(?<=http://i.imgur.com/)(\w+)", re.IGNORECASE)
-#             match = imgur_id_reg.search(command)
-#             if await credential(mess.author, "zenith"):
-#                 if match is not None:
-#                     imgur_id = match.group(0)
-#                     imgur.delete_image(imgur_id)
-#
-#             message = await finder(mess, command, "none")
-#             print(message.content)
-#             if message is not None:
-#                 await client.delete_message(message)
-#         # AUTHOR-ONLY
-#         if await credential(mess.author, "zenith"):
-#             if mess.content.startswith("`clearnicks"):
-#                 result = await userinfo_collection.update_many(
-#                     {},
-#                     {"$unset": {"nicks": ""}}
-#                 )
-#                 return
-#             if mess.content.startswith("`remindme"):
-#                 command = mess.content.replace("`remindme ", "")
-#                 command_list = command.split(" | ", 1)
-#                 print(command_list)
-#                 try:
-#                     time = int(aeval(command_list[1]))
-#                     # time = int(command[0])
-#                     await asyncio.sleep(time)
-#                     await client.send_message(mess.channel, "Reminding " + mess.author.mention + " after " + str(
-#                         time) + " seconds:\n" + command_list[0])
-#                 except:
-#                     print(traceback.format_exc())
-#
-#             if mess.content.startswith("`timenow"):
-#                 redirected = await get_redirected_url("http://imgs.xkcd.com/comics/now.png")
-#                 await client.send_message(mess.channel, redirected)
-#                 await client.delete_message(mess)
-#             if mess.content.startswith("`aex"):
-#                 print("EXECUTING")
-#                 input_command = mess.content.replace("`aex ", "")
-#                 command = ('try:\n'
-#                            '    import asyncio\n'
-#                            '    def do_task(message):\n'
-#                            '        asyncio.get_event_loop().create_task({command})\n'
-#                            '\n'
-#                            '    asyncio.get_event_loop().call_soon_threadsafe(do_task, mess)\n'
-#                            'except RuntimeError:\n'
-#                            '    pass\n').format(command=input_command)
-#
-#                 old_stdout = sys.stdout
-#                 redirected_output = sys.stdout = StringIO()
-#                 response_str = "```py\nInput:\n" + input_command + "\nOutput:\n"
-#                 try:
-#                     exec(command)
-#                 except Exception:
-#                     response_str += traceback.format_exc()
-#                 finally:
-#                     sys.stdout = old_stdout
-#                 if redirected_output.getvalue():
-#                     response_str += redirected_output.getvalue()
-#                 response_str += "\n```"
-#                 await client.send_message(mess.channel, response_str)
-#             if mess.content.startswith("`wipegists"):
-#                 gist = gistClient.profile().list(30)
-#                 for x in gist:
-#                     gistClient.profile().delete(id=x)
-#
-#             if mess.content.startswith("`say"):
-#                 command = mess.content.replace("`say ", "")
-#                 command_list = command.split(" | ")
-#                 channel = mess.channel
-#                 channel_mentions = mess.channel_mentions
-#                 await client.delete_message(mess)
-#                 if len(command_list) == 1:
-#                     await client.send_message(channel, command_list[0])
-#                 else:
-#                     await client.send_message(channel_mentions[0], command_list[1])
-#             if "`auth" in mess.content:
-#                 command = mess.content.replace("`auth ", "")
-#                 command_list = command.split(" ")
-#                 await client.delete_message(mess)
-#                 try:
-#                     await authorize_user(command_list)
-#                 except:
-#                     print(traceback.format_exc())
-#             # NADIR PURGE
-#             if "`clear" in mess.content and mess.server.id == "236343416177295360":
-#                 await client.purge_from(mess.channel)
-#             if "`rebuildnicks" in mess.content:
-#                 memberlist = []
-
-#                 for member in mess.server.members:
-#                     memberlist.append(member)
-#                 for member in memberlist:
-#                     try:
-#                         print(member.name)
-#                         await add_to_user_list(member)
-#                     except:
-#                         pass
-#             if mess.content.startswith("`purge"):
-#                 await client.send_message(client.get_channel(BOT_HAPPENINGS_ID),
-#                                           "PURGING:\n" + str(await parse_message_info(mess)))
-#
-#                 command = mess.content.replace("`purge ", "")
-#                 command_list = command.split(" ")
-#                 number_to_remove = int(command_list[1])
-#                 await client.delete_message(mess)
-#                 async for message in client.logs_from(mess.channel):
-#                     print(number_to_remove)
-#                     print(command_list[0] + " " + command_list[1])
-#                     if message.author.id == command_list[0] and number_to_remove > 0:
-#                         await client.delete_message(message)
-#                         number_to_remove -= 1
-#                     else:
-#                         return
-#         # BLACK-LIST MODS
-#         if mess.author.id != constants.MERCY_ID and not await credential(mess.author, "trusted"):
-#             # EXTRA-SERVER INVITE CHECKER
-#             if mess.channel.id not in BLACKLISTED_CHANNELS:
-#                 match = constants.LINK_REGEX.search(mess.content)
-#                 if match is not None:
-#                     await invite_checker(mess, match)
-#             # LFG -> Audit
-#             if mess.channel.id == constants.CHANNELNAME_CHANNELID_DICT["general-discussion"]:
-#                 match = constants.LFG_REGEX.search(mess.content)
-#                 if match is not None:
-#                     await client.send_message(client.get_channel(constants.NADIR_AUDIT_LOG_ID), mess.content)
-#                     # match = linkReg.search(mess.content)
-#                     # if match is not None:
-#                     #     print("FOUND ONE")
-#                     #     await invite_checker(mess, match)
-#
-#         if mess.content.startswith("`hots") and mess.author.id != constants.MERCY_ID and await credential(mess.author,
-#                                                                                                           "hots"):
-#             hots_message = "Please keep Heroes of the Storm party-ups to <#247769594155106304>"
-#             author = None
-#             if len(mess.mentions) > 0:
-#                 author = mess.mentions[0]
-#             else:
-#                 HOTS_REGEX = re.compile(r"(heroes of the storm)|(storm)|(heros)|(hots)|(heroes)|(genji)|(oni)",
-#                                         re.IGNORECASE)
-#                 found_mess = await finder(mess, HOTS_REGEX, "mod")
-#                 if found_mess is not None:
-#                     author = found_mess.author
-#             if author is not None:
-#                 hots_message += ", " + author.mention
-#             hots_warn = await client.send_message(mess.channel, hots_message)
-#             await client.delete_message(mess)
-#             # await asyncio.sleep(10)
-#             # await client.delete_message(hots_warn)
-#         # WHITE-LIST TRUSTED
-#
-#         if mess.author.id != constants.MERCY_ID and await credential(mess.author, "trusted"):
-#
-#             # Gets banned userinfo dict
-#             if "`ui" in mess.content:
-#                 try:
-#                     command_list = mess.content.split(" ", 1)[1:]
-#                     command_list = await mention_to_id(command_list)
-#                     command = command_list[0]
-#                 except IndexError:
-#                     command = mess.author.id
-#                 user_dict = await export_user(command)
-#                 if user_dict is not None:
-#                     formatted = [list(map(str, x)) for x in user_dict.items()]
-#                     await client.send_message(mess.channel,
-#                                               "```Found:\n" + pretty_column(formatted, True) + "\n```")
-#                 else:
-#                     await client.send_message(mess.channel, "User not found")
-#                 return
-#
-#             # Get Mentions
-#             if "`getmentions" == mess.content:
-#                 await get_mentions(mess)
-#                 return
-#                 # Call LFG autowarn
-#         if mess.author.id != constants.MERCY_ID and await credential(mess.author, "lfg"):
-#             if '`lfg' == mess.content[0:4]:
-#                 found_mess = None
-#                 author = None
-#                 if len(mess.mentions) > 0:
-#                     author = mess.mentions[0]
-#                 else:
-#                     found_mess = await finder(mess, constants.LFG_REGEX, "mod")
-#                     if found_mess is not None:
-#                         print("Found a message!")
-#                         print(found_mess.content + " " + found_mess.author.name)
-#                         author = found_mess.author
-#                 await client.send_message(client.get_channel(BOT_HAPPENINGS_ID), "`lfg called by " + mess.author.name)
-#
-#                 await client.delete_message(mess)
-#                 await lfg_warner(found_message=found_mess, warn_type="targeted", warn_user=author, channel=mess.channel)
-#                 # Ping bot
-#         if "`ping" == mess.content or mess.content == "<@!236341193842098177>":
-#             await ping(mess)
-#
-#         if mess.author.id != constants.MERCY_ID and await credential(mess.author, "mod"):
-#             # Generate Join Link
-#             if "`join" == mess.content[0:5]:
-#                 VCMess = mess
-#                 instainvite = await get_vc_link(mess)
-#                 VCInvite = await client.send_message(mess.channel, instainvite)
-#             # Fuzzy Nick Find
-#             if "`find" == mess.content[0:5]:
-#                 command = mess.content[6:]
-#                 command = command.lower()
-#                 command = command.split("|", 2)
-#                 await fuzzy_match(mess, *command)
-#                 await client.send_message(client.get_channel(BOT_HAPPENINGS_ID),
-#                                           "Fuzzysearch called by " + mess.author.name + " on " + mess.author.name)
-#
-#             # Get previous nicknames
-#             if mess.content.startswith("`getnicks"):
-#                 command = mess.content.strip("`getnicks ")
-#                 nicklist = await get_previous_nicks(mess.server.get_member(command))
-#                 await client.send_message(mess.channel, str(nicklist)[1:-1])
-#                 pass
-#             # Kill Bot
-#             if "`reboot" == mess.content:
-#                 await client.send_message(mess.channel, "Rebooting, " + mess.author.mention)
-#                 await client.send_message(client.get_channel(BOT_HAPPENINGS_ID), "Shut down by " + mess.author.name)
-#                 await client.logout()
-#             if "`kill" == mess.content:
-#                 with open(PATHS["comms"] + "bootstate.txt", "w") as f:
-#                     f.write("killed")
-#                 client.logout()
-#             # Get user logs
-#             if mess.content.startswith("`userlogs"):
-#                 command = mess.content.replace("`userlogs ", "")
-#                 command_list = command.split(" ")
-#                 command_list = await mention_to_id(command_list)
-#                 member = mess.server.get_member(command_list[0])
-#                 logs = await get_user_logs(member, int(command_list[1]))
-#                 gist = gistClient.create(name="User Log", description=member.name + "'s Logs", public=False,
-#                                          content="\n".join(logs))
-#                 await client.send_message(mess.channel, gist["Gist-Link"])
-#                 await log_action_to_nadir(message=mess, action_type="userlogs", *(member))
-#                 # await client.edit_message(contextMess, gist["Gist-Link"])
-
-
-
-
-
-# Cooperative Functions
-
-
 
 
 # Database
@@ -2306,7 +2023,7 @@ async def get_mentions(mess, auth):
 
 # Projects
 async def wolfram(message):
-    command = message.content.replace("`wa ", "")
+    command = message.content.replace("..wa ", "")
     res = WA_client.query(command)
     try:
         podlist = res["pod"]
@@ -2320,17 +2037,19 @@ async def wolfram(message):
     options = ""
     print("numpods = " + str(numpods))
     print(res["@numpods"])
-    for num in range(0, numpods - 1):
-        pod = podlist[num]
-        options += "[" + str(num) + "] " + pod["@title"] + "\n"
-        print("NUM = " + str(pod["@numsubpods"]))
-        for sub_num in range(0, int(pod["@numsubpods"])):
-            subpod = pod["subpod"]
-            if subpod["@title"] != "":
-                options += "    [" + str(num) + "." + str(sub_num) + "] " + subpod["@title"] + "\n"
-        keydict[num] = pod
-    options = await client.send_message(message.channel, options)
-
+    try:
+        for num in range(0, numpods - 1):
+            pod = podlist[num]
+            options += "[" + str(num) + "] " + pod["@title"] + "\n"
+            print("NUM = " + str(pod["@numsubpods"]))
+            for sub_num in range(0, int(pod["@numsubpods"])):
+                subpod = pod["subpod"]
+                if subpod["@title"] != "":
+                    options += "    [" + str(num) + "." + str(sub_num) + "] " + subpod["@title"] + "\n"
+            keydict[num] = pod
+        options = await client.send_message(message.channel, options)
+    except:
+        pass
     def check(msg):
         if message.server == msg.server and msg.author.id == message.author.id and message.channel == msg.channel:
             if re.match(r"^\d*$", msg.content):
