@@ -5,7 +5,7 @@ import discord
 import logging
 from TOKENS import *
 
-logging.basicConfig(level=logging.INFO)
+# logging.basicConfig(level=logging.INFO)
 
 from pip.utils import logging
 
@@ -20,20 +20,18 @@ client = discord.Client()
 async def on_message(message_in):
     if message_in.author == client.user:
         if message_in.content.startswith("%%"):
-            print(message_in.content)
             command = message_in.content.replace("%%", "")
-            if command == "on":
-                print("on")
-                await client.delete_message(message_in)
-                with open("on.png", "rb") as pfp:
-                    await client.edit_profile(password=PASS, avatar=pfp.read())
-                await client.change_nickname(message_in.server.get_member(client.user.id), "ZENITH")
-            if command == "off":
-                print("off")
-                await client.delete_message(message_in)
-                with open("off.png", "rb") as pfp:
-                    await client.edit_profile(password=PASS, avatar=pfp.read())
-                await client.change_nickname(message_in.server.get_member(client.user.id), "Zenith")
+            command_list = command.split(" ")
+            await client.delete_message(message_in)
+            if command_list[0] == "pfp":
+                pfp = command_list[1]
+                print("Switching to " + pfp)
+                try:
+                    with open(pfp + ".png", "rb") as pfp:
+                        await client.edit_profile(password=PASS, avatar=pfp.read())
+                except:
+                    with open("default.png", "rb") as pfp:
+                        await client.edit_profile(password=PASS, avatar=pfp.read())
 
 
 

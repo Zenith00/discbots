@@ -1011,16 +1011,15 @@ async def output_first_messages(userid, message_in):
     return (gist["Gist-Link"], None)
 
 async def rebuild_logs(message_in):
-    if message_in.content.startswith("`superlog"):
-        server = message_in.server
-        await client.delete_message(message_in)
-        for channel in server.channels:
-            count = 0
-            async for retrieved_message in client.logs_from(channel, limit=1000000000000):
-                if count % 100 == 0:
-                    print("Message got " + str(count))
-                await import_message(retrieved_message)
-                count += 1
+    server = message_in.server
+    # await client.delete_message(message_in)
+    for channel in server.channels:
+        count = 0
+        async for retrieved_message in client.logs_from(channel, limit=1000000000000):
+            if count % 100 == 0:
+                print("Message got " + str(count))
+            await import_message(retrieved_message)
+            count += 1
 
 async def rebuild_nicks(message_in):
     memberlist = []
@@ -1360,8 +1359,8 @@ async def log_action(action, detail):
             emoji = ":bangbang:"
         target_channel = voice_log
 
-        message = "{emoji} {date} {mention} : `{before}` → `{after}` ({count})".format(emoji=emoji, date=time, mention="<@!" + detail["id"] + ">",
-                                                                                       before=before, after=after, count=movecount)
+        message = "{emoji} {date} {mention} : `{before}` → `{after}` [{usercount}/{userlimit}] ({count})".format(emoji=emoji, date=time, mention="<@!" + detail["id"] + ">",
+                                                                                       before=before, after=after, usercount=str(len(voice_state.voice_channel.voice_members)), userlimit=str(voice_state.voice_channel.user_limit),count=movecount)
 
         await overwatch_db.server_log.insert_one({"date": datetime.utcnow().isoformat(" "), "action": action, "id": detail["id"]})
 
@@ -1376,7 +1375,10 @@ async def log_action(action, detail):
 # Database Query
 async def import_message(mess):
     messInfo = await parse_message_info(mess)
-    result = await message_log_collection.insert_one(messInfo)
+    try:
+        await message_log_collection.insert_one(messInfo)
+    except:
+        print("Duplicate...?")
     # messText = await format_message_to_log(messInfo)
     # await message_to_stream(messInfo)
     # await client.send_message(STREAM, await message_to_stream(messInfo))
