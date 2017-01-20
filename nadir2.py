@@ -549,7 +549,7 @@ async def perform_command(command, params, message_in):
 
     if command == "scrim":
         await scrim_manage(message_in)
-    if "trusted" not in auths:
+    if "trusted" not in auths and message_in.server.id != "266279338305912832":
         return
 
     if "zenith" in auths:
