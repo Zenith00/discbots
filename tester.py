@@ -281,4 +281,6 @@ def regex_test(reg_str, string):
     match = reg.search(string)
     return match
 
-print(regex_test("Kappa", "kappa"))
+# print(regex_test("Kappa", "kappa"))
+
+print(["asdf"][1:])

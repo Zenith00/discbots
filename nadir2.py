@@ -794,14 +794,17 @@ async def output_user_embed(member_id, message_in):
         unbans = [unban[:10] for unban in unbans]
         unbans = str(unbans)[1:-1]
         embed.add_field(name="Bans", value=unbans, inline=True)
-    embed.add_field(name="Roles", value=", ".join([role.name for role in target_member.roles][1:]), inline=True)
+    roles = [role.name for role in target_member.roles][1:]
+    if roles:
+        embed.add_field(name="Roles", value=", ".join(roles), inline=True)
+
+
     embed.add_field(name="Avatar", value=avatar_link, inline=False)
     voice = target_member.voice
     if voice.voice_channel:
         voice_name = voice.voice_channel.name
-    else:
-        voice_name = "None"
-    embed.add_field(name="Current VC", value=voice_name)
+        embed.add_field(name="Current VC", value=voice_name)
+
 
     embed.set_thumbnail(url=shorten_link(target_member.avatar_url))
     print(embed.to_dict())
