@@ -584,7 +584,17 @@ async def perform_command(command, params, message_in):
                 # await client.purge_from(message_in.channel)
                 async for message in client.logs_from(message_in.channel):
                     await client.delete_message(message)
+        if command == "firstjoins":
+            joins = {}
+            cursor = overwatch_db.message_log.find({})
+            cursor.sort("date", 1)
+            async for mess in cursor:
+                if mess["userid"] not in joins.keys():
+                    joins[mess["userid"]] = mess["date"]
 
+            for key in joins.keys():
+                await overwatch_db.userinfo.update_one({"userid":key}, {"$unset":{"server_joins":""}})
+                await overwatch_db.userinfo.update_one({"userid":key}, {"$addToSet":{"server_joins", joins[key]}})
 
         if command == "mostactive":
             output.append(await generate_activity_hist(message_in))
