@@ -599,7 +599,7 @@ async def perform_command(command, params, message_in):
             for key in joins.keys():
                 print(key)
                 await overwatch_db.userinfo.update_one({"userid":key}, {"$unset":{"server_joins":""}})
-                await overwatch_db.userinfo.update_one({"userid":key}, {"$addToSet":{"server_joins", joins[key]}})
+                await overwatch_db.userinfo.update_one({"userid":key}, {"$addToSet":{"server_joins": joins[key]}})
 
         if command == "mostactive":
             output.append(await generate_activity_hist(message_in))
