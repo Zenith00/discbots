@@ -586,13 +586,18 @@ async def perform_command(command, params, message_in):
                     await client.delete_message(message)
         if command == "firstjoins":
             joins = {}
+            print("Running firstjoins")
             cursor = overwatch_db.message_log.find({})
+
             cursor.sort("date", 1)
             async for mess in cursor:
+                print("mess")
                 if mess["userid"] not in joins.keys():
                     joins[mess["userid"]] = mess["date"]
 
+            print("done")
             for key in joins.keys():
+                print(key)
                 await overwatch_db.userinfo.update_one({"userid":key}, {"$unset":{"server_joins":""}})
                 await overwatch_db.userinfo.update_one({"userid":key}, {"$addToSet":{"server_joins", joins[key]}})
 
