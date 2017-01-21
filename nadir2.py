@@ -476,7 +476,7 @@ async def on_message(message_in):
                                                                 author=message_in.author.name))
         await perform_command(command=command, params=params, message_in=message_in)
 
-    elif message_in.server.id == constants.OVERWATCH_SERVER_ID:
+    if message_in.server.id == constants.OVERWATCH_SERVER_ID:
         if message_in.content.startswith("`scrim start"):
             await scrim_start(message_in)
             return
@@ -930,9 +930,13 @@ async def parse_triggers(message) -> list:
     # trigger_cursor = trigger_str_collection.find()
     # trigger_dict = await trigger_cursor.to_list()
     # trigger_list = [item["trigger"] for item in trigger_dict]
-
-    async for doc in trigger_str_collection.find():
+    # print("Parsing triggers for " + content)
+    async for doc in overwatch_db.trigger_str_collection.find():
+        # print(doc["trigger"])
+        # print(content)
+        # print(regex_test(doc["trigger"], content))
         if regex_test(doc["trigger"], content):
+            print("Found: " + doc["trigger"])
             response_docs.append(doc)
 
     match = re.search(constants.INVITE_REGEX, content)
@@ -1358,9 +1362,14 @@ async def log_action(action, detail):
         else:  # movecount < 25:
             emoji = ":bangbang:"
         target_channel = voice_log
-
+        if voice_state.voice_channel:
+            in_room = str(len(voice_state.voice_channel.voice_members))
+            room_cap = str(voice_state.voice_channel.user_limit)
+        else:
+            in_room = "0"
+            room_cap = "0"
         message = "{emoji} {date} {mention} : `{before}` → `{after}` [{usercount}/{userlimit}] ({count})".format(emoji=emoji, date=time, mention="<@!" + detail["id"] + ">",
-                                                                                       before=before, after=after, usercount=str(len(voice_state.voice_channel.voice_members)), userlimit=str(voice_state.voice_channel.user_limit),count=movecount)
+                                                                                       before=before, after=after, usercount=in_room, userlimit=room_cap,count=movecount)
 
         await overwatch_db.server_log.insert_one({"date": datetime.utcnow().isoformat(" "), "action": action, "id": detail["id"]})
 
