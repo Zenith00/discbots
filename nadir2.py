@@ -988,6 +988,8 @@ async def parse_triggers(message) -> list:
         # print(doc["trigger"])
         # print(content)
         # print(regex_test(doc["trigger"], content))
+        # print(doc["trigger"])
+        # print(content)
         if regex_test(doc["trigger"], content):
             print("Found: " + doc["trigger"])
             response_docs.append(doc)
