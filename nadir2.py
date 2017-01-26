@@ -777,6 +777,8 @@ async def output_user_embed(member_id, message_in):
     # target_member = message_in.author
     target_member = message_in.server.get_member(member_id)
     if not target_member:
+        target_member = await client.get_user_info(member_id)
+    if not target_member:
         target_member = message_in.author
 
     user_dict = await export_user(target_member.id)
@@ -821,15 +823,22 @@ async def output_user_embed(member_id, message_in):
         unbans = [unban[:10] for unban in unbans]
         unbans = str(unbans)[1:-1]
         embed.add_field(name="Bans", value=unbans, inline=True)
-    roles = [role.name for role in target_member.roles][1:]
-    if roles:
-        embed.add_field(name="Roles", value=", ".join(roles), inline=True)
 
+    if isinstance(target_member, discord.Member):
+        roles = [role.name for role in target_member.roles][1:]
+        if roles:
+            embed.add_field(name="Roles", value=", ".join(roles), inline=True)
+        voice = target_member.voice
+        if voice.voice_channel:
+            voice_name = voice.voice_channel.name
+            embed.add_field(name="Current VC", value=voice_name)
+        status = str(target_member.status)
+    else:
+        status = "Not part of the server"
+    embed.add_field(name="Status", value=status, inline=False)
     embed.add_field(name="Avatar", value=avatar_link, inline=False)
-    voice = target_member.voice
-    if voice.voice_channel:
-        voice_name = voice.voice_channel.name
-        embed.add_field(name="Current VC", value=voice_name)
+
+
 
     embed.set_thumbnail(url=shorten_link(target_member.avatar_url))
     print(embed.to_dict())
@@ -1064,10 +1073,13 @@ async def output_logs(userid, count, message_in):
             print(count)
         count += 1
         message_list.append(await format_message_to_log(message_dict))
-    gist = gistClient.create(name="User Log", description=message_in.server.get_member(userid).name + "'s Logs",
-                             public=False,
-                             content="\n".join(message_list))
-    return (gist["Gist-Link"], None)
+    if message_list:
+        gist = gistClient.create(name="User Log", description=(await client.get_user_info(userid)).name + "'s Logs",
+                                 public=False,
+                                 content="\n".join(message_list))
+        return (gist["Gist-Link"], None)
+    else:
+        return ("No logs found", None)
 
 async def output_first_messages(userid, message_in):
     member = message_in.server.get_member(userid)
