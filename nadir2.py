@@ -2270,7 +2270,7 @@ class temprole_master:
         end_time = datetime.utcnow() + timedelta(minutes=minutes)
         self.temproles.append(temprole(member, role, end_time))
         mongo_client_static.overwatch_db.roles.insert_one(
-            {"type": "temp", "member_id": member.id, "role_id": role.id, "end_time": end_time.})
+            {"type": "temp", "member_id": member.id, "role_id": role.id, "end_time": end_time.toordinal()})
 
 class temprole:
     def __init__(self, member_id, role, end):
