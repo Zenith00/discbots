@@ -14,7 +14,7 @@ def parse_bool(string) -> bool:
 
     :type string: str
     """
-    if any(substring in string for substring in ["yes", "y", "true"]):
+    if any(substring in string for substring in ["yes", "y", "true", "+", "on"]):
         return True
     return False
 
@@ -84,3 +84,5 @@ def format_list_to_widths(list_of_rows, widths, left_just):
 
 def shorten_link(link) -> str:
     return Shortener('Tinyurl').short(link)
+
+print(regex_test("Kappa", "Κappa"))
