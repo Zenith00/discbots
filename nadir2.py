@@ -621,6 +621,9 @@ async def perform_command(command, params, message_in):
             await wolfram(message_in)
         elif command == "reboot":
             await client.logout()
+        elif command == "setv":
+            version = params[0]
+            await client.change_presence(game=discord.Game(name=version), afk=False)
         elif command == "rebuild":
             count = 0
             memberlist = []
@@ -669,6 +672,10 @@ async def perform_command(command, params, message_in):
             await serve_say(message_in)  # Give a user perms
         elif command == "raw":
             output.append(await output_message_raw(channel=message_in.channel, message_id=params[0]))
+        elif command == "redraw":
+            channel = message_in.channel_mentions[0]
+            output.append(await output_message_raw(channel=channel, message_id=params[1]))
+
         elif command == "getroles":
             output.append(await output_roles(message_in))
         elif command == "moveafk":
