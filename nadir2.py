@@ -12,8 +12,8 @@ import motor.motor_asyncio
 import pymongo
 import wolframalpha
 from asteval import Interpreter
-import fuzzywuzzy
-from fuzzywuzzy import fuzz
+# import fuzzywuzzy
+from fuzzywuzzy import fuzz, process
 from imgurpython import ImgurClient
 from pymongo import ReturnDocument
 from simplegist.simplegist import Simplegist
@@ -28,6 +28,8 @@ from utils_text import shorten_link
 import utils_image
 
 logging.basicConfig(level=logging.INFO)
+
+# Clients
 client = discord.Client()
 imgur = ImgurClient(IMGUR_CLIENT_ID, IMGUR_SECRET_ID, IMGUR_ACCESS_TOKEN,
                     IMGUR_REFRESH_TOKEN)
@@ -38,23 +40,28 @@ message_log_collection = overwatch_db.message_log
 userinfo_collection = overwatch_db.userinfo
 auths_collection = overwatch_db.auths
 trigger_str_collection = overwatch_db.trigger_str
+mongo_client_static = pymongo.MongoClient()
 aeval = Interpreter()
-id_channel_dict = {}
-STREAM = None
-
+# scrim
 scrim = None
 gistClient = Simplegist()
 
-BOT_HAPPENINGS_ID = "245415914600661003"
+
+id_channel_dict = {}
+
+
 ROLENAME_ROLE_DICT = {}
+
 ID_ROLENAME_DICT = dict([[v, k] for k, v in constants.ROLENAME_ID_DICT.items()])
 BLACKLISTED_CHANNELS = (
     constants.CHANNELNAME_CHANNELID_DICT["bot-log"], constants.CHANNELNAME_CHANNELID_DICT["server-log"],
     constants.CHANNELNAME_CHANNELID_DICT["voice-channel-output"])
 SERVERS = {}
 CHANNELNAME_CHANNEL_DICT = {}
+
 VCInvite = None
 VCMess = None
+
 INITIALIZED = False
 
 tagger = Tagger(client)
@@ -858,8 +865,8 @@ async def serve_lfg(message_in):
         found_message = await finder(message=message_in, regex=constants.LFG_REGEX, blacklist="mod")
     else:
         warn_user = message_in.mentions[0]
-    await client.send_message(client.get_channel(BOT_HAPPENINGS_ID),
-                              "`lfg called by " + message_in.author.name)
+    # await client.send_message(client.get_channel(BOT_HAPPENINGS_ID),
+    #                           "`lfg called by " + message_in.author.name)
     await lfg_warner(found_message=found_message, warn_type="targeted", warn_user=warn_user,
                      channel=message_in.channel)
     await client.delete_message(message_in)
@@ -930,6 +937,18 @@ async def get_role(server, roleid):
     for x in server.roles:
         if x.id == roleid:
             return x
+
+
+async def get_role_from_name(server, rolename):
+    rolename_role_dict = {}
+    for role in server.roles:
+        rolename_role_dict[role.name] = role
+
+    role = process.extractOne(rolename, list(rolename_role_dict.keys()))
+    if role[1] > 85:
+        return role[0]
+    else:
+        return None
 
 # Tagging
 async def add_tag(string, note, action, categories):
@@ -1965,104 +1984,104 @@ async def scrim_start(message):
 
 # Wipe all gists
 # Get Mentions
-async def get_logs_mentions(query_type, mess):
-    """
-    :type query_type: Integer
-    :type mess: discord.Message
-    """
-    try:
-        await client.send_message(client.get_channel(BOT_HAPPENINGS_ID), str(await parse_message_info(mess)))
-    except:
-        await client.send_message(client.get_channel(BOT_HAPPENINGS_ID), str(traceback.format_exc()))
-    mess_info = await parse_message_info(mess)
-    target = mess.author
-    author_info = await parse_member_info(mess.server.get_member(mess.author.id))
-    cursor = None
-    if query_type == "1":
-        cursor = overwatch_db.message_log.find({"mentioned_users": author_info["id"]})
-    elif query_type == "2":
-        cursor = overwatch_db.message_log.find({"mentioned_roles": {"$in": author_info["role_ids"]}})
-    else:  # query_type == "3":
-        cursor = overwatch_db.message_log.find(
-            {"$or": [{"mentioned_users": author_info["id"]}, {"mentioned_roles": {"$in": author_info["role_ids"]}}]})
-
-    # await client.send_message(target, "DEBUG: Query Did Not Fail!")
-    number_message_dict = {}
-    count = 1
-    cursor.sort("date", -1)
-    message_choices_text = "```\n"
-    await client.send_message(target, "Retrieving Messages! (0) to get more messages!")
-    mention_choices_message = await client.send_message(target, "Please wait...")
-    response = 0
-    async for message_dict in cursor:
-        # user_info = await parse_member_info(target.server.get_member(message_dict["userid"]))
-        # await client.send_message(target, "DEBUG: FOUND MATCH! " + message_dict["content"])
-        number_message_dict[count] = message_dict
-        message_choices_text += "(" + str(count) + ")" + await format_message_to_log(message_dict) + "\n"
-        if count % 5 == 0:
-            message_choices_text += "\n```"
-            try:
-                await client.edit_message(mention_choices_message, message_choices_text)
-            except discord.errors.HTTPException:
-                # message_choices_text
-                await client.send_message(target, message_choices_text)
-            response = await get_response_int(target)
-            if response is None:
-                await client.send_message(target, "You have taken too long to respond! Please restart.")
-                return
-            elif response.content == "0":
-                count = 1
-                message_choices_text = message_choices_text[:-4]
-                continue
-            else:
-                break
-        count += 1
-    try:
-
-        if response.content == "0":
-            await client.send_message(target,
-                                      "You have no (more) logged mentions!")
-            response = await get_response_int(target)
-        selected_message = number_message_dict[int(response.content)]
-        await client.send_message(target, " \n Selected Message: \n[" + await format_message_to_log(selected_message))
-        await client.send_message(target,
-                                  "\n\n\n\nHow many messages of context would you like to retrieve? Enter an integer")
-        response = await get_response_int(target)
-        response = int(response.content)
-        # print("Response = " + str(response))
-        cursor = overwatch_db.message_log.find(
-            {
-                "date"      : {"$lt": selected_message["date"]},
-                "channel_id": selected_message["channel_id"]
-            }, limit=response
-        )
-        cursor.sort("date", -1)
-        contextMess = await client.send_message(target, "Please wait...")
-        contextContent = ""
-
-        async for message_dict in cursor:
-            try:
-                # print("DEBUG: FOUND MATCH! " + message_dict["content"])
-                user_info = await parse_member_info(
-                    (client.get_server(message_dict["server_id"])).get_member(message_dict["userid"])
-                )
-                contextContent += "[" + message_dict["date"][:19] + "][" + user_info["name"] + "]: " + message_dict[
-                    "content"] + "\n"
-            except:
-                pass
-
-        gist = gistClient.create(name="M3R-CY Log", description=selected_message["date"], public=False,
-                                 content=contextContent)
-        await client.edit_message(contextMess, gist["Gist-Link"])
-
-
-    except ValueError as e:
-        await client.send_message(target, "You entered something wrong! Oops!")
-        print(traceback.format_exc())
-    except TypeError as e:
-        await client.send_message(target, "You entered something wrong! Oops!")
-        print(traceback.format_exc())
-    pass
+# async def get_logs_mentions(query_type, mess):
+#     """
+#     :type query_type: Integer
+#     :type mess: discord.Message
+#     """
+#     try:
+#         await client.send_message(client.get_channel(BOT_HAPPENINGS_ID), str(await parse_message_info(mess)))
+#     except:
+#         await client.send_message(client.get_channel(BOT_HAPPENINGS_ID), str(traceback.format_exc()))
+#     mess_info = await parse_message_info(mess)
+#     target = mess.author
+#     author_info = await parse_member_info(mess.server.get_member(mess.author.id))
+#     cursor = None
+#     if query_type == "1":
+#         cursor = overwatch_db.message_log.find({"mentioned_users": author_info["id"]})
+#     elif query_type == "2":
+#         cursor = overwatch_db.message_log.find({"mentioned_roles": {"$in": author_info["role_ids"]}})
+#     else:  # query_type == "3":
+#         cursor = overwatch_db.message_log.find(
+#             {"$or": [{"mentioned_users": author_info["id"]}, {"mentioned_roles": {"$in": author_info["role_ids"]}}]})
+#
+#     # await client.send_message(target, "DEBUG: Query Did Not Fail!")
+#     number_message_dict = {}
+#     count = 1
+#     cursor.sort("date", -1)
+#     message_choices_text = "```\n"
+#     await client.send_message(target, "Retrieving Messages! (0) to get more messages!")
+#     mention_choices_message = await client.send_message(target, "Please wait...")
+#     response = 0
+#     async for message_dict in cursor:
+#         # user_info = await parse_member_info(target.server.get_member(message_dict["userid"]))
+#         # await client.send_message(target, "DEBUG: FOUND MATCH! " + message_dict["content"])
+#         number_message_dict[count] = message_dict
+#         message_choices_text += "(" + str(count) + ")" + await format_message_to_log(message_dict) + "\n"
+#         if count % 5 == 0:
+#             message_choices_text += "\n```"
+#             try:
+#                 await client.edit_message(mention_choices_message, message_choices_text)
+#             except discord.errors.HTTPException:
+#                 # message_choices_text
+#                 await client.send_message(target, message_choices_text)
+#             response = await get_response_int(target)
+#             if response is None:
+#                 await client.send_message(target, "You have taken too long to respond! Please restart.")
+#                 return
+#             elif response.content == "0":
+#                 count = 1
+#                 message_choices_text = message_choices_text[:-4]
+#                 continue
+#             else:
+#                 break
+#         count += 1
+#     try:
+#
+#         if response.content == "0":
+#             await client.send_message(target,
+#                                       "You have no (more) logged mentions!")
+#             response = await get_response_int(target)
+#         selected_message = number_message_dict[int(response.content)]
+#         await client.send_message(target, " \n Selected Message: \n[" + await format_message_to_log(selected_message))
+#         await client.send_message(target,
+#                                   "\n\n\n\nHow many messages of context would you like to retrieve? Enter an integer")
+#         response = await get_response_int(target)
+#         response = int(response.content)
+#         # print("Response = " + str(response))
+#         cursor = overwatch_db.message_log.find(
+#             {
+#                 "date"      : {"$lt": selected_message["date"]},
+#                 "channel_id": selected_message["channel_id"]
+#             }, limit=response
+#         )
+#         cursor.sort("date", -1)
+#         contextMess = await client.send_message(target, "Please wait...")
+#         contextContent = ""
+#
+#         async for message_dict in cursor:
+#             try:
+#                 # print("DEBUG: FOUND MATCH! " + message_dict["content"])
+#                 user_info = await parse_member_info(
+#                     (client.get_server(message_dict["server_id"])).get_member(message_dict["userid"])
+#                 )
+#                 contextContent += "[" + message_dict["date"][:19] + "][" + user_info["name"] + "]: " + message_dict[
+#                     "content"] + "\n"
+#             except:
+#                 pass
+#
+#         gist = gistClient.create(name="M3R-CY Log", description=selected_message["date"], public=False,
+#                                  content=contextContent)
+#         await client.edit_message(contextMess, gist["Gist-Link"])
+#
+#
+#     except ValueError as e:
+#         await client.send_message(target, "You entered something wrong! Oops!")
+#         print(traceback.format_exc())
+#     except TypeError as e:
+#         await client.send_message(target, "You entered something wrong! Oops!")
+#         print(traceback.format_exc())
+#     pass
 
 async def get_response_int(target) -> discord.Message:
     """
@@ -2080,22 +2099,23 @@ async def get_response_int(target) -> discord.Message:
 
     return await client.wait_for_message(timeout=30, author=target, check=check)
 
-async def get_mentions(mess, auth):
-    target = mess.author
 
-    await client.send_message(target, "Automated Mention Log Fetcher Starting Up!")
-    await client.send_message(target, "Please respond with the number in the parentheses (X)")
-    if auth == "mod":
-        await client.send_message(target,
-                                  "Would you like to query personal mentions (1), admin/mod mentions (2), or both (3)?")
-
-        response_mess = await get_response_int(target)
-        if response_mess is not None:
-            await get_logs_mentions(response_mess.content, mess)
-        else:
-            await client.send_message(target, "You have taken too long to respond! Please restart.")
-    else:
-        await get_logs_mentions("1", mess)
+# async def get_mentions(mess, auth):
+#     target = mess.author
+#
+#     await client.send_message(target, "Automated Mention Log Fetcher Starting Up!")
+#     await client.send_message(target, "Please respond with the number in the parentheses (X)")
+#     if auth == "mod":
+#         await client.send_message(target,
+#                                   "Would you like to query personal mentions (1), admin/mod mentions (2), or both (3)?")
+#
+#         response_mess = await get_response_int(target)
+#         if response_mess is not None:
+#             await get_logs_mentions(response_mess.content, mess)
+#         else:
+#             await client.send_message(target, "You have taken too long to respond! Please restart.")
+#     else:
+#         await get_logs_mentions("1", mess)
 
 # Projects
 async def wolfram(message):
@@ -2224,8 +2244,13 @@ async def get_from_find(message):
                 user_id = match.group(0)
     return user_id
 
+
+async def temp_apply_role(member, role, duration):
+    pass
+
 async def apply_role(member, role):
     pass
+
 
 class temprole_master:
     temproles = []
@@ -2241,21 +2266,24 @@ class temprole_master:
         print("Ticked: " + str(ticked))
         return ticked
 
-    async def add_role(self, member, rolename, minutes):
+    async def add_role(self, member, role, minutes):
         end_time = datetime.utcnow() + timedelta(minutes=minutes)
-        role = rolename # finish
         self.temproles.append(temprole(member, role, end_time))
+        mongo_client_static.overwatch_db.roles.insert_one(
+            {"type": "temp", "member_id": member.id, "role_id": role.id, "end_time": end_time.})
 
 class temprole:
     def __init__(self, member_id, role, end):
         self.member_id = member_id
-        self.role_id = role
+        self.role = role
         self.end = end
+
     def tick(self):
         if self.end > datetime.utcnow():
-            print("Ticking: " + self.member_id)
-            return (self.member_id, self.role_id)
+            print("Tock off: " + self.member_id)
+            return (self.member_id, self.role)
         else:
+            print("Ticking: " + self.member_id)
             return None
 
 
