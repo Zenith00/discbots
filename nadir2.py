@@ -22,6 +22,8 @@ from unidecode import unidecode
 import constants
 from TOKENS import *
 from tag import Tagger
+from dateutil import parser
+
 from utils_parse import *
 from utils_text import *
 from utils_text import shorten_link
@@ -30,7 +32,7 @@ import utils_image
 logging.basicConfig(level=logging.INFO)
 
 # Clients
-client = discord.Client()
+
 imgur = ImgurClient(IMGUR_CLIENT_ID, IMGUR_SECRET_ID, IMGUR_ACCESS_TOKEN,
                     IMGUR_REFRESH_TOKEN)
 WA_client = wolframalpha.Client(WA_ID)
@@ -42,11 +44,12 @@ auths_collection = overwatch_db.auths
 trigger_str_collection = overwatch_db.trigger_str
 mongo_client_static = pymongo.MongoClient()
 aeval = Interpreter()
+gistClient = Simplegist()
 # scrim
 scrim = None
-gistClient = Simplegist()
+client = discord.Client()
 
-
+temproles = None
 id_channel_dict = {}
 
 
@@ -212,8 +215,9 @@ class ScrimMaster:
 
     async def start(self):
         await self.compress()
-        await self.reset()
-        # overwatch_db.scrim.update_many({"active": True}, {"$set":{"team":"pending"}})
+
+        overwatch_db.scrim.update_many({"active": True}, {"$set":{"team":"pending"}})
+        # await self.reset()
         size = 12
         cursor = overwatch_db.scrim.find({"active": True})
         count = await cursor.count()
@@ -381,6 +385,7 @@ async def on_ready():
     print('ID: ' + client.user.id)
     global INITIALIZED
     global STATES
+    global temproles
     SERVERS["OW"] = client.get_server(constants.OVERWATCH_SERVER_ID)
     for role in SERVERS["OW"].roles:
         if role.id in ID_ROLENAME_DICT.keys():
@@ -390,6 +395,8 @@ async def on_ready():
     log_state = await overwatch_db.config.find_one({"type": "log"})
     STATES["server_log"] = log_state["server_log"]
     INITIALIZED = True
+    temproles = temprole_master(server=SERVERS["OW"])
+    await temproles.regenerate()
 
 @client.event
 async def on_member_join(member):
@@ -399,7 +406,10 @@ async def on_member_join(member):
         current_date = datetime.utcnow()
         age = abs(current_date - member.created_at)
         await log_action("join", {"mention": member.mention, "id": member.id, "age": str(age)[:-7]})
-
+        if INITIALIZED:
+            role = await temproles.check(member)
+            if role:
+                await log_automated("reapplied {role} to {mention}".format(role=role.name if role.mentionable else role.mention, mention=member.mention), type="autorole")
 # noinspection PyUnusedLocal
 @client.event
 async def on_voice_state_update(before, after):
@@ -431,7 +441,7 @@ async def on_member_update(before, after):
         return
 
     if len(before.roles) != len(after.roles):
-        await log_action("role_change", {"member": after, "old_roles": before.roles, "new_roles": after.roles})
+        await log_action("role_change", {"member": after, "old_roles": before.roles[1:], "new_roles": after.roles[1:]})
 
 @client.event
 async def on_message_edit(before, after):
@@ -468,7 +478,7 @@ async def on_message(message_in):
         return
     if message_in.author.id == client.user.id:
         return
-
+    await temproles.tick()
     if message_in.server is None:
         def scrim_register(msg):
             content = msg.content
@@ -714,6 +724,38 @@ async def perform_command(command, params, message_in):
             await client.unban(message_in.server, user)
             output.append(("Unbanned: {mention}".format(mention="<@!" + user_id + ">"), None))
 
+        elif command == "temprole":
+            global temproles
+            if params[0] in ["add", "+"]:
+                member = message_in.server.get_member(params[1])
+                parsed_dur = False
+                role_name = ""
+                dur = None
+                for param in params[2:]:
+                    if not parsed_dur:
+                        try:
+                            dur = int(param)
+                            parsed_dur = True
+                        except ValueError:
+                            role_name += param + " "
+                    else:
+                        reason = param
+                role = await get_role_from_name(message_in.server, role_name)
+                if not role:
+                    await client.send_message(message_in.channel, "Role not recognized")
+                    return
+                if not dur:
+                    await client.send_message(message_in.channel, "Duration not recognized")
+                    return
+                print(member)
+                print(role)
+                print(dur)
+                await temproles.add_role(member, role, dur)
+            if params[0] == "tick":
+                await temproles.tick()
+
+
+
     if "trusted" not in auths:
         return
     if called:
@@ -783,7 +825,7 @@ async def output_join_link(member):
     vc = member.voice.voice_channel
     invite = await client.create_invite(vc, max_uses=1, max_age=6)
     if invite:
-        return (invite.link, None)
+        return (invite.url, None)
     else:
         return "User not in a visible voice channel"
 
@@ -946,7 +988,7 @@ async def get_role_from_name(server, rolename):
 
     role = process.extractOne(rolename, list(rolename_role_dict.keys()))
     if role[1] > 85:
-        return role[0]
+        return rolename_role_dict[role[0]]
     else:
         return None
 
@@ -1264,13 +1306,15 @@ async def log_automated(description: object, type) -> None:
     action = ("At " + str(datetime.utcnow().strftime("[%Y-%m-%d %H:%m:%S] ")) + ", I automatically " + str(description))
     if type == "alert":
         target = constants.CHANNELNAME_CHANNELID_DICT["alerts"]
-    elif type == "deletion":
+    elif type == "deletion" or type == "autorole":
         target = constants.CHANNELNAME_CHANNELID_DICT["bot-log"]
+
     else:
         target = constants.CHANNELNAME_CHANNELID_DICT["spam-channel"]
     await client.send_message(client.get_channel(target), action)
 
 async def log_action(action, detail):
+    bot_log = client.get_channel(constants.CHANNELNAME_CHANNELID_DICT["bot-log"])
     server_log = client.get_channel(constants.CHANNELNAME_CHANNELID_DICT["server-log"])
     voice_log = client.get_channel(constants.CHANNELNAME_CHANNELID_DICT["voice-channel-output"])
     # server_log = client.get_channel("152757147288076297")
@@ -1391,7 +1435,7 @@ async def log_action(action, detail):
             {"date"   : datetime.utcnow().isoformat(" "), "action": action, "channel": detail["channel"], "mention": detail["mention"], "id": detail["id"],
              "content": detail["content"]})
     elif action == "edit":
-        message = "{time} :pencil: [EDIT] [{channel}] [{mention}] [{id}]:\n`-BEFORE:` {before}\n`+ AFTER:` {after}".format(
+        message = "{time} :pencil: [EDIT] [{channel}] [{mention}] [{id}]:\n`-BEFORE:` {before} \n`+ AFTER:` {after}".format(
             time=time, channel=detail["channel"], mention=detail["mention"], id=detail["id"], before=detail["before"],
             after=detail["after"])
         target_channel = server_log
@@ -1425,6 +1469,9 @@ async def log_action(action, detail):
         target_channel = server_log
         await overwatch_db.server_log.insert_one({"date": datetime.utcnow().isoformat(" "), "action": action, "id": detail["id"], "mention": detail["mention"]})
     elif action == "role_change":
+        # print("TRIGGERING ROLE CHANGE")
+        target_channel = server_log
+
         member = detail["member"]
         old_roles = detail["old_roles"]
         new_roles = detail["new_roles"]
@@ -1432,10 +1479,15 @@ async def log_action(action, detail):
         new_role_ids = " ".join([role.id for role in new_roles])
         print(new_role_ids)
         await overwatch_db.userinfo.update_one({"userid": member.id}, {"$set": {"roles": new_role_ids}})
-        message = "{time} :pencil: [ROLECHANGE] [{mention}] [{id}]:\n`-BEFORE:` {before}\n`+ AFTER:` {after}".format(time=time, mention=member.mention,
-                                                                                                                     id=member.id, before=" ".join(
-                [role.mention for role in old_roles]), after=" ".join([role.mention for role in new_roles]))
-        pass
+        before = " ".join([role.mention for role in old_roles])
+        after = " ".join([role.mention for role in new_roles])
+        mention = member.mention
+        mention = await scrub_text(mention, target_channel)
+
+        message = "{time} :pencil: [ROLECHANGE] [{mention}] [{id}]:\n`-BEFORE:` {before} \n`+ AFTER:` {after}".format(time=time, mention=mention,
+                                                                                                                     id=member.id, before=before, after=after)
+        message = await scrub_text(message, target_channel)
+        print(message)
     elif action == "voice_update":
         before = detail["before"]
         voice_state = before.voice
@@ -1480,6 +1532,7 @@ async def log_action(action, detail):
                                                                                                                  userlimit=room_cap, count=movecount)
 
         await overwatch_db.server_log.insert_one({"date": datetime.utcnow().isoformat(" "), "action": action, "id": detail["id"]})
+
 
     else:
         print("fail")
@@ -1740,6 +1793,7 @@ async def scrub_text(text, channel):
         match = re.match(r"(<@!?\d+>)|(@everyone)|(@here)", word)
         if match:
             id = match.group(0)
+            print(id)
             if id not in ["@everyone", "@here"]:
                 id = re.search(r"\d+", id)
                 id = id.group(0)
@@ -2254,38 +2308,85 @@ async def apply_role(member, role):
 
 class temprole_master:
     temproles = []
-    def __init__(self, eventloop):
+    def __init__(self, server):
+        self.server = server
         pass
 
     async def tick(self):
-        ticked = []
+        # ticked = []
+        new_temproles = []
         for temprole in self.temproles:
-            tick = temprole.tick()
+            tick = await temprole.tick()
             if tick:
-                ticked.append(tick)
-        print("Ticked: " + str(ticked))
-        return ticked
+                print("Ticking: " + temprole.member_id)
+                member = self.server.get_member(tick[0])
+                await client.remove_roles(member, tick[1])
+            else:
+                new_temproles.append(temprole)
+        self.temproles = new_temproles
+        #     if tick:
+        #         ticked.append(tick)
+        # print("Ticked: " + str(ticked))
+        # return ticked
+
+    async def regenerate(self):
+        async for temp in overwatch_db.roles.find({"type":"temp"}):
+            member_id = temp["member_id"]
+            role_id = temp["role_id"]
+            print(role_id)
+            role = await get_role(self.server, role_id)
+            end_time = temp["end_time"]
+            end_time = parser.parse(end_time)
+            self.temproles.append(temprole(member_id, role, end_time, self.server))
+
+    async def check(self, member):
+        try:
+            temprole = [temprole for temprole in self.temproles if temprole.member_id == member.id][0]
+            # print("Check found a temprole: " + member.id)
+            return await temprole.reapply()
+        except IndexError:
+            print("None found: " + member.name)
+
 
     async def add_role(self, member, role, minutes):
         end_time = datetime.utcnow() + timedelta(minutes=minutes)
-        self.temproles.append(temprole(member, role, end_time))
-        mongo_client_static.overwatch_db.roles.insert_one(
-            {"type": "temp", "member_id": member.id, "role_id": role.id, "end_time": end_time.toordinal()})
+        print(end_time)
+        self.temproles.append(temprole(member.id, role, end_time, self.server))
+        await client.add_roles(member, role)
+
+        await overwatch_db.roles.insert_one(
+            {"type": "temp", "member_id": member.id, "role_id": role.id, "end_time": str(end_time)})
+
 
 class temprole:
-    def __init__(self, member_id, role, end):
+    def __init__(self, member_id, role, end, server):
         self.member_id = member_id
         self.role = role
         self.end = end
+        self.server = server
 
-    def tick(self):
-        if self.end > datetime.utcnow():
+
+    async def tick(self):
+        print(self.end)
+        print(datetime.utcnow())
+        print(self.member_id)
+        print(self.role)
+        if self.end < datetime.utcnow():
+            await overwatch_db.roles.delete_one(
+            {"type": "temp", "member_id": self.member_id, "role_id": self.role.id, "end_time": str(self.end)})
             print("Tock off: " + self.member_id)
             return (self.member_id, self.role)
         else:
-            print("Ticking: " + self.member_id)
+            # print("Ticking: " + self.member_id)
             return None
 
-
+    async def reapply(self):
+        member = self.server.get_member(self.member_id)
+        if member:
+            await client.add_roles(member, self.role)
+            return self.role
+        else:
+            print("MISSING MEMBER?? " + str(self.member_id))
+            return None
 
 client.run(AUTH_TOKEN, bot=True)
