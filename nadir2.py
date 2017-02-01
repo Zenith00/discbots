@@ -363,7 +363,7 @@ async def on_member_ban(member):
         await import_to_user_set(member=member, set_name="bans", entry=datetime.utcnow().isoformat(" "))
         spam_ch = client.get_channel(constants.CHANNELNAME_CHANNELID_DICT["spam-channel"])
         # await client.send_message(spam_ch, "Ban detected, user id = " + member.id)
-        await log_action("ban", {"mention": member.mention, "id": member.id})
+        await log_action("ban", {"member": member})
 
 @client.event
 async def on_member_unban(server, member):
@@ -585,8 +585,9 @@ async def perform_command(command, params, message_in):
     if command == "scrim":
         await scrim_manage(message_in)
 
-    if command in ["names", "purge", "firstjoins", "mostactive", "channeldist", "superlog", "rebuildnicks", "wa", "reboot", "rebuild", "ui", "ping", "lfg",
-                   "serverlog", "timenow", "say", "raw", "getroles", "moveafk", "help", "join", "tag", "tagreg", "userlog", "channeldist", "unmute"]:
+    if command in ["names", "firstjoins", "mostactive", "channeldist", "superlog", "rebuildnicks", "wa", "reboot", "rebuild", "ui", "ping", "lfg",
+                   "serverlog", "timenow", "say", "raw", "getroles", "moveafk", "help", "join", "tag", "tagreg", "userlog", "channeldist", "unmute",
+                   "channelinfo"]:
         called = True
     print("Firing...")
     if "zenith" in auths:
@@ -603,11 +604,16 @@ async def perform_command(command, params, message_in):
                 text += member.name + "\n"
             output.append((text, None))
         if command == "purge":
+            offset = 1
+            dest = client.get_channel(params[0])
+            if not dest:
+                offset = 0
+                dest = message_in.server
             await client.delete_message(message_in)
-            while True:
-                # await client.purge_from(message_in.channel)
-                async for message in client.logs_from(message_in.channel):
-                    await client.delete_message(message)
+            try:
+                await purge_from(dest=dest, member_id=params[0 + offset], count=int(params[1 + offset]))
+            except IndexError:
+                output.append(("Syntax not recognized", None))
         if command == "firstjoins":
             joins = {}
             print("Running firstjoins")
@@ -689,7 +695,7 @@ async def perform_command(command, params, message_in):
                 await client.send_message(destination=message_in.channel, content=None, embed=embed)
             else:
                 await client.send_message(destination=message_in.channel, content="Channel not found")
-            called=True
+            called = True
         elif command == "jukeskip":
             await skip_jukebox(" ".join(params[1:]), params[0], message_in)
         elif command == "timenow":
@@ -761,9 +767,32 @@ async def perform_command(command, params, message_in):
                     return
 
                 await temproles.add_role(member, role, dur)
+                text = "Adding role {rolename} to {mention} [{id}] for {dur} minutes".format(rolename=role.mention, mention=member.mention, id=member.id,
+                                                                                             dur=dur)
+                text = await scrub_text(text, message_in.channel)
+                output.append((text, None))
             if params[0] == "tick":
                 await temproles.tick()
+        elif command == "mute":
+            role = await get_role(message_in.server, "110595961490792448")
+            member = message_in.server.get_member(params[0])
+            try:
+                dur = int(params[1])
+                if dur == 600:
+                    dur = 10
+                elif dur == 3600:
+                    dur = 60
 
+            except ValueError:
+                dur = None
+            if not dur:
+                await client.send_message(message_in.channel, "Duration not recognized")
+                return
+            if not member:
+                await client.send_message(message_in.channel, "Member not recognized")
+                return
+            output.append(("Muting {mention} [{id}] for {dur} minutes".format(mention=member.mention, id=member.id, dur=dur), None))
+            await temproles.add_role(member=member, role=role, minutes=params[1])
     if "trusted" not in auths:
         return
     if called:
@@ -836,6 +865,28 @@ async def output_join_link(member):
     else:
         return "User not in a visible voice channel"
 
+async def purge_from(dest, member_id, count):
+    print(dest.name)
+    print(member_id)
+    print(count)
+
+    def check(msg):
+        nonlocal count
+        if msg.author.id == member_id and count > 0:
+            count -= 1
+            return True
+
+    if isinstance(dest, discord.Server):
+        for channel in [dest for dest in dest.channels if dest.type == discord.ChannelType.text]:
+            try:
+                print("Purging from {name}".format(name=channel.name))
+                await client.purge_from(channel=channel, check=check)
+            except:
+                pass
+    else:
+        print("Purging from {name}".format(name=dest.name))
+        await client.purge_from(channel=dest, check=check)
+
 async def output_channel_embed(server, channel_name_or_id):
     channel_name_or_id = channel_name_or_id.strip()
     channel = client.get_channel(channel_name_or_id)
@@ -844,7 +895,7 @@ async def output_channel_embed(server, channel_name_or_id):
     if not channel:
         return None
     name = "   ".join(w.capitalize() for w in channel.name.split("-"))
-    embed = discord.Embed(title="{channelname}  info".format(channelname=name) + ' '*180 + "​​​​​​")
+    embed = discord.Embed(title="{channelname}  info".format(channelname=name) + ' ' * 180 + "​​​​​​")
 
     embed.add_field(name="ID", value=channel.id, inline=True)
     embed.add_field(name="Position", value=channel.position, inline=True)
@@ -889,22 +940,22 @@ async def output_user_embed(member_id, message_in):
 
 
     embed.add_field(name="ID", value=target_member.id, inline=True)
+    if user_dict:
+        if "server_joins" in user_dict.keys():
+            server_joins = user_dict["server_joins"]
+            server_joins = [join[:10] for join in server_joins]
 
-    if "server_joins" in user_dict.keys():
-        server_joins = user_dict["server_joins"]
-        server_joins = [join[:10] for join in server_joins]
-
-        embed.add_field(name="First Join", value=server_joins[0], inline=True)
-    if "bans" in user_dict.keys():
-        bans = user_dict["bans"]
-        bans = [ban[:10] for ban in bans]
-        bans = str(bans)[1:-1]
-        embed.add_field(name="Bans", value=bans, inline=True)
-    if "unbans" in user_dict.keys():
-        unbans = user_dict["unbans"]
-        unbans = [unban[:10] for unban in unbans]
-        unbans = str(unbans)[1:-1]
-        embed.add_field(name="Bans", value=unbans, inline=True)
+            embed.add_field(name="First Join", value=server_joins[0], inline=True)
+        if "bans" in user_dict.keys():
+            bans = user_dict["bans"]
+            bans = [ban[:10] for ban in bans]
+            bans = str(bans)[1:-1]
+            embed.add_field(name="Bans", value=bans, inline=True)
+        if "unbans" in user_dict.keys():
+            unbans = user_dict["unbans"]
+            unbans = [unban[:10] for unban in unbans]
+            unbans = str(unbans)[1:-1]
+            embed.add_field(name="Unbans", value=unbans, inline=True)
     embed.add_field(name="Creation", value=target_member.created_at.strftime("%B %d, %Y"), inline=True)
 
     if isinstance(target_member, discord.Member):
@@ -922,7 +973,7 @@ async def output_user_embed(member_id, message_in):
     if avatar_link:
         embed.set_thumbnail(url=avatar_link)
         color = utils_image.average_color_url(avatar_link)
-        embed.add_field(name="Avatar", value=avatar_link, inline=False)
+        embed.add_field(name="Avatar", value=avatar_link.replace(".webp", ".png"), inline=False)
         hex_int = int(color, 16)
         embed.colour = discord.Colour(hex_int)
         embed.set_thumbnail(url=shorten_link(target_member.avatar_url))
@@ -978,7 +1029,8 @@ async def output_command_list(auths):
                 ["ping", "", "Gives M3R-CY's current ping", ""],
                 ["lfg", "*<mention/id>", "Outputs the automated LFG warner", ""],
                 ["firstmsgs", "<mention/id>", "Outputs the first 50 messages of user", ""],
-                ["serverlog", "<on/off>", "Enables or disables the server log", ""]]
+                ["serverlog", "<on/off>", "Enables or disables the server log", ""],
+                ["channelinfo", "<channelname/id>", "Outputs information about the channel"]]
 
     notes = "```*Optional\n+Requires additional input\n-Slow```"
     output = [
@@ -1483,10 +1535,13 @@ async def log_action(action, detail):
         await overwatch_db.server_log.insert_one({"date": datetime.utcnow().isoformat(" "), "action": action, "id": detail["id"]})
 
     elif action == "ban":
-        message = "{time} :no_entry_sign: [BAN] [{mention}] [{id}]".format(time=time, mention=detail["mention"],
-                                                                           id=detail["id"])
+        message = "{time} :no_entry_sign: [BAN] [{mention}] [{id}] Name: {name} {nick}".format(time=time, mention=detail["member"].mention,
+                                                                                               id=detail["member"].id,
+                                                                                               name=detail["member"].name + "#" + detail[
+                                                                                                   "member"].discriminator, nick=
+                                                                                               detail["member"].nick if detail["member"].nick else "")
         target_channel = server_log
-        await overwatch_db.server_log.insert_one({"date": datetime.utcnow().isoformat(" "), "action": action, "id": detail["id"], "mention": detail["mention"]})
+        await overwatch_db.server_log.insert_one({"date": datetime.utcnow().isoformat(" "), "action": action, "id": detail["member"].id, "mention": detail["member"].mention})
 
     elif action == "unban":
         message = "{time} :white_check_mark:  [UNBAN] [{mention}] [{id}]".format(time=time, mention="<@!" + detail["id"] + ">",
@@ -1657,7 +1712,7 @@ async def mention_to_id(command_list):
     :type command: list
     """
     new_command = []
-    reg = re.compile(r"<@(!?)\d*>", re.IGNORECASE)
+    reg = re.compile(r"<[@#](!?)\d*>", re.IGNORECASE)
     for item in command_list:
         match = reg.search(item)
         if match is None:
@@ -2355,7 +2410,7 @@ class temprole_master:
             print("None found: " + member.name)
 
     async def add_role(self, member, role, minutes):
-        end_time = datetime.utcnow() + timedelta(minutes=minutes)
+        end_time = datetime.utcnow() + timedelta(minutes=int(minutes))
         self.temproles.append(temprole(member.id, role, end_time, self.server))
         await client.add_roles(member, role)
 
