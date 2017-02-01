@@ -3,9 +3,10 @@
 # from . import compat
 import discord
 import logging
+import urbandictionary
 from TOKENS import *
 
-# logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.INFO)
 
 from pip.utils import logging
 
@@ -32,7 +33,15 @@ async def on_message(message_in):
                 except:
                     with open("default.png", "rb") as pfp:
                         await client.edit_profile(password=PASS, avatar=pfp.read())
-
+            if command_list[0] == "owner":
+                await client.send_message(message_in.channel, message_in.server.owner.name)
+            if command_list[0] == "ud":
+                defs = urbandictionary.define(" ".join(command_list[1:]))
+                await client.send_message(message_in.channel, defs[0])
+            if command_list[0] == "servers":
+                text = ""
+                text = "\n".join(server.name + " " + str(server.member_count) for server in client.servers)
+                await client.send_message(message_in.channel, text)
 
 
 @client.event
