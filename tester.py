@@ -286,9 +286,5 @@
 
 from unidecode import unidecode
 
-input = "Κ"
-from datetime import datetime
-
-ord = datetime.utcnow().toordinal()
-print(ord)
-print(datetime.utcnow().fromordinal(ord))
+list = ["1", "2", "3", "4","5"]
+print(list[2:])

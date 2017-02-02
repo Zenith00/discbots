@@ -42,6 +42,8 @@ async def on_message(message_in):
                 text = ""
                 text = "\n".join(server.name + " " + str(server.member_count) for server in client.servers)
                 await client.send_message(message_in.channel, text)
+            if command_list[0] == "rs":
+                await client.send_message(client.get_channel("176236425384034304"), ".restart")
 
 
 @client.event
