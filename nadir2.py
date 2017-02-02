@@ -23,12 +23,13 @@ import constants
 from TOKENS import *
 from tag import Tagger
 from discord import http as dischttp
-from dateutil import parser
 import string
 from utils_parse import *
 from utils_text import *
 from utils_text import shorten_link
 import utils_image
+from dateutil import parser
+import dateparser
 
 logging.basicConfig(level=logging.INFO)
 
@@ -765,9 +766,11 @@ async def perform_command(command, params, message_in):
                 if not dur:
                     await client.send_message(message_in.channel, "Duration not recognized")
                     return
-
+                else:
+                    dur = timedelta(minutes=dur)
+                    dur = datetime.now() - dur
                 await temproles.add_role(member, role, dur)
-                text = "Adding role {rolename} to {mention} [{id}] for {dur} minutes".format(rolename=role.mention, mention=member.mention, id=member.id,
+                text = "Adding role {rolename} to {mention} [{id}] for {dur}".format(rolename=role.mention, mention=member.mention, id=member.id,
                                                                                              dur=dur)
                 text = await scrub_text(text, message_in.channel)
                 output.append((text, None))
@@ -776,23 +779,37 @@ async def perform_command(command, params, message_in):
         elif command == "mute":
             role = await get_role(message_in.server, "110595961490792448")
             member = message_in.server.get_member(params[0])
-            try:
-                dur = int(params[1])
-                if dur == 600:
-                    dur = 10
-                elif dur == 3600:
-                    dur = 60
+            if len(params) == 2:
+                try:
+                    dur = int(params[1])
+                    if dur == 600:
+                        dur = 10
+                    elif dur == 3600:
+                        dur = 60
+                    dur = timedelta(minutes=dur)
+                    dur = datetime.now() + dur
+                    # dur = dur
+                except ValueError:
+                    dur = await parse_date(date_text="in " + " ".join(params[1:]))
+            else:
+                dur = await parse_date(date_text="in " + " ".join(params[1:]))
+            print(dur)
 
-            except ValueError:
-                dur = None
-            if not dur:
+            if dur != 0 and not dur:
                 await client.send_message(message_in.channel, "Duration not recognized")
                 return
             if not member:
                 await client.send_message(message_in.channel, "Member not recognized")
                 return
-            output.append(("Muting {mention} [{id}] for {dur} minutes".format(mention=member.mention, id=member.id, dur=dur), None))
-            await temproles.add_role(member=member, role=role, minutes=params[1])
+            # dur = datetime.now() + dur
+            duration = dur - datetime.now()
+            # micros = dur.microsecond
+            complete = 1000000
+            duration = duration + timedelta(microseconds=499999)
+            duration = duration // 1000000 * 1000000
+
+            output.append(("Muting {mention} [{id}] for {dur}".format(mention=member.mention, id=member.id, dur=duration), None))
+            await temproles.add_role(member=member, role=role, minutes=dur)
     if "trusted" not in auths:
         return
     if called:
@@ -1884,6 +1901,10 @@ async def scrub_text(text, channel):
 async def delay_delete():
     pass
 
+async def parse_date(date_text):
+
+    res = dateparser.parse(date_text)
+    return res
 # Scrim
 async def scrim_end():
     global scrim
@@ -2398,7 +2419,8 @@ class temprole_master:
             role_id = temp["role_id"]
             role = await get_role(self.server, role_id)
             end_time = temp["end_time"]
-            end_time = parser.parse(end_time)
+            # end_time = parser.parse(end_time)
+            end_time = dateparser.parse(end_time)
             self.temproles.append(temprole(member_id, role, end_time, self.server))
 
     async def check(self, member):
@@ -2410,7 +2432,8 @@ class temprole_master:
             print("None found: " + member.name)
 
     async def add_role(self, member, role, minutes):
-        end_time = datetime.utcnow() + timedelta(minutes=int(minutes))
+        # end_time = datetime.utcnow() + minutes
+        end_time = minutes
         self.temproles.append(temprole(member.id, role, end_time, self.server))
         await client.add_roles(member, role)
 
