@@ -437,7 +437,8 @@ async def on_member_update(before, after):
     :type before: discord.Member
     """
     if before.server.id == constants.OVERWATCH_SERVER_ID:
-
+        if before.nick != after.nick:
+            await import_to_user_set(member=after, set_name="nicks", entry=after.nick)
         if not INITIALIZED:
             return
 
@@ -2463,7 +2464,6 @@ class temprole:
         else:
             # print("Ticking: " + self.member_id)
             return None
-
     async def reapply(self):
         member = self.server.get_member(self.member_id)
         if member:
