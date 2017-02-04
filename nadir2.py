@@ -439,6 +439,9 @@ async def on_member_update(before, after):
     if before.server.id == constants.OVERWATCH_SERVER_ID:
         if before.nick != after.nick:
             await import_to_user_set(member=after, set_name="nicks", entry=after.nick)
+        if before.name != after.name:
+            await import_to_user_set(member=after, set_name="names", entry=after.nick)
+
         if not INITIALIZED:
             return
 
