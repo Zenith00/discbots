@@ -6,6 +6,7 @@ import pymongo
 import imgurpython
 from pymongo import ReturnDocument
 from imgurpython import ImgurClient
+import traceback
 # import motor.motor_asyncio
 import utils_file
 
@@ -82,17 +83,17 @@ def new():
                     config = {}
                 if not result.raw_result["updatedExisting"]:
                     print("New file found. Uploading...")
-                    success = False
-                    while not success:
-                        try:
-                            image = imgur.upload_from_path(filepath, config=config, anon=False)
-                            success = True
-                        except:
-                            success = False
-                            print("FAIL")
+                    try:
+                        image = imgur.upload_from_path(filepath, config=config, anon=False)
+                        utils_file.append_line("C:\\Users\\Austin\\Dropbox\\Zenith's Fanart\\artlist.txt", image['link'])
+                        print("Done")
+                    except imgurpython.helpers.error.ImgurClientRateLimitError:
+                        mercy_collection.delete_one({"hash":digest})
+                        print("Rate limited. Waiting 5 minutes...")
+                        time.sleep(60*10)
 
-                    utils_file.append_line(PATHS["comms"] + "artlist.txt", image['link'])
-                    print("Done")
+
+
 
     print("End Sweep")
 
