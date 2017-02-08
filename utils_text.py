@@ -1,13 +1,22 @@
 import re
 import copy
 
-from pyshorteners import Shortener
+
+# from pyshorteners import Shortener
 
 
 def regex_test(reg_str, string):
     reg = re.compile(reg_str, re.IGNORECASE)
     match = reg.search(string)
     return match
+
+
+def is_int(string):
+    try:
+        int(string)
+        return True
+    except:
+        return False
 
 def parse_bool(string) -> bool:
     """
@@ -82,7 +91,7 @@ def format_list_to_widths(list_of_rows, widths, left_just):
     return output
 
 
-def shorten_link(link) -> str:
-    return Shortener('Tinyurl').short(link)
+    # def shorten_link(link) -> str:
+    #     return Shortener('Tinyurl').short(link)
 
-print(regex_test("Kappa", "Κappa"))
+    # print(regex_test("Kappa", "Κappa"))

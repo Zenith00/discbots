@@ -754,15 +754,19 @@ async def perform_command(command, params, message_in):
                 parsed_dur = False
                 role_name = ""
                 dur = None
+                role_name = ""
+                role = None
+                duration = ""
+                # duration bucket
+                # target bucket
+                # role name bucket
                 for param in params[2:]:
-                    if not parsed_dur:
-                        try:
-                            dur = int(param)
-                            parsed_dur = True
-                        except ValueError:
-                            role_name += param + " "
-                    else:
-                        reason = param
+                    if not role:
+                        role_name += param
+                        role = await get_role_from_name(message_in.server, role_name)
+                    else:  # change target bucket
+                        duration += param
+
                 role = await get_role_from_name(message_in.server, role_name)
                 if not role:
                     await client.send_message(message_in.channel, "Role not recognized")
@@ -772,10 +776,16 @@ async def perform_command(command, params, message_in):
                     return
                 else:
                     dur = timedelta(minutes=dur)
-                    dur = datetime.now() - dur
+                    dur = datetime.now() + dur
                 await temproles.add_role(member, role, dur)
+                duration = dur + datetime.now()
+
+                # micros = dur.microsecond
+                complete = 1000000
+                duration = duration + timedelta(microseconds=499999)
+                duration = duration // 1000000 * 1000000
                 text = "Adding role {rolename} to {mention} [{id}] for {dur}".format(rolename=role.mention, mention=member.mention, id=member.id,
-                                                                                             dur=dur)
+                                                                                     dur=duration)
                 text = await scrub_text(text, message_in.channel)
                 output.append((text, None))
             if params[0] == "tick":
@@ -791,24 +801,21 @@ async def perform_command(command, params, message_in):
                     elif dur == 3600:
                         dur = 60
                     dur = timedelta(minutes=dur)
-                    dur = datetime.now() + dur
+                    end_time = datetime.now() + dur
                     # dur = dur
                 except ValueError:
-                    dur = await parse_date(date_text="in " + " ".join(params[1:]))
+                    end_time = await parse_date(date_text="in " + " ".join(params[1:]))
             else:
-                dur = await parse_date(date_text="in " + " ".join(params[1:]))
-            print(dur)
+                end_time = await parse_date(date_text="in " + " ".join(params[1:]))
 
-            if dur != 0 and not dur:
+            if end_time != 0 and not end_time:
                 await client.send_message(message_in.channel, "Duration not recognized")
                 return
             if not member:
                 await client.send_message(message_in.channel, "Member not recognized")
                 return
-            # dur = datetime.now() + dur
-            duration = dur - datetime.now()
-            # micros = dur.microsecond
-            complete = 1000000
+
+            duration = end_time - datetime.now()
             duration = duration + timedelta(microseconds=499999)
             duration = duration // 1000000 * 1000000
 
@@ -824,6 +831,53 @@ async def perform_command(command, params, message_in):
 
 async def unmute(member):
     await client.server_voice_state(member, mute=False)
+
+
+async def parse_temprole(params, member):
+    # member = message_in.server.get_member(params[1])
+    parsed_dur = False
+    role_name = ""
+    dur = None
+    # for param in params[2:]:
+    #     if not parsed_dur:
+    #         try:
+    #             dur = int(param)
+    #             parsed_dur = True
+    #         except ValueError:
+    #             role_name += param + " "
+    #     else:
+    #         reason = param
+    role_name = ""
+    role = None
+    duration = ""
+    for param in params[2:]:
+        if not role:
+            role_name += param
+            role = await get_role_from_name(role_name)
+        else:
+            duration += param
+
+    role = await get_role_from_name(message_in.server, role_name)
+    if not role:
+        await client.send_message(message_in.channel, "Role not recognized")
+        return
+    if not dur:
+        await client.send_message(message_in.channel, "Duration not recognized")
+        return
+    else:
+        dur = timedelta(minutes=dur)
+        dur = datetime.now() + dur
+    await temproles.add_role(member, role, dur)
+    duration = dur + datetime.now()
+
+    # micros = dur.microsecond
+    complete = 1000000
+    duration = duration + timedelta(microseconds=499999)
+    duration = duration // 1000000 * 1000000
+    text = "Adding role {rolename} to {mention} [{id}] for {dur}".format(rolename=role.mention, mention=member.mention,
+                                                                         id=member.id,
+                                                                         dur=duration)
+    text = await scrub_text(text, message_in.channel)
 
 async def skip_jukebox(song_name, member_id, message_in):
     jukebox = client.get_server(constants.OVERWATCH_SERVER_ID).get_channel(
