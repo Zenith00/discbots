@@ -5,8 +5,7 @@ import random
 import textwrap
 import urllib.request
 from collections import defaultdict
-from datetime import datetime, timedelta
-
+from datetime import timedelta, datetime
 import discord
 import motor.motor_asyncio
 import pymongo
@@ -26,7 +25,7 @@ from discord import http as dischttp
 import string
 from utils_parse import *
 from utils_text import *
-from utils_text import shorten_link
+# from utils_text import shorten_link
 import utils_image
 from dateutil import parser
 import dateparser
@@ -300,6 +299,7 @@ class ScrimMaster:
             count += 1
 
     async def output_teams_list(self):
+        await self.compress()
         cursor = overwatch_db.scrim.find({"active": True})
 
         cursor.sort("pos", pymongo.ASCENDING)
@@ -576,7 +576,7 @@ async def perform_command(command, params, message_in):
 
     send_type = None
     called = False
-    if message_in.server.id == "266279338305912832" or "zenith" in auths:
+    if message_in.server.id == "266279338305912832":
         if command == "big":
             text = str(" ".join(params))
             big_text = ""
@@ -597,7 +597,7 @@ async def perform_command(command, params, message_in):
     print("Firing...")
     if "zenith" in auths:
         if command == "oauth":
-            print(discord.utils.oauth_url(AUTH_TOKEN))
+            print(discord.utils.oauth_url(client.id))
         if command == "names":
             count = 0
             text = ""
@@ -751,76 +751,58 @@ async def perform_command(command, params, message_in):
             global temproles
             if params[0] in ["add", "+"]:
                 member = message_in.server.get_member(params[1])
-                parsed_dur = False
-                role_name = ""
-                dur = None
                 role_name = ""
                 role = None
                 duration = ""
-                # duration bucket
-                # target bucket
-                # role name bucket
                 for param in params[2:]:
                     if not role:
+                        print(role_name)
                         role_name += param
                         role = await get_role_from_name(message_in.server, role_name)
-                    else:  # change target bucket
+                    else:
+                        print("FOUND:")
+                        print(role.name)
                         duration += param
-
-                role = await get_role_from_name(message_in.server, role_name)
                 if not role:
                     await client.send_message(message_in.channel, "Role not recognized")
                     return
-                if not dur:
+                time_dict = await parse_time_to_end(duration)
+                if not time_dict:
                     await client.send_message(message_in.channel, "Duration not recognized")
                     return
-                else:
-                    dur = timedelta(minutes=dur)
-                    dur = datetime.now() + dur
-                await temproles.add_role(member, role, dur)
-                duration = dur + datetime.now()
-
-                # micros = dur.microsecond
-                complete = 1000000
-                duration = duration + timedelta(microseconds=499999)
-                duration = duration // 1000000 * 1000000
                 text = "Adding role {rolename} to {mention} [{id}] for {dur}".format(rolename=role.mention, mention=member.mention, id=member.id,
-                                                                                     dur=duration)
+                                                                                     dur=time_dict["readable"])
                 text = await scrub_text(text, message_in.channel)
+                await temproles.add_role(member=member, role=role, end_datetime=time_dict["end"])
                 output.append((text, None))
             if params[0] == "tick":
                 await temproles.tick()
+            if params[0] == "list":
+                roles = [["Member ID", "Member Name", "Role Name", "Role ID", "Ending in"]]
+                temproles_dump = await temproles.dump()
+                for temprole_dict in temproles_dump:
+                    # return {"member_id": self.member_id, "role": self.role, "end": self.end, "server": self.server}
+                    member = message_in.server.get_member(temprole_dict["member_id"])
+                    role = temprole_dict["role"]
+                    end_time = temprole_dict["end"] - datetime.now()
+                    end_time = format_timedelta(end_time)
+                    if not (member and role and end_time):
+                        continue
+                    role_entry = [member.id, member.name + "#" + member.discriminator, role.name, role.id, end_time]
+                    roles.append(role_entry)
+                await send(destination=message_in.channel, text=roles, send_type="rows")
         elif command == "mute":
             role = await get_role(message_in.server, "110595961490792448")
             member = message_in.server.get_member(params[0])
-            if len(params) == 2:
-                try:
-                    dur = int(params[1])
-                    if dur == 600:
-                        dur = 10
-                    elif dur == 3600:
-                        dur = 60
-                    dur = timedelta(minutes=dur)
-                    end_time = datetime.now() + dur
-                    # dur = dur
-                except ValueError:
-                    end_time = await parse_date(date_text="in " + " ".join(params[1:]))
-            else:
-                end_time = await parse_date(date_text="in " + " ".join(params[1:]))
-
-            if end_time != 0 and not end_time:
-                await client.send_message(message_in.channel, "Duration not recognized")
-                return
+            time_dict = await parse_time_to_end(" ".join(params[1:]))
             if not member:
                 await client.send_message(message_in.channel, "Member not recognized")
                 return
-
-            duration = end_time - datetime.now()
-            duration = duration + timedelta(microseconds=499999)
-            duration = duration // 1000000 * 1000000
-
-            output.append(("Muting {mention} [{id}] for {dur}".format(mention=member.mention, id=member.id, dur=duration), None))
-            await temproles.add_role(member=member, role=role, minutes=dur)
+            if not time_dict:
+                await client.send_message(message_in.channel, "Duration not recognized")
+                return
+            output.append(("Muting {mention} [{id}] for {dur}".format(mention=member.mention, id=member.id, dur=time_dict["readable"]), None))
+            await temproles.add_role(member=member, role=role, end_datetime=time_dict["end"])
     if "trusted" not in auths:
         return
     if called:
@@ -833,51 +815,25 @@ async def unmute(member):
     await client.server_voice_state(member, mute=False)
 
 
-async def parse_temprole(params, member):
-    # member = message_in.server.get_member(params[1])
-    parsed_dur = False
-    role_name = ""
-    dur = None
-    # for param in params[2:]:
-    #     if not parsed_dur:
-    #         try:
-    #             dur = int(param)
-    #             parsed_dur = True
-    #         except ValueError:
-    #             role_name += param + " "
-    #     else:
-    #         reason = param
-    role_name = ""
-    role = None
-    duration = ""
-    for param in params[2:]:
-        if not role:
-            role_name += param
-            role = await get_role_from_name(role_name)
+async def parse_time_to_end(time_string):
+    print(time_string)
+    try:
+        if is_int(time_string):
+            delt = timedelta(minutes=int(time_string))
+            delt = round_timedelta(delt)
+            readable = format_timedelta(delt)
+            return {"end":datetime.now() + delt, "duration":delt, "readable":readable}
         else:
-            duration += param
+            end = await parse_date("in " + time_string)
+            delt = end - datetime.now()
+            delt = round_timedelta(delt)
+            readable = format_timedelta(delt)
+            return {"end":end, "duration":delt, "readable":readable}
+    except:
+        print(traceback.format_exc())
+        return None
 
-    role = await get_role_from_name(message_in.server, role_name)
-    if not role:
-        await client.send_message(message_in.channel, "Role not recognized")
-        return
-    if not dur:
-        await client.send_message(message_in.channel, "Duration not recognized")
-        return
-    else:
-        dur = timedelta(minutes=dur)
-        dur = datetime.now() + dur
-    await temproles.add_role(member, role, dur)
-    duration = dur + datetime.now()
 
-    # micros = dur.microsecond
-    complete = 1000000
-    duration = duration + timedelta(microseconds=499999)
-    duration = duration // 1000000 * 1000000
-    text = "Adding role {rolename} to {mention} [{id}] for {dur}".format(rolename=role.mention, mention=member.mention,
-                                                                         id=member.id,
-                                                                         dur=duration)
-    text = await scrub_text(text, message_in.channel)
 
 async def skip_jukebox(song_name, member_id, message_in):
     jukebox = client.get_server(constants.OVERWATCH_SERVER_ID).get_channel(
@@ -1043,7 +999,10 @@ async def output_user_embed(member_id, message_in):
             embed.add_field(name="Current VC", value=voice_name)
         status = str(target_member.status)
     else:
-        status = "Not part of the server"
+        if target_member in await client.get_bans(message_in.server):
+            status = "Banned"
+        else:
+            status = "Not part of the server"
     embed.add_field(name="Status", value=status, inline=False)
     if avatar_link:
         embed.set_thumbnail(url=avatar_link)
@@ -1051,7 +1010,7 @@ async def output_user_embed(member_id, message_in):
         embed.add_field(name="Avatar", value=avatar_link.replace(".webp", ".png"), inline=False)
         hex_int = int(color, 16)
         embed.colour = discord.Colour(hex_int)
-        embed.set_thumbnail(url=shorten_link(target_member.avatar_url))
+        embed.set_thumbnail(url=target_member.avatar_url)
     return embed
 
 async def serve_lfg(message_in):
@@ -1151,7 +1110,7 @@ async def get_role_from_name(server, role_name):
         rolename_role_dict[role.name] = role
 
     role = process.extractOne(role_name, list(rolename_role_dict.keys()))
-    if role[1] > 85:
+    if role[1] > 90:
         return rolename_role_dict[role[0]]
     else:
         return None
@@ -1403,6 +1362,9 @@ async def generate_activity_hist(message):
                                  content=hist)
         return (gist["Gist-Link"], None)
 
+async def generate_activity_info():
+    pass
+
 async def format_message_to_log(message_dict):
     cursor = await overwatch_db.userinfo.find_one({"userid": message_dict["userid"]})
     try:
@@ -1616,7 +1578,8 @@ async def log_action(action, detail):
                                                                                                    "member"].discriminator, nick=
                                                                                                detail["member"].nick if detail["member"].nick else "")
         target_channel = server_log
-        await overwatch_db.server_log.insert_one({"date": datetime.utcnow().isoformat(" "), "action": action, "id": detail["member"].id, "mention": detail["member"].mention})
+        await overwatch_db.server_log.insert_one(
+            {"date": datetime.utcnow().isoformat(" "), "action": action, "id": detail["member"].id, "mention": detail["member"].mention})
 
     elif action == "unban":
         message = "{time} :white_check_mark:  [UNBAN] [{mention}] [{id}]".format(time=time, mention="<@!" + detail["id"] + ">",
@@ -1692,7 +1655,7 @@ async def log_action(action, detail):
         print("fail")
         return
     message = await scrub_text(message, voice_log)
-    if STATES["server_log"]:
+    if "server_log" in STATES.keys() and STATES["server_log"]:
         await client.send_message(target_channel, message)
 
 # Database
@@ -1748,14 +1711,14 @@ async def export_user(member_id):
     if not userinfo:
         return None
     list = userinfo["avatar_urls"]
-    if len(list) > 0 and len(list[0]) > 0:
-        try:
-            shortened_list = []
-            for link in list:
-                shortened_list.append(await shorten_link(link))
-            userinfo["avatar_urls"] = shortened_list
-        except:
-            pass
+    # if len(list) > 0 and len(list[0]) > 0:
+    #     try:
+    #         shortened_list = []
+    #         for link in list:
+    #             shortened_list.append(link)
+    #         userinfo["avatar_urls"] = shortened_list
+    #     except:
+    #         pass
     return userinfo
 
 # Utils
@@ -1982,7 +1945,7 @@ async def scrim_manage(message):
 
     command = message.content.replace("..scrim ", "")
     command_list = command.split(" ")
-
+    command_list = await mention_to_id(command_list)
     if "mod" in auths or "host" in auths:
         if not scrim and command_list[0] == "start":
             await scrim_start(message)
@@ -2007,6 +1970,13 @@ async def scrim_manage(message):
             await scrim.start()
         if command_list[0] == "add":
             await scrim.force_register(message)
+        if command_list[0] == "remove":
+            user = await message.server.get_member(command_list[1])
+            if user:
+                await scrim.leave(user)
+            else:
+                await client.send_message(message.channel, "User not recognized")
+
     if scrim:
         try:
             # managers = await scrim.get_managers()
@@ -2052,6 +2022,8 @@ async def scrim_manage(message):
 
             if command_list[0] == "leave":
                 await scrim.leave(message.author)
+
+
 
 
         except IndexError:
@@ -2366,7 +2338,7 @@ async def wolfram(message):
 
         for subpod in subpods:
             img = (subpod["img"])["@src"]
-            img = shorten_link(img)
+            # img = shorten_link(img)
             text += img + "\n"
         await client.send_message(message.channel, text)
 
@@ -2462,7 +2434,10 @@ class temprole_master:
             if tick:
                 # print("Ticking: " + temprole.member_id)
                 member = self.server.get_member(tick[0])
-                await client.remove_roles(member, tick[1])
+                if member:
+                    await client.remove_roles(member, tick[1])
+                else:
+                    print("Cannot find <user> to automatically unmute")
             else:
                 new_temproles.append(temprole)
         self.temproles = new_temproles
@@ -2487,16 +2462,18 @@ class temprole_master:
             # print("Check found a temprole: " + member.id)
             return await temprole.reapply()
         except IndexError:
-            print("None found: " + member.name)
+            # print("None found: " + member.name)
+            pass
 
-    async def add_role(self, member, role, minutes):
+    async def add_role(self, member, role, end_datetime):
         # end_time = datetime.utcnow() + minutes
-        end_time = minutes
-        self.temproles.append(temprole(member.id, role, end_time, self.server))
+        self.temproles.append(temprole(member.id, role, end_datetime, self.server))
         await client.add_roles(member, role)
 
         await overwatch_db.roles.insert_one(
-            {"type": "temp", "member_id": member.id, "role_id": role.id, "end_time": str(end_time)})
+            {"type": "temp", "member_id": member.id, "role_id": role.id, "end_time": str(end_datetime)})
+    async def dump(self):
+        return [await temprole.dump() for temprole in self.temproles]
 
 class temprole:
     def __init__(self, member_id, role, end, server):
@@ -2513,7 +2490,7 @@ class temprole:
         # print(datetime.utcnow())
         # print(self.member_id)
         # print(self.role)
-        if self.end < datetime.utcnow():
+        if self.end < datetime.now():
             await overwatch_db.roles.delete_one(
                 {"type": "temp", "member_id": self.member_id, "role_id": self.role.id, "end_time": str(self.end)})
             print("Tock off: " + self.member_id)
@@ -2521,6 +2498,7 @@ class temprole:
         else:
             # print("Ticking: " + self.member_id)
             return None
+
     async def reapply(self):
         member = self.server.get_member(self.member_id)
         if member:
@@ -2529,5 +2507,9 @@ class temprole:
         else:
             print("MISSING MEMBER?? " + str(self.member_id))
             return None
+
+    async def dump(self):
+        return {"member_id": self.member_id, "role": self.role, "end": self.end, "server": self.server}
+
 
 client.run(AUTH_TOKEN, bot=True)

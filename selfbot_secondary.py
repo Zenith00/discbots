@@ -12,7 +12,7 @@ client = discord.Client()
 logging.basicConfig(level=logging.INFO)
 gistClient = Simplegist()
 
-art_timer = timer(1800)
+art_timer = timer(60*60*1)
 art_on = False
 @client.event
 async def on_ready():
@@ -59,6 +59,8 @@ async def on_message(message_in):
         file = extract_line(artlist)
         if file != "":
             await client.send_message(client.get_server(constants.OVERWATCH_SERVER_ID).get_channel("168567769573490688"), file)
+        else:
+            print("empty")
 async def get_moderators(server):
     users = []
     for role in server.roles:

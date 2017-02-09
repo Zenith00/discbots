@@ -44,6 +44,16 @@ async def on_message(message_in):
                 await client.send_message(message_in.channel, text)
             if command_list[0] == "rs":
                 await client.send_message(client.get_channel("176236425384034304"), ".restart")
+            if command_list[0] == "big":
+                text = str(" ".join(command_list[1:]))
+                big_text = ""
+                for character in text:
+                    if character == " ":
+                        big_text += "     "
+                    else:
+                        big_text += "​:regional_indicator_{c}:".format(c=character)
+                await client.send_message(message_in.channel, big_text)
+                print("sending" + big_text)
 
 
 @client.event
