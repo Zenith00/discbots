@@ -2560,8 +2560,8 @@ class heat_dot:
 
     def tick(self):
         time_chunks = (datetime.now() - self.creation)
-        time_chunks = pass
-        self.value = self.value * math.exp(-8 *)
+        time_chunks = None
+        self.value = self.value * math.exp(-8 *1)
 
 
 class heat_master:
