@@ -1,9 +1,11 @@
-from pytba import api as tba
+from datetime import datetime, timedelta
+import time
 
-import pyfav.pyfav as pyfav
+saved_time = datetime.now()
+time.sleep(5)
+print((datetime.now() - saved_time).total_seconds())
 
-tba.set_api_key("Austin Zhang", "1072bot ", "1.0")
 
-team = tba.team_get("254")
-# print(pyfav.get_favicon_url(r'https://webappsca.pcrsoft.com/Clue/SC-Assignments-End-Date-(No-Range)/18593'))
-print(team)
+#  import sys
+# numbers = input().split(" ")
+# print(numbers[-1].join(numbers[:-1]) + " = " + str(int(numbers[0]) + sum([int(x) for x in numbers[1:-1]]) if numbers[-1] == "+" else int(numbers[0]) - sum([int(x) for x in numbers[1:-1]])))

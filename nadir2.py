@@ -2512,4 +2512,62 @@ class temprole:
         return {"member_id": self.member_id, "role": self.role, "end": self.end, "server": self.server}
 
 
+class heat_user:
+    heat_dict = {}
+    weight_dict = {"voice": 1, "messages": 1, "invites": 1}
+
+    def __init__(self, master, userid):
+        self.userid = userid
+        self.master = master
+
+    def tick(self):
+        self.heat = self.heat * self.master.cool_ratio - self.master.cool_static
+
+    def register_voice(self):
+        new_voice = None
+        self.heat_dict["voice"] = new_voice
+        pass
+
+    def register_message(self):
+        new_message = None
+        self.heat_dict["messages"] = new_message
+        pass
+
+    def register_invite(self):
+        new_invite = None
+
+        new_invite = max(new_invite, 1)
+
+        self.heat_dict["invites"] = new_invite
+        pass
+
+    def compute_heat(self):
+        heat = 0
+        for key in self.heat_dict.keys():
+            heat = heat + self.heat_dict[key] * self.weight_dict[key]
+
+
+class heat_dot:
+    def __init__(self, creation, decay_rate, value):
+        self.creation = creation
+        self.decay_rate = decay_rate
+        self.value = value
+
+    def tick(self):
+        time_chunks = (datetime.now() - self.creation)
+        time_chunks =
+        self.value = self.value * math.exp(-8 *)
+
+
+class heat_master:
+    def __init__(self, cool_ratio, cool_static):
+        self.cool_rate = cool_ratio
+        self.cool_static = cool_static
+
+        pass
+
+    async def dump(self):
+        return {"member_id": self.member_id, "role": self.role, "end": self.end, "server": self.server}
+
+
 client.run(AUTH_TOKEN, bot=True)

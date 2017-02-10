@@ -50,13 +50,15 @@ async def on_message(message_in):
         await client.send_message(message_in.channel, content=None, embed=embed)
     if command_list[0] == "reboot":
         await client.logout()
+    if command_list[0] == "importevent":
+        pass
 
 
 async def output_event_embed(event):
     name = event.info["name"]
     embed = discord.Embed(title="[{event_code}] {name}'s  team  info".format(name=name.replace(" ", "  "),
                                                                              event_code=event.info[
-                                                                                 "key"]) + ' ' * 80 + "​​​​​​",
+                                                                                 "key"]) + ' ' * 40 + "​​​​​​",
                           type="rich")
     embed.add_field(name="Website", value=event.info["website"], inline=False)
     embed.add_field(name="Start Date", value=event.info["start_date"], inline=True)
@@ -72,19 +74,28 @@ async def output_event_embed(event):
 async def output_team_embed(team_dict):
     nickname = team_dict["nickname"]
     embed = discord.Embed(title="[{number}] {name}  info".format(name=nickname.replace(" ", "  "), number=team_dict[
-        "team_number"]) + ' ' * 120 + "​​​​​​", type="rich")
+        "team_number"]) + ' ' * 60 + "​​​​​​", type="rich")
+
 
     location = team_dict["locality"] + ", " + team_dict["region"]
     embed.add_field(name="Motto", value=team_dict["motto"], inline=False)
     embed.add_field(name="Website", value=team_dict["website"], inline=False)
     embed.add_field(name="Founding Year", value=team_dict["rookie_year"])
     embed.add_field(name="Location", value=location, inline=False)
-    print(team_dict["team_number"])
-    if team_dict["team_number"] == "1072":
-        return embed
+    print(team_dict)
+    # if team_dict["team_number"] == "1072":
+    #     return embed
     thumb = pyfav.get_favicon_url(team_dict["website"])
-    embed.set_thumbnail(url=thumb)
+    if thumb:
+        embed.set_thumbnail(url=thumb)
+    print("embed got")
+    print(embed.to_dict())
     return embed
+
+
+async def get_input(from_user, regex):
+    pass
+
 
 
 async def send(destination, text, send_type):
