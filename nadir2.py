@@ -2451,6 +2451,10 @@ class temprole_master:
             member_id = temp["member_id"]
             role_id = temp["role_id"]
             role = await get_role(self.server, role_id)
+            if not role:
+                asyncio.sleep(1)
+                role = await get_role(self.server, role_id)
+
             end_time = temp["end_time"]
             # end_time = parser.parse(end_time)
             end_time = dateparser.parse(end_time)
@@ -2491,6 +2495,7 @@ class temprole:
         # print(self.member_id)
         # print(self.role)
         if self.end < datetime.now():
+
             await overwatch_db.roles.delete_one(
                 {"type": "temp", "member_id": self.member_id, "role_id": self.role.id, "end_time": str(self.end)})
             print("Tock off: " + self.member_id)
@@ -2555,7 +2560,7 @@ class heat_dot:
 
     def tick(self):
         time_chunks = (datetime.now() - self.creation)
-        time_chunks =
+        time_chunks = pass
         self.value = self.value * math.exp(-8 *)
 
 
