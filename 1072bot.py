@@ -94,7 +94,12 @@ async def output_team_embed(team_dict):
 
 
 async def get_input(from_user, regex):
-    pass
+    def check(message):
+        if regex_test(regex, message.content):
+            return True
+        return False
+
+    message_in = await client.wait_for_message(author=from_user, check=check)
 
 
 

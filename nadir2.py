@@ -1096,6 +1096,7 @@ async def get_role(server, roleid):
         if x.id == roleid:
             return x
 
+
 async def trusted_analysis():
     ow = SERVERS["OW"]
     trusted = await get_role(ow, "169728613216813056")
@@ -1311,10 +1312,11 @@ async def rebuild_nicks(message_in):
         print(member.name)
         await import_user(member)
 
+
 async def generate_user_channel_activity_hist(server, userid):
     hist = defaultdict(int)
     member_name = server.get_member(userid).name
-    async for doc in message_log_collection.find({"userid": userid, "date":{"$gt": "2016-12-25"}}):
+    async for doc in message_log_collection.find({"userid": userid, "date": {"$gt": "2016-12-25"}}):
         hist[doc["channel_id"]] += len(doc["content"].split(" "))
         print("Found a message from " + str(doc["userid"]))
     named_hist = {}
@@ -2536,7 +2538,7 @@ class temprole:
 
 
 class heat_user:
-    heat_dict = {}
+    heat_dict = {"voice": [], "messages": [], "invites": []}
     weight_dict = {"voice": 1, "messages": 1, "invites": 1}
 
     def __init__(self, master, userid):
@@ -2544,11 +2546,21 @@ class heat_user:
         self.master = master
 
     def tick(self):
-        self.heat = self.heat * self.master.cool_ratio - self.master.cool_static
+        # self.heat = self.heat * self.master.cool_ratio - self.master.cool_static
+        pass
+        for type_key in self.heat_dict.keys():
+            new_list = []
+            list = self.heat_dict[type_key]
+            for heat_dot in list:
+                new_list.append(heat_dot.tick())
+            self.heat_dict[type_key] = filter(None, new_list)
 
-    def register_voice(self):
-        new_voice = None
-        self.heat_dict["voice"] = new_voice
+    def add(self, item_tuple):
+        pass
+
+    def register_voice(self, five_min_count):  # stores a list of heat_dots
+        new_dot = heat_dot(five_min_count)
+        self.heat_dict["voice"].append(new_dot)
         pass
 
     def register_message(self):
@@ -2571,26 +2583,29 @@ class heat_user:
 
 
 class heat_dot:
-    def __init__(self, creation, decay_rate, value):
-        self.creation = creation
-        self.decay_rate = decay_rate
+    chunk_size = 60 * 5
+
+    def __init__(self, value):
+        self.creation = datetime.now()
         self.value = value
 
     def tick(self):
-        time_chunks = (datetime.now() - self.creation)
-        time_chunks = None
-        self.value = self.value * math.exp(-8 *1)
+        age = (datetime.now() - self.creation)
+        age = round_timedelta(age)
+        time_chunks = age.total_seconds()
+        time_chunks = time_chunks / self.chunk_size
+        self.value = self.value * math.exp(-8 * math.pow(time_chunks, 2))
+        if self.value < 1.0e-5:
+            return None
+        return self.value
 
 
 class heat_master:
     def __init__(self, cool_ratio, cool_static):
         self.cool_rate = cool_ratio
         self.cool_static = cool_static
-
         pass
 
-    async def dump(self):
-        return {"member_id": self.member_id, "role": self.role, "end": self.end, "server": self.server}
 
 
 client.run(AUTH_TOKEN, bot=True)
