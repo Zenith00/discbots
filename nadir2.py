@@ -1036,7 +1036,15 @@ async def ping(message):
     timestamp = message.timestamp
     channel = message.channel
     # await client.delete_message(message)
-    voice = random.choice(constants.VOICE_LINES)
+    if message.author.id == "90302230506258432":
+        voice = "<@!90302230506258432>, HAMMERDOWN!!"
+    elif message.author.id == "106391128718245888":
+        voice = "<@!106391128718245888> , Let's break it DOWN!"
+    elif message.author.id == "66093947541266432":
+        voice = "<@!66093947541266432> ¡Apagando las luces!"
+    else:
+        voice = random.choice(constants.VOICE_LINES)
+
     sent = await client.send_message(channel, voice)
     await client.edit_message(sent,
                               voice + " (" + str(
