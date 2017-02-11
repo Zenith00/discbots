@@ -1042,14 +1042,15 @@ async def ping(message):
         voice = "<@!106391128718245888> , Let's break it DOWN!"
     elif message.author.id == "66093947541266432":
         voice = "<@!66093947541266432> ¡Apagando las luces!"
+    elif message.author.id == constants.ZENITH_ID:
+        voice = "<@!" + constants.ZENITH_ID + ">" + " Test"
     else:
-        voice = random.choice(constants.VOICE_LINES)
+        voice =  message.author.mention + random.choice(constants.VOICE_LINES)
 
     sent = await client.send_message(channel, voice)
     await client.edit_message(sent,
                               voice + " (" + str(
-                                  (sent.timestamp - timestamp).total_seconds() * 500) + " ms) " +
-                              message.author.mention)
+                                  (sent.timestamp - timestamp).total_seconds() * 500) + " ms)")
 
 async def output_roles(message):
     role_list = []
