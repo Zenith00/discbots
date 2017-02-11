@@ -596,6 +596,9 @@ async def perform_command(command, params, message_in):
         called = True
     print("Firing...")
     if "zenith" in auths:
+        if command == "trustedinfo":
+            results = await trusted_analysis()
+            output.extend(results)
         if command == "oauth":
             print(discord.utils.oauth_url(client.id))
         if command == "names":
@@ -640,7 +643,7 @@ async def perform_command(command, params, message_in):
             output.append(await generate_activity_hist(message_in))
 
         elif command == "channelsdist":
-            output.append(await generate_user_channel_activity_hist(message_in, params[0]))
+            output.append(await generate_user_channel_activity_hist(message_in.server, params[0]))
         elif command == "superlog":
             await rebuild_logs(message_in)
         elif command == "rebuildnicks":
@@ -1093,6 +1096,20 @@ async def get_role(server, roleid):
         if x.id == roleid:
             return x
 
+async def trusted_analysis():
+    ow = SERVERS["OW"]
+    trusted = await get_role(ow, "169728613216813056")
+    trusteds = await get_role_members(trusted)
+    gists = []
+    for member in trusteds:
+        try:
+            result = await generate_user_channel_activity_hist(ow, member.id)
+            gists.append(member.name + ": " + result[0])
+        except:
+            print(member.name)
+    return [(gist, None) for gist in gists]
+
+
 async def get_channel_from_name(server, channel_name, type):
     channelname_channel_dict = {}
     for channel in server.channels:
@@ -1294,19 +1311,20 @@ async def rebuild_nicks(message_in):
         print(member.name)
         await import_user(member)
 
-async def generate_user_channel_activity_hist(message_in, userid):
+async def generate_user_channel_activity_hist(server, userid):
     hist = defaultdict(int)
-    async for doc in message_log_collection.find({"userid": userid}):
+    member_name = server.get_member(userid).name
+    async for doc in message_log_collection.find({"userid": userid, "date":{"$gt": "2016-12-25"}}):
         hist[doc["channel_id"]] += len(doc["content"].split(" "))
+        print("Found a message from " + str(doc["userid"]))
     named_hist = {}
     hist = dict(hist)
     for key in hist.keys():
-
         try:
             named_hist[constants.CHANNELID_CHANNELNAME_DICT[key]] = hist[key]
         except:
             try:
-                name = message_in.server.get_channel(key).name
+                name = server.get_channel(key).name
                 named_hist[name] = hist[key]
             except:
                 name = key
@@ -1314,11 +1332,11 @@ async def generate_user_channel_activity_hist(message_in, userid):
 
     sort = sorted(named_hist.items(), key=lambda x: x[1])
     hist = "\n".join("%s,%s" % tup for tup in sort)
-
-    gist = gistClient.create(name="Channelhist",
-                             description=str(datetime.utcnow().strftime("[%Y-%m-%d %H:%m:%S] ")),
-                             public=False,
-                             content=hist)
+    if hist:
+        gist = gistClient.create(name=member_name + "'s Channelhist",
+                                 description=str(datetime.utcnow().strftime("[%Y-%m-%d %H:%m:%S] ")),
+                                 public=False,
+                                 content=hist)
     return (gist["Gist-Link"], None)
 
 async def generate_activity_hist(message):
