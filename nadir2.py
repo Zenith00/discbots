@@ -1313,7 +1313,7 @@ async def rebuild_nicks(message_in):
         await import_user(member)
 
 
-async def generate_user_channel_activity_hist(server, userid):
+async def generate_user_channel_activity_hist(server, userid, gist):
     hist = defaultdict(int)
     member_name = server.get_member(userid).name
     async for doc in message_log_collection.find({"userid": userid, "date": {"$gt": "2016-12-25"}}):
@@ -1331,15 +1331,18 @@ async def generate_user_channel_activity_hist(server, userid):
             except:
                 name = key
                 named_hist[name] = hist[key]
+    if not gist:
+        return hist
 
     sort = sorted(named_hist.items(), key=lambda x: x[1])
     hist = "\n".join("%s,%s" % tup for tup in sort)
     if hist:
-        gist = gistClient.create(name=member_name + "'s Channelhist",
+        gist_response = gistClient.create(name=member_name + "'s Channelhist",
                                  description=str(datetime.utcnow().strftime("[%Y-%m-%d %H:%m:%S] ")),
                                  public=False,
                                  content=hist)
-    return (gist["Gist-Link"], None)
+
+    return (gist_response["Gist-Link"], None)
 
 async def generate_activity_hist(message):
     if message.content.startswith("`mostactive"):
