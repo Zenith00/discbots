@@ -643,7 +643,7 @@ async def perform_command(command, params, message_in):
             output.append(await generate_activity_hist(message_in))
 
         elif command == "channelsdist":
-            output.append(await generate_user_channel_activity_hist(message_in.server, params[0]))
+            output.append(await generate_user_channel_activity_hist(message_in.server, params[0], gist=True))
         elif command == "superlog":
             await rebuild_logs(message_in)
         elif command == "rebuildnicks":
@@ -1113,8 +1113,8 @@ async def trusted_analysis():
     gists = []
     for member in trusteds:
         try:
-            result = await generate_user_channel_activity_hist(ow, member.id)
-            gists.append(member.name + ": " + result[0])
+            result = await generate_user_channel_activity_hist(ow, member.id, False)
+            gists[ascii(member.name)] = result
         except:
             print(member.name)
     return [(gist, None) for gist in gists]
