@@ -1106,6 +1106,7 @@ async def get_role(server, roleid):
             return x
 
 
+
 async def trusted_analysis():
     ow = SERVERS["OW"]
     trusted = await get_role(ow, "169728613216813056")
