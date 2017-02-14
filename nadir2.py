@@ -1875,8 +1875,10 @@ async def fuzzy_match(*args):
         try:
             for nick in userinfo_dict["nicks"]:
                 # print(userinfo_dict["nicks"])
-                nick_id_dict.setdefault(nick, []).append(userinfo_dict["userid"])
+                nick_id_dict.setdefault(nick, set()).add(userinfo_dict["userid"])
                 # nickIdDict.setdefault(nick, []).append(id)
+            for name in userinfo_dict["names"]:
+                nick_id_dict.setdefault(name, set()).add(userinfo_dict["userid"])
         except KeyError:
             try:
                 await import_user(
@@ -2699,4 +2701,4 @@ class heat_dot:
 
 
 
-client.run(AUTH_TOKEN, bot=True)
+client.run(MERCY_TOKEN, bot=True)
