@@ -672,6 +672,9 @@ async def perform_command(command, params, message_in):
                 print(count)
                 count += 1
                 await import_to_user_set(member, "server_joins", member.joined_at.isoformat(" "))
+        elif command == "test":
+            user = await client.get_user_info(user_id="222941072404381697")
+            await client.send_message(user, "Test")
 
     if "trusted" in auths:
         if command == "ui":
