@@ -2486,6 +2486,9 @@ async def temp_apply_role(member, role, duration):
 async def apply_role(member, role):
     pass
 
+
+
+
 class temprole_master:
     temproles = []
 
@@ -2631,6 +2634,12 @@ class heat_user:
         self.heat_dict["voice"] = [new_dot]
 
         pass
+
+    def compute_messages_per_second(self, message):
+        author_id = message.author.id
+        #    async for doc in message_log_collection.find({"userid": userid, "date": {"$gt": "2016-12-25"}}):
+
+        overwatch_db.message_log.find({"userid":author_id, "date":{"gt":str(datetime.utcnow())}})
 
     def register_message(self, message):
         print("Registering a message from " + message.author.name)
