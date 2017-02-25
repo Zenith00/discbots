@@ -696,8 +696,13 @@ async def perform_command(command, params, message_in):
 
     if "mod" in auths:
 
-        if command == "get_role_members":
-            pass
+        if command == "getrolemembers":
+            role_name = " ".join(params[0:])
+            role = await get_role_from_name(message_in.server, role_name)
+            print(role)
+            role_members = await get_role_members(role)
+            list = [[member.name, member.id] for member in role_members]
+            output.append((list, "rows"))
         elif command == "serverlog":
             result = await overwatch_db.config.find_one({"type": "log"})
             if not params:
@@ -1164,6 +1169,7 @@ async def get_role_from_name(server, role_name):
         rolename_role_dict[role.name] = role
 
     role = process.extractOne(role_name, list(rolename_role_dict.keys()))
+    print(role)
     if role[1] > 90:
         return rolename_role_dict[role[0]]
     else:
