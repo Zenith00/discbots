@@ -1834,7 +1834,6 @@ async def mention_to_id(command_list):
 
 async def invite_checker(message, regex_match):
     """
-
     :type regex_match: re.match
     :type message: discord.Message
     """
