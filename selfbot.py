@@ -5,7 +5,9 @@ import logging
 import os
 import textwrap
 from io import BytesIO
-
+import asyncio
+import traceback
+import utils_text
 import discord
 import requests
 import urbandictionary
@@ -18,7 +20,7 @@ from utils_text import multi_block
 
 logging.basicConfig(level=logging.INFO)
 
-perspective_api = discovery.build('commentanalyzer', 'v1', developerKey=GOOGLE_API_TOKEN)
+perspective_api = discovery.build('commentanalyzer', 'v1alpha1', developerKey=GOOGLE_API_TOKEN)
 client = discord.Client()
 imgur_client = ImgurClient(IMGUR_CLIENT_ID, IMGUR_SECRET_ID, IMGUR_ACCESS_TOKEN,
                            IMGUR_REFRESH_TOKEN)
@@ -71,6 +73,16 @@ async def on_message(message_in):
                      "{helix_right}    {helix_left}").format(
                 helix_left=command_list[1], helix_right=command_list[2])
             output.append((helix, "text"))
+        if command_list[0] == "persp":
+            text = " ".join(command_list[1])
+            analyze_request = {
+                'comment'            : {'text': text},
+                'requestedAttributes': {'TOXICITY': {}}
+            }
+            response = perspective_api.comments().analyze(body=analyze_request).execute()
+            toxicity_score = (response["attributeScores"]["TOXICITY"]["summaryScore"]["value"] * 100)
+            score_text = "```"
+
         if output:
             # noinspection PyTypeChecker
             for item in output:
@@ -124,5 +136,15 @@ async def send(destination, text, send_type):
             continue
         line = line.replace("<NL<", "\n")
         await client.send_message(destination, line)
+
+async def remind_me(command_list, message):
+    try:
+        time = await utils_text.parse_time_to_end(" ".join(command_list[1:]))
+        await asyncio.sleep(time["delt"].total_seconds())
+
+        await client.send_message(message.channel, "Reminding after " + str(
+            time) + " seconds:\n" + command_list[0])
+    except:
+        print(traceback.format_exc())
 
 client.run(ZENITH_AUTH_TOKEN, bot=False)

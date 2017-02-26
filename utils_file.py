@@ -1,3 +1,4 @@
+import subprocess
 def delete_lines(file, count):
     with open(file, "r") as lines:
         data = lines.readlines()
@@ -16,8 +17,24 @@ def extract_line(file):
     delete_lines(file, 1)
     return first_line
 
-def append_line(file, line):
-    with open(file, "a") as file: file.write(line + "\n")
+def append_line(filename, line):
+    with open(filename, "a") as file: file.write(line + "\n")
+    return rawincount(filename)
+
+def wccount(filename):
+    # requires http://gnuwin32.sourceforge.net/packages/coreutils.htm
+    out = subprocess.Popen(['wc', '-l', filename],
+                         stdout=subprocess.PIPE,
+                         stderr=subprocess.STDOUT
+                         ).communicate()[0]
+    return int(out.partition(b' ')[0])
+
+
+def rawincount(filename):
+    f = open(filename, 'rb')
+    from itertools import takewhile, repeat
+    bufgen = takewhile(lambda x: x, (f.raw.read(1024*1024) for _ in repeat(None)))
+    return sum( buf.count(b'\n') for buf in bufgen )
 
 
 def read_file(file) -> str:

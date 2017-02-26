@@ -39,10 +39,8 @@ imgur = ImgurClient(IMGUR_CLIENT_ID, IMGUR_SECRET_ID, IMGUR_ACCESS_TOKEN,
 WA_client = wolframalpha.Client(WA_ID)
 mongo_client = motor.motor_asyncio.AsyncIOMotorClient()
 overwatch_db = mongo_client.overwatch
-message_log_collection = overwatch_db.message_log
-userinfo_collection = overwatch_db.userinfo
+
 auths_collection = overwatch_db.auths
-trigger_str_collection = overwatch_db.trigger_str
 mongo_client_static = pymongo.MongoClient()
 aeval = Interpreter()
 gistClient = Simplegist()
@@ -53,7 +51,7 @@ heatmap = None
 temproles = None
 id_channel_dict = {}
 
-ROLENAME_ROLE_DICT = {}
+
 
 ID_ROLENAME_DICT = dict([[v, k] for k, v in constants.ROLENAME_ID_DICT.items()])
 BLACKLISTED_CHANNELS = (
@@ -62,14 +60,10 @@ BLACKLISTED_CHANNELS = (
 SERVERS = {}
 CHANNELNAME_CHANNEL_DICT = {}
 
-VCInvite = None
-VCMess = None
-
-INITIALIZED = False
 
 tagger = Tagger(client)
 
-STATES = {}
+STATES = {"init":False}
 
 class Streamer:
     def __init__(self, chann, thresh):
@@ -347,54 +341,50 @@ class ScrimMaster:
         for item in [team1, team2]:
             await send(destination=self.output, text=item, send_type="rows")
 
-async def get_redirected_url(url):
-    opener = urllib.request.build_opener(urllib.request.HTTPRedirectHandler)
-    request = opener.open(url)
-    return request.url
-
 @client.event
 async def on_member_remove(member):
-    if member.server.id == constants.OVERWATCH_SERVER_ID:
-        await import_to_user_set(member=member, set_name="server_leaves", entry=datetime.utcnow().isoformat(" "))
-        await log_action("leave", {"mention": member.mention, "id": member.id})
+    pass
+    # if member.server.id == constants.OVERWATCH_SERVER_ID:
+    #     await import_to_user_set(member=member, set_name="server_leaves", entry=datetime.utcnow().isoformat(" "))
+    #     await log_action("leave", {"mention": member.mention, "id": member.id})
 
 @client.event
 async def on_member_ban(member):
-    if member.server.id == constants.OVERWATCH_SERVER_ID:
-        await import_to_user_set(member=member, set_name="bans", entry=datetime.utcnow().isoformat(" "))
-        spam_ch = client.get_channel(constants.CHANNELNAME_CHANNELID_DICT["spam-channel"])
-        # await client.send_message(spam_ch, "Ban detected, user id = " + member.id)
-        await log_action("ban", {"member": member})
+    pass
+    # if member.server.id == constants.OVERWATCH_SERVER_ID:
+    #     await import_to_user_set(member=member, set_name="bans", entry=datetime.utcnow().isoformat(" "))
+    #     spam_ch = client.get_channel(constants.CHANNELNAME_CHANNELID_DICT["spam-channel"])
+    #     # await client.send_message(spam_ch, "Ban detected, user id = " + member.id)
+    #     await log_action("ban", {"member": member})
 
 @client.event
 async def on_member_unban(server, member):
-    if server.id == constants.OVERWATCH_SERVER_ID:
-        # print("unban detected")
-        await import_to_user_set(member=member, set_name="unbans", entry=datetime.utcnow().isoformat(" "))
-        # await client.send_message(CHANNELNAME_CHANNEL_DICT["spam-channel"], "Unban detected, user id = " + member.id)
-        await log_action("unban", {"mention": "<@!{id}>".format(id=member.id), "id": member.id})
-
-        # await log_automated("registered a user unban: \n```" + str(await export_user(member.id)) + "```")
+    pass
+    # if server.id == constants.OVERWATCH_SERVER_ID:
+    #     # print("unban detected")
+    #     await import_to_user_set(member=member, set_name="unbans", entry=datetime.utcnow().isoformat(" "))
+    #     # await client.send_message(CHANNELNAME_CHANNEL_DICT["spam-channel"], "Unban detected, user id = " + member.id)
+    #     await log_action("unban", {"mention": "<@!{id}>".format(id=member.id), "id": member.id})
+    #
+    #     # await log_automated("registered a user unban: \n```" + str(await export_user(member.id)) + "```")
 
 @client.event
 async def on_ready():
     print('Connected!')
     print('Username: ' + client.user.name)
     print('ID: ' + client.user.id)
-    global INITIALIZED
+    # global INITIALIZED
     global STATES
     global temproles
     global heatmap
 
     SERVERS["OW"] = client.get_server(constants.OVERWATCH_SERVER_ID)
-    for role in SERVERS["OW"].roles:
-        if role.id in ID_ROLENAME_DICT.keys():
-            ROLENAME_ROLE_DICT[ID_ROLENAME_DICT[role.id]] = role
+
     for name in constants.CHANNELNAME_CHANNELID_DICT.keys():
         CHANNELNAME_CHANNEL_DICT[name] = SERVERS["OW"].get_channel(constants.CHANNELNAME_CHANNELID_DICT[name])
     log_state = await overwatch_db.config.find_one({"type": "log"})
     STATES["server_log"] = log_state["server_log"]
-    INITIALIZED = True
+    # INITIALIZED = True
     heatmap = heat_master()
     temproles = temprole_master(server=SERVERS["OW"])
 
@@ -405,32 +395,23 @@ async def on_member_join(member):
     # await add_to_nick_id_list(member)
     if member.server.id == constants.OVERWATCH_SERVER_ID:
         await import_user(member)
-        current_date = datetime.utcnow()
-        age = abs(current_date - member.created_at)
-        await log_action("join", {"mention": member.mention, "id": member.id, "age": str(age)[:-7]})
-        if INITIALIZED:
+        # current_date = datetime.utcnow()
+        # age = abs(current_date - member.created_at)
+        # await log_action("join", {"mention": member.mention, "id": member.id, "age": str(age)[:-7]})
+        if STATES["init"]:
             role = await temproles.check(member)
             if role:
                 await log_automated("reapplied {role} to {mention}".format(role=role.name if role.mentionable else role.mention, mention=member.mention),
                                     type="autorole")
 # noinspection PyUnusedLocal
+
 @client.event
 async def on_voice_state_update(before, after):
     """
     :type after: discord.Member
     :type before: discord.Member
     """
-    global VCInvite
-    global VCMess
-    if before.server.id == constants.OVERWATCH_SERVER_ID:
-
-        if VCInvite is not None and VCMess is not None:
-            if after is VCMess.author:
-                await client.delete_messages([VCInvite, VCMess])
-                VCInvite = None
-                VCMess = None
-        if before.voice.voice_channel != after.voice.voice_channel:
-            await log_action("voice_update", {"before": before, "after": after, "id": before.id})
+    pass
 
 # noinspection PyShadowingNames
 @client.event
@@ -446,11 +427,11 @@ async def on_member_update(before, after):
         if before.name != after.name:
             await import_to_user_set(member=after, set_name="names", entry=after.nick)
 
-        if not INITIALIZED:
+        if not STATES["init"]:
             return
 
-        if len(before.roles) != len(after.roles):
-            await log_action("role_change", {"member": after, "old_roles": before.roles[1:], "new_roles": after.roles[1:]})
+            # if len(before.roles) != len(after.roles):
+            #     await log_action("role_change", {"member": after, "old_roles": before.roles[1:], "new_roles": after.roles[1:]})
 
 @client.event
 async def on_message_edit(before, after):
@@ -464,33 +445,32 @@ async def on_message_edit(before, after):
             #     match = constants.INVITE_REGEX.search(after.content)
             #     if match is not None:
             #         await invite_checker(after, match)
-        await log_action("edit",
-                         {"channel": before.channel.mention, "mention": before.author.mention, "id": before.author.id,
-                          "before" : before.content, "after": after.content})
+            # await log_action("edit",
+            #                  {"channel": before.channel.mention, "mention": before.author.mention, "id": before.author.id,
+            #                   "before" : before.content, "after": after.content})
 
 @client.event
 async def on_message_delete(message):
-    if message.server.id == constants.OVERWATCH_SERVER_ID:
-        await log_action("delete",
-                         {"channel": message.channel.mention, "mention": message.author.mention, "id": message.author.id,
-                          "content": message.content})
+    pass
+    # if message.server.id == constants.OVERWATCH_SERVER_ID:
+    #     await log_action("delete",
+    #                      {"channel": message.channel.mention, "mention": message.author.mention, "id": message.author.id,
+    #                       "content": message.content})
 
 @client.event
 async def on_message(message_in):
-    global VCMess
-    global VCInvite
-    global PATHS
-    global ENABLED
-    global INITIALIZED
+    # global VCMess
+    # global VCInvite
+    # global PATHS
+    # global ENABLED
+    # global INITIALIZED
 
-    if not INITIALIZED:
+    if not STATES["init"]:
         print("Ignoring message...")
         return
     if message_in.author.id == client.user.id:
         return
-    await temproles.tick()
     if message_in.author.id == constants.ZENITH_ID:
-        # def register(self, userid, type, parameter):
         heatmap.register(message_in.author.id, "message", message_in)
     if message_in.server is None:
         def scrim_register(msg):
@@ -518,34 +498,26 @@ async def on_message(message_in):
         segmented_command = full_command.split(" ", 1)
         command = segmented_command[0]
         params = segmented_command[1] if len(segmented_command) == 2 else None
-        # print("Firing command [{command}] from {author}".format(command=segmented_command[0],
-        #                                                         author=message_in.author.name))
         await perform_command(command=command, params=params, message_in=message_in)
 
     if message_in.server.id == constants.OVERWATCH_SERVER_ID:
         if message_in.content.startswith("`scrim start"):
             await scrim_start(message_in)
             return
-        # if message_in.channel.id not in BLACKLISTED_CHANNELS and message_in.server.id == constants.OVERWATCH_SERVER_ID:
         await import_message(message_in)
 
         if "mod" not in auths:
             await parse_triggers(message_in)
-            # if message_in.channel.id not in BLACKLISTED_CHANNELS:
-            #     match = constants.INVITE_REGEX.search(message_in.content)
-            #     if match is not None:
-            #         await invite_checker(message_in, match)
+
 
 async def get_auths(member):
     """
-
     :type member: discord.Member
     """
     author_info = await parse_member_info(member)
     role_whitelist = any(x in [constants.ROLENAME_ID_DICT["TRUSTED_ROLE"], constants.ROLENAME_ID_DICT["MVP_ROLE"]]
                          for x in author_info["role_ids"])
     mods = await get_moderators(member.server)
-
     auths = set()
     if member.id == constants.ZENITH_ID:
         auths |= {"zenith"}
@@ -581,8 +553,6 @@ async def perform_command(command, params, message_in):
         params = await mention_to_id(params.split(" "))
     output = []
     auths = await get_auths(message_in.author)
-
-    send_type = None
     called = False
     if message_in.server.id == "266279338305912832":
         if command == "big":
@@ -597,7 +567,6 @@ async def perform_command(command, params, message_in):
 
     if command == "scrim":
         await scrim_manage(message_in)
-
     if command in ["names", "firstjoins", "mostactive", "channeldist", "superlog", "rebuildnicks", "wa", "reboot", "rebuild", "ui", "ping", "lfg",
                    "serverlog", "timenow", "say", "raw", "getroles", "moveafk", "help", "join", "tag", "tagreg", "userlog", "channeldist", "unmute",
                    "channelinfo"]:
@@ -844,7 +813,6 @@ async def perform_command(command, params, message_in):
 async def unmute(member):
     await client.server_voice_state(member, mute=False)
 
-
 async def parse_time_to_end(time_string):
     print(time_string)
     try:
@@ -852,18 +820,16 @@ async def parse_time_to_end(time_string):
             delt = timedelta(minutes=int(time_string))
             delt = round_timedelta(delt)
             readable = format_timedelta(delt)
-            return {"end":datetime.now() + delt, "duration":delt, "readable":readable}
+            return {"end": datetime.now() + delt, "duration": delt, "readable": readable}
         else:
             end = await parse_date("in " + time_string)
             delt = end - datetime.now()
             delt = round_timedelta(delt)
             readable = format_timedelta(delt)
-            return {"end":end, "duration":delt, "readable":readable}
+            return {"end": end, "duration": delt, "readable": readable}
     except:
         print(traceback.format_exc())
         return None
-
-
 
 async def skip_jukebox(song_name, member_id, message_in):
     jukebox = client.get_server(constants.OVERWATCH_SERVER_ID).get_channel(
@@ -1076,7 +1042,7 @@ async def ping(message):
     elif message.author.id == constants.ZENITH_ID:
         voice = message.author.mention + " Test"
     else:
-        voice =  message.author.mention + " " + random.choice(constants.VOICE_LINES)
+        voice = message.author.mention + " " + random.choice(constants.VOICE_LINES)
 
     sent = await client.send_message(channel, voice)
     await client.edit_message(sent,
@@ -1136,8 +1102,6 @@ async def get_role(server, roleid):
         if x.id == roleid:
             return x
 
-
-
 async def trusted_analysis():
     ow = SERVERS["OW"]
     trusted = await get_role(ow, "169728613216813056")
@@ -1150,7 +1114,6 @@ async def trusted_analysis():
         except:
             print(member.name)
     return [(gist, None) for gist in gists]
-
 
 async def get_channel_from_name(server, channel_name, type):
     channelname_channel_dict = {}
@@ -1177,7 +1140,7 @@ async def get_role_from_name(server, role_name):
 
 # Tagging
 async def add_tag(string, note, action, categories):
-    await trigger_str_collection.update_one({"string": string}, {
+    await overwatch_db.trigger_str_collection.update_one({"string": string}, {
         "$addtoset": {"actions"   : action,
                       "note"      : note,
                       "categories": {"$each": categories}}})
@@ -1186,13 +1149,13 @@ async def tag_str(trigger, message, regex):
     if not regex:
         trigger = re.escape(trigger)
 
-    # if trigger_str_collection.find_one({"trigger": string}):
+    # if overwatch_db.trigger_str_collection.find_one({"trigger": string}):
     #     await tag_update(message)
     #     return
 
     # if string == "reset":
-    #     await trigger_str_collection.remove({})
-    #     await trigger_str_collection.create_index([("trigger", pymongo.DESCENDING)], unique=True)
+    #     await overwatch_db.trigger_str_collection.remove({})
+    #     await overwatch_db.trigger_str_collection.create_index([("trigger", pymongo.DESCENDING)], unique=True)
     #     return
 
     interact = await client.send_message(message.channel,
@@ -1231,7 +1194,7 @@ async def tag_str(trigger, message, regex):
             else:
                 note = action_list[2]
             action_list = (" ".join(action_list)).split(" ", 2)
-            await trigger_str_collection.insert_one(
+            await overwatch_db.trigger_str_collection.insert_one(
                 {"trigger": trigger, "action": action_list[0], "duration": action_list[1], "note": action_list[2]})
 
 
@@ -1240,13 +1203,13 @@ async def tag_str(trigger, message, regex):
             # else:
             #     await client.edit_message(interact, "Syntax not recognized. Please restart")
             #     return
-            #     # result = await trigger_str_collection.insert_one(database_entry)
+            #     # result = await overwatch_db.trigger_str_collection.insert_one(database_entry)
             #     # print(result)
 
 async def parse_triggers(message) -> list:
     response_docs = []
     content = message.content
-    # trigger_cursor = trigger_str_collection.find()
+    # trigger_cursor = overwatch_db.trigger_str_collection.find()
     # trigger_dict = await trigger_cursor.to_list()
     # trigger_list = [item["trigger"] for item in trigger_dict]
     # print("Parsing triggers for " + content)
@@ -1262,7 +1225,8 @@ async def parse_triggers(message) -> list:
         try:
             invite = await client.get_invite(inv_link)
             if invite.server.id == message.server.id:
-                if message.channel.id in [constants.CHANNELNAME_CHANNELID_DICT["general-discussion"], constants.CHANNELNAME_CHANNELID_DICT["overwatch-discussion"]]:
+                if message.channel.id in [constants.CHANNELNAME_CHANNELID_DICT["general-discussion"],
+                                          constants.CHANNELNAME_CHANNELID_DICT["overwatch-discussion"]]:
                     party = re.search(r"(^\[)\w+.\w+\]", invite.channel.name, flags=re.IGNORECASE)
                     if party:
                         response_docs.append({"action": "delete", "note": "Please keep LFGs to <#182420486582435840> <#185665683009306625>"})
@@ -1270,7 +1234,6 @@ async def parse_triggers(message) -> list:
                 response_docs.append({"action": "external_invite", "invite": invite, "note": "Please don't link other discord servers here"})
         except discord.errors.NotFound:
             pass
-
 
     await act_triggers(response_docs, message)
 
@@ -1361,11 +1324,10 @@ async def rebuild_nicks(message_in):
         print(member.name)
         await import_user(member)
 
-
 async def generate_user_channel_activity_hist(server, userid, gist):
     hist = defaultdict(int)
     member_name = server.get_member(userid).name
-    async for doc in message_log_collection.find({"userid": userid, "date": {"$gt": "2016-12-25"}}):
+    async for doc in overwatch_db.message_log.find({"userid": userid, "date": {"$gt": "2016-12-25"}}):
         hist[doc["channel_id"]] += len(doc["content"].split(" "))
         print("Found a message from " + str(doc["userid"]))
     named_hist = {}
@@ -1387,9 +1349,9 @@ async def generate_user_channel_activity_hist(server, userid, gist):
     hist = "\n".join("%s,%s" % tup for tup in sort)
     if hist:
         gist_response = gistClient.create(name=member_name + "'s Channelhist",
-                                 description=str(datetime.utcnow().strftime("[%Y-%m-%d %H:%m:%S] ")),
-                                 public=False,
-                                 content=hist)
+                                          description=str(datetime.utcnow().strftime("[%Y-%m-%d %H:%m:%S] ")),
+                                          public=False,
+                                          content=hist)
 
     return (gist_response["Gist-Link"], None)
 
@@ -1398,7 +1360,7 @@ async def generate_activity_hist(message):
         print("STARTING")
         activity = defaultdict(int)
         count = 0
-        async for mess in message_log_collection.find({"date": {"$gt": "2016-11-18"}}):
+        async for mess in overwatch_db.message_log.find({"date": {"$gt": "2016-11-18"}}):
             content = mess["content"]
             length = len(content.split(" "))
             activity[mess["userid"]] += length
@@ -1463,7 +1425,7 @@ async def output_channel_dist(channel, days):
     date = datetime.utcnow() - timedelta(days=int(days))
     date = date.isoformat(" ")
     print(date)
-    async for mess in message_log_collection.find({"date": {"$gt": date}, "channel_id": channel.id}):
+    async for mess in overwatch_db.message_log.find({"date": {"$gt": date}, "channel_id": channel.id}):
         activity[mess["userid"]] += len(mess["content"].split(" "))
         print(mess["date"])
         print(mess["channel_id"])
@@ -1499,242 +1461,242 @@ async def log_automated(description: object, type) -> None:
         target = constants.CHANNELNAME_CHANNELID_DICT["spam-channel"]
     await client.send_message(client.get_channel(target), action)
 
-async def log_action(action, detail):
-    bot_log = client.get_channel(constants.CHANNELNAME_CHANNELID_DICT["bot-log"])
-    server_log = client.get_channel(constants.CHANNELNAME_CHANNELID_DICT["server-log"])
-    voice_log = client.get_channel(constants.CHANNELNAME_CHANNELID_DICT["voice-channel-output"])
-    # server_log = client.get_channel("152757147288076297")
-    time = datetime.utcnow().isoformat(" ")
-    time = time[5:19]
-    time = time[6:19] + " " + time[0:5]
-    if any(key in ["before", "after", "content", "mention"] for key in detail.keys()):
-        for key in detail.keys():
-            if key == "before" and isinstance(detail["before"], str):
-                target = "before"
-            elif key == "after" and isinstance(detail["before"], str):
-                target = "after"
-            elif key == "content":
-                target = "content"
-            elif key == "mention":
-                target = "mention"
-            else:
-                continue
-            new = []
-            for word in re.split(r"\s", detail[target]):
-                if regex_test(
-                        r"https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)",
-                        word):
-                    word = "<" + word + ">"
-                new.append(word)
-            detail[target] = " ".join(new)
-            if action not in ["leave", "ban"]:
-                detail[target] = await scrub_text(detail[target], server_log)
-
-    #
-    # if "content" in detail.keys():
-    #     new_words = []
-    #     words = re.split(r"\s", detail["content"])
-    #     for word in words:
-    #         match = re.match(r"(<@!?\d+>)|(@everyone)|(@here)", word)
-    #         if match:
-    #             id = match.group(0)
-    #             if id not in ["@everyone", "@here"]:
-    #                 id = re.search(r"\d+", id)
-    #                 id = id.group(0)
-    #                 member = client.get_server(constants.OVERWATCH_SERVER_ID).get_member(id)
-    #                 perms = server_log.permissions_for(member)
-    #                 if perms.read_messages:
-    #                     new_words.append(r"\@" + member.name)
-    #                 else:
-    #                     new_words.append(word)
-    #             else:
-    #                 new_words.append("\\" + word)
-    #         else:
-    #             new_words.append(word)
-    #
-    #     detail["content"] = " ".join(new_words)
-    #
-    # if "before" in detail.keys():
-    #     new_words = []
-    #     words = re.split(r"\s", detail["before"])
-    #     for word in words:
-    #         match = re.match(r"(<@!?\d+>)|(@everyone)|(@here)", word)
-    #         if match:
-    #             id = match.group(0)
-    #             if id not in ["@everyone", "@here"]:
-    #                 id = re.search(r"\d+", id)
-    #                 id = id.group(0)
-    #                 member = client.get_server(constants.OVERWATCH_SERVER_ID).get_member(id)
-    #                 perms = server_log.permissions_for(member)
-    #                 if perms.read_messages:
-    #                     new_words.append(r"\@" + member.name)
-    #                 else:
-    #                     new_words.append(word)
-    #             else:
-    #                 new_words.append("\\" + word)
-    #         else:
-    #             new_words.append(word)
-    #     detail["before"] = " ".join(new_words)
-    # if "after" in detail.keys():
-    #     new_words = []
-    #     words = re.split(r"\s", detail["after"])
-    #     for word in words:
-    #         match = re.match(r"(<@!?\d+>)|(@everyone)|(@here)", word)
-    #         if match:
-    #             id = match.group(0)
-    #
-    #             if id not in ["@everyone", "@here"]:
-    #                 id = re.search(r"\d+", id)
-    #                 id = id.group(0)
-    #                 member = client.get_server(constants.OVERWATCH_SERVER_ID).get_member(id)
-    #                 perms = server_log.permissions_for(member)
-    #                 if perms.read_messages:
-    #                     new_words.append(r"\@" + member.name)
-    #                 else:
-    #                     new_words.append(word)
-    #             else:
-    #                 new_words.append("\\" + word)
-    #         else:
-    #             new_words.append(word)
-    #     detail["after"] = " ".join(new_words)
-    # if "mention" in detail.keys():
-    #     id = re.search(r"\d+", detail["mention"])
-    #     id = id.group(0)
-    #     if id == "129706966460137472":
-    #         return
-    #     member = client.get_server(constants.OVERWATCH_SERVER_ID).get_member(id)
-    #     if member:
-    #         perms = server_log.permissions_for(member)
-    #         if perms and perms.read_messages:
-    #             detail["mention"] = member.name
-
-    time = "`" + time + "`"
-
-    if action == "delete":
-        message = "{time} :wastebasket: [DELETE] [{channel}] [{mention}] [{id}]:\n{content}".format(time=time, channel=detail["channel"],
-                                                                                                    mention=detail["mention"],
-                                                                                                    id=detail["id"],
-                                                                                                    content=detail[
-                                                                                                        "content"])
-        target_channel = server_log
-        await overwatch_db.server_log.insert_one(
-            {"date"   : datetime.utcnow().isoformat(" "), "action": action, "channel": detail["channel"], "mention": detail["mention"], "id": detail["id"],
-             "content": detail["content"]})
-    elif action == "edit":
-        message = "{time} :pencil: [EDIT] [{channel}] [{mention}] [{id}]:\n`-BEFORE:` {before} \n`+ AFTER:` {after}".format(
-            time=time, channel=detail["channel"], mention=detail["mention"], id=detail["id"], before=detail["before"],
-            after=detail["after"])
-        target_channel = server_log
-        await overwatch_db.server_log.insert_one(
-            {"date"  : datetime.utcnow().isoformat(" "), "action": action, "channel": detail["channel"], "mention": detail["mention"], "id": detail["id"],
-             "before": detail["before"], "after": detail["after"]})
-
-    elif action == "join":
-        message = "{time} :inbox_tray: [JOIN] [{mention}] [{id}]. Account Age: {age}".format(time=time,
-                                                                                             mention=detail["mention"],
-                                                                                             id=detail["id"],
-                                                                                             age=detail["age"])
-        target_channel = server_log
-        await overwatch_db.server_log.insert_one({"date": datetime.utcnow().isoformat(" "), "action": action, "id": detail["id"], "age": detail["age"]})
-    elif action == "leave":
-        message = "{time} :outbox_tray: [LEAVE] [{mention}] [{id}]".format(time=time, mention=detail["mention"],
-                                                                           id=detail["id"])
-        target_channel = server_log
-        await overwatch_db.server_log.insert_one({"date": datetime.utcnow().isoformat(" "), "action": action, "id": detail["id"]})
-
-    elif action == "ban":
-        message = "{time} :no_entry_sign: [BAN] [{mention}] [{id}] Name: {name} {nick}".format(time=time, mention=detail["member"].mention,
-                                                                                               id=detail["member"].id,
-                                                                                               name=detail["member"].name + "#" + detail[
-                                                                                                   "member"].discriminator, nick=
-                                                                                               detail["member"].nick if detail["member"].nick else "")
-        target_channel = server_log
-        await overwatch_db.server_log.insert_one(
-            {"date": datetime.utcnow().isoformat(" "), "action": action, "id": detail["member"].id, "mention": detail["member"].mention})
-
-    elif action == "unban":
-        message = "{time} :white_check_mark:  [UNBAN] [{mention}] [{id}]".format(time=time, mention="<@!" + detail["id"] + ">",
-                                                                                 id=detail["id"])
-
-        target_channel = server_log
-        await overwatch_db.server_log.insert_one({"date": datetime.utcnow().isoformat(" "), "action": action, "id": detail["id"], "mention": detail["mention"]})
-    elif action == "role_change":
-        # print("TRIGGERING ROLE CHANGE")
-        target_channel = server_log
-
-        member = detail["member"]
-        old_roles = detail["old_roles"]
-        new_roles = detail["new_roles"]
-        # old_role_ids = [role.id for role in old_roles]
-        new_role_ids = " ".join([role.id for role in new_roles])
-        await overwatch_db.userinfo.update_one({"userid": member.id}, {"$set": {"roles": new_role_ids}})
-        before = " ".join([role.mention for role in old_roles])
-        after = " ".join([role.mention for role in new_roles])
-        mention = member.mention
-        mention = await scrub_text(mention, target_channel)
-
-        message = "{time} :pencil: [ROLECHANGE] [{mention}] [{id}]:\n`-BEFORE:` {before} \n`+ AFTER:` {after}".format(time=time, mention=mention,
-                                                                                                                      id=member.id, before=before, after=after)
-        message = await scrub_text(message, target_channel)
-    elif action == "voice_update":
-        before = detail["before"]
-        voice_state = before.voice
-        if not voice_state.voice_channel:
-            before = "Joined Voice"
-        else:
-            before = voice_state.voice_channel.name
-        after = detail["after"]
-        voice_state = after.voice
-        if not voice_state.voice_channel:
-            after = ":Left Voice:"
-        else:
-            after = voice_state.voice_channel.name
-
-        now = datetime.utcnow()
-        threshold = timedelta(minutes=5)
-        ago = now - threshold
-        date_text = ago.isoformat(" ")
-
-        movecount = await (overwatch_db.server_log.find({"action": action, "id": detail["id"], "date": {"$gt": date_text}}).count())
-
-        if movecount < 5:
-            emoji = ":white_check_mark:"
-        elif movecount < 10:
-            emoji = ":grey_question:"
-        elif movecount < 15:
-            emoji = ":warning:"
-        elif movecount < 20:
-            emoji = ":exclamation:"
-        else:  # movecount < 25:
-            emoji = ":bangbang:"
-        target_channel = voice_log
-        if voice_state.voice_channel:
-            in_room = str(len(voice_state.voice_channel.voice_members))
-            room_cap = str(voice_state.voice_channel.user_limit)
-        else:
-            in_room = "0"
-            room_cap = "0"
-        message = "{emoji} {date} {mention} : `{before}` → `{after}` [{usercount}/{userlimit}] ({count})".format(emoji=emoji, date=time,
-                                                                                                                 mention="<@!" + detail["id"] + ">",
-                                                                                                                 before=before, after=after, usercount=in_room,
-                                                                                                                 userlimit=room_cap, count=movecount)
-
-        await overwatch_db.server_log.insert_one({"date": datetime.utcnow().isoformat(" "), "action": action, "id": detail["id"]})
-
-
-    else:
-        print("fail")
-        return
-    message = await scrub_text(message, voice_log)
-    if "server_log" in STATES.keys() and STATES["server_log"]:
-        await client.send_message(target_channel, message)
+# async def log_action(action, detail):
+#     bot_log = client.get_channel(constants.CHANNELNAME_CHANNELID_DICT["bot-log"])
+#     server_log = client.get_channel(constants.CHANNELNAME_CHANNELID_DICT["server-log"])
+#     voice_log = client.get_channel(constants.CHANNELNAME_CHANNELID_DICT["voice-channel-output"])
+#     # server_log = client.get_channel("152757147288076297")
+#     time = datetime.utcnow().isoformat(" ")
+#     time = time[5:19]
+#     time = time[6:19] + " " + time[0:5]
+#     if any(key in ["before", "after", "content", "mention"] for key in detail.keys()):
+#         for key in detail.keys():
+#             if key == "before" and isinstance(detail["before"], str):
+#                 target = "before"
+#             elif key == "after" and isinstance(detail["before"], str):
+#                 target = "after"
+#             elif key == "content":
+#                 target = "content"
+#             elif key == "mention":
+#                 target = "mention"
+#             else:
+#                 continue
+#             new = []
+#             for word in re.split(r"\s", detail[target]):
+#                 if regex_test(
+#                         r"https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)",
+#                         word):
+#                     word = "<" + word + ">"
+#                 new.append(word)
+#             detail[target] = " ".join(new)
+#             if action not in ["leave", "ban"]:
+#                 detail[target] = await scrub_text(detail[target], server_log)
+#
+#     #
+#     # if "content" in detail.keys():
+#     #     new_words = []
+#     #     words = re.split(r"\s", detail["content"])
+#     #     for word in words:
+#     #         match = re.match(r"(<@!?\d+>)|(@everyone)|(@here)", word)
+#     #         if match:
+#     #             id = match.group(0)
+#     #             if id not in ["@everyone", "@here"]:
+#     #                 id = re.search(r"\d+", id)
+#     #                 id = id.group(0)
+#     #                 member = client.get_server(constants.OVERWATCH_SERVER_ID).get_member(id)
+#     #                 perms = server_log.permissions_for(member)
+#     #                 if perms.read_messages:
+#     #                     new_words.append(r"\@" + member.name)
+#     #                 else:
+#     #                     new_words.append(word)
+#     #             else:
+#     #                 new_words.append("\\" + word)
+#     #         else:
+#     #             new_words.append(word)
+#     #
+#     #     detail["content"] = " ".join(new_words)
+#     #
+#     # if "before" in detail.keys():
+#     #     new_words = []
+#     #     words = re.split(r"\s", detail["before"])
+#     #     for word in words:
+#     #         match = re.match(r"(<@!?\d+>)|(@everyone)|(@here)", word)
+#     #         if match:
+#     #             id = match.group(0)
+#     #             if id not in ["@everyone", "@here"]:
+#     #                 id = re.search(r"\d+", id)
+#     #                 id = id.group(0)
+#     #                 member = client.get_server(constants.OVERWATCH_SERVER_ID).get_member(id)
+#     #                 perms = server_log.permissions_for(member)
+#     #                 if perms.read_messages:
+#     #                     new_words.append(r"\@" + member.name)
+#     #                 else:
+#     #                     new_words.append(word)
+#     #             else:
+#     #                 new_words.append("\\" + word)
+#     #         else:
+#     #             new_words.append(word)
+#     #     detail["before"] = " ".join(new_words)
+#     # if "after" in detail.keys():
+#     #     new_words = []
+#     #     words = re.split(r"\s", detail["after"])
+#     #     for word in words:
+#     #         match = re.match(r"(<@!?\d+>)|(@everyone)|(@here)", word)
+#     #         if match:
+#     #             id = match.group(0)
+#     #
+#     #             if id not in ["@everyone", "@here"]:
+#     #                 id = re.search(r"\d+", id)
+#     #                 id = id.group(0)
+#     #                 member = client.get_server(constants.OVERWATCH_SERVER_ID).get_member(id)
+#     #                 perms = server_log.permissions_for(member)
+#     #                 if perms.read_messages:
+#     #                     new_words.append(r"\@" + member.name)
+#     #                 else:
+#     #                     new_words.append(word)
+#     #             else:
+#     #                 new_words.append("\\" + word)
+#     #         else:
+#     #             new_words.append(word)
+#     #     detail["after"] = " ".join(new_words)
+#     # if "mention" in detail.keys():
+#     #     id = re.search(r"\d+", detail["mention"])
+#     #     id = id.group(0)
+#     #     if id == "129706966460137472":
+#     #         return
+#     #     member = client.get_server(constants.OVERWATCH_SERVER_ID).get_member(id)
+#     #     if member:
+#     #         perms = server_log.permissions_for(member)
+#     #         if perms and perms.read_messages:
+#     #             detail["mention"] = member.name
+#
+#     time = "`" + time + "`"
+#
+#     if action == "delete":
+#         message = "{time} :wastebasket: [DELETE] [{channel}] [{mention}] [{id}]:\n{content}".format(time=time, channel=detail["channel"],
+#                                                                                                     mention=detail["mention"],
+#                                                                                                     id=detail["id"],
+#                                                                                                     content=detail[
+#                                                                                                         "content"])
+#         target_channel = server_log
+#         await overwatch_db.server_log.insert_one(
+#             {"date"   : datetime.utcnow().isoformat(" "), "action": action, "channel": detail["channel"], "mention": detail["mention"], "id": detail["id"],
+#              "content": detail["content"]})
+#     elif action == "edit":
+#         message = "{time} :pencil: [EDIT] [{channel}] [{mention}] [{id}]:\n`-BEFORE:` {before} \n`+ AFTER:` {after}".format(
+#             time=time, channel=detail["channel"], mention=detail["mention"], id=detail["id"], before=detail["before"],
+#             after=detail["after"])
+#         target_channel = server_log
+#         await overwatch_db.server_log.insert_one(
+#             {"date"  : datetime.utcnow().isoformat(" "), "action": action, "channel": detail["channel"], "mention": detail["mention"], "id": detail["id"],
+#              "before": detail["before"], "after": detail["after"]})
+#
+#     elif action == "join":
+#         message = "{time} :inbox_tray: [JOIN] [{mention}] [{id}]. Account Age: {age}".format(time=time,
+#                                                                                              mention=detail["mention"],
+#                                                                                              id=detail["id"],
+#                                                                                              age=detail["age"])
+#         target_channel = server_log
+#         await overwatch_db.server_log.insert_one({"date": datetime.utcnow().isoformat(" "), "action": action, "id": detail["id"], "age": detail["age"]})
+#     elif action == "leave":
+#         message = "{time} :outbox_tray: [LEAVE] [{mention}] [{id}]".format(time=time, mention=detail["mention"],
+#                                                                            id=detail["id"])
+#         target_channel = server_log
+#         await overwatch_db.server_log.insert_one({"date": datetime.utcnow().isoformat(" "), "action": action, "id": detail["id"]})
+#
+#     elif action == "ban":
+#         message = "{time} :no_entry_sign: [BAN] [{mention}] [{id}] Name: {name} {nick}".format(time=time, mention=detail["member"].mention,
+#                                                                                                id=detail["member"].id,
+#                                                                                                name=detail["member"].name + "#" + detail[
+#                                                                                                    "member"].discriminator, nick=
+#                                                                                                detail["member"].nick if detail["member"].nick else "")
+#         target_channel = server_log
+#         await overwatch_db.server_log.insert_one(
+#             {"date": datetime.utcnow().isoformat(" "), "action": action, "id": detail["member"].id, "mention": detail["member"].mention})
+#
+#     elif action == "unban":
+#         message = "{time} :white_check_mark:  [UNBAN] [{mention}] [{id}]".format(time=time, mention="<@!" + detail["id"] + ">",
+#                                                                                  id=detail["id"])
+#
+#         target_channel = server_log
+#         await overwatch_db.server_log.insert_one({"date": datetime.utcnow().isoformat(" "), "action": action, "id": detail["id"], "mention": detail["mention"]})
+#     elif action == "role_change":
+#         # print("TRIGGERING ROLE CHANGE")
+#         target_channel = server_log
+#
+#         member = detail["member"]
+#         old_roles = detail["old_roles"]
+#         new_roles = detail["new_roles"]
+#         # old_role_ids = [role.id for role in old_roles]
+#         new_role_ids = " ".join([role.id for role in new_roles])
+#         await overwatch_db.userinfo.update_one({"userid": member.id}, {"$set": {"roles": new_role_ids}})
+#         before = " ".join([role.mention for role in old_roles])
+#         after = " ".join([role.mention for role in new_roles])
+#         mention = member.mention
+#         mention = await scrub_text(mention, target_channel)
+#
+#         message = "{time} :pencil: [ROLECHANGE] [{mention}] [{id}]:\n`-BEFORE:` {before} \n`+ AFTER:` {after}".format(time=time, mention=mention,
+#                                                                                                                       id=member.id, before=before, after=after)
+#         message = await scrub_text(message, target_channel)
+#     elif action == "voice_update":
+#         before = detail["before"]
+#         voice_state = before.voice
+#         if not voice_state.voice_channel:
+#             before = "Joined Voice"
+#         else:
+#             before = voice_state.voice_channel.name
+#         after = detail["after"]
+#         voice_state = after.voice
+#         if not voice_state.voice_channel:
+#             after = ":Left Voice:"
+#         else:
+#             after = voice_state.voice_channel.name
+#
+#         now = datetime.utcnow()
+#         threshold = timedelta(minutes=5)
+#         ago = now - threshold
+#         date_text = ago.isoformat(" ")
+#
+#         movecount = await (overwatch_db.server_log.find({"action": action, "id": detail["id"], "date": {"$gt": date_text}}).count())
+#
+#         if movecount < 5:
+#             emoji = ":white_check_mark:"
+#         elif movecount < 10:
+#             emoji = ":grey_question:"
+#         elif movecount < 15:
+#             emoji = ":warning:"
+#         elif movecount < 20:
+#             emoji = ":exclamation:"
+#         else:  # movecount < 25:
+#             emoji = ":bangbang:"
+#         target_channel = voice_log
+#         if voice_state.voice_channel:
+#             in_room = str(len(voice_state.voice_channel.voice_members))
+#             room_cap = str(voice_state.voice_channel.user_limit)
+#         else:
+#             in_room = "0"
+#             room_cap = "0"
+#         message = "{emoji} {date} {mention} : `{before}` → `{after}` [{usercount}/{userlimit}] ({count})".format(emoji=emoji, date=time,
+#                                                                                                                  mention="<@!" + detail["id"] + ">",
+#                                                                                                                  before=before, after=after, usercount=in_room,
+#                                                                                                                  userlimit=room_cap, count=movecount)
+#
+#         await overwatch_db.server_log.insert_one({"date": datetime.utcnow().isoformat(" "), "action": action, "id": detail["id"]})
+#
+#
+#     else:
+#         print("fail")
+#         return
+#     message = await scrub_text(message, voice_log)
+#     if "server_log" in STATES.keys() and STATES["server_log"]:
+#         await client.send_message(target_channel, message)
 
 # Database
 # Database Query
 async def import_message(mess):
     messInfo = await parse_message_info(mess)
     try:
-        await message_log_collection.insert_one(messInfo)
+        await overwatch_db.message_log.insert_one(messInfo)
     except:
         pass
         # messText = await format_message_to_log(messInfo)
@@ -1742,7 +1704,7 @@ async def import_message(mess):
         # await client.send_message(STREAM, await message_to_stream(messInfo))
 
 async def import_to_user_set(member, set_name, entry):
-    await userinfo_collection.update_one(
+    await overwatch_db.userinfo.update_one(
         {"userid": member.id},
         {
             "$addToSet": {set_name: entry}
@@ -1755,7 +1717,7 @@ async def import_user(member):
     :type member: discord.Member
     """
     user_info = await parse_member_info(member)
-    result = await userinfo_collection.update_one(
+    result = await overwatch_db.userinfo.update_one(
         {"userid": member.id},
         {
             "$addToSet": {"nicks": {
@@ -1776,7 +1738,7 @@ async def export_user(member_id):
 
     :type member: discord.Member
     """
-    userinfo = await userinfo_collection.find_one(
+    userinfo = await overwatch_db.userinfo.find_one(
         {"userid": member_id}, projection={"_id": False, "mention_str": False}
     )
     if not userinfo:
@@ -1879,7 +1841,7 @@ async def fuzzy_match(*args):
 
     nick_id_dict = {}
 
-    mongo_cursor = userinfo_collection.find()
+    mongo_cursor = overwatch_db.userinfo.find()
     async for userinfo_dict in mongo_cursor:
         try:
             for nick in userinfo_dict["nicks"]:
@@ -1996,7 +1958,6 @@ async def delay_delete():
     pass
 
 async def parse_date(date_text):
-
     res = dateparser.parse(date_text)
     return res
 # Scrim
@@ -2440,7 +2401,7 @@ async def lfg_warner(found_message, warn_type, warn_user, channel):
     author_mention = ""
     count = 0
     try:
-        result = await userinfo_collection.find_one_and_update(
+        result = await overwatch_db.userinfo.find_one_and_update(
             {"userid": author.id},
             {"$inc": {
                 "lfg_count": 1
@@ -2491,9 +2452,6 @@ async def temp_apply_role(member, role, duration):
 
 async def apply_role(member, role):
     pass
-
-
-
 
 class temprole_master:
     temproles = []
@@ -2552,6 +2510,7 @@ class temprole_master:
 
         await overwatch_db.roles.insert_one(
             {"type": "temp", "member_id": member.id, "role_id": role.id, "end_time": str(end_datetime)})
+
     async def dump(self):
         return [await temprole.dump() for temprole in self.temproles]
 
@@ -2594,6 +2553,7 @@ class temprole:
 
 class heat_master:
     users = {}
+
     def __init__(self):
         pass
 
@@ -2601,8 +2561,6 @@ class heat_master:
         if userid not in self.users.keys():
             self.users[userid] = heat_user(self, userid)
         result = self.users[userid].register(type, parameter)
-
-
 
 class heat_user:
     heat_dict = {"voice": [], "messages": [], "invites": []}
@@ -2629,7 +2587,7 @@ class heat_user:
     def register(self, type, parameter):
         if type == "voice":
             pass
-        elif type =="message":
+        elif type == "message":
             result = self.register_message(parameter)
         elif type == "message":
             pass
@@ -2643,9 +2601,9 @@ class heat_user:
 
     def compute_messages_per_second(self, message):
         author_id = message.author.id
-        #    async for doc in message_log_collection.find({"userid": userid, "date": {"$gt": "2016-12-25"}}):
+        #    async for doc in overwatch_db.message_log.find({"userid": userid, "date": {"$gt": "2016-12-25"}}):
 
-        overwatch_db.message_log.find({"userid":author_id, "date":{"gt":str(datetime.utcnow())}})
+        overwatch_db.message_log.find({"userid": author_id, "date": {"gt": str(datetime.utcnow())}})
 
     def register_message(self, message):
         print("Registering a message from " + message.author.name)
@@ -2662,12 +2620,11 @@ class heat_user:
 
         unique_word_count = len(set(word_list))
 
-        unique_heat = ((word_count - unique_word_count) / word_count)*20
-        emote_heat = (emote_count / word_count)*35
-        length_heat = full_length*.05
+        unique_heat = ((word_count - unique_word_count) / word_count) * 20
+        emote_heat = (emote_count / word_count) * 35
+        length_heat = full_length * .05
 
-
-        self.heat_dict["messages"].append(heat_dot(unique_heat+emote_heat+length_heat))
+        self.heat_dict["messages"].append(heat_dot(unique_heat + emote_heat + length_heat))
         heat = self.tick()
         print("heat: " + str(heat))
         return heat
@@ -2690,10 +2647,9 @@ class heat_user:
             heat += category_heat
         return heat
 
-
-
 class heat_dot:
     chunk_size = 60 * 4
+
     def __str__(self):
         return "[{creation} : {value}]".format(creation=str(self.creation), value=str(self.value))
 
@@ -2716,7 +2672,16 @@ class heat_dot:
 
 
 
+async def clock():
+    global STATES
+    await client.wait_until_ready()
+    STATES["init"] = True
+    print(STATES["init"])
+    STATES["server_log"] = True
+    print("Ready")
+    while not client.is_closed:
+        await asyncio.sleep(1)
+        await temproles.tick()
 
-
-
+client.loop.create_task(clock())
 client.run(MERCY_TOKEN, bot=True)

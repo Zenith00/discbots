@@ -1,6 +1,9 @@
 import re
 import copy
+import urllib.request
 from datetime import datetime,timedelta
+import dateparser
+import traceback
 # from pyshorteners import Shortener
 
 
@@ -80,10 +83,11 @@ def format_timedelta(timedelta):
 # duration = duration + timedelta(microseconds=499999)
 # duration = duration // 1000000 * 1000000
 
-def round_timedelta(delta):
+def round_timedelta(delta) -> timedelta:
     delta = delta + timedelta(microseconds=499999)
     delta = delta // 1000000 * 1000000
     return delta
+
 def pretty_column(list_of_rows, left_just):
     """
     :type list_of_rows: list
@@ -112,3 +116,24 @@ def format_list_to_widths(list_of_rows, widths, left_just):
     #     return Shortener('Tinyurl').short(link)
 
     # print(regex_test("Kappa", "Κappa"))
+
+async def parse_time_to_end(time_string):
+    print(time_string)
+    try:
+        end = await parse_date("in " + time_string)
+        delt = end - datetime.now()
+        delt = round_timedelta(delt)
+        readable = format_timedelta(delt)
+        return {"end":end, "duration":delt, "readable":readable}
+    except:
+        print(traceback.format_exc())
+        return None
+
+async def parse_date(date_text):
+    res = dateparser.parse(date_text)
+    return res
+
+async def get_redirected_url(url):
+    opener = urllib.request.build_opener(urllib.request.HTTPRedirectHandler)
+    request = opener.open(url)
+    return request.url

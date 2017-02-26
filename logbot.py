@@ -6,13 +6,28 @@ import regex as re
 import constants
 from utils_parse import *
 from utils_text import *
+import TOKENS
+from unidecode import unidecode
+import utils_file
+from googleapiclient import discovery
 
+logging.basicConfig(level=logging.INFO)
 
 mongo_client = motor.motor_asyncio.AsyncIOMotorClient()
 overwatch_db = mongo_client.overwatch
 client = discord.Client()
 
+perspective_api = discovery.build('commentanalyzer', 'v1alpha1', developerKey=TOKENS.GOOGLE_API_TOKEN)
+
+
 STATES = {"init":False}
+
+@client.event
+async def on_message(message_in):
+    #                                 server-meta            server log          bot  log               voice channel
+    if message_in.channel.id not in ["264735004553248768", "152757147288076297", "147153976687591424", "200185170249252865"]:
+        await mess2log(message_in)
+    pass
 
 @client.event
 async def on_member_remove(member):
@@ -109,15 +124,27 @@ async def on_message_delete(message):
                           "content": message.content})
 
 
-
+async def mess2log(message):
+    time = datetime.now().strftime("%I:%M:%S")
+    channel = message.channel.name
+    nick = message.author.nick if message.author.nick else message.author.name
+    log_str = unidecode("[{time}][{channel}][{name}] {content}".format(time=time, channel=channel, name=nick, content=message.content)).replace("\n",r"[\n]")
+    logfile_txt = r"C:\Users\Austin\Desktop\Programming\Disc\logfile.txt"
+    lines = utils_file.append_line(logfile_txt, log_str)
+    if lines > 10000:
+        import os
+        os.remove(logfile_txt)
 
 async def log_action(action, detail):
     server_log = client.get_channel(constants.CHANNELNAME_CHANNELID_DICT["server-log"])
     voice_log = client.get_channel(constants.CHANNELNAME_CHANNELID_DICT["voice-channel-output"])
+    # server_log = client.get_channel("285123105117044736")
+    # voice_log = client.get_channel("285123117943226369")
     # server_log = client.get_channel("152757147288076297")
     time = datetime.utcnow().isoformat(" ")
     time = time[5:19]
     time = time[6:19] + " " + time[0:5]
+    print("Logging action")
     if any(key in ["before", "after", "content", "mention"] for key in detail.keys()):
         for key in detail.keys():
             if key == "before" and isinstance(detail["before"], str):
@@ -322,5 +349,9 @@ async def get_role(server, roleid):
 async def clock():
     await client.wait_until_ready()
     STATES["init"] = True
+    STATES["server_log"] = True
+    print("Ready")
 
 client.loop.create_task(clock())
+
+client.run(TOKENS.LOGBOT_TOKEN, bot=True)
