@@ -4,9 +4,14 @@
 import logging
 import os
 import textwrap
+from datetime import datetime
 from io import BytesIO
 import asyncio
 import traceback
+import random
+from unidecode import unidecode
+import constants
+import utils_file
 import utils_text
 import discord
 import requests
@@ -14,25 +19,35 @@ import urbandictionary
 from PIL import Image
 from googleapiclient import discovery
 from imgurpython import ImgurClient
-
+import markovify
 from TOKENS import *
 from utils_text import multi_block
+import re
+import motor.motor_asyncio
 
-logging.basicConfig(level=logging.INFO)
+# logging.basicConfig(level=logging.INFO)
 
 perspective_api = discovery.build('commentanalyzer', 'v1alpha1', developerKey=GOOGLE_API_TOKEN)
+
 client = discord.Client()
 imgur_client = ImgurClient(IMGUR_CLIENT_ID, IMGUR_SECRET_ID, IMGUR_ACCESS_TOKEN,
                            IMGUR_REFRESH_TOKEN)
-
+overwatch_db = motor.motor_asyncio.AsyncIOMotorClient().overwatch
 
 @client.event
 async def on_message(message_in):
+    #                                                                                           server-meta     server log   bot  log  voice channel
+    if message_in.server and message_in.server.id == constants.OVERWATCH_SERVER_ID and message_in.channel.id not in ["264735004553248768", "152757147288076297", "147153976687591424",
+                                                                                               "200185170249252865"]:
+        try:
+            await mess2log(message_in)
+        except AttributeError:
+            pass
     if message_in.author == client.user and message_in.content.startswith("%%"):
         command = message_in.content.replace("%%", "")
         command_list = command.split(" ")
         await client.delete_message(message_in)
-        output = None
+        output = []
         if command_list[0] == "pfp":
             pfp = command_list[1]
             print("Switching to " + pfp)
@@ -50,6 +65,33 @@ async def on_message(message_in):
         if command_list[0] == "servers":
             server_list = [[server.name, str(server.member_count)] for server in client.servers]
             output.append((server_list, "rows"))
+        if command_list[0] == "mercyshuffle":
+
+            link_list = [x.link for x in imgur_client.get_album_images("umuvY")]
+            random.shuffle(link_list)
+            for link in link_list[:int(command_list[1])]:
+                await client.send_message(message_in.channel, link)
+        if command_list[0] == "markdump":
+            command_list = await mention_to_id(command_list)
+            target_user_id = command_list[1]
+            async for message_dict in overwatch_db.message_log.find({"userid":target_user_id}):
+                utils_file.append_line("C:\\Users\\Austin\\Desktop\\Programming\\Disc\\markov\\" + target_user_id + ".txt", message_dict["content"])
+        if command_list[0] == "markov":
+            command_list = await mention_to_id(command_list)
+            target_user_id = command_list[1]
+            markovify.NewlineText("C:\\Users\\Austin\\Desktop\\Programming\\Disc\\markov\\" + target_user_id + ".txt")
+
+        if command_list[0] == "emoji":
+            import re
+
+            emoji_id = utils_text.regex_test("\d+(?=>)", " ".join(command_list[1:])).group(0)
+            print(emoji_id)
+            server_name = None
+            for emoji in client.get_all_emojis():
+                if emoji_id == emoji.id:
+                    server_name = emoji.server.name
+                    break
+            output.append((server_name, None))
         if command_list[0] == "rs":
             await client.send_message(client.get_channel("176236425384034304"), ".restart")
         if command_list[0] == "big":
@@ -74,20 +116,15 @@ async def on_message(message_in):
                 helix_left=command_list[1], helix_right=command_list[2])
             output.append((helix, "text"))
         if command_list[0] == "persp":
-            text = " ".join(command_list[1])
-            analyze_request = {
-                'comment'            : {'text': text},
-                'requestedAttributes': {'TOXICITY': {}}
-            }
-            response = perspective_api.comments().analyze(body=analyze_request).execute()
-            toxicity_score = (response["attributeScores"]["TOXICITY"]["summaryScore"]["value"] * 100)
-            score_text = "```"
+            text = " ".join(command_list[1:])
+            toxicity_score = await perspective(text)
+            score_text = "```{text}``` Toxicity Score: {score}%".format(text=text, score=toxicity_score * 100)
+            output.append((score_text, "text"))
 
         if output:
             # noinspection PyTypeChecker
             for item in output:
                 await send(destination=message_in.channel, text=item[0], send_type=item[1])
-
 
 @client.event
 async def on_ready():
@@ -95,6 +132,43 @@ async def on_ready():
     print('Username: ' + client.user.name)
     print('ID: ' + client.user.id)
 
+async def perspective(text):
+    import timeit
+    # start = timeit.default_timer()
+    analyze_request = {
+        'comment'            : {'text': text},
+        'requestedAttributes': {'TOXICITY': {}}
+    }
+    response = perspective_api.comments().analyze(body=analyze_request).execute()
+    # stop = timeit.default_timer()
+    # print(stop - start)
+    return response["attributeScores"]["TOXICITY"]["summaryScore"]["value"]
+
+async def mess2log(message):
+    time = datetime.now().strftime("%I:%M:%S")
+    channel = message.channel.name if message.channel.id != "170185225526181890" else "trusted-chat"
+    nick = message.author.nick if message.author.nick else message.author.name
+    text = message.content
+    if len(text) < 2:
+        return
+    toxicity = await perspective(text)
+    if message.author.id == "248841864831041547":
+        toxicity = 0.0
+    toxicity_string = str(round(toxicity*100, 1)).rjust(4, "0") + "%"
+
+
+
+    log_str = unidecode(
+        "[{toxicity}][{time}][{channel}][{name}] {content}{trg}".format(trg="" if toxicity < 0.6 else "|| [TRG-]", toxicity=toxicity_string, time=time,
+                                                                        channel=channel, name=nick, content=message.content)).replace(
+        "\n", r"[\n]")
+    # if toxicity > 0.5:
+    #     await client.send_message(client.get_channel("280517327496413186"), log_str)
+    logfile_txt = r"C:\Users\Austin\Desktop\Programming\Disc\logfile.txt"
+    lines = utils_file.append_line(logfile_txt, log_str)
+    if lines > 10000:
+        import os
+        os.remove(logfile_txt)
 async def more_jpeg(url):
     response = requests.get(url)
     original_size = len(response.content)
@@ -113,7 +187,6 @@ async def more_jpeg(url):
     }
     ret = imgur_client.upload_from_path(img_path, config=config, anon=True)
     return ret["link"], ratio
-
 
 async def send(destination, text, send_type):
     if isinstance(destination, str):
@@ -146,5 +219,20 @@ async def remind_me(command_list, message):
             time) + " seconds:\n" + command_list[0])
     except:
         print(traceback.format_exc())
+async def mention_to_id(command_list):
+    """
 
+    :type command: list
+    """
+    new_command = []
+    reg = re.compile(r"<[@#](!?)\d*>", re.IGNORECASE)
+    for item in command_list:
+        match = reg.search(item)
+        if match is None:
+            new_command.append(item)
+        else:
+            idmatch = re.compile(r"\d")
+            id_chars = "".join(idmatch.findall(item))
+            new_command.append(id_chars)
+    return new_command
 client.run(ZENITH_AUTH_TOKEN, bot=False)

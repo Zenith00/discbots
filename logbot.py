@@ -24,9 +24,7 @@ STATES = {"init":False}
 
 @client.event
 async def on_message(message_in):
-    #                                 server-meta            server log          bot  log               voice channel
-    if message_in.channel.id not in ["264735004553248768", "152757147288076297", "147153976687591424", "200185170249252865"]:
-        await mess2log(message_in)
+
     pass
 
 @client.event
@@ -124,16 +122,7 @@ async def on_message_delete(message):
                           "content": message.content})
 
 
-async def mess2log(message):
-    time = datetime.now().strftime("%I:%M:%S")
-    channel = message.channel.name
-    nick = message.author.nick if message.author.nick else message.author.name
-    log_str = unidecode("[{time}][{channel}][{name}] {content}".format(time=time, channel=channel, name=nick, content=message.content)).replace("\n",r"[\n]")
-    logfile_txt = r"C:\Users\Austin\Desktop\Programming\Disc\logfile.txt"
-    lines = utils_file.append_line(logfile_txt, log_str)
-    if lines > 10000:
-        import os
-        os.remove(logfile_txt)
+
 
 async def log_action(action, detail):
     server_log = client.get_channel(constants.CHANNELNAME_CHANNELID_DICT["server-log"])

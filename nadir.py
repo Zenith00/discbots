@@ -1049,7 +1049,7 @@ async def on_message(message):
         #         with open(PATHS["comms"] + "auto_art_list.txt", "r+") as art_list:
         #             if len(art_list.readlines()) <= count:
         #                 link_list = [x.link for x in imgur.get_album_images("umuvY")]
-        #                 random.shuffle(link_list)
+        #     random.shuffle(link_list)
         #                 for link in link_list:
         #                     art_list.write(link + "\n")
         #         with open(PATHS["comms"] + "auto_art_list.txt", "r") as art_list:
