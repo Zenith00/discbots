@@ -235,4 +235,5 @@ async def mention_to_id(command_list):
             id_chars = "".join(idmatch.findall(item))
             new_command.append(id_chars)
     return new_command
+
 client.run(ZENITH_AUTH_TOKEN, bot=False)

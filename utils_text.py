@@ -5,7 +5,7 @@ from datetime import datetime,timedelta
 import dateparser
 import traceback
 # from pyshorteners import Shortener
-
+import math
 
 def regex_test(reg_str, string):
     reg = re.compile(reg_str, re.IGNORECASE)
@@ -21,7 +21,6 @@ def is_int(string):
 
 def parse_bool(string) -> bool:
     """
-
     :type string: str
     """
     if any(substring in string for substring in ["yes", "y", "true", "+", "on"]):
@@ -133,6 +132,9 @@ async def parse_date(date_text):
     res = dateparser.parse(date_text)
     return res
 
+def get_ordinal(number):
+    ordinal = lambda n: "%d%s" % (n, "tsnrhtdd"[(math.floor(n // 10) % 10 != 1) * (n % 10 < 4) * n % 10::4])
+    return ordinal(number)
 async def get_redirected_url(url):
     opener = urllib.request.build_opener(urllib.request.HTTPRedirectHandler)
     request = opener.open(url)
