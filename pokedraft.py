@@ -1,17 +1,15 @@
 import asyncio
-import textwrap
 import pickle
-import asyncio
-from fuzzywuzzy import process
+import textwrap
+
 import discord
-import motor.motor_asyncio
+from fuzzywuzzy import process
+
 import utils_text
 from TOKENS import *
 from utils_text import multi_block
 
 # logging.basicConfig(level=logging.INFO)
-
-
 
 poke_path = "C:\\Users\\Austin\\Desktop\\Programming\\Disc\\pokedraft\\"
 with open(poke_path + "list.pickle", 'rb') as fp:
@@ -23,6 +21,7 @@ user_queue = asyncio.Queue()
 registered = []
 locked = []
 
+
 @client.event
 async def on_message(message_in):
     global user_queue
@@ -32,7 +31,8 @@ async def on_message(message_in):
         command_list = command.split(" ")
         if command_list[0] == "draft":
             if message_in.author.id not in registered and message_in.author.id not in locked:
-                await client.send_message(message_in.author, "You have registered for the draft in {ordinal} place. Please wait.".format(ordinal=utils_text.get_ordinal(user_queue.qsize()+2)))
+                await client.send_message(message_in.author, "You have registered for the draft in {ordinal} place. Please wait.".format(
+                    ordinal=utils_text.get_ordinal(user_queue.qsize() + 2)))
                 await user_queue.put(message_in.author)
                 locked.append(message_in.author.id)
             else:
@@ -48,15 +48,13 @@ async def on_ready():
 
 async def process_queue(member_queue):
     """
-    :type queue: Queue
+    :type member_queue: Queue
     """
     await client.wait_until_ready()
     while not client.is_closed:
         member = await member_queue.get()
         await draft(member)
         await save_pickle("list.pickle", poke_dict)
-
-
 
 async def draft(member):
     global poke_dict
@@ -67,18 +65,22 @@ async def draft(member):
     await client.send_message(member, "List of already drafted pokemon:")
     await send(member, "\n".join(drafted_pokemon), "text")
     await client.send_message(member, "Please select a pokemon")
+
     def select_check(msg):
-        result = process.extractOne(msg.content, undrafted_pokemon)
+        result_pokemon = process.extractOne(msg.content, undrafted_pokemon)
         if not msg.channel.is_private:
             return False
-        if result[1] > 90 :
-            print(result)
+        if result_pokemon[1] > 90:
+            print(result_pokemon)
             return True
         else:
             def send_msg():
-                yield from client.send_message(msg.channel if msg.channel else msg.author, "Did not recognize the pokemon. Please check your spelling and try again.")
+                yield from client.send_message(msg.channel if msg.channel else msg.author,
+                                               "Did not recognize the pokemon. Please check your spelling and try again.")
+
             discord.compat.create_task(send_msg(), loop=client.loop)
             return False
+
     selection_msg = await client.wait_for_message(timeout=30, author=member, check=select_check)
     if not selection_msg:
         await client.send_message(member, "You have timed out. Please rejoin the draft in the main server with ..draft")
@@ -96,7 +98,6 @@ async def draft(member):
         print("Stacking down")
     registered.append(member.id)
     return
-
 
 async def send(destination, text, send_type):
     if isinstance(destination, str):
@@ -121,20 +122,21 @@ async def send(destination, text, send_type):
         await client.send_message(destination, line)
 
 async def save_pickle(filename, item):
-    with open(poke_path + filename, 'wb') as fp:
-        pickle.dump(item, fp)
-
+    with open(poke_path + filename, 'wb') as pickled_filed:
+        pickle.dump(item, pickled_filed)
 
 async def confirm(member, target, private_message=True):
     await client.send_message(target, "Are you sure? (yes/no)")
-    def confirm_check(msg):
+
+    def confirm_check(confirm_msg):
         if private_message:
-            if msg.channel.is_private:
+            if confirm_msg.channel.is_private:
                 return True
         else:
-            if target != msg.channel:
+            if target != confirm_msg.channel:
                 return False
-        return msg.content in ["yes", "y", "true", "+", "on", "no", "n", "false", "-", "off"]
+        return confirm_msg.content in ["yes", "y", "true", "+", "on", "no", "n", "false", "-", "off"]
+
     msg = await client.wait_for_message(timeout=15, author=member, check=confirm_check)
     if not msg:
         return None
@@ -142,4 +144,3 @@ async def confirm(member, target, private_message=True):
 
 client.loop.create_task(process_queue(user_queue))
 client.run(TEST2_AUTH, bot=True)
-
