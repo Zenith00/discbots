@@ -9,7 +9,6 @@ import motor.motor_asyncio
 import pymongo
 import wolframalpha
 from asteval import Interpreter
-
 # import fuzzywuzzy
 from fuzzywuzzy import fuzz, process
 from imgurpython import ImgurClient
@@ -54,8 +53,6 @@ BLACKLISTED_CHANNELS = (
 SERVERS = {}
 CHANNELNAME_CHANNEL_DICT = {}
 
-
-tagger = Tagger(client)
 
 STATES = {"init":False}
 
