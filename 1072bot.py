@@ -2,7 +2,7 @@ import textwrap
 
 import discord
 from pytba import api as tba
-
+import TOKENS
 from utils import utils_text
 from utils.utils_text import *
 
@@ -126,4 +126,4 @@ async def send(destination, text, send_type):
         await client.send_message(destination, line)
 
 
-client.run(ROBO_TOKEN, bot=True)
+client.run(TOKENS.ROBO_TOKEN, bot=True)
