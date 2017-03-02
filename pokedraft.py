@@ -31,8 +31,9 @@ async def on_message(message_in):
         command_list = command.split(" ")
         if command_list[0] == "draft":
             if message_in.author.id not in registered and message_in.author.id not in locked:
-                await client.send_message(message_in.author, "You have registered for the draft in {ordinal} place. Please wait.".format(
-                    ordinal=utils_text.get_ordinal(user_queue.qsize() + 2)))
+                await client.send_message(message_in.author, "You have registered for the draft in {ordinal} place. "
+                                                             "Please wait.".format(
+                                                                ordinal=utils_text.get_ordinal(user_queue.qsize() + 2)))
                 await user_queue.put(message_in.author)
                 locked.append(message_in.author.id)
             else:
@@ -46,6 +47,7 @@ async def on_ready():
     print('Username: ' + client.user.name)
     print('ID: ' + client.user.id)
 
+
 async def process_queue(member_queue):
     """
     :type member_queue: Queue
@@ -55,6 +57,7 @@ async def process_queue(member_queue):
         member = await member_queue.get()
         await draft(member)
         await save_pickle("list.pickle", poke_dict)
+
 
 async def draft(member):
     global poke_dict
@@ -76,7 +79,8 @@ async def draft(member):
         else:
             def send_msg():
                 yield from client.send_message(msg.channel if msg.channel else msg.author,
-                                               "Did not recognize the pokemon. Please check your spelling and try again.")
+                                               "Did not recognize the pokemon. Please check your spelling and try "
+                                               "again.")
 
             discord.compat.create_task(send_msg(), loop=client.loop)
             return False
@@ -98,6 +102,7 @@ async def draft(member):
         print("Stacking down")
     registered.append(member.id)
     return
+
 
 async def send(destination, text, send_type):
     if isinstance(destination, str):
@@ -121,9 +126,11 @@ async def send(destination, text, send_type):
         line = line.replace("<NL<", "\n")
         await client.send_message(destination, line)
 
+
 async def save_pickle(filename, item):
     with open(poke_path + filename, 'wb') as pickled_filed:
         pickle.dump(item, pickled_filed)
+
 
 async def confirm(member, target, private_message=True):
     await client.send_message(target, "Are you sure? (yes/no)")
@@ -141,6 +148,7 @@ async def confirm(member, target, private_message=True):
     if not msg:
         return None
     return utils_text.parse_bool(msg.content)
+
 
 client.loop.create_task(process_queue(user_queue))
 client.run(TEST2_AUTH, bot=True)
