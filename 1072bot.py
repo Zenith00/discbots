@@ -7,7 +7,8 @@ from utils import utils_text
 from utils.utils_text import *
 
 tba.set_api_key("Austin Zhang", "1072bot ", "1.0")
-import pyfav.pyfav as pyfav
+import pyfav
+
 import logging
 
 logging.basicConfig(level=logging.INFO)
@@ -64,7 +65,7 @@ async def output_event_embed(event):
     embed.add_field(name="End Date", value=event.info["end_date"], inline=True)
     embed.add_field(name="Week", value=event.info["week"], inline=True)
     embed.add_field(name="Address", value=event.info["venue_address"], inline=False)
-    thumb = pyfav.get_favicon_url(event.info["website"])
+    thumb = pyfav.pyfav.get_favicon_url(event.info["website"])
     embed.set_thumbnail(url=thumb)
     return embed
 
@@ -84,7 +85,7 @@ async def output_team_embed(team_dict):
     print(team_dict)
     # if team_dict["team_number"] == "1072":
     #     return embed
-    thumb = pyfav.get_favicon_url(team_dict["website"])
+    thumb = pyfav.pyfav.get_favicon_url(team_dict["website"])
     if thumb:
         embed.set_thumbnail(url=thumb)
     print("embed got")
