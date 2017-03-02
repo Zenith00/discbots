@@ -49,13 +49,13 @@ async def on_message(message_in):
         await client.delete_message(message_in)
         output = []
         if command_list[0] == "pfp":
-            pfp = command_list[1]
+            pfp = command_list[1] + ".png"
             print("Switching to " + pfp)
             try:
-                with open(pfp + ".png", "rb") as pfp:
+                with open(utils_file.relative_path("avatars\\" + pfp), "rb") as pfp:
                     await client.edit_profile(password=PASS, avatar=pfp.read())
             except:
-                with open("default.png", "rb") as pfp:
+                with open(utils_file.relative_path("avatars\\default.png"), "rb") as pfp:
                     await client.edit_profile(password=PASS, avatar=pfp.read())
         if command_list[0] == "owner":
             output.append((message_in.server.owner.name, "text"))
@@ -75,11 +75,11 @@ async def on_message(message_in):
             command_list = await mention_to_id(command_list)
             target_user_id = command_list[1]
             async for message_dict in overwatch_db.message_log.find({"userid":target_user_id}):
-                utils_file.append_line("C:\\Users\\Austin\\Desktop\\Programming\\Disc\\markov\\" + target_user_id + ".txt", message_dict["content"])
+                utils_file.append_line(utils_file.relative_path("markov\\" + target_user_id + ".txt"), message_dict["content"])
         if command_list[0] == "markov":
             command_list = await mention_to_id(command_list)
             target_user_id = command_list[1]
-            markovify.NewlineText("C:\\Users\\Austin\\Desktop\\Programming\\Disc\\markov\\" + target_user_id + ".txt")
+            markovify.NewlineText(utils_file.relative_path("markov\\" + target_user_id + ".txt"))
 
         if command_list[0] == "emoji":
             import re
@@ -133,15 +133,11 @@ async def on_ready():
     print('ID: ' + client.user.id)
 
 async def perspective(text):
-    import timeit
-    # start = timeit.default_timer()
     analyze_request = {
         'comment'            : {'text': text},
         'requestedAttributes': {'TOXICITY': {}}
     }
     response = perspective_api.comments().analyze(body=analyze_request).execute()
-    # stop = timeit.default_timer()
-    # print(stop - start)
     return response["attributeScores"]["TOXICITY"]["summaryScore"]["value"]
 
 async def mess2log(message):
@@ -162,18 +158,15 @@ async def mess2log(message):
         "[{toxicity}][{time}][{channel}][{name}] {content}{trg}".format(trg="" if toxicity < 0.6 else "|| [TRG-]", toxicity=toxicity_string, time=time,
                                                                         channel=channel, name=nick, content=message.content)).replace(
         "\n", r"[\n]")
-    # if toxicity > 0.5:
-    #     await client.send_message(client.get_channel("280517327496413186"), log_str)
     logfile_txt = r"C:\Users\Austin\Desktop\Programming\Disc\logfile.txt"
     lines = utils_file.append_line(logfile_txt, log_str)
-    if lines > 10000:
-        import os
-        os.remove(logfile_txt)
+
 async def more_jpeg(url):
     response = requests.get(url)
     original_size = len(response.content)
     img = Image.open(BytesIO(response.content))
-    img_path = os.path.join(os.path.dirname(__file__), "tmp\\tmp.jpeg")
+    img_path = utils_file.relative_path("tmp\\tmp.jpeg")
+    # img_path = os.path.join(os.path.dirname(__file__), "tmp\\tmp.jpeg")
     if os.path.isfile(img_path):
         os.remove(img_path)
 
@@ -219,11 +212,8 @@ async def remind_me(command_list, message):
             time) + " seconds:\n" + command_list[0])
     except:
         print(traceback.format_exc())
-async def mention_to_id(command_list):
-    """
 
-    :type command: list
-    """
+async def mention_to_id(command_list):
     new_command = []
     reg = re.compile(r"<[@#](!?)\d*>", re.IGNORECASE)
     for item in command_list:

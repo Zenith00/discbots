@@ -41,3 +41,7 @@ def read_file(file) -> str:
     with open(file, "r") as file:
         return file.readlines()
 
+
+def relative_path(relative):
+    import os
+    return os.path.join(os.path.dirname(__file__), relative)
