@@ -25,7 +25,6 @@ from utils_text import multi_block
 import re
 import motor.motor_asyncio
 
-
 # logging.basicConfig(level=logging.INFO)
 
 perspective_api = discovery.build('commentanalyzer', 'v1alpha1', developerKey=GOOGLE_API_TOKEN)
