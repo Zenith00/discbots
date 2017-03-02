@@ -126,6 +126,7 @@ async def on_message(message_in):
             for item in output:
                 await send(destination=message_in.channel, text=item[0], send_type=item[1])
 
+
 @client.event
 async def on_ready():
     print('Connected!')
