@@ -5,9 +5,9 @@ import textwrap
 import discord
 from fuzzywuzzy import process
 
-import utils_text
 from TOKENS import *
-from utils_text import multi_block
+from utils import utils_text
+from utils.utils_text import multi_block
 
 # logging.basicConfig(level=logging.INFO)
 

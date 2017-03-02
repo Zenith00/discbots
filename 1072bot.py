@@ -1,14 +1,13 @@
-from TOKENS import *
-import discord
-import utils_text
-from pytba import api as tba
 import textwrap
-import asyncio
-from utils_text import *
+
+import discord
+from pytba import api as tba
+
+from utils import utils_text
+from utils.utils_text import *
 
 tba.set_api_key("Austin Zhang", "1072bot ", "1.0")
 import pyfav.pyfav as pyfav
-import fuckit
 import logging
 
 logging.basicConfig(level=logging.INFO)

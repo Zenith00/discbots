@@ -1,6 +1,6 @@
-import utils_file
 import ast
 
+from utils import utils_file
 
 with open("paths.txt", "r") as f:
     pathList = f.read()

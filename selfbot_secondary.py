@@ -1,13 +1,14 @@
-import asyncio
-import discord
 import logging
-import constants
+
+import discord
 from simplegist.simplegist import Simplegist
-from datetime import datetime
 from utils_text import *
+
+import constants
 from TOKENS import *
-from duration_timer import timer
-from utils_file import *
+from utils.duration_timer import timer
+from utils.utils_file import *
+
 client = discord.Client()
 logging.basicConfig(level=logging.INFO)
 gistClient = Simplegist()

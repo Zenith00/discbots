@@ -1,16 +1,15 @@
 import heapq
 import logging
-import math
 import random
 import textwrap
-import urllib.request
 from collections import defaultdict
-from datetime import timedelta, datetime
+
 import discord
 import motor.motor_asyncio
 import pymongo
 import wolframalpha
 from asteval import Interpreter
+
 # import fuzzywuzzy
 from fuzzywuzzy import fuzz, process
 from imgurpython import ImgurClient
@@ -21,13 +20,10 @@ from unidecode import unidecode
 import constants
 from TOKENS import *
 from tag import Tagger
-from discord import http as dischttp
-import string
-from utils_parse import *
-from utils_text import *
+from utils.utils_parse import *
+from utils.utils_text import *
 # from utils_text import shorten_link
-import utils_image
-from dateutil import parser
+from utils import utils_image
 import dateparser
 
 logging.basicConfig(level=logging.INFO)

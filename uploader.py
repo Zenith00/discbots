@@ -1,15 +1,11 @@
-import urllib
-import imgurpython
+import ast
+
 from imgurpython import ImgurClient
-import os, ast
 # import win32file
 # import win32con
-import time, shutil, fileinput
-from concurrent.futures import ProcessPoolExecutor
-import sys
+import time
 import traceback
-import utils_file
-import threading
+from utils import utils_file
 
 # FANARTBOT
 path = "C:\\Users\\Austin\\Dropbox\\Zenith's Fanart\\"
@@ -72,7 +68,7 @@ while True:
             image = imgur.upload_from_path(fileToUpload, config=config, anon=False)
             # with open(PATHS["comms"] + "toUpload.txt", "r+") as toUpload:
             #     fileToUpload = toUpload.readline()
-            utils_file.delete_lines(PATHS["comms"] + "toUpload.txt",1)
+            utils_file.delete_lines(PATHS["comms"] + "toUpload.txt", 1)
             utils_file_prepend_line_wrapper(PATHS["comms"] + "auto_art_list.txt", image['link'])
             print("WRITING LINK: " + image['link'])
         print(imgur.credits)

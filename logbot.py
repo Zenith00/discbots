@@ -1,15 +1,14 @@
 import logging
+from datetime import datetime, timedelta
+
 import discord
 import motor.motor_asyncio
-from datetime import datetime, timedelta
 import regex as re
-import constants
-from utils_parse import *
-from utils_text import *
-import TOKENS
-from unidecode import unidecode
-import utils_file
 from googleapiclient import discovery
+from utils import utils_text
+
+import TOKENS
+import constants
 
 logging.basicConfig(level=logging.INFO)
 
@@ -148,7 +147,7 @@ async def log_action(action, detail):
                 continue
             new = []
             for word in re.split(r"\s", detail[target]):
-                if regex_test(
+                if utils_text.regex_test(
                         r"https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)",
                         word):
                     word = "<" + word + ">"

@@ -1,14 +1,16 @@
+import ast
 import os
+import string
+import sys
 import time
-import sys, string, ast
 import xxhash
-import pymongo
+
 import imgurpython
-from pymongo import ReturnDocument
+import pymongo
 from imgurpython import ImgurClient
-import traceback
+
 # import motor.motor_asyncio
-import utils_file
+from utils import utils_file
 
 path = "C:\\Users\\Austin\\Dropbox\\Zenith's Fanart\\"
 global before

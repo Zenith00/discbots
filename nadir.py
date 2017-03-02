@@ -1,14 +1,12 @@
-import copy
 import heapq
 import logging
-
 import math
 import random
 import re
 import sys
 import urllib.request
 from collections import defaultdict
-from datetime import datetime, timedelta
+from datetime import datetime
 from io import StringIO
 
 import discord
@@ -18,15 +16,14 @@ import wolframalpha
 from asteval import Interpreter
 from fuzzywuzzy import fuzz
 from imgurpython import ImgurClient
-from overwatch_api import OverwatchAPI
 from pymongo import ReturnDocument
 from simplegist.simplegist import Simplegist
-import constants
-import unicodedata
-from utils_text import *
-from utils_parse import *
 from unidecode import unidecode
+from utils_text import *
+
+import constants
 from TOKENS import *
+from utils.utils_parse import *
 
 ENABLED = True
 logging.basicConfig(level=logging.INFO)

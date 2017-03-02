@@ -1,29 +1,30 @@
 """Provide an asynchronous equivalent *to exec*."""
 
 # from . import compat
-import logging
+import asyncio
 import os
+import random
+import re
 import textwrap
+import traceback
 from datetime import datetime
 from io import BytesIO
-import asyncio
-import traceback
-import random
-from unidecode import unidecode
-import constants
-import utils_file
-import utils_text
+
 import discord
+import markovify
+import motor.motor_asyncio
 import requests
 import urbandictionary
+from utils import utils_file, utils_text, utils_image, utils_parse, utils_persist
 from PIL import Image
 from googleapiclient import discovery
 from imgurpython import ImgurClient
-import markovify
+from unidecode import unidecode
+# from utils_text import multi_block
+
+import constants
 from TOKENS import *
-from utils_text import multi_block
-import re
-import motor.motor_asyncio
+from utils import utils_file
 
 # logging.basicConfig(level=logging.INFO)
 
@@ -187,7 +188,7 @@ async def send(destination, text, send_type):
         destination = await client.get_channel(destination)
 
     if send_type == "rows":
-        message_list = multi_block(text, True)
+        message_list = utils_text.multi_block(text, True)
         for message in message_list:
             await client.send_message(destination, "```" + message + "```")
         return
