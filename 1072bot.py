@@ -25,6 +25,7 @@ async def on_ready():
 
 @client.event
 async def on_message(message_in):
+    print(message_in.content)
     trigger = ",,"
     if not message_in.content.startswith(trigger):
         return
