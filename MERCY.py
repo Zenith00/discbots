@@ -18,7 +18,7 @@ from simplegist.simplegist import Simplegist
 from unidecode import unidecode
 # import Color
 import constants
-from TOKENS import *
+import TOKENS
 from utils.utils_parse import *
 from utils.utils_text import *
 from utils import utils_image
@@ -31,7 +31,7 @@ logging.basicConfig(level=logging.INFO)
 # imgur = ImgurClient(IMGUR_CLIENT_ID, IMGUR_SECRET_ID, IMGUR_ACCESS_TOKEN,
 #                     IMGUR_REFRESH_TOKEN)
 # WA_client = wolframalpha.Client(WA_ID)
-mongo_client = motor.motor_asyncio.AsyncIOMotorClient()
+mongo_client = motor.motor_asyncio.AsyncIOMotorClient("mongodb://{usn}:{pwd}@nadir.space".format(usn=TOKENS.MONGO_USN, pwd=TOKENS.MONGO_PASS))
 overwatch_db = mongo_client.overwatch
 
 auths_collection = overwatch_db.auths
@@ -2676,4 +2676,4 @@ async def clock():
         await temproles.tick()
 
 client.loop.create_task(clock())
-client.run(MERCY_TOKEN, bot=True)
+client.run(TOKENS.MERCY_TOKEN, bot=True)
