@@ -2654,12 +2654,12 @@ async def clock():
     global STATES
     global temproles
     await client.wait_until_ready()
+    global heatmap
     STATES["init"] = True
     print(STATES["init"])
     STATES["server_log"] = True
     print("Ready")
-    global temproles
-    global heatmap
+
 
     SERVERS["OW"] = client.get_server(constants.OVERWATCH_SERVER_ID)
 
