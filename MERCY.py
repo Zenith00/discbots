@@ -31,7 +31,9 @@ logging.basicConfig(level=logging.INFO)
 # imgur = ImgurClient(IMGUR_CLIENT_ID, IMGUR_SECRET_ID, IMGUR_ACCESS_TOKEN,
 #                     IMGUR_REFRESH_TOKEN)
 # WA_client = wolframalpha.Client(WA_ID)
-mongo_client = motor.motor_asyncio.AsyncIOMotorClient("mongodb://{usn}:{pwd}@nadir.space".format(usn=TOKENS.MONGO_USN, pwd=TOKENS.MONGO_PASS))
+# mongo_client = motor.motor_asyncio.AsyncIOMotorClient("mongodb://{usn}:{pwd}@nadir.space".format(usn=TOKENS.MONGO_USN, pwd=TOKENS.MONGO_PASS))
+mongo_client = motor.motor_asyncio.AsyncIOMotorClient()
+
 overwatch_db = mongo_client.overwatch
 
 auths_collection = overwatch_db.auths
