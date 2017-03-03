@@ -12,7 +12,7 @@ import constants
 
 logging.basicConfig(level=logging.INFO)
 
-mongo_client = motor.motor_asyncio.AsyncIOMotorClient()
+mongo_client = motor.motor_asyncio.AsyncIOMotorClient("mongodb://{usn}:{pwd}@nadir.space".format(usn=TOKENS.MONGO_USN, pwd=TOKENS.MONGO_PASS))
 overwatch_db = mongo_client.overwatch
 client = discord.Client()
 
