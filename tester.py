@@ -1,6 +1,6 @@
-from utils import utils_file
+import pymongo
 
-utils_file.append_line(r"C:\Users\Austin\Desktop\Programming\Disc\logfile.txt", "asdf")
+mongo_client_static = pymongo.MongoClient("mongodb://nadir.space:27017")
 
-# if os.path.isfile(img_path):
-#     os.remove(img_path)
+
+print(mongo_client_static.database_names())
