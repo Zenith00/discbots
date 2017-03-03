@@ -366,21 +366,7 @@ async def on_ready():
     print('Username: ' + client.user.name)
     print('ID: ' + client.user.id)
     # global INITIALIZED
-    global STATES
-    global temproles
-    global heatmap
 
-    SERVERS["OW"] = client.get_server(constants.OVERWATCH_SERVER_ID)
-
-    for name in constants.CHANNELNAME_CHANNELID_DICT.keys():
-        CHANNELNAME_CHANNEL_DICT[name] = SERVERS["OW"].get_channel(constants.CHANNELNAME_CHANNELID_DICT[name])
-    log_state = await overwatch_db.config.find_one({"type": "log"})
-    STATES["server_log"] = log_state["server_log"]
-    # INITIALIZED = True
-    heatmap = heat_master()
-    temproles = temprole_master(server=SERVERS["OW"])
-
-    await temproles.regenerate()
 
 @client.event
 async def on_member_join(member):
@@ -2666,11 +2652,27 @@ class heat_dot:
 
 async def clock():
     global STATES
+    global temproles
     await client.wait_until_ready()
     STATES["init"] = True
     print(STATES["init"])
     STATES["server_log"] = True
     print("Ready")
+    global STATES
+    global temproles
+    global heatmap
+
+    SERVERS["OW"] = client.get_server(constants.OVERWATCH_SERVER_ID)
+
+    for name in constants.CHANNELNAME_CHANNELID_DICT.keys():
+        CHANNELNAME_CHANNEL_DICT[name] = SERVERS["OW"].get_channel(constants.CHANNELNAME_CHANNELID_DICT[name])
+    log_state = await overwatch_db.config.find_one({"type": "log"})
+    STATES["server_log"] = log_state["server_log"]
+    # INITIALIZED = True
+    heatmap = heat_master()
+    temproles = temprole_master(server=SERVERS["OW"])
+    await temproles.regenerate()
+    print("Initialized!")
     while not client.is_closed:
         await asyncio.sleep(1)
         await temproles.tick()
