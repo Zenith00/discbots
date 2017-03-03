@@ -13,6 +13,7 @@ import pymongo
 from fuzzywuzzy import fuzz, process
 # from imgurpython import ImgurClient
 from pymongo import ReturnDocument
+# from simplegist.simplegist import Simplegist
 from simplegist.simplegist import Simplegist
 from unidecode import unidecode
 # import Color
