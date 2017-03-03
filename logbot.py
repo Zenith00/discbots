@@ -9,13 +9,12 @@ from utils import utils_text
 import TOKENS
 import constants
 
+
 logging.basicConfig(level=logging.INFO)
 
 mongo_client = motor.motor_asyncio.AsyncIOMotorClient()
 overwatch_db = mongo_client.overwatch
 client = discord.Client()
-
-# perspective_api = discovery.build('commentanalyzer', 'v1alpha1', developerKey=TOKENS.GOOGLE_API_TOKEN)
 
 
 STATES = {"init":False}
