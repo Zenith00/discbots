@@ -27,7 +27,6 @@ async def on_ready():
 async def on_message(message_in):
     if message_in.author.id == client.user.id:
         return
-    await client.send_message(message_in.channel, "Resp")
     print(message_in.content)
     trigger = ",,"
     if not message_in.content.startswith(trigger):
