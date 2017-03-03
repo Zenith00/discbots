@@ -4,7 +4,6 @@ from datetime import datetime, timedelta
 import discord
 import motor.motor_asyncio
 import regex as re
-from googleapiclient import discovery
 from utils import utils_text
 
 import TOKENS
@@ -16,7 +15,7 @@ mongo_client = motor.motor_asyncio.AsyncIOMotorClient()
 overwatch_db = mongo_client.overwatch
 client = discord.Client()
 
-perspective_api = discovery.build('commentanalyzer', 'v1alpha1', developerKey=TOKENS.GOOGLE_API_TOKEN)
+# perspective_api = discovery.build('commentanalyzer', 'v1alpha1', developerKey=TOKENS.GOOGLE_API_TOKEN)
 
 
 STATES = {"init":False}
