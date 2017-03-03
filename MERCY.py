@@ -2658,7 +2658,6 @@ async def clock():
     print(STATES["init"])
     STATES["server_log"] = True
     print("Ready")
-    global STATES
     global temproles
     global heatmap
 
