@@ -442,7 +442,8 @@ async def on_message(message_in):
     # global PATHS
     # global ENABLED
     # global INITIALIZED
-
+    print("Message in")
+    print(STATES)
     if not STATES["init"]:
         print("Ignoring message...")
         return
