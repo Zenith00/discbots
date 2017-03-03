@@ -8,7 +8,7 @@ import discord
 import motor.motor_asyncio
 import pymongo
 # import wolframalpha
-from asteval import Interpreter
+# from asteval import Interpreter
 # import fuzzywuzzy
 from fuzzywuzzy import fuzz, process
 from imgurpython import ImgurClient
@@ -35,7 +35,7 @@ overwatch_db = mongo_client.overwatch
 
 auths_collection = overwatch_db.auths
 mongo_client_static = pymongo.MongoClient()
-aeval = Interpreter()
+# aeval = Interpreter()
 gistClient = Simplegist()
 # scrim
 scrim = None
