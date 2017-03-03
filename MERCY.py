@@ -11,7 +11,7 @@ import pymongo
 # from asteval import Interpreter
 # import fuzzywuzzy
 from fuzzywuzzy import fuzz, process
-from imgurpython import ImgurClient
+# from imgurpython import ImgurClient
 from pymongo import ReturnDocument
 from simplegist.simplegist import Simplegist
 from unidecode import unidecode
@@ -27,8 +27,8 @@ logging.basicConfig(level=logging.INFO)
 
 # Clients
 
-imgur = ImgurClient(IMGUR_CLIENT_ID, IMGUR_SECRET_ID, IMGUR_ACCESS_TOKEN,
-                    IMGUR_REFRESH_TOKEN)
+# imgur = ImgurClient(IMGUR_CLIENT_ID, IMGUR_SECRET_ID, IMGUR_ACCESS_TOKEN,
+#                     IMGUR_REFRESH_TOKEN)
 # WA_client = wolframalpha.Client(WA_ID)
 mongo_client = motor.motor_asyncio.AsyncIOMotorClient()
 overwatch_db = mongo_client.overwatch
