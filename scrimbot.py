@@ -1,6 +1,11 @@
 import motor.motor_asyncio
 mongo_client = motor.motor_asyncio.AsyncIOMotorClient()
+import discord
 
+overwatch_db = mongo_client.overwatch
+client = discord.Client()
+from pymongo import ReturnDocument
+import pymongo
 
 
 class ScrimTeam:
@@ -17,6 +22,7 @@ class ScrimMaster:
         self.text = txt
         self.spectate = spec
         self.masters = []
+        self.client = globals().get(client)
 
     async def get_managers(self):
         managers = []
@@ -260,3 +266,158 @@ class ScrimMaster:
                 print(user)
         for item in [team1, team2]:
             await send(destination=self.output, text=item, send_type="rows")
+
+
+async def scrim_manage(message):
+    auths = await get_auths(message.author)
+
+    command = message.content.replace("..scrim ", "")
+    command_list = command.split(" ")
+    command_list = await mention_to_id(command_list)
+    if "mod" in auths or "host" in auths:
+        if not scrim and command_list[0] == "start":
+            await scrim_start(message)
+            # if command_list[0] == "manager":
+            #     command_list = await mention_to_id(command_list)
+            #     if command_list[1] == "list":
+            #         managers = await scrim.get_managers()
+            #         manager_list = [["Name", "ID"]]
+            #         for manager_id in managers:
+            #             member = message.server.get_member(manager_id)
+            #             manager_list.append([member.name, member.id])
+            #         await send(destination=message.channel, text=manager_list, send_type="rows")
+
+
+            # else:
+            #     await overwatch_db.scrim.find_one_and_update({"userid": command_list[1]},
+            #                                                  {"$bit": {"manager": {"xor": 1}}})
+        if command_list[0] == "end":
+            await overwatch_db.scrim.update_many({}, {"$set": {"active": False, "pos": 0}})
+            await scrim_end()
+        if command_list[0] == "next":
+            await scrim.start()
+        if command_list[0] == "add":
+            await scrim.force_register(message)
+        if command_list[0] == "remove":
+            user = await message.server.get_member(command_list[1])
+            if user:
+                await scrim.leave(user)
+            else:
+                await client.send_message(message.channel, "User not recognized")
+
+    if scrim:
+        try:
+            # managers = await scrim.get_managers()
+            # if command_list[0] == "commands":
+            #     list = [
+            #         ["Command", "Description"],
+            #         ["Public", ""],
+            #         ["`scrim list", "Lists each active participant in the scrim sorted by SR"],
+            #         ["`scrim teams", "Lists each active participant sorted by team and SR"],
+            #         ["`scrim join", "Starts the registration process. Have your battletag ready"],
+            #         ["`scrim leave", "Leaves the scrim and removes you from the active participants list"],
+            #         ["", ""],
+            #         ["Manager", ""],
+            #         ["`scrim reset", "Unassigns all active members from their teams"],
+            #         ["`scrim end", ""],
+            #         ["`scrim move <@mention> <team>", "Assigns a member to a team. Ex: `scrim move @Zenith#7998 1"],
+            #         ["`scrim remove <@mention>", "Removes a member from the active participant pool"],
+            #         ["`scrim autobalance", "Automatically sorts placed members into teams"],
+            #         ["`scrim ping", "Pings every member assigned to a team"],
+            #     ]
+            #     await send(destination=message.channel, text=list, send_type="rows")
+            #     # text = pretty_column(list, True)
+            #     # await pretty_send(message.channel, text)
+
+
+            if command_list[0] == "help":
+                list = [["Command", "Details", "Role"],
+                        ["..scrim join", "Joins the scrim. Bot will PM you", "Everyone"],
+                        ["..scrim list", "Lists the members in the queue", "Everyone"],
+                        ["..scrim start", "Starts up the scrimbot.", "Host+"],
+                        ["..scrim end", "Ends the scrim and cleans up", "Host+"],
+                        ["..scrim next", "Pulls the next 12 players and forms teams", "Host+"]
+                        ]
+                await send(destination=scrim.output, text=list, send_type="rows")
+            if command_list[0] == "list":
+                await scrim.output_teams_list()
+                await client.delete_message(message)
+
+            if command_list[0] == "join":
+                # await scrim.add_user(message.author)
+                await scrim.serve_scrim_prompt(message.author)
+                await client.delete_message(message)
+
+            if command_list[0] == "leave":
+                await scrim.leave(message.author)
+
+
+
+
+        except IndexError:
+            await client.send_message(message.channel, "Syntax error")
+    pass
+
+async def scrim_start(message):
+    global scrim
+    server = message.server
+    # mod_role = ROLENAME_ROLE_DICT["MODERATOR_ROLE"]
+    mod_role = await get_role(client.get_server("236343416177295360"), "260186671641919490")
+    # super_manager_role = await get_role(client.get_server("236343416177295360"), "261331682546810880")
+
+    vc_overwrite_everyone = discord.PermissionOverwrite(connect=False, speak=True)
+    vc_overwrite_mod = discord.PermissionOverwrite(connect=True)
+    vc_overwrite_super_manager = discord.PermissionOverwrite(connect=True)
+
+    text_overwrite_everyone = discord.PermissionOverwrite(read_messages=False)
+    # text_overwrite_mod = discord.PermissionOverwrite(read_messages=True)
+    # super_manager_perms_text = discord.PermissionOverwrite(read_messages=True)
+
+    vc_permission_everyone = discord.ChannelPermissions(target=server.default_role, overwrite=vc_overwrite_everyone)
+    vc_permission_mod = discord.ChannelPermissions(target=mod_role, overwrite=vc_overwrite_mod)
+    # vc_permission_super_manager = discord.ChannelPermissions(target=super_manager_role, overwrite=vc_overwrite_super_manager)
+
+    text_permission_everyone = discord.ChannelPermissions(target=server.default_role, overwrite=text_overwrite_everyone)
+
+    # text_permission_mod = discord.ChannelPermissions(target=mod_role, overwrite=text_overwrite_mod)
+    #
+    # admin_text = discord.ChannelPermissions(target=ROLENAME_ROLE_DICT["ADMINISTRATOR_ROLE"], overwrite=admin_perms_text)
+
+    scrim1_vc = await client.create_channel(server, "[Scrim] Team 1", vc_permission_everyone, vc_permission_mod,
+                                            type=discord.ChannelType.voice)
+    scrim2_vc = await client.create_channel(server, "[Scrim] Team 2", vc_permission_everyone, vc_permission_mod,
+                                            type=discord.ChannelType.voice)
+    scrim1 = ScrimTeam("1", scrim1_vc)
+    scrim2 = ScrimTeam("2", scrim2_vc)
+
+    scrim_spectate = await client.create_channel(server, "[Scrim] Spectate", type=discord.ChannelType.voice)
+
+    scrim_text = await client.create_channel(server, "Scrim", text_permission_everyone, type=discord.ChannelType.text)
+
+    scrim = ScrimMaster(scr1=scrim1, scr2=scrim2, txt=scrim_text, spec=scrim_spectate, output=message.channel)
+    # mod_list = await get_moderators(message.server)
+    # for mod in mod_list:
+    #     await overwatch_db.scrim.update_one({"userid": mod.id}, {"$set": {"manager": 1}}, upsert=True)
+
+    time = datetime.utcnow().isoformat(" ")
+    # pin_marker = await client.send_message(client.get_channel("262494034252005377"), "Highlights from " + time[5:10])
+    # await client.pin_message(pin_marker)
+    await client.move_channel(scrim.spectate, 1)
+    await client.move_channel(scrim.team1.vc, 2)
+    await client.move_channel(scrim.team2.vc, 3)
+
+    pass
+
+
+async def scrim_end():
+    global scrim
+    await scrim.end()
+    scrim = None
+
+async def scrim_reset():
+    global scrim
+
+    for pair in scrim.team1.vc.overwrites:
+        await client.delete_channel_permissions(scrim.team1.vc, pair[0])
+    for pair in scrim.team2.vc.overwrites:
+        await client.delete_channel_permissions(scrim.team2.vc, pair[0])

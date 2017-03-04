@@ -234,4 +234,65 @@ async def mention_to_id(command_list):
             new_command.append(id_chars)
     return new_command
 
+
+# # Projects
+# async def wolfram(message):
+#     command = message.content.replace("..wa ", "")
+#     res = WA_client.query(command)
+#     try:
+#         podlist = res["pod"]
+#         print(ascii(res))
+#     except:
+#         print(ascii(res))
+#         print("LOLFAIL")
+#         return
+#     numpods = int(res["@numpods"])
+#     keydict = {}
+#     options = ""
+#     print("numpods = " + str(numpods))
+#     print(res["@numpods"])
+#     try:
+#         for num in range(0, numpods - 1):
+#             pod = podlist[num]
+#             options += "[" + str(num) + "] " + pod["@title"] + "\n"
+#             print("NUM = " + str(pod["@numsubpods"]))
+#             for sub_num in range(0, int(pod["@numsubpods"])):
+#                 subpod = pod["subpod"]
+#                 if subpod["@title"] != "":
+#                     options += "    [" + str(num) + "." + str(sub_num) + "] " + subpod["@title"] + "\n"
+#             keydict[num] = pod
+#         options = await client.send_message(message.channel, options)
+#     except:
+#         pass
+#
+#     def check(msg):
+#         if message.server == msg.server and msg.author.id == message.author.id and message.channel == msg.channel:
+#             if re.match(r"^\d*$", msg.content):
+#                 return True
+#         return False
+#
+#     response = await client.wait_for_message(timeout=15, check=check)
+#     try:
+#         response = int(response.content)
+#         pod = podlist[response]
+#         subpods = []
+#         text = ""
+#         if pod["@numsubpods"] == "1":
+#             subpods.append(pod["subpod"])
+#
+#         else:
+#             for x in pod["subpod"]:
+#                 subpods.append(x)
+#
+#         for subpod in subpods:
+#             img = (subpod["img"])["@src"]
+#             # img = shorten_link(img)
+#             text += img + "\n"
+#         await client.send_message(message.channel, text)
+#
+#     except:
+#         print(traceback.format_exc())
+#     await client.delete_message(options)
+
+
 client.run(ZENITH_AUTH_TOKEN, bot=False)
