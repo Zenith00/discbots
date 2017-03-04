@@ -45,6 +45,7 @@ async def on_message(message_in):
         except AttributeError:
             pass
     if message_in.author == client.user and message_in.content.startswith("%%"):
+
         command = message_in.content.replace("%%", "")
         command_list = command.split(" ")
         await client.delete_message(message_in)
@@ -58,6 +59,14 @@ async def on_message(message_in):
             except:
                 with open(utils_file.relative_path("avatars\\default.png"), "rb") as pfp:
                     await client.edit_profile(password=PASS, avatar=pfp.read())
+        if command_list[0] == "multinote":
+            start = int(command_list[1])
+            end = int(command_list[2])
+            reason = " ".join(command_list[3:])
+
+            for case_number in range(start, end):
+                message = "<@!274119184953114625> update {number} {reason}, starting from {first}".format(number=case_number, reason=reason, start=start)
+                await client.send_message(message_in.channel, message)
         if command_list[0] == "owner":
             output.append((message_in.server.owner.name, "text"))
         if command_list[0] == "ud":
