@@ -67,7 +67,6 @@ async def on_message(message_in):
             server_list = [[server.name, str(server.member_count)] for server in client.servers]
             output.append((server_list, "rows"))
         if command_list[0] == "mercyshuffle":
-
             link_list = [x.link for x in imgur_client.get_album_images("umuvY")]
             random.shuffle(link_list)
             for link in link_list[:int(command_list[1])]:
@@ -81,10 +80,8 @@ async def on_message(message_in):
             command_list = await mention_to_id(command_list)
             target_user_id = command_list[1]
             markovify.NewlineText(utils_file.relative_path("markov\\" + target_user_id + ".txt"))
-
         if command_list[0] == "emoji":
             import re
-
             emoji_id = utils_text.regex_test("\d+(?=>)", " ".join(command_list[1:])).group(0)
             print(emoji_id)
             server_name = None
@@ -122,6 +119,15 @@ async def on_message(message_in):
             score_text = "```{text}``` Toxicity Score: {score}%".format(text=text, score=toxicity_score * 100)
             output.append((score_text, "text"))
 
+        if command_list[0] == "big":
+            text = str(" ".join(command_list[1:]))
+            big_text = ""
+            for character in text:
+                if character == " ":
+                    big_text += "     "
+                else:
+                    big_text += " :regional_indicator_{c}:".format(c=character)
+            output.append((big_text, None))
         if output:
             # noinspection PyTypeChecker
             for item in output:
