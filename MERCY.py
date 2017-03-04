@@ -2427,9 +2427,7 @@ class temprole:
         # print(datetime.utcnow())
         # print(self.member_id)
         # print(self.role)
-        print(self.member_id)
-        print(self.end)
-        print(datetime.now())
+
         if self.end < datetime.now():
 
             await overwatch_db.roles.delete_one(
@@ -2595,7 +2593,7 @@ async def clock():
     await temproles.regenerate()
     print("Initialized!")
     while not client.is_closed:
-        await asyncio.sleep(1)
+        await asyncio.sleep(2)
         await temproles.tick()
 
 client.loop.create_task(clock())
