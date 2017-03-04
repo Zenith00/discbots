@@ -65,7 +65,7 @@ async def on_message(message_in):
             reason = " ".join(command_list[3:])
 
             for case_number in range(start, end):
-                message = "<@!274119184953114625> update {number} {reason}, starting from {first}".format(number=case_number, reason=reason, first=start)
+                message = "<@!274119184953114625> update {number} {reason}, starting from {first}".format(number=case_number, reason=reason, first="715")
                 await client.send_message(message_in.channel, message)
         if command_list[0] == "owner":
             output.append((message_in.server.owner.name, "text"))
