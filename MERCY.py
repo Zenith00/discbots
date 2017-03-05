@@ -47,7 +47,6 @@ heatmap = None
 temproles = None
 id_channel_dict = {}
 
-
 ID_ROLENAME_DICT = dict([[v, k] for k, v in constants.ROLENAME_ID_DICT.items()])
 BLACKLISTED_CHANNELS = (
     constants.CHANNELNAME_CHANNELID_DICT["bot-log"], constants.CHANNELNAME_CHANNELID_DICT["server-log"],
@@ -55,9 +54,7 @@ BLACKLISTED_CHANNELS = (
 SERVERS = {}
 CHANNELNAME_CHANNEL_DICT = {}
 
-
-STATES = {"init":False}
-
+STATES = {"init": False}
 
 #
 # class ScrimTeam:
@@ -363,7 +360,6 @@ async def on_ready():
     print('ID: ' + client.user.id)
     # global INITIALIZED
 
-
 @client.event
 async def on_member_join(member):
     # await add_to_nick_id_list(member)
@@ -384,10 +380,6 @@ async def on_message_edit(before, after):
         auths = await get_auths(after.author)
         if "mod" not in auths:
             await parse_triggers(after)
-
-
-
-
 
 @client.event
 async def on_message(message_in):
@@ -440,7 +432,6 @@ async def on_message(message_in):
         if "mod" not in auths:
             await parse_triggers(message_in)
 
-
 async def get_auths(member):
     """
     :type member: discord.Member
@@ -477,7 +468,6 @@ async def perform_command(command, params, message_in):
     output = []
     auths = await get_auths(message_in.author)
     called = False
-
 
     # if command == "scrim":
     #     await scrim_manage(message_in)
@@ -699,6 +689,17 @@ async def perform_command(command, params, message_in):
                 return
             output.append(("Muting {mention} [{id}] for {dur}".format(mention=member.mention, id=member.id, dur=time_dict["readable"]), None))
             await temproles.add_role(member=member, role=role, end_datetime=time_dict["end"])
+        elif command == "massban":
+            start = params[0]
+            end = params[1]
+            server_log = overwatch_db.server_log
+            start_doc = await server_log.find_one({"action": "join", "id": start})
+            end_doc = await server_log.find_one({"action": "join", "id": end})
+
+            cursor = server_log.find({"action": "join", "date": {"$gte": start_doc["date"], "$lte": end_doc["date"]}})
+            async for document in cursor:
+                print(document)
+
     if "trusted" not in auths:
         return
     if called:
@@ -1360,7 +1361,6 @@ async def log_automated(description: object, type) -> None:
         target = constants.CHANNELNAME_CHANNELID_DICT["spam-channel"]
     await client.send_message(client.get_channel(target), action)
 
-
 # Database
 # Database Query
 async def import_message(mess):
@@ -1379,7 +1379,6 @@ async def import_to_user_set(member, set_name, entry):
     )
 
 async def import_user(member):
-
     user_info = await parse_member_info(member)
     result = await overwatch_db.userinfo.update_one(
         {"userid": member.id},
@@ -1409,8 +1408,7 @@ async def export_user(member_id):
         return None
     return userinfo
 
-
-async def send(destination, text, send_type, delete_in = 0):
+async def send(destination, text, send_type, delete_in=0):
     if isinstance(destination, str):
         destination = await client.get_channel(destination)
 
@@ -1559,9 +1557,6 @@ async def finder(message, regex, blacklist):
                     return found_message
     return found_message
 
-
-
-
 async def scrub_text(text, channel):
     new_words = []
     words = re.split(r" ", text)
@@ -1603,7 +1598,6 @@ async def scrub_text(text, channel):
 
 async def delay_delete():
     pass
-
 
 # Scrim
 
@@ -1785,7 +1779,6 @@ async def delay_delete():
 
 
 async def lfg_warner(found_message, warn_type, warn_user, channel):
-
     lfg_text = ("You're probably looking for <#182420486582435840> or <#185665683009306625>."
                 " Please avoid posting LFGs in ")
     if found_message:
@@ -1817,7 +1810,6 @@ async def lfg_warner(found_message, warn_type, warn_user, channel):
     lfg_text += author_mention
     await client.send_message(channel, lfg_text)
 
-
 async def get_from_find(message):
     reg = re.compile(r"(?!ID: ')(\d+)(?=')", re.IGNORECASE)
     user_id = ""
@@ -1827,8 +1819,6 @@ async def get_from_find(message):
             if match is not None:
                 user_id = match.group(0)
     return user_id
-
-
 
 class temprole_master:
     temproles = []
@@ -1928,7 +1918,6 @@ class temprole:
 
     async def dump(self):
         return {"member_id": self.member_id, "role": self.role, "end": self.end, "server": self.server}
-
 
 class heat_master:
     users = {}
@@ -2048,8 +2037,6 @@ class heat_dot:
         if self.value < 1.0e-1:
             return None
         return self
-
-
 
 async def clock():
     global STATES
