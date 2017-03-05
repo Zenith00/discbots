@@ -471,7 +471,7 @@ async def perform_command(command, params, message_in):
 
     # if command == "scrim":
     #     await scrim_manage(message_in)
-    if command in ["names", "firstjoins", "mostactive", "channeldist", "superlog", "rebuildnicks", "wa", "reboot", "rebuild", "ui", "ping", "lfg",
+    if command in ["names", "firstjoins", "mostactive", "channeldist", "superlog", "rebuildnicks", "wa", "reboot", "rebuild", "ui", "userinfo", "ping", "lfg",
                    "serverlog", "timenow", "say", "raw", "getroles", "moveafk", "help", "join", "tag", "tagreg", "userlog", "channeldist", "unmute",
                    "channelinfo"]:
         called = True
@@ -533,7 +533,7 @@ async def perform_command(command, params, message_in):
             await client.send_message(user, "Test")
 
     if "trusted" in auths:
-        if command == "ui":
+        if command == "ui" or command == "userinfo":
             if params:
                 userid = params[0]
             else:

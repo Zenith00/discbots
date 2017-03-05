@@ -1,7 +1,7 @@
 import re
 import copy
 import urllib.request
-from datetime import datetime,timedelta
+from datetime import datetime, timedelta
 import dateparser
 import traceback
 # from pyshorteners import Shortener
@@ -123,10 +123,19 @@ async def parse_time_to_end(time_string):
         delt = end - datetime.now()
         delt = round_timedelta(delt)
         readable = format_timedelta(delt)
-        return {"end":end, "duration":delt, "readable":readable}
+        return {"end": end, "duration": delt, "readable": readable}
     except:
         print(traceback.format_exc())
         return None
+
+
+def round_time(dt=None, round_to=60):
+    import datetime
+    if dt == None: dt = datetime.datetime.now()
+    seconds = (dt.replace(tzinfo=None) - dt.min).seconds
+    rounding = (seconds + round_to / 2) // round_to * round_to
+    return dt + datetime.timedelta(0, rounding - seconds, -dt.microsecond)
+
 
 def parse_date(date_text):
     res = dateparser.parse(date_text)
