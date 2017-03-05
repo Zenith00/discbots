@@ -699,6 +699,9 @@ async def perform_command(command, params, message_in):
             threshold = " ".join(params[2:])
             dur = await parse_time_to_end(threshold)
             dur = dur["duration"].to_seconds()
+            print(start_doc)
+            print(end_doc)
+
             cursor = server_log.find({"action": "join", "date": {"$gte": start_doc["date"], "$lte": end_doc["date"]}})
             async for document in cursor:
                 doc_date = parse_date(document["date"])
