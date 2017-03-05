@@ -696,12 +696,13 @@ async def perform_command(command, params, message_in):
             server_log = overwatch_db.server_log
             start_doc = await server_log.find_one({"action": "join", "id": start})
             end_doc = await server_log.find_one({"action": "join", "id": end})
+            print(start_doc)
+            print(end_doc)
             base_date = dateparser.parse(start_doc["date"])
             threshold = " ".join(params[2:])
             dur = await parse_time_to_end(threshold)
-            dur = dur["duration"].to_seconds()
-            print(start_doc)
-            print(end_doc)
+            dur = dur["duration"].total_seconds()
+
 
             cursor = server_log.find({"action": "join", "date": {"$gte": start_doc["date"], "$lte": end_doc["date"]}})
             async for document in cursor:
