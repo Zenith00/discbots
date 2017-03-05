@@ -128,7 +128,7 @@ async def parse_time_to_end(time_string):
         print(traceback.format_exc())
         return None
 
-async def parse_date(date_text):
+def parse_date(date_text):
     res = dateparser.parse(date_text)
     return res
 

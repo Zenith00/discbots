@@ -695,10 +695,18 @@ async def perform_command(command, params, message_in):
             server_log = overwatch_db.server_log
             start_doc = await server_log.find_one({"action": "join", "id": start})
             end_doc = await server_log.find_one({"action": "join", "id": end})
-
+            base_date = dateparser.parse(start_doc["date"])
+            threshold = " ".join(params[2:])
+            dur = await parse_time_to_end(threshold)
+            dur = dur["duration"].to_seconds()
             cursor = server_log.find({"action": "join", "date": {"$gte": start_doc["date"], "$lte": end_doc["date"]}})
             async for document in cursor:
-                print(document)
+                doc_date = parse_date(document["date"])
+                delta = doc_date - base_date
+                delta = abs(delta.to_seconds())
+                if delta < dur:
+                    print(document["id"])
+                # result = await client.http.ban(user_id=document["id"], guild_id=message_in.server.id, delete_message_days=7)
 
     if "trusted" not in auths:
         return
