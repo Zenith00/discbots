@@ -704,6 +704,7 @@ async def perform_command(command, params, message_in):
                 doc_date = parse_date(document["date"])
                 delta = doc_date - base_date
                 delta = abs(delta.to_seconds())
+                print(delta)
                 if delta < dur:
                     print(document["id"])
                 # result = await client.http.ban(user_id=document["id"], guild_id=message_in.server.id, delete_message_days=7)
