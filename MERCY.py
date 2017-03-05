@@ -690,6 +690,7 @@ async def perform_command(command, params, message_in):
             output.append(("Muting {mention} [{id}] for {dur}".format(mention=member.mention, id=member.id, dur=time_dict["readable"]), None))
             await temproles.add_role(member=member, role=role, end_datetime=time_dict["end"])
         elif command == "massban":
+            print("CALLING")
             start = params[0]
             end = params[1]
             server_log = overwatch_db.server_log
