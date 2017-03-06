@@ -115,7 +115,8 @@ def format_list_to_widths(list_of_rows, widths, left_just):
     #     return Shortener('Tinyurl').short(link)
 
     # print(regex_test("Kappa", "Κappa"))
-
+def reverse_dict(input_dict) -> dict:
+    return dict((v, k) for k, v in input_dict.items())
 async def parse_time_to_end(time_string):
     print(time_string)
     try:
