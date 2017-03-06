@@ -24,7 +24,7 @@ from utils.utils_text import *
 from utils import utils_image
 import dateparser
 import os
-os.environ["PYTHONUNBUFFERED"] = True
+os.environ["PYTHONUNBUFFERED"] = "True"
 
 logging.basicConfig(level=logging.INFO)
 
