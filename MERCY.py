@@ -24,6 +24,7 @@ from utils.utils_text import *
 from utils import utils_image
 import dateparser
 import os
+
 os.environ["PYTHONUNBUFFERED"] = "True"
 
 logging.basicConfig(level=logging.INFO)
@@ -2087,6 +2088,21 @@ async def clock():
     while not client.is_closed:
         await asyncio.sleep(2)
         await temproles.tick()
+
+class Unbuffered(object):
+    def __init__(self, stream):
+        self.stream = stream
+
+    def write(self, data):
+        self.stream.write(data)
+        self.stream.flush()
+
+    def __getattr__(self, attr):
+        return getattr(self.stream, attr)
+
+import sys
+
+sys.stdout = Unbuffered(sys.stdout)
 
 client.loop.create_task(clock())
 client.run(TOKENS.MERCY_TOKEN, bot=True)
