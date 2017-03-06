@@ -562,7 +562,7 @@ async def perform_command(command, params, message_in):
             output.append((list, "rows"))
         if command == "dumpinfo":
             target = await export_user(params[0])
-            rows = target.items()
+            rows = [target.items()]
             output.append((target, "rows"))
 
         elif command == "serverlog":
