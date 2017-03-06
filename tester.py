@@ -1,2 +1,1 @@
-str = "/home/austin/develop/asdf"
-print(str[:21])
+print("asdf".join(" "))

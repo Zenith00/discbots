@@ -566,11 +566,8 @@ async def perform_command(command, params, message_in):
 
         elif command == "dumpinfo":
             target = await export_user(params[0])
-            rows = [list(target.items())]
-            print(rows)
-            print(rows)
+            rows = [(k, str(v)) for k, v in target.items()]
             output.append((rows, "rows"))
-            logging.log("warning", output)
         elif command == "serverlog":
             result = await overwatch_db.config.find_one({"type": "log"})
             if not params:
