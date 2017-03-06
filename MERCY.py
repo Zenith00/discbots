@@ -547,6 +547,7 @@ async def perform_command(command, params, message_in):
         elif command == "ping":
             print("FIRING PINGER")
             await ping(message_in)
+
         elif command == "lfg":
             await serve_lfg(message_in)
 
@@ -559,6 +560,10 @@ async def perform_command(command, params, message_in):
             role_members = await get_role_members(role)
             list = [[member.name, member.id] for member in role_members]
             output.append((list, "rows"))
+        if command == "dumpinfo":
+            target = await export_user(params[0])
+            output.append((target, "text"))
+
         elif command == "serverlog":
             result = await overwatch_db.config.find_one({"type": "log"})
             if not params:
