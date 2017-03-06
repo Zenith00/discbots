@@ -23,6 +23,8 @@ from utils.utils_parse import *
 from utils.utils_text import *
 from utils import utils_image
 import dateparser
+import os
+os.environ["PYTHONUNBUFFERED"] = True
 
 logging.basicConfig(level=logging.INFO)
 
@@ -1435,6 +1437,7 @@ async def send(destination, text, send_type, delete_in=0):
         destination = await client.get_channel(destination)
 
     if send_type == "rows":
+        print("FIRING")
         message_list = multi_block(text, True)
         for message in message_list:
             await client.send_message(destination, "```" + message + "```")
