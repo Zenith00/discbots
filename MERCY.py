@@ -552,18 +552,20 @@ async def perform_command(command, params, message_in):
             await serve_lfg(message_in)
 
     if "mod" in auths:
-
+        print("asdf")
         if command == "getrolemembers":
             role_name = " ".join(params[0:])
             role = await get_role_from_name(message_in.server, role_name)
             print(role)
             role_members = await get_role_members(role)
-            list = [[member.name, member.id] for member in role_members]
-            output.append((list, "rows"))
+            member_list = [[member.name, member.id] for member in role_members]
+            output.append((member_list, "rows"))
 
-        if command == "dumpinfo":
+        elif command == "dumpinfo":
             target = await export_user(params[0])
-            rows = target.items()
+            rows = list(target.items())
+            print(rows)
+            print(rows)
             output.append((rows, "rows"))
             logging.log("warning", output)
         elif command == "serverlog":
