@@ -564,7 +564,7 @@ async def perform_command(command, params, message_in):
             target = await export_user(params[0])
             rows = target.items()
             output.append((rows, "rows"))
-
+            print(output)
         elif command == "serverlog":
             result = await overwatch_db.config.find_one({"type": "log"})
             if not params:
