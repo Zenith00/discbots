@@ -560,11 +560,12 @@ async def perform_command(command, params, message_in):
             role_members = await get_role_members(role)
             list = [[member.name, member.id] for member in role_members]
             output.append((list, "rows"))
+
         if command == "dumpinfo":
             target = await export_user(params[0])
             rows = target.items()
             output.append((rows, "rows"))
-            print(output)
+            logging.log("warning", output)
         elif command == "serverlog":
             result = await overwatch_db.config.find_one({"type": "log"})
             if not params:
@@ -709,7 +710,6 @@ async def perform_command(command, params, message_in):
             dur = await parse_time_to_end(threshold)
             dur = dur["duration"].total_seconds()
 
-
             cursor = server_log.find({"action": "join", "date": {"$gte": start_doc["date"], "$lte": end_doc["date"]}})
             async for document in cursor:
                 doc_date = parse_date(document["date"])
@@ -718,7 +718,7 @@ async def perform_command(command, params, message_in):
                 print(delta)
                 if delta < dur:
                     print(document["id"])
-                # result = await client.http.ban(user_id=document["id"], guild_id=message_in.server.id, delete_message_days=7)
+                    # result = await client.http.ban(user_id=document["id"], guild_id=message_in.server.id, delete_message_days=7)
 
     if "trusted" not in auths:
         return
