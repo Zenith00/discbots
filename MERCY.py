@@ -1424,7 +1424,7 @@ async def export_user(member_id):
     :type member: discord.Member
     """
     userinfo = await overwatch_db.userinfo.find_one(
-        {"userid": member_id}, projection={"_id": False, "mention_str": False}
+        {"userid": member_id}, projection={"_id": False, "mention_str": False, "avatar_urls": False, "lfg_count": False}
     )
     if not userinfo:
         return None
