@@ -72,7 +72,7 @@ async def on_message(message_in):
         if command_list[0] == "owner":
             output.append((message_in.server.owner.name, "text"))
         if command_list[0] == "ud":
-            defs = str(urbandictionary.define(" ".join(command_list[1:]))[0])
+            defs = str(urbandictionary.define(" ".join(command_list[1:])))
             output.append((defs, "text"))
         if command_list[0] == "servers":
             server_list = [[server.name, str(server.member_count)] for server in client.servers]
