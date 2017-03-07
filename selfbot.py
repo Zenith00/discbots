@@ -15,6 +15,8 @@ import markovify
 import motor.motor_asyncio
 import requests
 import urbandictionary
+import logging
+
 from utils import utils_file, utils_text, utils_image, utils_parse, utils_persist
 from PIL import Image
 from googleapiclient import discovery
@@ -26,7 +28,7 @@ import constants
 from TOKENS import *
 from utils import utils_file
 
-# logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.INFO)
 
 perspective_api = discovery.build('commentanalyzer', 'v1alpha1', developerKey=GOOGLE_API_TOKEN)
 
@@ -54,10 +56,10 @@ async def on_message(message_in):
             pfp = command_list[1] + ".png"
             print("Switching to " + pfp)
             try:
-                with open(utils_file.relative_path("avatars\\" + pfp), "rb") as pfp:
+                with open(utils_file.relative_path(__file__,"avatars\\" + pfp), "rb") as pfp:
                     await client.edit_profile(password=PASS, avatar=pfp.read())
             except:
-                with open(utils_file.relative_path("avatars\\default.png"), "rb") as pfp:
+                with open(utils_file.relative_path(__file__,"avatars\\default.png"), "rb") as pfp:
                     await client.edit_profile(password=PASS, avatar=pfp.read())
         if command_list[0] == "multinote":
             start = int(command_list[1])
@@ -70,7 +72,7 @@ async def on_message(message_in):
         if command_list[0] == "owner":
             output.append((message_in.server.owner.name, "text"))
         if command_list[0] == "ud":
-            defs = str(urbandictionary.define(" ".join(command_list[1:])))
+            defs = str(urbandictionary.define(" ".join(command_list[1:]))[0])
             output.append((defs, "text"))
         if command_list[0] == "servers":
             server_list = [[server.name, str(server.member_count)] for server in client.servers]
