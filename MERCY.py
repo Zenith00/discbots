@@ -1128,7 +1128,7 @@ async def tag_str(trigger, message, regex):
 
 async def parse_triggers(message) -> list:
     response_docs = []
-    content = unidecode(message.content)
+    content = unidecode(strip_markdown(message.content))
     # trigger_cursor = overwatch_db.trigger_str_collection.find()
     # trigger_dict = await trigger_cursor.to_list()
     # trigger_list = [item["trigger"] for item in trigger_dict]
