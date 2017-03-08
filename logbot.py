@@ -116,8 +116,9 @@ async def on_message_delete(message):
     if not STATES["init"]: return
 
     if message.server.id == constants.OVERWATCH_SERVER_ID:
+        mention = message.author.mention if message.author.mention else message.author.name + message.author.discriminator
         await log_action("delete",
-                         {"channel": message.channel.mention, "mention": message.author.mention, "id": message.author.id,
+                         {"channel": message.channel.mention, "mention": mention, "id": message.author.id,
                           "content": message.content})
 
 
