@@ -372,7 +372,11 @@ async def on_member_join(member):
             role = await temproles.check(member)
             if role:
                 await log_automated("reapplied {role} to {mention}".format(role=role.name if role.mentionable else role.mention, mention=member.mention),
-                                    type="autorole")
+                                    log_type="autorole")
+        age = abs(datetime.utcnow() - member.created_at)
+        if age.total_seconds() < 60*10:
+            await log_automated("{mention} joined with an age of {age}".format(mention=member.mention, age=format_timedelta(age)), "alert")
+
 # noinspection PyUnusedLocal
 
 
@@ -1183,8 +1187,8 @@ async def act_triggers(response_docs, message):
                                                                                                                      channel=message.channel.mention,
                                                                                                                      server_name=doc["invite"].server.name,
                                                                                                                      note=doc["note"]), "deletion")
-                await log_automated(
-                    "deleted an external invite to " + str(doc["invite"].url) + " from " + message.author.mention + " in " + message.channel.mention, "alert")
+                # await log_automated(
+                #     "deleted an external invite to " + str(doc["invite"].url) + " from " + message.author.mention + " in " + message.channel.mention, "alert")
                 await client.delete_message(message)
         except (discord.Forbidden, discord.HTTPException):
             print(traceback.format_exc())
@@ -1372,11 +1376,11 @@ async def output_channel_dist(channel, days):
                              content=hist)
     return (gist["Gist-Link"], None)
 
-async def log_automated(description: object, type) -> None:
+async def log_automated(description: object, log_type) -> None:
     action = ("At " + str(datetime.utcnow().strftime("[%Y-%m-%d %H:%m:%S] ")) + ", I automatically " + str(description))
-    if type == "alert":
+    if log_type == "alert" or log_type == "autorole":
         target = constants.CHANNELNAME_CHANNELID_DICT["alerts"]
-    elif type == "deletion" or type == "autorole":
+    elif log_type == "deletion":
         target = constants.CHANNELNAME_CHANNELID_DICT["bot-log"]
 
     else:

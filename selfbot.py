@@ -246,6 +246,9 @@ async def mention_to_id(command_list):
     return new_command
 
 
+class reminder
+
+
 # # Projects
 # async def wolfram(message):
 #     command = message.content.replace("..wa ", "")

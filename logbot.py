@@ -23,7 +23,6 @@ STATES = {"init":False}
 
 @client.event
 async def on_message(message_in):
-
     pass
 
 @client.event
