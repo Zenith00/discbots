@@ -375,7 +375,7 @@ async def on_member_join(member):
                                     log_type="autorole")
         age = abs(datetime.utcnow() - member.created_at)
         if age.total_seconds() < 60*10:
-            await log_automated("{mention} joined with an age of {age}".format(mention=member.mention, age=format_timedelta(age)), "alert")
+            await alert("{mention} joined with an age of {age}".format(mention=member.mention, age=format_timedelta(age)))
 
 # noinspection PyUnusedLocal
 
@@ -1387,6 +1387,9 @@ async def log_automated(description: object, log_type) -> None:
         target = constants.CHANNELNAME_CHANNELID_DICT["spam-channel"]
     await client.send_message(client.get_channel(target), action)
 
+async def alert(text):
+    text = "At " + str(datetime.utcnow().strftime("[%Y-%m-%d %H:%m:%S], ")) + text
+    await client.send_message(client.get_channel("252976184344838144"), text)
 # Database
 # Database Query
 async def import_message(mess):
