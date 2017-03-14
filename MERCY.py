@@ -814,7 +814,7 @@ async def output_join_link(member):
     if invite:
         return (invite.url, None)
     else:
-        return "User not in a visible voice channel"
+        return ("User not in a visible voice channel", None)
 
 async def purge_from(dest, member_id, count):
     print(dest.name)
