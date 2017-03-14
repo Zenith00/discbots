@@ -149,3 +149,11 @@ async def get_redirected_url(url):
     opener = urllib.request.build_opener(urllib.request.HTTPRedirectHandler)
     request = opener.open(url)
     return request.url
+
+
+def strip_markdown(markdowned_str):
+    from bs4 import BeautifulSoup
+    from markdown import markdown
+
+    html = markdown(markdowned_str)
+    return ''.join(BeautifulSoup(html).findAll(text=True))
