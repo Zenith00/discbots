@@ -49,9 +49,7 @@ async def on_message(message_in):
             await mess2log(message_in)
         except AttributeError:
             pass
-    if message_in.channel.id == "170185225526181890":
-        if "(╯°□°）╯︵ ┻━┻" in message_in.content:
-            await client.send_message(message_in.channel, "┬─┬﻿ ノ( ゜-゜ノ)")
+
     if message_in.author == client.user and message_in.content.startswith("%%"):
 
         command = message_in.content.replace("%%", "")
