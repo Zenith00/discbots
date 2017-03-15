@@ -29,30 +29,22 @@ async def on_message(message_in):
 
 @client.event
 async def on_member_remove(member):
-    if not STATES["init"]: return
-    if member.server.id == constants.OVERWATCH_SERVER_ID:
-        # await import_to_user_set(member=member, set_name="server_leaves", entry=datetime.utcnow().isoformat(" "))
-        await log_action(member.server,"leave", {"mention": member.mention, "id": member.id})
+    if not STATES["init"]:
+        return
+    await log_action(member.server,"leave", {"mention": member.mention, "id": member.id})
 
 
 @client.event
 async def on_member_ban(member):
     if not STATES["init"]: return
 
-    if member.server.id == constants.OVERWATCH_SERVER_ID:
-        # await import_to_user_set(member=member, set_name="bans", entry=datetime.utcnow().isoformat(" "))
-        spam_ch = client.get_channel(constants.CHANNELNAME_CHANNELID_DICT["spam-channel"])
-        # await client.send_message(spam_ch, "Ban detected, user id = " + member.id)
-        await log_action(member.server,"ban", {"member": member})
+    await log_action(member.server,"ban", {"member": member})
 
 
 @client.event
 async def on_member_unban(server, member):
     if not STATES["init"]: return
-
-    if server.id == constants.OVERWATCH_SERVER_ID:
-        # await import_to_user_set(member=member, set_name="unbans", entry=datetime.utcnow().isoformat(" "))
-        await log_action(server,"unban", {"mention": "<@!{id}>".format(id=member.id), "id": member.id})
+    await log_action(server,"unban", {"mention": "<@!{id}>".format(id=member.id), "id": member.id})
 
 
 @client.event
@@ -66,10 +58,9 @@ async def on_ready():
 async def on_member_join(member):
     if not STATES["init"]: return
 
-    if member.server.id == constants.OVERWATCH_SERVER_ID:
-        current_date = datetime.utcnow()
-        age = abs(current_date - member.created_at)
-        await log_action(member.server,"join", {"mention": member.mention, "id": member.id, "age": str(age)[:-7]})
+    current_date = datetime.utcnow()
+    age = abs(current_date - member.created_at)
+    await log_action(member.server,"join", {"mention": member.mention, "id": member.id, "age": str(age)[:-7]})
 
 
 @client.event
@@ -80,9 +71,8 @@ async def on_voice_state_update(before, after):
     """
     if not STATES["init"]: return
 
-    if before.server.id == constants.OVERWATCH_SERVER_ID:
-        if before.voice.voice_channel != after.voice.voice_channel:
-            await log_action(after.server,"voice_update", {"before": before, "after": after, "id": before.id})
+    if before.voice.voice_channel != after.voice.voice_channel:
+        await log_action(after.server,"voice_update", {"before": before, "after": after, "id": before.id})
 
 
 # noinspection PyShadowingNames
@@ -95,35 +85,31 @@ async def on_member_update(before, after):
     """
     if not STATES["init"]: return
 
-    if before.server.id == constants.OVERWATCH_SERVER_ID:
-        if not STATES["init"]:
-            return
+    if not STATES["init"]:
+        return
 
 
-        if len(before.roles) != len(after.roles):
-            await log_action(after.server,"role_change",
-                             {"member": after, "old_roles": before.roles[1:], "new_roles": after.roles[1:]})
+    if len(before.roles) != len(after.roles):
+        await log_action(after.server,"role_change",
+                         {"member": after, "old_roles": before.roles[1:], "new_roles": after.roles[1:]})
 
 
 @client.event
 async def on_message_edit(before, after):
     if not STATES["init"]: return
 
-    if before.server.id == constants.OVERWATCH_SERVER_ID:
-        await log_action(after.server,"edit",
-                         {"channel": before.channel.mention, "mention": before.author.mention, "id": before.author.id,
-                          "before": before.content, "after": after.content})
+    await log_action(after.server,"edit",
+                     {"channel": before.channel.mention, "mention": before.author.mention, "id": before.author.id,
+                      "before": before.content, "after": after.content})
 
 
 @client.event
 async def on_message_delete(message):
     if not STATES["init"]: return
-
-    if message.server.id == constants.OVERWATCH_SERVER_ID:
-        mention = message.author.mention if message.author.mention else message.author.name + message.author.discriminator
-        await log_action(message.server,"delete",
-                         {"channel": message.channel.mention, "mention": mention, "id": message.author.id,
-                          "content": message.content})
+    mention = message.author.mention if message.author.mention else message.author.name + message.author.discriminator
+    await log_action(message.server,"delete",
+                     {"channel": message.channel.mention, "mention": mention, "id": message.author.id,
+                      "content": message.content})
 
 
 async def log_action(server, action, detail):
@@ -248,6 +234,7 @@ async def log_action(server, action, detail):
         message = await scrub_text(message, target_channel)
 
     elif action == "voice_update":
+        if log_config[]
         before = detail["before"]
         voice_state = before.voice
         if not voice_state.voice_channel:
