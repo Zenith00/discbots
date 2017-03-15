@@ -352,6 +352,8 @@ async def on_member_update(before, after):
         if before.name != after.name:
             await import_to_user_set(member=after, set_name="names", entry=after.nick)
 
+
+
 @client.event
 async def on_message_delete(message):
     pass
