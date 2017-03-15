@@ -129,7 +129,8 @@ async def on_message_delete(message):
 async def log_action(server, action, detail):
     server_log = client.get_channel(constants.CHANNELNAME_CHANNELID_DICT["server-log"])
     voice_log = client.get_channel(constants.CHANNELNAME_CHANNELID_DICT["voice-channel-output"])
-
+    server_log = log_config[server.id]["server_log"]
+    voice_log = log_config[server.id]["voice_log"]
 
 
     time = datetime.utcnow().isoformat(" ")
@@ -379,6 +380,7 @@ async def import_user(member):
 
 
 async def clock():
+    await update()
     await client.wait_until_ready()
     STATES["init"] = True
     STATES["server_log"] = True
@@ -389,10 +391,11 @@ async def update():
     with open(utils_file.relative_path(__file__, "log_config.json"), 'w') as config:
         json.dump(log_config, config)
 
-
 with open(utils_file.relative_path(__file__, "log_config.json"), 'r') as config:
     log_config = json.load(config)
 
+log_config["94882524378968064"]["server_log"] = "152757147288076297"
+log_config["94882524378968064"]["voice_log"] = "200185170249252865"
 
 client.loop.create_task(clock())
 
