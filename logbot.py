@@ -394,6 +394,7 @@ async def update():
 with open(utils_file.relative_path(__file__, "log_config.json"), 'r') as config:
     log_config = json.load(config)
 
+log_config["94882524378968064"] = {"server_log":None, "voice_log":None}
 log_config["94882524378968064"]["server_log"] = "152757147288076297"
 log_config["94882524378968064"]["voice_log"] = "200185170249252865"
 
