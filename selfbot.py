@@ -252,66 +252,66 @@ async def mention_to_id(command_list):
             new_command.append(id_chars)
     return new_command
 
-
-def do_gmagik(self, ctx, gif):
-	try:
-		try:
-			gif = PIL.Image.open(gif)
-		except:
-			return '\N{WARNING SIGN} Invalid Gif.'
-		if gif.size >= (3000, 3000):
-			return '\N{WARNING SIGN} `GIF resolution exceeds maximum >= (3000, 3000).`'
-		elif gif.n_frames > 150 and ctx.message.author.id != self.bot.owner.id:
-			return "\N{WARNING SIGN} `GIF has too many frames (> 150 Frames).`"
-		count = 0
-		frames = []
-		while gif:
-			b = BytesIO()
-			try:
-				gif.save(b, 'GIF')
-			except:
-				continue
-			b.seek(0)
-			frames.append(b)
-			count += 1
-			try:
-				gif.seek(count)
-			except EOFError:
-				break
-		imgs2 = []
-		for image in frames:
-			try:
-				im = wand.image.Image(file=image)
-			except:
-				continue
-			i = im.clone()
-			i.transform(resize='800x800>')
-			i.liquid_rescale(width=int(i.width*0.5), height=int(i.height*0.5), delta_x=1, rigidity=0)
-			i.liquid_rescale(width=int(i.width*1.5), height=int(i.height*1.5), delta_x=2, rigidity=0)
-			i.resize(i.width, i.height)
-			b = BytesIO()
-			i.save(file=b)
-			b.seek(0)
-			imgs2.append(b)
-		imgs2 = [PIL.Image.open(i) for i in imgs2]
-		final = BytesIO()
-		i = imgs2[0].save(final, 'GIF', loop=0, save_all=True, append_images=imgs2)
-		final.seek(0)
-		return final
-	except Exception as e:
-		print(traceback.format_exc())
-
-async def do_gmagik2(self, url):
-	path = self.files_path(self.bot.random(True))
-	await self.download(url, path)
-	args = ['convert', '(', path, '-resize', '256x256>', '-resize', '256x256<', ')']
-	i = 5
-	while i <= 70:
-		args.extend(['(', '-clone', '0', '(', '+clone', '-liquid-rescale', '{0}%'.format(int(100-i)), ')', '(', '+clone', '-resize', '256', ')', '-delete', '-2', '-delete', '-2', ')'])
-		i += 5
-	args.extend(['-delay', '8', '-set', 'delay', '8', 'gif:-'])
-	final = await self.bot.run_process(args, b=True)
-	return path, final
+#
+# def do_gmagik(self, ctx, gif):
+# 	try:
+# 		try:
+# 			gif = PIL.Image.open(gif)
+# 		except:
+# 			return '\N{WARNING SIGN} Invalid Gif.'
+# 		if gif.size >= (3000, 3000):
+# 			return '\N{WARNING SIGN} `GIF resolution exceeds maximum >= (3000, 3000).`'
+# 		elif gif.n_frames > 150 and ctx.message.author.id != self.bot.owner.id:
+# 			return "\N{WARNING SIGN} `GIF has too many frames (> 150 Frames).`"
+# 		count = 0
+# 		frames = []
+# 		while gif:
+# 			b = BytesIO()
+# 			try:
+# 				gif.save(b, 'GIF')
+# 			except:
+# 				continue
+# 			b.seek(0)
+# 			frames.append(b)
+# 			count += 1
+# 			try:
+# 				gif.seek(count)
+# 			except EOFError:
+# 				break
+# 		imgs2 = []
+# 		for image in frames:
+# 			try:
+# 				im = wand.image.Image(file=image)
+# 			except:
+# 				continue
+# 			i = im.clone()
+# 			i.transform(resize='800x800>')
+# 			i.liquid_rescale(width=int(i.width*0.5), height=int(i.height*0.5), delta_x=1, rigidity=0)
+# 			i.liquid_rescale(width=int(i.width*1.5), height=int(i.height*1.5), delta_x=2, rigidity=0)
+# 			i.resize(i.width, i.height)
+# 			b = BytesIO()
+# 			i.save(file=b)
+# 			b.seek(0)
+# 			imgs2.append(b)
+# 		imgs2 = [PIL.Image.open(i) for i in imgs2]
+# 		final = BytesIO()
+# 		i = imgs2[0].save(final, 'GIF', loop=0, save_all=True, append_images=imgs2)
+# 		final.seek(0)
+# 		return final
+# 	except Exception as e:
+# 		print(traceback.format_exc())
+#
+# async def do_gmagik2(self, url):
+# 	path = self.files_path(self.bot.random(True))
+# 	await self.download(url, path)
+# 	args = ['convert', '(', path, '-resize', '256x256>', '-resize', '256x256<', ')']
+# 	i = 5
+# 	while i <= 70:
+# 		args.extend(['(', '-clone', '0', '(', '+clone', '-liquid-rescale', '{0}%'.format(int(100-i)), ')', '(', '+clone', '-resize', '256', ')', '-delete', '-2', '-delete', '-2', ')'])
+# 		i += 5
+# 	args.extend(['-delay', '8', '-set', 'delay', '8', 'gif:-'])
+# 	final = await self.bot.run_process(args, b=True)
+# 	return path, final
 
 
 # def do_gmagik(self, ctx, gif):
