@@ -18,7 +18,7 @@ import requests
 import urbandictionary
 import logging
 
-import wand.image
+# import wand.image
 
 from utils import utils_file, utils_text, utils_image, utils_parse, utils_persist
 from PIL import Image
