@@ -390,9 +390,6 @@ async def update():
         json.dump(log_config, config)
 
 
-with open(utils_file.relative_path(__file__, "log_config.json"), 'w') as config:
-    json.dump({}, config)
-
 with open(utils_file.relative_path(__file__, "log_config.json"), 'r') as config:
     log_config = json.load(config)
 
