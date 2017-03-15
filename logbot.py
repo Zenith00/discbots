@@ -234,7 +234,7 @@ async def log_action(server, action, detail):
         message = await scrub_text(message, target_channel)
 
     elif action == "voice_update":
-        if log_config[]
+        # if log_config[]
         before = detail["before"]
         voice_state = before.voice
         if not voice_state.voice_channel:
