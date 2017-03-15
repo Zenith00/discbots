@@ -629,6 +629,8 @@ async def perform_command(command, params, message_in):
         elif command == "unmute":
             member = message_in.server.get_member(params[0])
             await unmute(member)
+        elif command == "id":
+            pass
         elif command == "unban":
             user_id = params[0]
             user = await client.get_user_info(user_id)
@@ -1509,6 +1511,9 @@ async def invite_checker(message, regex_match):
     except:
         print(traceback.format_exc())
 
+async def closest_mention(username_with_discrim):
+
+
 async def fuzzy_match(*args):
     if len(args) == 2:
         count = 1
@@ -1573,7 +1578,7 @@ async def finder(message, regex, blacklist):
                 auth = False
             elif blacklist == "mod":
                 auth = "mod" in await get_auths(messageCheck.author)
-                # auth = await credential(messageCheck.author, "mod")
+                    # auth = await w    tial(messageCheck.author, "mod")
             else:
                 auth = False
             if not auth:

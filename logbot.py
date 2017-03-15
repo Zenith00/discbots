@@ -1,36 +1,39 @@
+import json
 import logging
 from datetime import datetime, timedelta
 
 import discord
 import motor.motor_asyncio
 import regex as re
-from utils import utils_text
+from utils import utils_text, utils_parse, utils_file
 
 import TOKENS
 import constants
 
-
 logging.basicConfig(level=logging.INFO)
 
-mongo_client = motor.motor_asyncio.AsyncIOMotorClient("mongodb://{usn}:{pwd}@nadir.space".format(usn=TOKENS.MONGO_USN, pwd=TOKENS.MONGO_PASS))
+mongo_client = motor.motor_asyncio.AsyncIOMotorClient(
+    "mongodb://{usn}:{pwd}@nadir.space".format(usn=TOKENS.MONGO_USN, pwd=TOKENS.MONGO_PASS))
 # mongo_client = motor.motor_asyncio.AsyncIOMotorClient()
 
 overwatch_db = mongo_client.overwatch
 client = discord.Client()
 
+STATES = {"init": False}
 
-STATES = {"init":False}
 
 @client.event
 async def on_message(message_in):
     pass
+
 
 @client.event
 async def on_member_remove(member):
     if not STATES["init"]: return
     if member.server.id == constants.OVERWATCH_SERVER_ID:
         await import_to_user_set(member=member, set_name="server_leaves", entry=datetime.utcnow().isoformat(" "))
-        await log_action("leave", {"mention": member.mention, "id": member.id})
+        await log_action(member.server,"leave", {"mention": member.mention, "id": member.id})
+
 
 @client.event
 async def on_member_ban(member):
@@ -40,7 +43,8 @@ async def on_member_ban(member):
         await import_to_user_set(member=member, set_name="bans", entry=datetime.utcnow().isoformat(" "))
         spam_ch = client.get_channel(constants.CHANNELNAME_CHANNELID_DICT["spam-channel"])
         # await client.send_message(spam_ch, "Ban detected, user id = " + member.id)
-        await log_action("ban", {"member": member})
+        await log_action(member.server,"ban", {"member": member})
+
 
 @client.event
 async def on_member_unban(server, member):
@@ -48,14 +52,14 @@ async def on_member_unban(server, member):
 
     if server.id == constants.OVERWATCH_SERVER_ID:
         await import_to_user_set(member=member, set_name="unbans", entry=datetime.utcnow().isoformat(" "))
-        await log_action("unban", {"mention": "<@!{id}>".format(id=member.id), "id": member.id})
+        await log_action(server,"unban", {"mention": "<@!{id}>".format(id=member.id), "id": member.id})
+
 
 @client.event
 async def on_ready():
     print('Connected!')
     print('Username: ' + client.user.name)
     print('ID: ' + client.user.id)
-
 
 
 @client.event
@@ -65,7 +69,8 @@ async def on_member_join(member):
     if member.server.id == constants.OVERWATCH_SERVER_ID:
         current_date = datetime.utcnow()
         age = abs(current_date - member.created_at)
-        await log_action("join", {"mention": member.mention, "id": member.id, "age": str(age)[:-7]})
+        await log_action(member.server,"join", {"mention": member.mention, "id": member.id, "age": str(age)[:-7]})
+
 
 @client.event
 async def on_voice_state_update(before, after):
@@ -77,7 +82,8 @@ async def on_voice_state_update(before, after):
 
     if before.server.id == constants.OVERWATCH_SERVER_ID:
         if before.voice.voice_channel != after.voice.voice_channel:
-            await log_action("voice_update", {"before": before, "after": after, "id": before.id})
+            await log_action(after.server,"voice_update", {"before": before, "after": after, "id": before.id})
+
 
 # noinspection PyShadowingNames
 @client.event
@@ -90,25 +96,24 @@ async def on_member_update(before, after):
     if not STATES["init"]: return
 
     if before.server.id == constants.OVERWATCH_SERVER_ID:
-        if before.nick != after.nick:
-            await import_to_user_set(member=after, set_name="nicks", entry=after.nick)
-        if before.name != after.name:
-            await import_to_user_set(member=after, set_name="names", entry=after.nick)
-
         if not STATES["init"]:
             return
+        await import_user(after)
 
         if len(before.roles) != len(after.roles):
-            await log_action("role_change", {"member": after, "old_roles": before.roles[1:], "new_roles": after.roles[1:]})
+            await log_action(after.server,"role_change",
+                             {"member": after, "old_roles": before.roles[1:], "new_roles": after.roles[1:]})
+
 
 @client.event
 async def on_message_edit(before, after):
     if not STATES["init"]: return
 
     if before.server.id == constants.OVERWATCH_SERVER_ID:
-        await log_action("edit",
+        await log_action(after.server,"edit",
                          {"channel": before.channel.mention, "mention": before.author.mention, "id": before.author.id,
-                          "before" : before.content, "after": after.content})
+                          "before": before.content, "after": after.content})
+
 
 @client.event
 async def on_message_delete(message):
@@ -116,19 +121,17 @@ async def on_message_delete(message):
 
     if message.server.id == constants.OVERWATCH_SERVER_ID:
         mention = message.author.mention if message.author.mention else message.author.name + message.author.discriminator
-        await log_action("delete",
+        await log_action(message.server,"delete",
                          {"channel": message.channel.mention, "mention": mention, "id": message.author.id,
                           "content": message.content})
 
 
-
-
-async def log_action(action, detail):
+async def log_action(server, action, detail):
     server_log = client.get_channel(constants.CHANNELNAME_CHANNELID_DICT["server-log"])
     voice_log = client.get_channel(constants.CHANNELNAME_CHANNELID_DICT["voice-channel-output"])
-    # server_log = client.get_channel("285123105117044736")
-    # voice_log = client.get_channel("285123117943226369")
-    # server_log = client.get_channel("152757147288076297")
+
+
+
     time = datetime.utcnow().isoformat(" ")
     time = time[5:19]
     time = time[6:19] + " " + time[0:5]
@@ -156,18 +159,21 @@ async def log_action(action, detail):
             if action not in ["leave", "ban"]:
                 detail[target] = await scrub_text(detail[target], server_log)
 
-
     time = "`" + time + "`"
 
     if action == "delete":
-        message = "{time} :wastebasket: [DELETE] [{channel}] [{mention}] [{id}]:\n{content}".format(time=time, channel=detail["channel"],
-                                                                                                    mention=detail["mention"],
+        message = "{time} :wastebasket: [DELETE] [{channel}] [{mention}] [{id}]:\n{content}".format(time=time,
+                                                                                                    channel=detail[
+                                                                                                        "channel"],
+                                                                                                    mention=detail[
+                                                                                                        "mention"],
                                                                                                     id=detail["id"],
                                                                                                     content=detail[
                                                                                                         "content"])
         target_channel = server_log
         await overwatch_db.server_log.insert_one(
-            {"date"   : datetime.utcnow().isoformat(" "), "action": action, "channel": detail["channel"], "mention": detail["mention"], "id": detail["id"],
+            {"date": datetime.utcnow().isoformat(" "), "action": action, "channel": detail["channel"],
+             "mention": detail["mention"], "id": detail["id"],
              "content": detail["content"]})
     elif action == "edit":
         message = "{time} :pencil: [EDIT] [{channel}] [{mention}] [{id}]:\n`-BEFORE:` {before} \n`+ AFTER:` {after}".format(
@@ -175,7 +181,8 @@ async def log_action(action, detail):
             after=detail["after"])
         target_channel = server_log
         await overwatch_db.server_log.insert_one(
-            {"date"  : datetime.utcnow().isoformat(" "), "action": action, "channel": detail["channel"], "mention": detail["mention"], "id": detail["id"],
+            {"date": datetime.utcnow().isoformat(" "), "action": action, "channel": detail["channel"],
+             "mention": detail["mention"], "id": detail["id"],
              "before": detail["before"], "after": detail["after"]})
 
     elif action == "join":
@@ -184,29 +191,42 @@ async def log_action(action, detail):
                                                                                              id=detail["id"],
                                                                                              age=detail["age"])
         target_channel = server_log
-        await overwatch_db.server_log.insert_one({"date": datetime.utcnow().isoformat(" "), "action": action, "id": detail["id"], "age": detail["age"]})
+        await overwatch_db.server_log.insert_one(
+            {"date": datetime.utcnow().isoformat(" "), "action": action, "id": detail["id"], "age": detail["age"]})
     elif action == "leave":
         message = "{time} :outbox_tray: [LEAVE] [{mention}] [{id}]".format(time=time, mention=detail["mention"],
                                                                            id=detail["id"])
         target_channel = server_log
-        await overwatch_db.server_log.insert_one({"date": datetime.utcnow().isoformat(" "), "action": action, "id": detail["id"]})
+        await overwatch_db.server_log.insert_one(
+            {"date": datetime.utcnow().isoformat(" "), "action": action, "id": detail["id"]})
 
     elif action == "ban":
-        message = "{time} :no_entry_sign: [BAN] [{mention}] [{id}] Name: {name} {nick}".format(time=time, mention=detail["member"].mention,
+        message = "{time} :no_entry_sign: [BAN] [{mention}] [{id}] Name: {name} {nick}".format(time=time,
+                                                                                               mention=detail[
+                                                                                                   "member"].mention,
                                                                                                id=detail["member"].id,
-                                                                                               name=detail["member"].name + "#" + detail[
-                                                                                                   "member"].discriminator, nick=
-                                                                                               detail["member"].nick if detail["member"].nick else "")
+                                                                                               name=detail[
+                                                                                                        "member"].name + "#" +
+                                                                                                    detail[
+                                                                                                        "member"].discriminator,
+                                                                                               nick=
+                                                                                               detail["member"].nick if
+                                                                                               detail[
+                                                                                                   "member"].nick else "")
         target_channel = server_log
         await overwatch_db.server_log.insert_one(
-            {"date": datetime.utcnow().isoformat(" "), "action": action, "id": detail["member"].id, "mention": detail["member"].mention})
+            {"date": datetime.utcnow().isoformat(" "), "action": action, "id": detail["member"].id,
+             "mention": detail["member"].mention})
 
     elif action == "unban":
-        message = "{time} :white_check_mark:  [UNBAN] [{mention}] [{id}]".format(time=time, mention="<@!" + detail["id"] + ">",
+        message = "{time} :white_check_mark:  [UNBAN] [{mention}] [{id}]".format(time=time,
+                                                                                 mention="<@!" + detail["id"] + ">",
                                                                                  id=detail["id"])
 
         target_channel = server_log
-        await overwatch_db.server_log.insert_one({"date": datetime.utcnow().isoformat(" "), "action": action, "id": detail["id"], "mention": detail["mention"]})
+        await overwatch_db.server_log.insert_one(
+            {"date": datetime.utcnow().isoformat(" "), "action": action, "id": detail["id"],
+             "mention": detail["mention"]})
     elif action == "role_change":
         # print("TRIGGERING ROLE CHANGE")
         target_channel = server_log
@@ -222,8 +242,9 @@ async def log_action(action, detail):
         mention = member.mention
         mention = await scrub_text(mention, target_channel)
 
-        message = "{time} :pencil: [ROLECHANGE] [{mention}] [{id}]:\n`-BEFORE:` {before} \n`+ AFTER:` {after}".format(time=time, mention=mention,
-                                                                                                                      id=member.id, before=before, after=after)
+        message = "{time} :pencil: [ROLECHANGE] [{mention}] [{id}]:\n`-BEFORE:` {before} \n`+ AFTER:` {after}".format(
+            time=time, mention=mention,
+            id=member.id, before=before, after=after)
         message = await scrub_text(message, target_channel)
     elif action == "voice_update":
         before = detail["before"]
@@ -244,7 +265,8 @@ async def log_action(action, detail):
         ago = now - threshold
         date_text = ago.isoformat(" ")
 
-        movecount = await (overwatch_db.server_log.find({"action": action, "id": detail["id"], "date": {"$gt": date_text}}).count())
+        movecount = await (
+        overwatch_db.server_log.find({"action": action, "id": detail["id"], "date": {"$gt": date_text}}).count())
 
         if movecount < 5:
             emoji = ":white_check_mark:"
@@ -263,12 +285,14 @@ async def log_action(action, detail):
         else:
             in_room = "0"
             room_cap = "0"
-        message = "{emoji} {date} {mention} : `{before}` → `{after}` [{usercount}/{userlimit}] ({count})".format(emoji=emoji, date=time,
-                                                                                                                 mention="<@!" + detail["id"] + ">",
-                                                                                                                 before=before, after=after, usercount=in_room,
-                                                                                                                 userlimit=room_cap, count=movecount)
+        message = "{emoji} {date} {mention} : `{before}` → `{after}` [{usercount}/{userlimit}] ({count})".format(
+            emoji=emoji, date=time,
+            mention="<@!" + detail["id"] + ">",
+            before=before, after=after, usercount=in_room,
+            userlimit=room_cap, count=movecount)
 
-        await overwatch_db.server_log.insert_one({"date": datetime.utcnow().isoformat(" "), "action": action, "id": detail["id"]})
+        await overwatch_db.server_log.insert_one(
+            {"date": datetime.utcnow().isoformat(" "), "action": action, "id": detail["id"]})
 
 
     else:
@@ -286,7 +310,6 @@ async def import_to_user_set(member, set_name, entry):
             "$addToSet": {set_name: entry}
         }
     )
-
 
 
 async def scrub_text(text, channel):
@@ -314,7 +337,7 @@ async def scrub_text(text, channel):
             if id not in ["@everyone", "@here"]:
                 id = re.search(r"\d+", id)
                 id = id.group(0)
-                member = client.get_server(constants.OVERWATCH_SERVER_ID).get_member(id)
+                member = channel.server.get_member(id)
                 if not member:
                     continue
                 perms = channel.permissions_for(member)
@@ -328,17 +351,51 @@ async def scrub_text(text, channel):
             new_words.append(word)
     return " ".join(new_words)
 
+
 async def get_role(server, roleid):
     for x in server.roles:
         if x.id == roleid:
             return x
 
 
+async def import_user(member):
+    user_info = await utils_parse.parse_member_info(member)
+    result = await overwatch_db.userinfo.update_one(
+        {"userid": member.id},
+        {
+            "$addToSet": {
+                "nicks": {"$each": [user_info["nick"], user_info["name"]]},
+                "names": {"$each": [user_info["name"]]},
+                "full_name":user_info["name"] + "#" + str(user_info["discrim"]),
+                "avatar_urls": user_info["avatar_url"],
+                "server_joins": user_info["joined_at"]},
+            "$set": {"mention_str": user_info["mention_str"],
+                     "created_at": user_info["created_at"]},
+
+        }
+        , upsert=True
+    )
+    pass
+
+
 async def clock():
     await client.wait_until_ready()
     STATES["init"] = True
     STATES["server_log"] = True
+
     print("Ready")
+
+async def update():
+    with open(utils_file.relative_path(__file__, "log_config.json"), 'w') as config:
+        json.dump(log_config, config)
+
+
+with open(utils_file.relative_path(__file__, "log_config.json"), 'w') as config:
+    json.dump({}, config)
+
+with open(utils_file.relative_path(__file__, "log_config.json"), 'r') as config:
+    log_config = json.load(config)
+
 
 client.loop.create_task(clock())
 

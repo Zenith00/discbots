@@ -73,36 +73,56 @@ async def output_event_embed(event):
     return embed
 
 
+
 # @fuckit
 async def output_team_embed(team_dict):
     nickname = team_dict["nickname"]
     embed = discord.Embed(title="[{number}] {name}  info".format(name=nickname.replace(" ", "  "), number=team_dict[
         "team_number"]) + ' ' * 60 + "​​​​​​", type="rich")
-
-
     location = team_dict["locality"] + ", " + team_dict["region"]
-    embed.add_field(name="Motto", value=team_dict["motto"], inline=False)
-    embed.add_field(name="Website", value=team_dict["website"], inline=False)
-    embed.add_field(name="Founding Year", value=team_dict["rookie_year"])
+    if "motto" in team_dict.keys():
+        embed.add_field(name="Motto", value=team_dict["motto"], inline=False)
+    if "website" in team_dict.keys():
+        try:
+            embed.add_field(name="Website", value=team_dict["website"], inline=False)
+            thumb = pyfav.pyfav.get_favicon_url(team_dict["website"])
+            if thumb:
+                embed.set_thumbnail(url=thumb)
+        except:
+            pass
+    if "rookie_year" in team_dict.keys():
+        embed.add_field(name="Founding Year", value=team_dict["rookie_year"])
     embed.add_field(name="Location", value=location, inline=False)
-    print(team_dict)
-    # if team_dict["team_number"] == "1072":
-    #     return embed
-    thumb = pyfav.pyfav.get_favicon_url(team_dict["website"])
-    if thumb:
-        embed.set_thumbnail(url=thumb)
-    print("embed got")
-    print(embed.to_dict())
+    # print(team_dict)
+    #
+    # print("embed got")
+    # print(embed.to_dict())
     return embed
 
+async def draft(target, team_number):
+    await client.send_message(target, "Now drafting... Team {number}".format(number=team_number))
+    try:
+        team = tba.team_get(team_number)
+        await client.send_message(destination=target, content=None, embed=await output_event_embed(team))
+    except:
+        pass
+    await client.send_message(target, "no: The robot does not have the functionality. \n "
+                                      "has: The robot has the functionality, but it is not working. \n"
+                                      "works: The robot has the functionality, and it works")
+    await client.send_message(target, "How is the gear mechanism? [no/has/works]")
 
-async def get_input(from_user, regex):
+    await client.send_message(target, "How is the   ")
+
+async def get_input(from_user, regex, fail_message="Input not recognized"):
     def check(message):
         if regex_test(regex, message.content):
             return True
-        return False
-
+        else:
+            yield from client.send_message(message.channel if message.channel else message.author,
+                                           fail_message)
+            return False
     message_in = await client.wait_for_message(author=from_user, check=check)
+    return message_in
 
 
 
@@ -117,7 +137,6 @@ async def send(destination, text, send_type):
         return
     if send_type == "list":
         text = str(text)[1:-1]
-
     text = str(text)
     text = text.replace("\n", "<NL<")
     lines = textwrap.wrap(text, 2000, break_long_words=False)
