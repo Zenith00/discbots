@@ -320,15 +320,24 @@ STATES = {"init": False}
 
 @client.event
 async def on_member_remove(member):
-    pass
+    if not STATES["init"]: return
+    if member.server.id == constants.OVERWATCH_SERVER_ID:
+        await import_to_user_set(member=member, set_name="server_leaves", entry=datetime.utcnow().isoformat(" "))
 
 @client.event
 async def on_member_ban(member):
-    pass
+    if not STATES["init"]: return
+    if member.server.id == constants.OVERWATCH_SERVER_ID:
+        await import_to_user_set(member=member, set_name="bans", entry=datetime.utcnow().isoformat(" "))
+
 
 @client.event
 async def on_member_unban(server, member):
-    pass
+    if not STATES["init"]: return
+
+    if server.id == constants.OVERWATCH_SERVER_ID:
+        await import_to_user_set(member=member, set_name="unbans", entry=datetime.utcnow().isoformat(" "))
+
 
 @client.event
 async def on_voice_state_update(before, after):
@@ -351,6 +360,8 @@ async def on_member_update(before, after):
             await import_to_user_set(member=after, set_name="nicks", entry=after.nick)
         if before.name != after.name:
             await import_to_user_set(member=after, set_name="names", entry=after.nick)
+    if before.voice == after.voice:
+        await import_user(after)
 
 
 
@@ -1514,7 +1525,7 @@ async def invite_checker(message, regex_match):
         print(traceback.format_exc())
 
 async def closest_mention(username_with_discrim):
-
+    pass
 
 async def fuzzy_match(*args):
     if len(args) == 2:

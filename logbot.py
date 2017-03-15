@@ -31,7 +31,7 @@ async def on_message(message_in):
 async def on_member_remove(member):
     if not STATES["init"]: return
     if member.server.id == constants.OVERWATCH_SERVER_ID:
-        await import_to_user_set(member=member, set_name="server_leaves", entry=datetime.utcnow().isoformat(" "))
+        # await import_to_user_set(member=member, set_name="server_leaves", entry=datetime.utcnow().isoformat(" "))
         await log_action(member.server,"leave", {"mention": member.mention, "id": member.id})
 
 
@@ -40,7 +40,7 @@ async def on_member_ban(member):
     if not STATES["init"]: return
 
     if member.server.id == constants.OVERWATCH_SERVER_ID:
-        await import_to_user_set(member=member, set_name="bans", entry=datetime.utcnow().isoformat(" "))
+        # await import_to_user_set(member=member, set_name="bans", entry=datetime.utcnow().isoformat(" "))
         spam_ch = client.get_channel(constants.CHANNELNAME_CHANNELID_DICT["spam-channel"])
         # await client.send_message(spam_ch, "Ban detected, user id = " + member.id)
         await log_action(member.server,"ban", {"member": member})
@@ -51,7 +51,7 @@ async def on_member_unban(server, member):
     if not STATES["init"]: return
 
     if server.id == constants.OVERWATCH_SERVER_ID:
-        await import_to_user_set(member=member, set_name="unbans", entry=datetime.utcnow().isoformat(" "))
+        # await import_to_user_set(member=member, set_name="unbans", entry=datetime.utcnow().isoformat(" "))
         await log_action(server,"unban", {"mention": "<@!{id}>".format(id=member.id), "id": member.id})
 
 
@@ -98,7 +98,7 @@ async def on_member_update(before, after):
     if before.server.id == constants.OVERWATCH_SERVER_ID:
         if not STATES["init"]:
             return
-        await import_user(after)
+
 
         if len(before.roles) != len(after.roles):
             await log_action(after.server,"role_change",
@@ -305,13 +305,13 @@ async def log_action(server, action, detail):
         await client.send_message(target_channel, message)
 
 
-async def import_to_user_set(member, set_name, entry):
-    await overwatch_db.userinfo_collection.update_one(
-        {"userid": member.id},
-        {
-            "$addToSet": {set_name: entry}
-        }
-    )
+# async def import_to_user_set(member, set_name, entry):
+#     await overwatch_db.userinfo_collection.update_one(
+#         {"userid": member.id},
+#         {
+#             "$addToSet": {set_name: entry}
+#         }
+#     )
 
 
 async def scrub_text(text, channel):
@@ -360,24 +360,24 @@ async def get_role(server, roleid):
             return x
 
 
-async def import_user(member):
-    user_info = await utils_parse.parse_member_info(member)
-    result = await overwatch_db.userinfo.update_one(
-        {"userid": member.id},
-        {
-            "$addToSet": {
-                "nicks": {"$each": [user_info["nick"], user_info["name"]]},
-                "names": {"$each": [user_info["name"]]},
-                "full_name":user_info["name"] + "#" + str(user_info["discrim"]),
-                "avatar_urls": user_info["avatar_url"],
-                "server_joins": user_info["joined_at"]},
-            "$set": {"mention_str": user_info["mention_str"],
-                     "created_at": user_info["created_at"]},
-
-        }
-        , upsert=True
-    )
-    pass
+# async def import_user(member):
+#     user_info = await utils_parse.parse_member_info(member)
+#     result = await overwatch_db.userinfo.update_one(
+#         {"userid": member.id},
+#         {
+#             "$addToSet": {
+#                 "nicks": {"$each": [user_info["nick"], user_info["name"]]},
+#                 "names": {"$each": [user_info["name"]]},
+#                 "full_name":user_info["name"] + "#" + str(user_info["discrim"]),
+#                 "avatar_urls": user_info["avatar_url"],
+#                 "server_joins": user_info["joined_at"]},
+#             "$set": {"mention_str": user_info["mention_str"],
+#                      "created_at": user_info["created_at"]},
+#
+#         }
+#         , upsert=True
+#     )
+#     pass
 
 
 async def clock():
