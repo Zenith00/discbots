@@ -29,7 +29,7 @@ async def on_message(message_in):
         if message_in.author.server_permissions.manage_server or message_in.author.id == "129706966460137472":
             if command_list[0] == "register":
                 await client.send_message(message_in.channel, "Starting up the registration process...")
-                log_config[message_in.server.id] = {"states":{}}
+                log_config[message_in.server.id] = {"states": {}}
                 await client.send_message(message_in.channel,
                                           "The server log records joins, leaves, bans, and unbans.\mIf you want to enable the server log, please respond with a channel mention or ID. Ex: `#general`. Otherwise, say `no`")
                 target_id = None
@@ -56,8 +56,6 @@ async def on_message(message_in):
                     log_config[message_in.server.id]["states"]["server_log"] = True
                 log_config[message_in.server.id]["server_log"] = target_id
 
-
-
                 await client.send_message(message_in.channel,
                                           "The message log records message edits and deletions.\nIf you want to enable the message log, please respond with a channel mention or ID. Ex: `#general`. Otherwise, say `no`")
                 target_id = None
@@ -82,9 +80,6 @@ async def on_message(message_in):
                 else:
                     log_config[message_in.server.id]["states"]["message_log"] = True
                 log_config[message_in.server.id]["message_log"] = target_id
-
-
-
 
                 await client.send_message(message_in.channel,
                                           "The voice log records voice channel movement. If you want to enable the voice log, please respond with a channel mention or ID. Ex: `#general`. Otherwise, say `no`")
@@ -117,12 +112,22 @@ async def on_message(message_in):
             if command_list[0] == "toggle":
                 if len(command_list) == 1:
                     await client.send_message(message_in.channel, "Toggle <server/message>voice> to switch the logging on and off")
+                state_target = None
                 if "server" in command_list[1:]:
-                    log_config[message_in.server.id]["states"]["server_log"] = not log_config[message_in.server.id]["states"]["server_log"]
-                if "message" in command_list[1:]:
-                    log_config[message_in.server.id]["states"]["message_log"] = not log_config[message_in.server.id]["states"]["message_log"]
-                if "voice" in command_list[1:]:
-                    log_config[message_in.server.id]["states"]["voice_log"] = not log_config[message_in.server.id]["states"]["voice_log"]
+                    state_target = "server_log"
+                elif "message" in command_list[1:]:
+                    state_target = "message_log"
+                elif "voice" in command_list[1:]:
+                    state_target = "voice_log"
+                if state_target:
+                    start_state = message_in[message_in.server.id]["states"][state_target]
+                    message_in[message_in.server.id]["states"][state_target] = not message_in[message_in.server.id]["states"][state_target]
+                    await client.send_message(message_in.channel,
+                                              "Toggling {state} from {state_start} to {state_end}".format(state=state_target, state_start=start_state,
+                                                                                                          state_end=not start_state))
+                    await update()
+                else:
+                    await client.send_message(message_in.channel, "Did not recognize. Please try again with either `server`, `state`, or `message`")
 
 @client.event
 async def on_member_remove(member):
