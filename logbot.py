@@ -152,6 +152,7 @@ async def on_message(message_in):
             if command_list[0] == "setprefix":
                 log_config[message_in.server.id]["prefix"] = command_list[1:]
                 await client.send_message(message_in.channel, "Setting prefix to {prefix}".format(prefix=command_list[1:]))
+                await update()
 
 @client.event
 async def on_member_remove(member):
