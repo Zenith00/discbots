@@ -23,7 +23,6 @@ STATES = {"init": False}
 
 @client.event
 async def on_message(message_in):
-    print(log_config)
     if message_in.server.id in log_config.keys():
         prefix = log_config[message_in.server.id]["prefix"]
     else:
@@ -36,7 +35,7 @@ async def on_message(message_in):
             if command_list[0] == "register":
                 await client.send_message(message_in.channel, "Starting up the registration process...")
                 await client.send_message(message_in.channel, "What would you like your command prefix to be? For example, `!!` in !!ban.")
-                message = client.wait_for_message(author=message_in.author, channel=message_in.channel)
+                message = await client.wait_for_message(author=message_in.author, channel=message_in.channel)
                 log_config[message_in.server.id] = {"states": {}}
                 log_config[message_in.server.id]["prefix"] = message.content
                 await client.send_message(message_in.channel,
@@ -521,6 +520,7 @@ class Unbuffered(object):
 import sys
 
 sys.stdout = Unbuffered(sys.stdout)
+
 async def update():
     with open(utils_file.relative_path(__file__, "log_config.json"), 'w') as config:
         json.dump(log_config, config)
