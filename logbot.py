@@ -506,6 +506,20 @@ async def clock():
 
     print("Ready")
 
+class Unbuffered(object):
+    def __init__(self, stream):
+        self.stream = stream
+
+    def write(self, data):
+        self.stream.write(data)
+        self.stream.flush()
+
+    def __getattr__(self, attr):
+        return getattr(self.stream, attr)
+
+import sys
+
+sys.stdout = Unbuffered(sys.stdout)
 async def update():
     with open(utils_file.relative_path(__file__, "log_config.json"), 'w') as config:
         json.dump(log_config, config)
