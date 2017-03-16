@@ -127,6 +127,7 @@ async def on_message(message_in):
             if command_list[0] == "toggle":
                 if len(command_list) == 1:
                     await client.send_message(message_in.channel, "Toggle <server/message>voice> to switch the logging on and off")
+                    return
                 state_target = None
                 if "server" in command_list[1:]:
                     state_target = "server_log"
@@ -136,13 +137,13 @@ async def on_message(message_in):
                     state_target = "voice_log"
                 if state_target:
                     start_state = message_in[message_in.server.id]["states"][state_target]
-                    message_in[message_in.server.id]["states"][state_target] = not message_in[message_in.server.id]["states"][state_target]
+                    log_config[message_in.server.id]["states"][state_target] = not message_in[message_in.server.id]["states"][state_target]
                     await client.send_message(message_in.channel,
                                               "Toggling {state} from {state_start} to {state_end}".format(state=state_target, state_start=start_state,
                                                                                                           state_end=not start_state))
                     await update()
                 else:
-                    await client.send_message(message_in.channel, "Did not recognize. Please try again with either `server`, `state`, or `message`")
+                    await client.send_message(message_in.channel, "Did not recognize. Please try again with either `server`, `message`, or `message`")
             if command_list[0] == "setprefix":
                 log_config[message_in.server.id]["prefix"] = command_list[1:]
                 await client.send_message(message_in.channel, "Setting prefix to {prefix}".format(prefix=command_list[1:]))
