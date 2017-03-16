@@ -41,7 +41,7 @@ async def on_message(message_in):
             print(command_list)
             if command_list[0] == "renick":
                 for server in client.servers:
-                    client.change_nickname(server.me, "Logbot")
+                    await client.change_nickname(server.me, "Logbot")
             if command_list[0] == "dump":
                 if len(command_list) > 1:
                     target = command_list[1]
