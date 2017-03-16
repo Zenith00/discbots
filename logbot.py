@@ -66,9 +66,7 @@ async def on_message(message_in):
                     log_config[message_in.server.id]["states"]["server_log"] = False
                 else:
                     log_config[message_in.server.id]["states"]["server_log"] = True
-                    await client.send_message(message_in.channel, "Setting server log to {channel}".format(channel="<#" +
-                                                                                                                   log_config[message_in.server.id]["states"][
-                                                                                                                       "server_log"] + ">"))
+                    await client.send_message(message_in.channel, "Setting server log to {channel}".format(channel="<#" + target_id + ">"))
                 log_config[message_in.server.id]["server_log"] = target_id
 
                 await client.send_message(message_in.channel,
@@ -95,9 +93,7 @@ async def on_message(message_in):
                     log_config[message_in.server.id]["states"]["message_log"] = False
                 else:
                     log_config[message_in.server.id]["states"]["message_log"] = True
-                    await client.send_message(message_in.channel, "Setting message log to {channel}".format(channel="<#" +
-                                                                                                               log_config[message_in.server.id]["states"][
-                                                                                                                   "message_log"] + ">"))
+                    await client.send_message(message_in.channel, "Setting message log to {channel}".format(channel="<#" + target_id + ">"))
                 log_config[message_in.server.id]["message_log"] = target_id
 
                 await client.send_message(message_in.channel,
@@ -124,9 +120,7 @@ async def on_message(message_in):
                     log_config[message_in.server.id]["states"]["voice_log"] = False
                 else:
                     log_config[message_in.server.id]["states"]["voice_log"] = True
-                    await client.send_message(message_in.channel, "Setting voice log to {channel}".format(channel="<#" +
-                                                                                                                log_config[message_in.server.id]["states"][
-                                                                                                                    "voice_log"] + ">"))
+                    await client.send_message(message_in.channel, "Setting voice log to {channel}".format(channel="<#" +target_id + ">"))
                 log_config[message_in.server.id]["voice_log"] = target_id
 
                 log_config[message_in.server.id]["states"]["global"] = True
