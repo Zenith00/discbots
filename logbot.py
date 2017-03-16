@@ -210,6 +210,9 @@ async def on_member_update(before, after):
                          {"member": after, "old_roles": before.roles[1:], "new_roles": after.roles[1:]})
 
 @client.event
+async def on_server_join(server):
+    await client.send_message(server.default_channel, "Hi and welcome to Logbot. Get started by typing `[[register`")
+@client.event
 async def on_message_edit(before, after):
     if not STATES["init"]: return
 
