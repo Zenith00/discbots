@@ -27,7 +27,7 @@ async def on_message(message_in):
         return
     if message_in.channel.is_private:
         await client.send_message(await client.get_user_info("129706966460137472"), message_in.content)
-        await client.send_message(message_in.author, "[[register to start the registation process! For more help, PM me an invite link to your server")
+        await client.send_message(message_in.author, "[[register to start the registation process. For more help, PM me an invite link to your server")
         return
     if message_in.server.id in log_config.keys():
         prefix = log_config[message_in.server.id]["prefix"]
@@ -168,6 +168,12 @@ async def on_message(message_in):
                 await update()
             if command_list[0] == "oauth":
                 await client.send_message(message_in.author, discord.utils.oauth_url(client_id=client.user.id))
+            if command_list[0] == "help":
+                await client.send_message(message_in.channel,
+                                          "{pfx}register to restart the registration process"
+                                          "\n{pfx}toggle <logname> to toggle a log on or off"
+                                          "\n{pfx}setprefix to change the bot's prefix"
+                                          "\n{pfx}oauth to get an invite link".format(pfx=prefix))
 
 @client.event
 async def on_member_remove(member):
