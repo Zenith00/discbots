@@ -500,7 +500,11 @@ async def perform_command(command, params, message_in):
         if command == "trustedinfo":
             results = await trusted_analysis()
             output.extend(results)
-
+        if command == "fix":
+            for server in client.servers:
+                if server.id != "94882524378968064" and "Overwatch" not in server.name:
+                    print(server.name)
+                    await client.leave_server(server)
         if command == "oauth":
             print(discord.utils.oauth_url(client.user.id))
         if command == "names":

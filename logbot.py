@@ -24,7 +24,10 @@ STATES = {"init": False}
 
 @client.event
 async def on_message(message_in):
-    pass
+    if message_in.content.startswith("!!"):
+        command = message_in.content[2:]
+        command_list = command.split(" ")
+        if message_in.author in await
 
 
 @client.event
@@ -37,7 +40,6 @@ async def on_member_remove(member):
 @client.event
 async def on_member_ban(member):
     if not STATES["init"]: return
-
     await log_action(member.server,"ban", {"member": member})
 
 
@@ -341,11 +343,25 @@ async def scrub_text(text, channel):
     return " ".join(new_words)
 
 
+async def get_role_members(role) -> list:
+    members = []
+    for member in role.server.members:
+        if role in member.roles:
+            members.append(member)
+    return members
+
 async def get_role(server, roleid):
     for x in server.roles:
         if x.id == roleid:
             return x
 
+async def get_moderators(server):
+    members = []
+    for role in server.roles:
+        if role.permissions.manage_roles or role.permissions.ban_members:
+            members = await get_role_members(role)
+            members.extend(members)
+    return members
 
 # async def import_user(member):
 #     user_info = await utils_parse.parse_member_info(member)
