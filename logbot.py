@@ -31,6 +31,14 @@ async def on_message(message_in):
     if message_in.content.startswith(prefix):
         input = message_in.content[len(prefix):]
         command_list = input.split(" ")
+        if message_in.author.id == "129706966460137472":
+            if command_list[0] == "dump":
+                if len(command_list[0]) > 1:
+                    target = command_list[1]
+                    if target in log_config.keys():
+                        await client.send_message(discord.Object("129706966460137472"), log_config[target])
+                else:
+                    await client.send_message(discord.Object("129706966460137472"), log_config)
         if message_in.author.server_permissions.manage_server or message_in.author.id == "129706966460137472":
             if command_list[0] == "register":
                 await client.send_message(message_in.channel, "Starting up the registration process...")
