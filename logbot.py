@@ -23,15 +23,26 @@ STATES = {"init": False}
 
 @client.event
 async def on_message(message_in):
-    if message_in.content.startswith("]]"):
-        input = message_in.content[2:]
+    if message_in.server.id in log_config.keys():
+        prefix = log_config[message_in.server.id]["prefix"]
+    else:
+        prefix = "[["
+
+    if message_in.content.startswith(prefix):
+        input = message_in.content[len(prefix):]
         command_list = input.split(" ")
         if message_in.author.server_permissions.manage_server or message_in.author.id == "129706966460137472":
             if command_list[0] == "register":
                 await client.send_message(message_in.channel, "Starting up the registration process...")
+                await client.send_message(message_in.channel, "What would you like your command prefix to be? For example, `!!` in !!ban.")
+                message = client.wait_for_message(author=message_in.author, channel=message_in.channel)
                 log_config[message_in.server.id] = {"states": {}}
+                log_config[message_in.server.id]["prefix"] = message.content
                 await client.send_message(message_in.channel,
-                                          "The server log records joins, leaves, bans, and unbans.\mIf you want to enable the server log, please respond with a channel mention or ID. Ex: `#general`. Otherwise, say `no`")
+                                          "Setting prefix to {prefix}".format(prefix="`" + log_config[message_in.server.id]["prefix"] + "`"))
+                await client.send_message(message_in.channel,
+                                          "The server log records joins, leaves, bans, and unbans.\mIf you want to enable the server log, please respond with "
+                                          "a channel mention or ID. Ex: `#general`. Otherwise, say `no`")
                 target_id = None
 
                 def check(msg):
@@ -54,10 +65,14 @@ async def on_message(message_in):
                     log_config[message_in.server.id]["states"]["server_log"] = False
                 else:
                     log_config[message_in.server.id]["states"]["server_log"] = True
+                    await client.send_message(message_in.channel, "Setting server log to {channel}".format(channel="<#" +
+                                                                                                                   log_config[message_in.server.id]["states"][
+                                                                                                                       "server_log"] + ">"))
                 log_config[message_in.server.id]["server_log"] = target_id
 
                 await client.send_message(message_in.channel,
-                                          "The message log records message edits and deletions.\nIf you want to enable the message log, please respond with a channel mention or ID. Ex: `#general`. Otherwise, say `no`")
+                                          "The message log records message edits and deletions.\nIf you want to enable the message log, please respond with"
+                                          " a channel mention or ID. Ex: `#general`. Otherwise, say `no`")
                 target_id = None
 
                 def check(msg):
@@ -79,10 +94,14 @@ async def on_message(message_in):
                     log_config[message_in.server.id]["states"]["message_log"] = False
                 else:
                     log_config[message_in.server.id]["states"]["message_log"] = True
+                    await client.send_message(message_in.channel, "Setting message log to {channel}".format(channel="<#" +
+                                                                                                               log_config[message_in.server.id]["states"][
+                                                                                                                   "message_log"] + ">"))
                 log_config[message_in.server.id]["message_log"] = target_id
 
                 await client.send_message(message_in.channel,
-                                          "The voice log records voice channel movement. If you want to enable the voice log, please respond with a channel mention or ID. Ex: `#general`. Otherwise, say `no`")
+                                          "The voice log records voice channel movement.\n If you want to enable the voice log, please respond with"
+                                          " a channel mention or ID. Ex: `#general`. Otherwise, say `no`")
                 target_id = None
 
                 def check(msg):
@@ -104,7 +123,9 @@ async def on_message(message_in):
                     log_config[message_in.server.id]["states"]["voice_log"] = False
                 else:
                     log_config[message_in.server.id]["states"]["voice_log"] = True
-
+                    await client.send_message(message_in.channel, "Setting voice log to {channel}".format(channel="<#" +
+                                                                                                                log_config[message_in.server.id]["states"][
+                                                                                                                    "voice_log"] + ">"))
                 log_config[message_in.server.id]["voice_log"] = target_id
 
                 log_config[message_in.server.id]["states"]["global"] = True
@@ -128,6 +149,9 @@ async def on_message(message_in):
                     await update()
                 else:
                     await client.send_message(message_in.channel, "Did not recognize. Please try again with either `server`, `state`, or `message`")
+            if command_list[0] == "setprefix":
+                log_config[message_in.server.id]["prefix"] = command_list[1:]
+                await client.send_message(message_in.channel, "Setting prefix to {prefix}".format(prefix=command_list[1:]))
 
 @client.event
 async def on_member_remove(member):
