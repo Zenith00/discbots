@@ -23,7 +23,7 @@ STATES = {"init": False}
 
 @client.event
 async def on_message(message_in):
-    if message_in.content.startswith("!!"):
+    if message_in.content.startswith("]]"):
         input = message_in.content[2:]
         command_list = input.split(" ")
         if message_in.author.server_permissions.manage_server or message_in.author.id == "129706966460137472":
