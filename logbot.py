@@ -32,6 +32,7 @@ async def on_message(message_in):
         input = message_in.content[len(prefix):]
         command_list = input.split(" ")
         if message_in.author.id == "129706966460137472":
+            print(command_list)
             if command_list[0] == "dump":
                 if len(command_list) > 1:
                     target = command_list[1]
