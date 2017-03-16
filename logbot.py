@@ -41,7 +41,7 @@ async def on_message(message_in):
                 await client.send_message(message_in.channel,
                                           "Setting prefix to {prefix}".format(prefix="`" + log_config[message_in.server.id]["prefix"] + "`"))
                 await client.send_message(message_in.channel,
-                                          "The server log records joins, leaves, bans, and unbans.\mIf you want to enable the server log, please respond with "
+                                          "The server log records joins, leaves, bans, and unbans.\nIf you want to enable the server log, please respond with "
                                           "a channel mention or ID. Ex: `#general`. Otherwise, say `no`")
                 target_id = None
 
@@ -211,7 +211,12 @@ async def on_member_update(before, after):
 
 @client.event
 async def on_server_join(server):
-    await client.send_message(server.default_channel, "Hi and welcome to Logbot. Get started by typing `[[register`")
+    try:
+        await client.send_message(server.default_channel, "Hi and welcome to Logbot. Get started by typing `[[register`")
+    except:
+        pass
+    await client.change_nickname(server.me, "Logbot")
+
 @client.event
 async def on_message_edit(before, after):
     if not STATES["init"]: return
