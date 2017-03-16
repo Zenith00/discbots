@@ -582,7 +582,7 @@ async def perform_command(command, params, message_in):
             role = await get_role_from_name(message_in.server, role_name)
             print(role)
             role_members = await get_role_members(role)
-            member_list = [[member.name, member.id] for member in role_members]
+            member_list = [[unidecode(member.name), member.id] for member in role_members]
             output.append((member_list, "rows"))
 
         elif command == "dumpinfo":
