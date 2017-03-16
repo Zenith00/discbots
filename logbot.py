@@ -149,7 +149,7 @@ async def on_message(message_in):
                 await client.send_message(message_in.channel, "Setting prefix to {prefix}".format(prefix=command_list[1:]))
                 await update()
             if command_list[0] == "oauth":
-                await client.send_message(message_in.channel, discord.utils.oauth_url(client_id=client.user.id))
+                await client.send_message(message_in.author, discord.utils.oauth_url(client_id=client.user.id))
 
 @client.event
 async def on_member_remove(member):
