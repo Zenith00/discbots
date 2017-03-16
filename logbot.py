@@ -46,6 +46,7 @@ async def on_message(message_in):
                 target_id = None
 
                 def check(msg):
+                    print(msg.content)
                     nonlocal target_id
                     reg = re.search("\d+", msg.content)
                     if reg:
@@ -60,7 +61,7 @@ async def on_message(message_in):
                         discord.compat.create_task(send_msg(), loop=client.loop)
 
                 message = await client.wait_for_message(author=message_in.author, channel=message_in.channel, check=check)
-
+                print("asdf")
                 if not target_id:
                     log_config[message_in.server.id]["states"]["server_log"] = False
                 else:
