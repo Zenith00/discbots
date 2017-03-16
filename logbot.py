@@ -23,6 +23,7 @@ STATES = {"init": False}
 
 @client.event
 async def on_message(message_in):
+    print(log_config)
     if message_in.server.id in log_config.keys():
         prefix = log_config[message_in.server.id]["prefix"]
     else:
