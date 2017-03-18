@@ -26,7 +26,15 @@ async def on_message(message_in):
     if message_in.author.id == client.user.id:
         return
     if message_in.channel.is_private:
-        await client.send_message(await client.get_user_info("129706966460137472"), message_in.author.name + "#" + message_in.author.discriminator + ": " + message_in.content)
+        if message_in.author.id == "129706966460137472":
+            command_list = message_in.content.replace("[[","").split(" ")
+            if command_list[0] == "reply":
+                reply_id = command_list[1]
+                reply_content = " ".join(command_list[2:])
+                await client.send_message(await client.get_user_info(reply_id), reply_content)
+        await client.send_message(await client.get_user_info("129706966460137472"),
+                                  "[{id}]{name}#{discrim}: {content}".format(id=message_in.author.id, name=message_in.author.name,
+                                                                             discrim=message_in.author.discriminator, content=message_in.content))
         await client.send_message(message_in.author, "[[register to start the registation process. For more help, PM me an invite link to your server")
         if message_in.content.startswith("[["):
             await client.send_message(message_in.author, "Commands must be used in a specific server")
