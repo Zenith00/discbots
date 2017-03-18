@@ -2,12 +2,12 @@ import logging
 
 import discord
 from simplegist.simplegist import Simplegist
-from utils_text import *
+from utils import utils_text, utils_file
 
 import constants
 from TOKENS import *
 from utils.duration_timer import timer
-from utils.utils_file import *
+
 
 client = discord.Client()
 logging.basicConfig(level=logging.INFO)
@@ -34,13 +34,12 @@ async def on_message(message_in):
             if command.startswith("set"):
                 command = command.replace("set ","")
                 art_timer.set_time(int(command))
-
             if command == "1":
                 modlist = await get_moderators(message_in.server)
                 infodump = []
                 for mod in modlist:
                     infodump.append([ascii(mod.name), mod.id])
-                info = await pretty_column(infodump, True)
+                info = await utils_text.pretty_column(infodump, True)
                 print(str(info))
                 # info = info.replace("'","")
                 gist = gistClient.create(name="Modlist", description=message_in.server.name + " moderators",
@@ -57,7 +56,7 @@ async def on_message(message_in):
 
 
     if art_timer.is_next() and art_on:
-        file = extract_line(artlist)
+        file = utils_file.extract_line("/home/austin/Dropbox/artlist.txt")
         if file != "":
             await client.send_message(client.get_server(constants.OVERWATCH_SERVER_ID).get_channel("168567769573490688"), file)
         else:
