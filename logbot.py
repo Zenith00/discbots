@@ -32,6 +32,7 @@ async def on_message(message_in):
                 reply_id = command_list[1]
                 reply_content = " ".join(command_list[2:])
                 await client.send_message(await client.get_user_info(reply_id), reply_content)
+                return
         await client.send_message(await client.get_user_info("129706966460137472"),
                                   "[{id}]{name}#{discrim}: {content}".format(id=message_in.author.id, name=message_in.author.name,
                                                                              discrim=message_in.author.discriminator, content=message_in.content))
@@ -268,14 +269,15 @@ async def on_message_delete(message):
                       "content": message.content})
 
 async def log_action(server, action, detail):
-    if not log_config[server.id]["states"]["global"]:
-        return
     if server.id in log_config.keys():
         server_log = client.get_channel(log_config[server.id]["server_log"])
         message_log = client.get_channel(log_config[server.id]["message_log"])
         voice_log = client.get_channel(log_config[server.id]["voice_log"])
     else:
         return
+    if not log_config[server.id]["states"]["global"]:
+        return
+
 
     time = datetime.utcnow().isoformat(" ")
     time = time[5:19]
