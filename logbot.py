@@ -26,8 +26,10 @@ async def on_message(message_in):
     if message_in.author.id == client.user.id:
         return
     if message_in.channel.is_private:
-        await client.send_message(await client.get_user_info("129706966460137472"), message_in.content)
+        await client.send_message(await client.get_user_info("129706966460137472"), message_in.author.name + "#" + message_in.author.discriminator + ": " + message_in.content)
         await client.send_message(message_in.author, "[[register to start the registation process. For more help, PM me an invite link to your server")
+        if message_in.content.startswith("[["):
+            await client.send_message(message_in.author, "Commands must be used in a specific server")
         return
     if message_in.server.id in log_config.keys():
         prefix = log_config[message_in.server.id]["prefix"]
