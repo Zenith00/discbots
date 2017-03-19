@@ -49,7 +49,7 @@ client = discord.Client()
 heatmap = None
 temproles = None
 id_channel_dict = {}
-
+join_warn = False
 ID_ROLENAME_DICT = dict([[v, k] for k, v in constants.ROLENAME_ID_DICT.items()])
 BLACKLISTED_CHANNELS = (
     constants.CHANNELNAME_CHANNELID_DICT["bot-log"], constants.CHANNELNAME_CHANNELID_DICT["server-log"],
@@ -387,7 +387,7 @@ async def on_member_join(member):
                 await log_automated("reapplied {role} to {mention}".format(role=role.name if role.mentionable else role.mention, mention=member.mention),
                                     log_type="autorole")
         age = abs(datetime.utcnow() - member.created_at)
-        if age.total_seconds() < 60*10:
+        if age.total_seconds() < 60*10 and join_warn:
             await alert("{mention} joined with an age of {age}".format(mention=member.mention, age=format_timedelta(age)))
 
 # noinspection PyUnusedLocal
@@ -598,6 +598,10 @@ async def perform_command(command, params, message_in):
                 await overwatch_db.config.update_one({"type": "log"}, {"$set": {"server_log": new_state}}, upsert=True)
                 STATES["server_log"] = new_state
                 await client.send_message(message_in.channel, "Setting server log to {state}".format(state="on" if result["server_log"] else "off"))
+        elif command == "joinwarn":
+            global join_warn
+            join_warn = not join_warn
+            await client.send_message(message_in.channel, "Setting join warning to " + str(join_warn))
 
         elif command == "channelinfo":
             embed = await output_channel_embed(server=message_in.server, channel_name_or_id=" ".join(params))
