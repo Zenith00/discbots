@@ -57,15 +57,15 @@ async def on_message(message_in):
         await client.delete_message(message_in)
         output = []
 
-        if command_list[0] == "pfp":
-            pfp = command_list[1] + ".png"
-            print("Switching to " + pfp)
+        if command_list[0] == "ava":
+            ava = command_list[1] + ".png"
+            print("Switching to " + ava)
             try:
-                with open(utils_file.relative_path(__file__,"avatars/" + pfp), "rb") as pfp:
-                    await client.edit_profile(password=PASS, avatar=pfp.read())
+                with open(utils_file.relative_path(__file__,"avatars/" + ava), "rb") as ava:
+                    await client.edit_profile(password=PASS, avatar=ava.read())
             except:
-                with open(utils_file.relative_path(__file__,"avatars/default.png"), "rb") as pfp:
-                    await client.edit_profile(password=PASS, avatar=pfp.read())
+                with open(utils_file.relative_path(__file__,"avatars/default.png"), "rb") as ava:
+                    await client.edit_profile(password=PASS, avatar=ava.read())
         if command_list[0] == "multinote":
             start = int(command_list[1])
             end = int(command_list[2])
