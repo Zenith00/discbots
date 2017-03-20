@@ -165,6 +165,7 @@ async def perspective(text):
     return response["attributeScores"]["TOXICITY"]["summaryScore"]["value"]
 
 async def mess2log(message):
+    return
     time = datetime.now().strftime("%I:%M:%S")
     channel = message.channel.name if message.channel.id != "170185225526181890" else "trusted-chat"
     nick = message.author.nick if message.author.nick else message.author.name
@@ -189,7 +190,8 @@ async def more_jpeg(url):
     response = requests.get(url)
     original_size = len(response.content)
     img = Image.open(BytesIO(response.content))
-    img_path = utils_file.relative_path("tmp\\tmp.jpeg")
+    img_path = utils_file.relative_path(__file__, "tmp/tmp.jpeg")
+
     # img_path = os.path.join(os.path.dirname(__file__), "tmp\\tmp.jpeg")
     if os.path.isfile(img_path):
         os.remove(img_path)
