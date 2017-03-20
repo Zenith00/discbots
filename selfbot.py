@@ -61,10 +61,10 @@ async def on_message(message_in):
             pfp = command_list[1] + ".png"
             print("Switching to " + pfp)
             try:
-                with open(utils_file.relative_path(__file__,"avatars\\" + pfp), "rb") as pfp:
+                with open(utils_file.relative_path(__file__,"avatars/" + pfp), "rb") as pfp:
                     await client.edit_profile(password=PASS, avatar=pfp.read())
             except:
-                with open(utils_file.relative_path(__file__,"avatars\\default.png"), "rb") as pfp:
+                with open(utils_file.relative_path(__file__,"avatars/default.png"), "rb") as pfp:
                     await client.edit_profile(password=PASS, avatar=pfp.read())
         if command_list[0] == "multinote":
             start = int(command_list[1])
@@ -91,11 +91,11 @@ async def on_message(message_in):
             command_list = await mention_to_id(command_list)
             target_user_id = command_list[1]
             async for message_dict in overwatch_db.message_log.find({"userid":target_user_id}):
-                utils_file.append_line(utils_file.relative_path("markov\\" + target_user_id + ".txt"), message_dict["content"])
+                utils_file.append_line(utils_file.relative_path(__file__, "markov/" + target_user_id + ".txt"), message_dict["content"])
         if command_list[0] == "markov":
             command_list = await mention_to_id(command_list)
             target_user_id = command_list[1]
-            markovify.NewlineText(utils_file.relative_path("markov\\" + target_user_id + ".txt"))
+            markovify.NewlineText(utils_file.relative_path(__file__, "markov/" + target_user_id + ".txt"))
         if command_list[0] == "emoji":
             import re
             emoji_id = utils_text.regex_test("\d+(?=>)", " ".join(command_list[1:])).group(0)
