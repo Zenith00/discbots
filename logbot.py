@@ -255,7 +255,8 @@ async def on_server_join(server):
 @client.event
 async def on_message_edit(before, after):
     if not STATES["init"]: return
-
+    if before.content == after.content:
+        return
     await log_action(after.server, "edit",
                      {"channel": before.channel.mention, "mention": before.author.mention, "id": before.author.id,
                       "before" : before.content, "after": after.content})
