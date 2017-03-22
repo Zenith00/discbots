@@ -605,4 +605,4 @@ with open(utils_file.relative_path(__file__, "log_config.json"), 'r') as config:
 
 client.loop.create_task(clock())
 
-client.run(TOKENS.LOGBOT_TOKEN, bot=True)
+client.run("MjkzOTEyNzIwNDMwOTg5MzEy.C7NfEg.b6u59nRYd3wp6wyLMlnL9joHnqU", bot=True)

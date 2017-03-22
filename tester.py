@@ -1,1 +1,3 @@
-{"94882524378968064": {"states": {"server_log": true, "message_log": true, "voice_log": true, "global": true}, "prefix"$
+import datetime
+
+datetime.datetime.utcnow()
