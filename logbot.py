@@ -185,7 +185,8 @@ async def on_message(message_in):
                 text = [["Log","Channel","Enabled"]]
                 for log_type in ["server_log","voice_log","message_log"]:
                     text.append([log_type, server_config[log_type], server_config["states"][log_type]])
-                await send(destination=message_in.channel, text=text, type="rows")
+                print(text)
+                await send(destination=message_in.channel, text=text, send_type="rows")
             if command_list[0] == "help":
                 await client.send_message(message_in.channel,
                                           "{pfx}register to restart the registration process"
