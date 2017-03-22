@@ -91,8 +91,7 @@ async def on_message(message_in):
             command_list = await mention_to_id(command_list)
             target_user_id = command_list[1]
             target_member = message_in.server.get_member(target_user_id)
-            avatar_url = target_member.avatar_url
-            response = requests.get(url)
+            response = requests.get(target_member.avatar_url)
             img = Image.open(BytesIO(response.content))
             img_path = utils_file.relative_path(__file__, "avatars/" + target_user_id + ".png")
             # if os.path.isfile(img_path):
