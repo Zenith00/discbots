@@ -69,12 +69,24 @@ async def on_message(message_in):
         if command_list[0] == "getava":
             response = requests.get(command_list[1])
             img = Image.open(BytesIO(response.content))
-            img_path = utils_file.relative_path(__file__, "avatars/" + command_list[2] + ".jpeg")
+            img_path = utils_file.relative_path(__file__, "avatars/" + command_list[2] + ".png")
             # if os.path.isfile(img_path):
             #     os.remove(img_path)
             img.save(img_path, 'PNG')
             with open(img_path, "rb") as ava:
                 await client.edit_profile(password=PASS, avatar=ava.read())
+        if command_list[0] == "stealava":
+            command_list = await mention_to_id(command_list)
+            url = message_in.server.get_member(message_in[1]).avatar_url
+            response = requests.get(url)
+            img = Image.open(BytesIO(response.content))
+            img_path = utils_file.relative_path(__file__, "avatars/" + message_in[1] + ".png")
+            # if os.path.isfile(img_path):
+            #     os.remove(img_path)
+            img.save(img_path, 'PNG')
+            with open(img_path, "rb") as ava:
+                await client.edit_profile(password=PASS, avatar=ava.read())
+
         if command_list[0] == "multinote":
             start = int(command_list[1])
             end = int(command_list[2])
