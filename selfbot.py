@@ -77,10 +77,10 @@ async def on_message(message_in):
                 await client.edit_profile(password=PASS, avatar=ava.read())
         if command_list[0] == "stealava":
             command_list = await mention_to_id(command_list)
-            url = message_in.server.get_member(message_in[1]).avatar_url
+            url = message_in.server.get_member(command_list[1]).avatar_url
             response = requests.get(url)
             img = Image.open(BytesIO(response.content))
-            img_path = utils_file.relative_path(__file__, "avatars/" + message_in[1] + ".png")
+            img_path = utils_file.relative_path(__file__, "avatars/" + command_list[1] + ".png")
             # if os.path.isfile(img_path):
             #     os.remove(img_path)
             img.save(img_path, 'PNG')
