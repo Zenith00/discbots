@@ -1,5 +1,6 @@
 import json
 import logging
+import textwrap
 from datetime import datetime, timedelta
 
 import discord
@@ -179,12 +180,21 @@ async def on_message(message_in):
                 await update()
             if command_list[0] == "oauth":
                 await client.send_message(message_in.author, discord.utils.oauth_url(client_id=client.user.id))
+            if command_list[0] == "info":
+                server_config = log_config[message_in.server.id]
+                text = [["Log","Channel","Enabled"]]
+                for log_type in ["server_log","voice_log","message_log"]:
+                    text.append([log_type, server_config[log_type], server_config["states"][log_type]])
+                print(text)
+                await send(destination=message_in.channel, text=text, send_type="rows")
             if command_list[0] == "help":
                 await client.send_message(message_in.channel,
                                           "{pfx}register to restart the registration process"
                                           "\n{pfx}toggle <logname> to toggle a log on or off"
                                           "\n{pfx}setprefix to change the bot's prefix"
-                                          "\n{pfx}oauth to get an invite link".format(pfx=prefix))
+                                          "\n{pfx}oauth to get an invite link"
+                                          "\n{pfx}info to see current log positions".format(pfx=prefix))
+
 
 @client.event
 async def on_member_remove(member):
@@ -538,6 +548,29 @@ async def get_moderators(server):
 #         , upsert=True
 #     )
 #     pass
+async def send(destination, text, send_type, delete_in=0):
+    if isinstance(destination, str):
+        destination = await client.get_channel(destination)
+
+    if send_type == "rows":
+        print("FIRING")
+        message_list = utils_text.multi_block(text, True)
+        for message in message_list:
+            await client.send_message(destination, "```" + message + "```")
+        return
+    if send_type == "list":
+        text = str(text)[1:-1]
+
+    text = str(text)
+    text = text.replace("\n", "<NL<")
+    lines = textwrap.wrap(text, 2000, break_long_words=False)
+
+    for line in lines:
+        if len(line) > 2000:
+            continue
+        line = line.replace("<NL<", "\n")
+        await client.send_message(destination, line)
+
 
 
 async def clock():
