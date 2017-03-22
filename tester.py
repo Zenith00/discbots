@@ -1,13 +1,15 @@
-import random
-def rand1000():
-    global called
-    rand1000.called = True
-    global num2
-    num2 = random.randrange(0, 1000)
-    print("rand1000 ", num2)
-    print("-----")
-rand1000()
-if rand1000.called:
-    global maxguess
-    maxguess = 7
-    print(maxguess)
+{'94882524378968064': {'states': {'server_log': True, 'message_log': True, 'voice_log': True, 'global': True},
+                       'prefix': '[[', 'server_log': '152757147288076297', 'message_log': '152757147288076297',
+                       'voice_log': '200185170249252865'},
+ '274347674122190848': {'states': {'server_log': True, 'message_log': True, 'voice_log': True, 'global': True},
+                        'prefix': '!!', 'server_log': '285123105117044736', 'message_log': '285123105117044736',
+                        'voice_log': '285123117943226369'},
+ '286040194371682315': {'states': {'server_log': True, 'message_log': True, 'voice_log': True, 'global': True},
+                        'prefix': '!!', 'server_log': '286040194371682315', 'message_log': '286040194371682315',
+                        'voice_log': '286040194371682315'},
+ '232582881241726976': {'states': {'server_log': True, 'message_log': True, 'voice_log': True, 'global': True},
+                        'prefix': '/', 'server_log': '278041198034157568', 'message_log': '278041198034157568',
+                        'voice_log': '278041198034157568'},
+ '233915898807713792': {'states': {'server_log': True, 'message_log': True, 'voice_log': True, 'global': True},
+                        'prefix': '!!', 'server_log': '249118468694081536', 'message_log': '249118468694081536',
+                        'voice_log': '249118468694081536'}}
