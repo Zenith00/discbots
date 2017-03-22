@@ -70,7 +70,9 @@ async def on_message(message_in):
             response = requests.get(command_list[1])
             img = Image.open(BytesIO(response.content))
             img_path = utils_file.relative_path(__file__, "avatars/" + command_list[2] + ".jpeg")
-            img.save(img_path, 'JPEG', quality=1)
+            # if os.path.isfile(img_path):
+            #     os.remove(img_path)
+            img.save(img_path, 'PNG')
             with open(img_path, "rb") as ava:
                 await client.edit_profile(password=PASS, avatar=ava.read())
         if command_list[0] == "multinote":
