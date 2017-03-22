@@ -175,7 +175,7 @@ async def on_message(message_in):
                 else:
                     await client.send_message(message_in.channel, "Did not recognize. Please try again with either `server`, `message`, or `message`")
             if command_list[0] == "setprefix":
-                log_config[message_in.server.id]["prefix"] = command_list[1:]
+                log_config[message_in.server.id]["prefix"] = " ".join(command_list[1:])
                 await client.send_message(message_in.channel, "Setting prefix to {prefix}".format(prefix=command_list[1:]))
                 await update()
             if command_list[0] == "oauth":
