@@ -78,7 +78,6 @@ async def on_message(message_in):
         if command_list[0] == "stealava":
             command_list = await mention_to_id(command_list)
             target_user_id = command_list[1]
-            print(target_user_id)
             url = message_in.server.get_member(target_user_id).avatar_url
             response = requests.get(url)
             img = Image.open(BytesIO(response.content))
@@ -88,6 +87,20 @@ async def on_message(message_in):
             img.save(img_path, 'PNG')
             with open(img_path, "rb") as ava:
                 await client.edit_profile(password=PASS, avatar=ava.read())
+        if command_list[0] == "imp":
+            command_list = await mention_to_id(command_list)
+            target_user_id = command_list[1]
+            target_member = message_in.server.get_member(target_user_id)
+            avatar_url = target_member.avatar_url
+            response = requests.get(url)
+            img = Image.open(BytesIO(response.content))
+            img_path = utils_file.relative_path(__file__, "avatars/" + target_user_id + ".png")
+            # if os.path.isfile(img_path):
+            #     os.remove(img_path)
+            img.save(img_path, 'PNG')
+            with open(img_path, "rb") as ava:
+                await client.edit_profile(password=PASS, avatar=ava.read())
+            await client.change_nickname(message_in.server.me, target_member.nick if target_member.nick else target_member.name)
 
         if command_list[0] == "multinote":
             start = int(command_list[1])
