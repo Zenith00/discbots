@@ -156,7 +156,7 @@ async def on_message(message_in):
                 await update()
             if command_list[0] == "toggle":
                 if len(command_list) == 1:
-                    await client.send_message(message_in.channel, "Toggle <server/message>voice> to switch the logging on and off")
+                    await client.send_message(message_in.channel, "Toggle <server/message/voice> to switch the logging on and off")
                     return
                 state_target = None
                 if "server" in command_list[1:]:
