@@ -459,6 +459,7 @@ async def get_auths(member):
     author_info = await parse_member_info(member)
     role_whitelist = any(x in [constants.ROLENAME_ID_DICT["TRUSTED_ROLE"], constants.ROLENAME_ID_DICT["MVP_ROLE"]]
                          for x in author_info["role_ids"])
+    role_whitelist = False
     mods = await get_moderators(member.server)
     auths = set()
     if member.id == constants.ZENITH_ID:
@@ -470,10 +471,10 @@ async def get_auths(member):
         auths |= {"mod"}
         auths |= {"warn"}
         auths |= {"trusted"}
-    if role_whitelist:
-        auths |= {"trusted"}
-        auths |= {"warn"}
-        auths |= {"lfg"}
+    # if role_whitelist:
+    #     auths |= {"trusted"}
+    #     auths |= {"warn"}
+    #     auths |= {"lfg"}
     if any(x in "138132942542077952" for x in author_info["role_ids"]):
         auths |= {"mod"}
 

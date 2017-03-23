@@ -1,3 +1,1 @@
-import datetime
-
-datetime.datetime.utcnow()
+from PIL import image
