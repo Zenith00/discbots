@@ -530,12 +530,23 @@ async def perform_command(command, params, message_in):
             except IndexError:
                 output.append(("Syntax not recognized", None))
         if command == "fixhighlights":
-            async for message in client.logs_from(message_in.channel, limit=5000):
+            def check(message):
                 if message.content:
-                    if not regex_test(
+                    if regex_test(
                             r"https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)",
                             message.content):
-                        await client.delete_message(message)
+                        return False
+                    else:
+                        return True
+                else:
+                    return False
+            await client.purge_from(message_in.channel,limit=999999, check=check)
+            # async for message in client.logs_from(message_in.channel, limit=5000):
+            #     if message.content:
+            #         if not regex_test(
+            #                 r"https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)",
+            #                 message.content):
+            #             await client.delete_message(message)
 
         if command == "mostactive":
             output.append(await generate_activity_hist(message_in))
