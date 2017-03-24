@@ -540,7 +540,7 @@ async def perform_command(command, params, message_in):
                         return True
                 else:
                     return False
-            await client.purge_from(message_in.channel,limit=999999, check=check)
+            await client.purge_from(message_in.channel, check=check)
             # async for message in client.logs_from(message_in.channel, limit=5000):
             #     if message.content:
             #         if not regex_test(
