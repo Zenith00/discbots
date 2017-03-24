@@ -494,7 +494,7 @@ async def perform_command(command, params, message_in):
     #     await scrim_manage(message_in)
     if command in ["names", "firstjoins", "mostactive", "channeldist", "superlog", "rebuildnicks", "wa", "reboot", "rebuild", "ui", "userinfo", "ping", "lfg",
                    "serverlog", "timenow", "say", "raw", "getroles", "moveafk", "help", "join", "tag", "tagreg", "userlog", "channeldist", "unmute",
-                   "channelinfo"]:
+                   "channelinfo", "fixhighlights"]:
         called = True
     # print("Firing...")
     if "zenith" in auths:
@@ -529,6 +529,14 @@ async def perform_command(command, params, message_in):
                 await purge_from(dest=dest, member_id=params[0 + offset], count=int(params[1 + offset]))
             except IndexError:
                 output.append(("Syntax not recognized", None))
+        if command == "fixhighlights":
+            async for message in client.logs_from(message_in.channel, limit=1000):
+                if message.content:
+                    if not regex_test(
+                            r"https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)",
+                            message.content):
+                        print(message.content)
+
         if command == "mostactive":
             output.append(await generate_activity_hist(message_in))
         elif command == "channelsdist":
