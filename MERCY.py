@@ -575,6 +575,9 @@ async def perform_command(command, params, message_in):
         elif command == "test":
             user = await client.get_user_info(user_id="222941072404381697")
             await client.send_message(user, "Test")
+        elif command == "multihist":
+            for user_id in params:
+                output.append(await generate_user_channel_activity_hist(server=message_in.server, userid=user_id, gist=True))
 
     if "trusted" in auths:
         if command == "ui" or command == "userinfo":
@@ -1291,11 +1294,12 @@ async def rebuild_nicks(message_in):
         print(member.name)
         await import_user(member)
 
-async def generate_user_channel_activity_hist(server, userid, gist):
+async def generate_user_channel_activity_hist(server, userid, gist=False):
     hist = defaultdict(int)
     member_name = server.get_member(userid).name
     async for doc in overwatch_db.message_log.find({"userid": userid, "date": {"$gt": "2016-12-25"}}):
         hist[doc["channel_id"]] += len(doc["content"].split(" "))
+        hist["Total"] += len(doc["content"].split(" "))
         print("Found a message from " + str(doc["userid"]))
     named_hist = {}
     hist = dict(hist)
@@ -1323,6 +1327,7 @@ async def generate_user_channel_activity_hist(server, userid, gist):
         return
 
     return (gist_response["Gist-Link"], None)
+
 
 async def generate_activity_hist(message):
     if message.content.startswith("`mostactive"):
@@ -1365,8 +1370,7 @@ async def generate_activity_hist(message):
                                  content=hist)
         return (gist["Gist-Link"], None)
 
-async def generate_activity_info():
-    pass
+
 
 async def format_message_to_log(message_dict):
     cursor = await overwatch_db.userinfo.find_one({"userid": message_dict["userid"]})
@@ -1852,6 +1856,7 @@ async def delay_delete():
 #     pass
 
 #
+
 
 
 async def lfg_warner(found_message, warn_type, warn_user, channel):
