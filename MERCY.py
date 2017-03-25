@@ -1420,11 +1420,11 @@ async def generate_multi_user_channel_activity_hist(server, userid_list, gist=Fa
                        "240320691868663809",
                        "252976184344838144"]:
             text += str(hist[column]) + ", "
-        gist_response = gistClient.create(name="Multhist of " + str(userid_list),
-                                          description=str(datetime.utcnow().strftime("[%Y-%m-%d %H:%m:%S] ")),
-                                          public=False,
-                                          content=text)
-        return (gist_response["Gist-Link"], None)
+    gist_response = gistClient.create(name="Multhist of " + str(userid_list),
+                                      description=str(datetime.utcnow().strftime("[%Y-%m-%d %H:%m:%S] ")),
+                                      public=False,
+                                      content=text)
+    return (gist_response["Gist-Link"], None)
 
 
 async def generate_activity_hist(message):
