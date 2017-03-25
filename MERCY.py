@@ -1297,7 +1297,7 @@ async def rebuild_nicks(message_in):
 async def generate_user_channel_activity_hist(server, userid, gist=False):
     hist = defaultdict(int)
     member_name = server.get_member(userid).name
-    async for doc in overwatch_db.message_log.find({"userid": userid, "date": {"$gt": "2016-12-25"}}):
+    async for doc in overwatch_db.message_log.find({"userid": userid, "date": {"$gt": "2017-01-25"}}):
         hist[doc["channel_id"]] += len(doc["content"].split(" "))
         hist["Total"] += len(doc["content"].split(" "))
         print("Found a message from " + str(doc["userid"]))
