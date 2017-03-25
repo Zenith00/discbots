@@ -200,7 +200,7 @@ async def perspective(text):
     return response["attributeScores"]["TOXICITY"]["summaryScore"]["value"]
 
 async def mess2log(message):
-    return
+
     time = datetime.now().strftime("%I:%M:%S")
     channel = message.channel.name if message.channel.id != "170185225526181890" else "trusted-chat"
     nick = message.author.nick if message.author.nick else message.author.name
@@ -218,8 +218,8 @@ async def mess2log(message):
         "[{toxicity}][{time}][{channel}][{name}] {content}{trg}".format(trg="" if toxicity < 0.6 else "|| [TRG-]", toxicity=toxicity_string, time=time,
                                                                         channel=channel, name=nick, content=message.content)).replace(
         "\n", r"[\n]")
-    logfile_txt = r"C:\Users\Austin\Desktop\Programming\Disc\logfile.txt"
-    lines = utils_file.append_line(logfile_txt, log_str)
+    logfile_txt = r"logfile.txt"
+    lines = utils_file.append_line(utils_file.relative_path(__file__, logfile_txt), log_str)
     if message.author.id in ["262652360008925184", "163008912348413953", "108962416582238208", "110182909993857024", "164564849915985922", "217276714244505600", "111911466172424192", "195671081065906176", "258500747732189185", "218133578326867968", "133884121830129664"]:
         await client.send_message(await client.get_channel("295260183352049664"), log_str)
 
