@@ -142,7 +142,7 @@ async def on_message(message_in):
                     break
             output.append((server_name, None))
         if command_list[0] == "rs":
-            await client.send_message(client.get_channel("176236425384034304"), ".restart")
+            await client.send_message(await client.get_channel("176236425384034304"), ".restart")
         if command_list[0] == "big":
             text = str(" ".join(command_list[1:]))
             big_text = ""
@@ -220,6 +220,8 @@ async def mess2log(message):
         "\n", r"[\n]")
     logfile_txt = r"C:\Users\Austin\Desktop\Programming\Disc\logfile.txt"
     lines = utils_file.append_line(logfile_txt, log_str)
+    if message.author.id in ["262652360008925184", "163008912348413953", "108962416582238208", "110182909993857024", "164564849915985922", "217276714244505600", "111911466172424192", "195671081065906176", "258500747732189185", "218133578326867968", "133884121830129664"]:
+        await client.send_message(await client.get_channel("295260183352049664"), log_str)
 
 async def more_jpeg(url):
     response = requests.get(url)
