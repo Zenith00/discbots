@@ -215,7 +215,7 @@ async def mess2log(message):
 
 
     log_str = unidecode(
-        "[{toxicity}][{time}][{channel}][{name}] {content}{trg}".format(trg="" if toxicity < 0.6 else "|| [TRG-]", toxicity=toxicity_string, time=time,
+        "[{toxicity}][{time}][{channel}][{name}] {content}".format(toxicity=toxicity_string, time=time,
                                                                         channel=channel, name=nick, content=message.content)).replace(
         "\n", r"[\n]")
     logfile_txt = r"logfile.txt"
