@@ -1463,9 +1463,11 @@ async def format_message_to_log(message_dict):
             await import_user(SERVERS["OW"].get_member(message_dict["userid"]))
             cursor = await overwatch_db.userinfo.find_one({"userid": message_dict["userid"]})
             name = cursor["names"][-1]
-
         except:
             name = message_dict["userid"]
+        if not name:
+            name = message_dict["userid"]
+
     try:
         content = message_dict["content"].replace("```", "")
         try:
@@ -1473,9 +1475,10 @@ async def format_message_to_log(message_dict):
         except KeyError:
             channel_name = "Unknown"
 
-        return "[" + message_dict["date"][:19] + "][" + channel_name + "][" + name + "]:" + content
+        return "[" + message_dict["date"][:19] + "][" + channel_name + "][" + str(name) + "]:" + content
 
     except:
+        print(traceback.format_exc())
         return "Errored Message : " + str(message_dict)
 
 async def output_channel_dist(channel, days):
