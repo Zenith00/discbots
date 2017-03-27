@@ -1312,7 +1312,7 @@ async def output_first_messages(userid, message_in):
         message_list.append(await format_message_to_log(message_dict))
 
     logs = message_list
-    gist = gistClient.create(name="First Messages", description=member.name if member else userid + "'s First Messages",
+    gist = gistClient.create(name="First Messages", description=userid if not member else member.name + "'s First Messages",
                              public=False,
                              content="\n".join(logs))
     return (gist["Gist-Link"], None)
