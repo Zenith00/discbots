@@ -518,7 +518,7 @@ async def perform_command(command, params, message_in):
         if command == "trustedinfo":
             results = await trusted_analysis()
             output.extend(results)
-        if command == "wipeinvites":
+        elif command == "wipeinvites":
             count = 0
             async for invite in client.invites_from(message_in.server):
                 if invite.inviter.id == client.user.id:
@@ -530,9 +530,9 @@ async def perform_command(command, params, message_in):
                 if server.id != "94882524378968064" and "Overwatch" not in server.name:
                     print(server.name)
                     await client.leave_server(server)
-        if command == "oauth":
+        elif command == "oauth":
             print(discord.utils.oauth_url(client.user.id))
-        if command == "names":
+        elif command == "names":
             count = 0
             text = ""
             for member in message_in.server.members:
@@ -542,7 +542,7 @@ async def perform_command(command, params, message_in):
                     count += 1
                 text += member.name + "\n"
             output.append((text, None))
-        if command == "purge":
+        elif command == "purge":
             offset = 1
             dest = client.get_channel(params[0])
             if not dest:
@@ -553,7 +553,7 @@ async def perform_command(command, params, message_in):
                 await purge_from(dest=dest, member_id=params[0 + offset], count=int(params[1 + offset]))
             except IndexError:
                 output.append(("Syntax not recognized", None))
-        if command == "fixhighlights":
+        elif command == "fixhighlights":
             # def check(message):
             #     if message.content:
             #         if regex_test(
@@ -572,7 +572,7 @@ async def perform_command(command, params, message_in):
                             message.content):
                         await client.delete_message(message)
 
-        if command == "mostactive":
+        elif command == "mostactive":
             output.append(await generate_activity_hist(message_in))
         elif command == "channelsdist":
             output.append(await generate_user_channel_activity_hist(message_in.server, params[0], gist=True))
