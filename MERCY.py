@@ -1305,14 +1305,14 @@ async def output_logs(userid, count, message_in):
 
 async def output_first_messages(userid, message_in):
     member = message_in.server.get_member(userid)
-    cursor = overwatch_db.message_log.find({"userid": member.id}, limit=50)
+    cursor = overwatch_db.message_log.find({"userid": userid}, limit=50)
     cursor.sort("date", 1)
     message_list = []
     async for message_dict in cursor:
         message_list.append(await format_message_to_log(message_dict))
 
     logs = message_list
-    gist = gistClient.create(name="First Messages", description=member.name + "'s First Messages",
+    gist = gistClient.create(name="First Messages", description=member.name if member.name else userid + "'s First Messages",
                              public=False,
                              content="\n".join(logs))
     return (gist["Gist-Link"], None)
