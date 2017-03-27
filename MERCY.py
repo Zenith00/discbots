@@ -623,7 +623,7 @@ async def perform_command(command, params, message_in):
             await serve_lfg(message_in)
 
     if "mod" in auths:
-        print("asdf")
+        print(command)
         if command == "getrolemembers":
             role_name = " ".join(params[0:])
             role = await get_role_from_name(message_in.server, role_name)
@@ -683,6 +683,7 @@ async def perform_command(command, params, message_in):
             output.append(commands_help[0])
             output.append(commands_help[1])
         elif command == "join":
+            print("firing joiner")
             output.append(await output_join_link(message_in.server.get_member(params[0])))
         elif command == "find":
             await output_find_user(message_in)
