@@ -1458,6 +1458,8 @@ async def format_message_to_log(message_dict):
     cursor = await overwatch_db.userinfo.find_one({"userid": message_dict["userid"]})
     try:
         name = cursor["names"][-1]
+        if not name:
+            name = cursor["names"][-2]
     except:
         try:
             await import_user(SERVERS["OW"].get_member(message_dict["userid"]))
