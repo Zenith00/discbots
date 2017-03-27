@@ -887,6 +887,7 @@ async def output_find_user(message_in):
 async def output_join_link(member):
     vc = member.voice.voice_channel
     invite = await client.create_invite(vc, max_uses=1, max_age=6)
+    print("Creating Invite...")
     if invite:
         return (invite.url, None)
     else:
