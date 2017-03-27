@@ -522,7 +522,8 @@ async def perform_command(command, params, message_in):
             print("wiping...")
             count = 0
             try:
-                async for invite in client.invites_from(message_in.server):
+                invite_list = await client.invites_from(message_in.server)
+                for invite in invite_list:
                     if invite.inviter.id == client.user.id:
                         print(count)
                         count = count + 1
