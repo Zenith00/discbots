@@ -1510,7 +1510,7 @@ async def output_channel_dist(channel, days):
     return (gist["Gist-Link"], None)
 
 async def log_automated(description: object, log_type) -> None:
-    action = ("At " + str(datetime.utcnow().strftime("[%Y-%m-%d %H:%m:%S] ")) + ", I automatically " + str(description))
+    action = ("At " + str(datetime.utcnow().strftime("[%Y-%m-%d %H:%M:%S] ")) + ", I automatically " + str(description))
     if log_type == "alert" or log_type == "autorole":
         target = constants.CHANNELNAME_CHANNELID_DICT["alerts"]
     elif log_type == "deletion":
