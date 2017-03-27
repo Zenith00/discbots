@@ -195,7 +195,7 @@ async def perspective(text):
     analyze_request = {
         'comment'            : {'text': text},
         'requestedAttributes': {'TOXICITY': {}},
-        'languages'          : {"en"}
+        'languages'          : ["en"]
     }
     response = perspective_api.comments().analyze(body=analyze_request).execute()
     return response["attributeScores"]["TOXICITY"]["summaryScore"]["value"]
