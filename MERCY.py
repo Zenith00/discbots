@@ -519,12 +519,16 @@ async def perform_command(command, params, message_in):
             results = await trusted_analysis()
             output.extend(results)
         elif command == "wipeinvites":
+            print("wiping...")
             count = 0
-            async for invite in client.invites_from(message_in.server):
-                if invite.inviter.id == client.user.id:
-                    print(count)
-                    count = count + 1
-                    await client.delete_invite(invite)
+            try:
+                async for invite in client.invites_from(message_in.server):
+                    if invite.inviter.id == client.user.id:
+                        print(count)
+                        count = count + 1
+                        await client.delete_invite(invite)
+            except:
+                print(traceback.format_exc())
         if command == "fix":
             for server in client.servers:
                 if server.id != "94882524378968064" and "Overwatch" not in server.name:
