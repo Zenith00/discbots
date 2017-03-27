@@ -43,8 +43,9 @@ overwatch_db = motor.motor_asyncio.AsyncIOMotorClient().overwatch
 @client.event
 async def on_message(message_in):
     #                                                                                           server-meta     server log   bot  log  voice channel
-    if message_in.server and message_in.server.id == constants.OVERWATCH_SERVER_ID and message_in.channel.id not in ["264735004553248768", "152757147288076297", "147153976687591424",
-                                                                                               "200185170249252865"]:
+    if message_in.server and message_in.server.id == constants.OVERWATCH_SERVER_ID and message_in.channel.id not in ["264735004553248768", "152757147288076297",
+                                                                                                                     "147153976687591424",
+                                                                                                                     "200185170249252865"]:
         try:
             await mess2log(message_in)
         except AttributeError:
@@ -61,10 +62,10 @@ async def on_message(message_in):
             ava = command_list[1] + ".png"
             print("Switching to " + ava)
             try:
-                with open(utils_file.relative_path(__file__,"avatars/" + ava), "rb") as ava:
+                with open(utils_file.relative_path(__file__, "avatars/" + ava), "rb") as ava:
                     await client.edit_profile(password=PASS, avatar=ava.read())
             except:
-                with open(utils_file.relative_path(__file__,"avatars/default.png"), "rb") as ava:
+                with open(utils_file.relative_path(__file__, "avatars/default.png"), "rb") as ava:
                     await client.edit_profile(password=PASS, avatar=ava.read())
         if command_list[0] == "getava":
             response = requests.get(command_list[1])
@@ -125,7 +126,7 @@ async def on_message(message_in):
         if command_list[0] == "markdump":
             command_list = await mention_to_id(command_list)
             target_user_id = command_list[1]
-            async for message_dict in overwatch_db.message_log.find({"userid":target_user_id}):
+            async for message_dict in overwatch_db.message_log.find({"userid": target_user_id}):
                 utils_file.append_line(utils_file.relative_path(__file__, "markov/" + target_user_id + ".txt"), message_dict["content"])
         if command_list[0] == "markov":
             command_list = await mention_to_id(command_list)
@@ -184,7 +185,6 @@ async def on_message(message_in):
             for item in output:
                 await send(destination=message_in.channel, text=item[0], send_type=item[1])
 
-
 @client.event
 async def on_ready():
     print('Connected!')
@@ -194,13 +194,13 @@ async def on_ready():
 async def perspective(text):
     analyze_request = {
         'comment'            : {'text': text},
-        'requestedAttributes': {'TOXICITY': {}}
+        'requestedAttributes': {'TOXICITY': {}},
+        'languages'          : {"en"}
     }
     response = perspective_api.comments().analyze(body=analyze_request).execute()
     return response["attributeScores"]["TOXICITY"]["summaryScore"]["value"]
 
 async def mess2log(message):
-
     time = datetime.now().strftime("%I:%M:%S")
     channel = message.channel.name if message.channel.id != "170185225526181890" else "trusted-chat"
     nick = message.author.nick if message.author.nick else message.author.name
@@ -210,17 +210,16 @@ async def mess2log(message):
     toxicity = await perspective(text)
     if message.author.id == "248841864831041547":
         toxicity = 0.0
-    toxicity_string = str(round(toxicity*100, 1)).rjust(4, "0") + "%"
-
-
+    toxicity_string = str(round(toxicity * 100, 1)).rjust(4, "0") + "%"
 
     log_str = unidecode(
         "[{toxicity}][{time}][{channel}][{name}] {content}".format(toxicity=toxicity_string, time=time,
-                                                                        channel=channel, name=nick, content=message.content)).replace(
+                                                                   channel=channel, name=nick, content=message.content)).replace(
         "\n", r"[\n]")
     logfile_txt = r"logfile.txt"
     lines = utils_file.append_line(utils_file.relative_path(__file__, logfile_txt), log_str)
-    if message.author.id in ["262652360008925184", "163008912348413953", "108962416582238208", "110182909993857024", "164564849915985922", "217276714244505600", "111911466172424192", "195671081065906176", "258500747732189185", "218133578326867968", "133884121830129664"]:
+    if message.author.id in ["262652360008925184", "163008912348413953", "108962416582238208", "110182909993857024", "164564849915985922", "217276714244505600",
+                             "111911466172424192", "195671081065906176", "258500747732189185", "218133578326867968", "133884121830129664"]:
         await client.send_message(client.get_channel("295260183352049664"), log_str)
 
 async def more_jpeg(url):
