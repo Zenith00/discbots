@@ -3,21 +3,21 @@ import logging
 import random
 import textwrap
 from collections import defaultdict
-class Unbuffered(object):
-    def __init__(self, stream):
-        self.stream = stream
-
-    def write(self, data):
-        self.stream.write(data)
-        self.stream.flush()
-
-    def __getattr__(self, attr):
-        return getattr(self.stream, attr)
-
-import sys
-
-sys.stdout = Unbuffered(sys.stdout)
-
+# class Unbuffered(object):
+#     def __init__(self, stream):
+#         self.stream = stream
+#
+#     def write(self, data):
+#         self.stream.write(data)
+#         self.stream.flush()
+#
+#     def __getattr__(self, attr):
+#         return getattr(self.stream, attr)
+#
+# import sys
+#
+# sys.stdout = Unbuffered(sys.stdout)
+sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 0)
 import discord
 import motor.motor_asyncio
 import pymongo
