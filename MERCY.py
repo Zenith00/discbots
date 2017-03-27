@@ -41,7 +41,7 @@ import dateparser
 import os, sys
 
 os.environ["PYTHONUNBUFFERED"] = "True"
-sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 0)
+sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 1)
 logging.basicConfig(level=logging.INFO)
 
 # Clients
