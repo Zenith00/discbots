@@ -3,6 +3,7 @@ import logging
 import random
 import textwrap
 from collections import defaultdict
+
 # class Unbuffered(object):
 #     def __init__(self, stream):
 #         self.stream = stream
@@ -17,7 +18,7 @@ from collections import defaultdict
 # import sys
 #
 # sys.stdout = Unbuffered(sys.stdout)
-sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 0)
+
 import discord
 import motor.motor_asyncio
 import pymongo
@@ -37,10 +38,10 @@ from utils.utils_parse import *
 from utils.utils_text import *
 from utils import utils_image
 import dateparser
-import os
+import os, sys
 
 os.environ["PYTHONUNBUFFERED"] = "True"
-
+sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 0)
 logging.basicConfig(level=logging.INFO)
 
 # Clients
