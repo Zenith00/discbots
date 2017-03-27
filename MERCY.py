@@ -1466,13 +1466,17 @@ async def format_message_to_log(message_dict):
 
         except:
             name = message_dict["userid"]
-
-    content = message_dict["content"].replace("```", "")
     try:
-        channel_name = constants.CHANNELID_CHANNELNAME_DICT[str(message_dict["channel_id"])]
-    except KeyError:
-        channel_name = "Unknown"
-    return "[" + message_dict["date"][:19] + "][" + channel_name + "][" + name + "]:" + content
+        content = message_dict["content"].replace("```", "")
+        try:
+            channel_name = constants.CHANNELID_CHANNELNAME_DICT[str(message_dict["channel_id"])]
+        except KeyError:
+            channel_name = "Unknown"
+
+        return "[" + message_dict["date"][:19] + "][" + channel_name + "][" + name + "]:" + content
+
+    except:
+        return "Errored Message : " + str(message_dict)
 
 async def output_channel_dist(channel, days):
     activity = defaultdict(int)
