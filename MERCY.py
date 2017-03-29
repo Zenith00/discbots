@@ -524,8 +524,9 @@ async def perform_command(command, params, message_in):
                 try:
                     invite_list = await client.invites_from(message_in.server)
                     for invite in invite_list:
-                        print("Invite Found")
+                        print(invite.inviter.name)
                         if invite.inviter.id == client.user.id:
+                            print(invite.inviter.name)
                             print(count)
                             count = count + 1
                             await client.delete_invite(invite)
