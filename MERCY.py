@@ -657,7 +657,23 @@ async def perform_command(command, params, message_in):
                 global join_warn
                 join_warn = not join_warn
                 await client.send_message(message_in.channel, "Setting join warning to " + str(join_warn))
-
+            elif command == "watcher":
+                id_list = re.findall(r"(?<!\/)\d{18}", await client.get_message(client.get_channel("252976184344838144"), params[0]))
+                if id_list:
+                    pass
+                else:
+                    await client.send_message(message_in.channel, "Message not found")
+                    return
+                id_list = list(set(id_list))
+                await client.send_message(message_in.channel, "**Found Members:**\n<@!" + "> <@!".join(id_list) + ">\n\nWould you like to ban these?")
+                answer = (await client.wait_for_message(author=message.author, channel=message.channel)).content
+                answer = parse_bool(answer)
+                if answer:
+                    for user_id in id_list:
+                        await client.http.ban(user_id=user_id, guild_id=message_in.server.id, delete_message_days=7)
+                else:
+                    await client.send_message(message_in.channel, "Cancelling...")
+            bounded = parse_bool(answer)
             elif command == "channelinfo":
                 embed = await output_channel_embed(server=message_in.server, channel_name_or_id=" ".join(params))
                 if embed:
