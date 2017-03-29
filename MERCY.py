@@ -1608,13 +1608,13 @@ async def send(destination, text, send_type, delete_in=0):
 
     if send_type == "rows":
         print("FIRING")
-        message_list = pretty_column(text, True)
+        message_list = multi_block(text, True)
         for message in message_list:
             try:
-                await client.send_message(destination, "```" + message + "```")
+                await client.send_message(destination, "```" + message.rstrip() + "```")
             except:
-                print(message)
-                print(len(message))
+                print(message.rstrip())
+                print(len(message.rstrip()))
                 print(traceback.format_exc())
         return
     if send_type == "list":
