@@ -548,17 +548,7 @@ async def perform_command(command, params, message_in):
                         count += 1
                     text += member.name + "\n"
                 output.append((text, None))
-            elif command == "purge":
-                offset = 1
-                dest = client.get_channel(params[0])
-                if not dest:
-                    offset = 0
-                    dest = message_in.server
-                await client.delete_message(message_in)
-                try:
-                    await purge_from(dest=dest, member_id=params[0 + offset], count=int(params[1 + offset]))
-                except IndexError:
-                    output.append(("Syntax not recognized", None))
+
             elif command == "fixhighlights":
                 # def check(message):
                 #     if message.content:
@@ -637,7 +627,17 @@ async def perform_command(command, params, message_in):
                 role_members = await get_role_members(role)
                 member_list = [[unidecode(member.name), member.id] for member in role_members]
                 output.append((member_list, "rows"))
-
+            elif command == "purge":
+                offset = 1
+                dest = client.get_channel(params[0])
+                if not dest:
+                    offset = 0
+                    dest = message_in.server
+                await client.delete_message(message_in)
+                try:
+                    await purge_from(dest=dest, member_id=params[0 + offset], count=int(params[1 + offset]))
+                except IndexError:
+                    output.append(("Syntax not recognized", None))
             elif command == "dumpinfo":
                 target = await export_user(params[0])
                 rows = [(k, str(v)) for k, v in target.items()]
