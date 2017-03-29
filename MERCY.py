@@ -1608,7 +1608,7 @@ async def send(destination, text, send_type, delete_in=0):
 
     if send_type == "rows":
         print("FIRING")
-        message_list = multi_block(text, True)
+        message_list = format_rows(text)
         for message in message_list:
             try:
                 await client.send_message(destination, "```" + message.rstrip() + "```")

@@ -33,6 +33,18 @@ def multi_regex(reg_list, string):
             return True
     return False
 
+def format_rows(list_of_rows):
+    widths = generate_widths(list_of_rows=list_of_rows)
+    list_of_blocks = []
+    block = ""
+    for row in list_of_rows:
+        new_item = format_row_to_widths(row, widths)
+        if len(block) + len(new_item) > 2000:
+            list_of_blocks.append(block)
+            block = ""
+        block += "\n" + new_item
+    return list_of_blocks
+
 def generate_widths(list_of_rows):
     widths = [max(map(len, col)) for col in zip(*list_of_rows)]
     return widths
@@ -110,11 +122,14 @@ def format_list_to_widths(list_of_rows, widths, left_just):
             output += ("  ".join((val.rjust(width) for val, width in zip(row, widths)))) + "\n"
     return output
 
+def format_row_to_widths(row,widths):
+    return "  ".join((val.ljust(width) for val, width in zip(row, widths)))
 
-    # def shorten_link(link) -> str:
-    #     return Shortener('Tinyurl').short(link)
+# def shorten_link(link) -> str:
+#     return Shortener('Tinyurl').short(link)
 
-    # print(regex_test("Kappa", "Κappa"))
+# print(regex_test("Kappa", "Κappa"))
+
 def reverse_dict(input_dict) -> dict:
     return dict((v, k) for k, v in input_dict.items())
 async def parse_time_to_end(time_string):
