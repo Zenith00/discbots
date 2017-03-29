@@ -1610,7 +1610,12 @@ async def send(destination, text, send_type, delete_in=0):
         print("FIRING")
         message_list = multi_block(text, True)
         for message in message_list:
-            await client.send_message(destination, "```" + message + "```")
+            try:
+                await client.send_message(destination, "```" + message + "```")
+            except:
+                print(message)
+                print(len(message))
+                print(traceback.format_exc())
         return
     if send_type == "list":
         text = str(text)[1:-1]
