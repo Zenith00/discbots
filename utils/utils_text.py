@@ -55,7 +55,7 @@ def multi_block(list_of_rows, left_just):
         old_list = copy.deepcopy(test_list)
         test_list.append(row)
         text = pretty_column(test_list, left_just)
-        if (len(text)) > 1000:
+        if (len(text)) > 500:
             final_list.append(old_list)
             test_list = [row]
 
