@@ -673,7 +673,7 @@ async def perform_command(command, params, message_in):
                         await client.http.ban(user_id=user_id, guild_id=message_in.server.id, delete_message_days=7)
                 else:
                     await client.send_message(message_in.channel, "Cancelling...")
-            bounded = parse_bool(answer)
+
             elif command == "channelinfo":
                 embed = await output_channel_embed(server=message_in.server, channel_name_or_id=" ".join(params))
                 if embed:
