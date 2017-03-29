@@ -658,11 +658,18 @@ async def perform_command(command, params, message_in):
                 join_warn = not join_warn
                 await client.send_message(message_in.channel, "Setting join warning to " + str(join_warn))
             elif command == "watcher":
-                id_list = re.findall(r"(?<!\/)\d{18}", await client.get_message(client.get_channel("252976184344838144"), params[0]))
+                try:
+                    message = await client.get_message(client.get_channel("252976184344838144"), params[0])
+                    content = message.content
+                except:
+                    await client.send_message(message_in.channel, "Message not found")
+
+
+                id_list = re.findall(r"(?<!\/)\d{18}", content)
                 if id_list:
                     pass
                 else:
-                    await client.send_message(message_in.channel, "Message not found")
+                    await client.send_message(message_in.channel, "Message syntax not recognized")
                     return
                 id_list = list(set(id_list))
                 await client.send_message(message_in.channel, "**Found Members:**\n<@!" + "> <@!".join(id_list) + ">\n\nWould you like to ban these?")
