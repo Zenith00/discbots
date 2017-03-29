@@ -524,8 +524,7 @@ async def perform_command(command, params, message_in):
                 try:
                     invite_list = await client.invites_from(message_in.server)
                     for invite in invite_list:
-                        # print(invite.inviter.name)
-                        if invite.inviter.id == client.user.id or "M3R-CY" in invite.inviter.name:
+                        if invite.inviter.id == client.user.id:
                             print(invite.inviter.name)
                             print(count)
                             count = count + 1
@@ -895,7 +894,10 @@ async def output_find_user(message_in):
 
 async def output_join_link(member):
     vc = member.voice.voice_channel
-    invite = await client.create_invite(vc, max_uses=1, max_age=6)
+    try:
+        invite = await client.create_invite(vc, max_uses=1, max_age=6, unique=False)
+    except:
+        return ("Error generating invite link...",None)
     print("Creating Invite...")
     if invite:
         return (invite.url, None)
@@ -1592,10 +1594,10 @@ async def send(destination, text, send_type, delete_in=0):
 
     text = str(text)
     text = text.replace("\n", "<NL<")
-    lines = textwrap.wrap(text, 2000, break_long_words=False)
+    lines = textwrap.wrap(text, 1500, break_long_words=False)
 
     for line in lines:
-        if len(line) > 2000:
+        if len(line) > 1500:
             continue
         line = line.replace("<NL<", "\n")
         await client.send_message(destination, line)
