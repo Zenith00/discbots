@@ -673,7 +673,7 @@ async def perform_command(command, params, message_in):
                     return
                 id_list = list(set(id_list))
                 await client.send_message(message_in.channel, "**Found Members:**\n<@!" + "> <@!".join(id_list) + ">\n\nWould you like to ban these?")
-                answer = (await client.wait_for_message(author=message.author, channel=message.channel)).content
+                answer = (await client.wait_for_message(author=message_in.author, channel=message_in.channel)).content
                 answer = parse_bool(answer)
                 if answer:
                     for user_id in id_list:
