@@ -741,10 +741,10 @@ async def perform_command(command, params, message_in):
                 raw_params = " ".join(params)
                 params = raw_params.split("|")
                 if len(params) > 1:
-                    output.append(await find_user(matching_ident=params[0], find_type="ban", server=message_in.server,
+                    output.append(await find_user(matching_ident=params[0], find_type="bans", server=message_in.server,
                                                   count=int(params[1])))
                 else:
-                    output.append(await find_user(matching_ident=params[0], find_type="ban", server=message_in.server))
+                    output.append(await find_user(matching_ident=params[0], find_type="bans", server=message_in.server))
 
 
             elif command == "tag":
@@ -1813,7 +1813,7 @@ async def find_user(matching_ident, find_type, server, cast_to_lower=True, count
     if find_type == "bans":
         banlist = await client.get_bans(server)
         for banned_user in banlist:
-            print(banned_user.name)
+            # print(banned_user.name)
             ident_id_set_dict[banned_user.name].add(banned_user.id)
             ident_id_set_dict[banned_user.name + banned_user.discriminator].add(banned_user.id)
     elif find_type == "current":
