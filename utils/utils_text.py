@@ -38,7 +38,7 @@ def format_rows(list_of_rows):
     list_of_blocks = []
     block = ""
     for row in list_of_rows:
-        new_item = format_row_to_widths(row, widths)
+        new_item = format_row_to_widths(row, widths).rstrip()
         if len(block) + len(new_item) > 2000:
             print(block)
             print("\n"*3)
