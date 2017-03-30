@@ -1845,7 +1845,7 @@ async def find_user(matching_ident, find_type, server, cast_to_lower=True, count
     ident_ratio = {}
     for ident in ident_id_set_dict.keys():
         ratio = fuzz.ratio(matching_ident, ident)
-        ident_ratio[ident] = ident_ratio
+        ident_ratio[ident] = ratio
 
     top_idents = heapq.nlargest(int(count), ident_ratio, key=lambda k: ident_ratio[k])
     output = "Fuzzy Searching {} with the input {}, {} ignoring case".format(find_type, matching_ident,
