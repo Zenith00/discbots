@@ -43,7 +43,7 @@ def format_rows(list_of_rows):
             print(block)
             print("\n"*3)
             list_of_blocks.append(block.rstrip())
-            block = ""
+            block = new_item
         block += "\n" + new_item.rstrip()
     print(list_of_blocks)
     return list_of_blocks
