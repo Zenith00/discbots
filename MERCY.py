@@ -1813,6 +1813,7 @@ async def find_user(matching_ident, find_type, server, cast_to_lower=True, count
     if find_type == "bans":
         banlist = await client.get_bans(server)
         for banned_user in banlist:
+            print(banned_user.name)
             ident_id_set_dict[banned_user.name].add(banned_user.id)
             ident_id_set_dict[banned_user.name + banned_user.discriminator].add(banned_user.id)
     elif find_type == "current":
