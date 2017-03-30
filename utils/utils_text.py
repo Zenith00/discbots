@@ -46,6 +46,7 @@ def format_rows(list_of_rows):
             block = new_item
         block += "\n" + new_item.rstrip()
         print(block)
+    list_of_blocks.append(block.rstrip())
     print(list_of_blocks)
     return list_of_blocks
 
