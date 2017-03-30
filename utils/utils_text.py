@@ -42,9 +42,9 @@ def format_rows(list_of_rows):
         if len(block) + len(new_item) > 2000:
             print(block)
             print("\n"*3)
-            list_of_blocks.append(block)
+            list_of_blocks.append(block.rstrip())
             block = ""
-        block += "\n" + new_item
+        block += "\n" + new_item.rstrip()
     print(list_of_blocks)
     return list_of_blocks
 
