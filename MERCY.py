@@ -1837,9 +1837,11 @@ async def find_user(matching_ident, find_type, server, cast_to_lower=True, count
         async for userinfo_dict in mongo_cursor:
             try:
                 for nick in userinfo_dict["nicks"]:
-                    ident_id_set_dict[nick].add(userinfo_dict["userid"])
+                    if nick:
+                        ident_id_set_dict[nick].add(userinfo_dict["userid"])
                 for name in userinfo_dict["names"]:
-                    ident_id_set_dict[name].add(userinfo_dict["userid"])
+                    if name:
+                        ident_id_set_dict[name].add(userinfo_dict["userid"])
             except:
                 print(traceback.format_exc())
 
