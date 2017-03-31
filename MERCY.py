@@ -737,6 +737,14 @@ async def perform_command(command, params, message_in):
                     output.append(await find_user(matching_ident=params[0], find_type="current", server=message_in.server, count=int(params[1])))
                 else:
                     output.append(await find_user(matching_ident=params[0], find_type="current", server=message_in.server))
+            elif command == "findall":
+                # await output_find_user(message_in)
+                raw_params = " ".join(params)
+                params = raw_params.split("|")
+                if len(params) > 1:
+                    output.append(await find_user(matching_ident=params[0], find_type="history", server=message_in.server, count=int(params[1])))
+                else:
+                    output.append(await find_user(matching_ident=params[0], find_type="history", server=message_in.server))
 
             elif command == "findban":
                 raw_params = " ".join(params)
