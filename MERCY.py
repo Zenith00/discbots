@@ -1863,7 +1863,7 @@ async def find_user(matching_ident, find_type, server, cast_to_lower=True, count
     for ident in top_idents:
         id_set = ident_id_set_dict[ident]
         for userid in id_set:
-            output += "`ID: {userid} | Name: {name} |` {mention}"\n.format(userid=userid, name=ident,
+            output += "`ID: {userid} | Name: {name} |` {mention}\n".format(userid=userid, name=ident,
                                                                          mention="<@!{}>".format(userid))
     return (output, None)
 
