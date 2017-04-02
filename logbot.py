@@ -495,7 +495,9 @@ async def scrub_text(text,channel):
         def escape_role(match):
             mention = match.group(0)
             roleid = re.search("\d+", mention)
+            print(roleid)
             role = get_role(channel.server, roleid)
+            print(role.name)
             if role and role.mentionable:
                 return role.name
             else:
