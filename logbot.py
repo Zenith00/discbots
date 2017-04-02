@@ -476,6 +476,7 @@ async def log_action(server, action, detail):
 #         }
 #     )
 
+
 async def scrub_text(text,channel):
     def escape_user(match):
         mention = match.group(0)
@@ -489,10 +490,14 @@ async def scrub_text(text,channel):
             return mention
         pass
     re.sub("(<@!?\d+>)", escape_user, text)
+
+    def sync_get_role(server, role):
+        return client.loop.run_until_complete(get_role, server, role)
+
     def escape_role(match):
         mention = match.group(0)
         roleid = re.search("\d+", mention)
-        role = await get_role(channel.server, roleid)
+        role = sync_get_role(channel.server, roleid)
         if role.mentionable:
             return "\\" + mention
         else:
