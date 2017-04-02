@@ -2,7 +2,7 @@ import json
 import logging
 import textwrap
 from datetime import datetime, timedelta
-
+import traceback
 import discord
 import motor.motor_asyncio
 import regex as re
@@ -478,31 +478,34 @@ async def log_action(server, action, detail):
 
 
 async def scrub_text(text,channel):
-    def escape_user(match):
-        mention = match.group(0)
-        userid = re.search("\d+", mention)
-        userid = userid.group(0)
-        member = channel.server.get_member(userid)
-        permissions = channel.permissions_for(member)
-        if permissions.read_messages:
-            return "\\" + mention
-        else:
-            return mention
-        pass
-    re.sub("(<@!?\d+>)", escape_user, text)
+    try:
+        def escape_user(match):
+            mention = match.group(0)
+            userid = re.search("\d+", mention)
+            userid = userid.group(0)
+            member = channel.server.get_member(userid)
+            permissions = channel.permissions_for(member)
+            if permissions.read_messages:
+                return "\\" + mention
+            else:
+                return mention
+            pass
+        re.sub("(<@!?\d+>)", escape_user, text)
 
-    def sync_get_role(server, role):
-        return client.loop.run_until_complete(get_role, server, role)
+        def sync_get_role(server, role):
+            return client.loop.run_until_complete(get_role, server, role)
 
-    def escape_role(match):
-        mention = match.group(0)
-        roleid = re.search("\d+", mention)
-        role = sync_get_role(channel.server, roleid)
-        if role.mentionable:
-            return "\\" + mention
-        else:
-            return mention
-    re.sub("(<#!?\d+>)", escape_role, text)
+        def escape_role(match):
+            mention = match.group(0)
+            roleid = re.search("\d+", mention)
+            role = sync_get_role(channel.server, roleid)
+            if role.mentionable:
+                return "\\" + mention
+            else:
+                return mention
+        re.sub("(<#!?\d+>)", escape_role, text)
+    except:
+        print(traceback.format_exc())
 
             # for group in [group for group in userid_matches.groups() if group]:
 
