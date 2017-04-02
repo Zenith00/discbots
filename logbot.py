@@ -32,7 +32,10 @@ async def on_message(message_in):
             if command_list[0] == "reply":
                 reply_id = command_list[1]
                 reply_content = " ".join(command_list[2:])
-                await client.send_message(await client.get_user_info(reply_id), reply_content)
+                target_user = await client.get_user_info(reply_id)
+                await client.send_message(target_user, reply_content)
+                await client.send_message(message_in.author, "[" + target_user.name + "]" + "»" + reply_content)
+
                 return
         await client.send_message(await client.get_user_info("129706966460137472"),
                                   "[{id}]{name}#{discrim}: {content}".format(id=message_in.author.id, name=message_in.author.name,
