@@ -491,14 +491,11 @@ async def scrub_text(text,channel):
                 return mention
             pass
         re.sub("(<@!?\d+>)", escape_user, text)
-        import asyncio
-        def sync_get_role(server, role):
-            return client.loop.run_until_complete(asyncio.gather(get_role(server, role)))
 
         def escape_role(match):
             mention = match.group(0)
             roleid = re.search("\d+", mention)
-            role = sync_get_role(channel.server, roleid)
+            role = get_role(channel.server, roleid)
             if role.mentionable:
                 return "\\" + mention
             else:
@@ -521,7 +518,7 @@ async def scrub_text2(text, channel):
             id = match.group(0)
             id = re.search(r"\d+", id)
             id = id.group(0)
-            role = await get_role(server=channel.server, roleid=id)
+            role = get_role(server=channel.server, roleid=id)
             overwrites = channel.overwrites_for(role)
             perm = overwrites.pair()[0]
             if perm.read_messages:
@@ -557,7 +554,7 @@ async def get_role_members(role) -> list:
             members.append(member)
     return members
 
-async def get_role(server, roleid):
+def get_role(server, roleid):
     for x in server.roles:
         if x.id == roleid:
             return x
@@ -566,7 +563,7 @@ async def get_moderators(server):
     members = []
     for role in server.roles:
         if role.permissions.manage_roles or role.permissions.ban_members:
-            members = await get_role_members(role)
+            members = get_role_members(role)
             members.extend(members)
     return members
 
