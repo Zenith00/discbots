@@ -491,7 +491,7 @@ async def scrub_text(text,channel):
                 return mention
             pass
         text = re.sub("(<@!?\d+>)", escape_user, text)
-
+#
         def escape_role(match):
             mention = match.group(0)
             roleid = re.search("\d+", mention)
