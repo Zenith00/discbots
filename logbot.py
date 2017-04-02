@@ -481,8 +481,8 @@ async def scrub_text(text,channel):
     try:
         def escape_user(match):
             mention = match.group(0)
-            userid = re.search("\d+", mention)
-            userid = userid.group(0)
+            userid = re.search("\d+", mention).group(0)
+            # userid = userid.group(0)
             member = channel.server.get_member(userid)
             permissions = channel.permissions_for(member)
             if permissions.read_messages:
@@ -494,10 +494,10 @@ async def scrub_text(text,channel):
 #
         def escape_role(match):
             mention = match.group(0)
-            roleid = re.search("\d+", mention)
-            print(roleid)
+            roleid = re.search("\d+", mention).group(0)
+            # print(roleid)
             role = get_role(channel.server, roleid)
-            print(role.name)
+            # print(role.name)
             if role and role.mentionable:
                 return role.name
             else:
