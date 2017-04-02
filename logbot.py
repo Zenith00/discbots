@@ -490,7 +490,7 @@ async def scrub_text(text,channel):
             else:
                 return mention
             pass
-        re.sub("(<@!?\d+>)", escape_user, text)
+        text = re.sub("(<@!?\d+>)", escape_user, text)
 
         def escape_role(match):
             mention = match.group(0)
@@ -501,9 +501,10 @@ async def scrub_text(text,channel):
                 return "\\" + mention
             else:
                 return mention
-        re.sub("(<#!?\d+>)", escape_role, text)
+        text = re.sub("(<#!?\d+>)", escape_role, text)
     except:
         print(traceback.format_exc())
+    return text
 
             # for group in [group for group in userid_matches.groups() if group]:
 
