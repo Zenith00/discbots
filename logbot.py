@@ -486,7 +486,7 @@ async def scrub_text(text,channel):
             member = channel.server.get_member(userid)
             permissions = channel.permissions_for(member)
             if permissions.read_messages:
-                return "\\" + mention
+                return member.name
             else:
                 return mention
             pass
@@ -498,7 +498,7 @@ async def scrub_text(text,channel):
             role = get_role(channel.server, roleid)
 
             if role and role.mentionable:
-                return "\\" + mention
+                return role.name
             else:
                 return mention
         text = re.sub("(<#!?\d+>)", escape_role, text)
