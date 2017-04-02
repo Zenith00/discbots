@@ -501,7 +501,7 @@ async def scrub_text(text,channel):
                 return role.name
             else:
                 return mention
-        text = re.sub("(<#!?\d+>)", escape_role, text)
+        text = re.sub("(<@&\d+>)", escape_role, text)
     except:
         print(traceback.format_exc())
     return text
@@ -565,7 +565,7 @@ async def get_moderators(server):
     members = []
     for role in server.roles:
         if role.permissions.manage_roles or role.permissions.ban_members:
-            members = get_role_members(role)
+            members = await get_role_members(role)
             members.extend(members)
     return members
 
