@@ -81,3 +81,7 @@ async def parse_member_info(member) -> dict:
         print(info_dict["name"])
         print(traceback.format_exc())
     return info_dict
+
+
+def reverse_dict(indict):
+    return dict([[v, k] for k, v in indict.items()])

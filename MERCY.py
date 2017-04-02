@@ -651,6 +651,12 @@ async def perform_command(command, params, message_in):
                     await purge_from(dest=dest, member_id=params[0 + offset], count=int(params[1 + offset]))
                 except IndexError:
                     output.append(("Syntax not recognized", None))
+            elif command == "fixchannels":
+                for channel in message_in.server.channels:
+                    channel_id_name = reverse_dict(constants.CHANNELNAME_CHANNELID_DICT)
+                    if channel.id in channel_id_name.keys():
+                        await client.edit_channel(channel, name=channel_id_name[channel.id])
+
             elif command == "dumpinfo":
                 target = await export_user(params[0])
                 rows = [(k, str(v)) for k, v in target.items()]
