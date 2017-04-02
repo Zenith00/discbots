@@ -476,8 +476,34 @@ async def log_action(server, action, detail):
 #         }
 #     )
 
+async def scrub_text(text,channel):
+    def escape_user(match):
+        mention = match.group(0)
+        userid = re.search("\d+", mention)
+        userid = userid.group(0)
+        member = channel.server.get_member(userid)
+        permissions = channel.permissions_for(member)
+        if permissions.read_messages:
+            return "\\" + mention
+        else:
+            return mention
+        pass
+    re.sub("(<@!?\d+>)", escape_user, text)
+    def escape_role(match):
+        mention = match.group(0)
+        roleid = re.search("\d+", mention)
+        role = await get_role(channel.server, roleid)
+        if role.mentionable:
+            return "\\" + mention
+        else:
+            return mention
+    re.sub("(<#!?\d+>)", escape_role, text)
 
-async def scrub_text(text, channel):
+            # for group in [group for group in userid_matches.groups() if group]:
+
+
+
+async def scrub_text2(text, channel):
     new_words = []
     words = re.split(r" ", text)
     for word in words:
