@@ -491,9 +491,9 @@ async def scrub_text(text,channel):
                 return mention
             pass
         re.sub("(<@!?\d+>)", escape_user, text)
-
+        import asyncio
         def sync_get_role(server, role):
-            return client.loop.run_until_complete(get_role(server, role))
+            return client.loop.run_until_complete(asyncio.gather(get_role(server, role)))
 
         def escape_role(match):
             mention = match.group(0)
