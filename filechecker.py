@@ -27,8 +27,8 @@ mongo_client = pymongo.MongoClient()
 art_db = mongo_client.art
 mercy_collection = art_db.mercy_collection
 
-PATHS = {'home': 'C:\\Users\\Austin\\Desktop\\Programming\\', 'art': "C:\\Users\\Austin\\Dropbox\\Zenith's Fanart\\", 'logs': 'C:\\Users\\Austin\\Desktop\\Programming\\Logs\\', 'comms': 'C:\\Users\\Austin\\Desktop\\Programming\\Comms\\'}
-
+# PATHS = {'home': 'C:\\Users\\Austin\\Desktop\\Programming\\', 'art': "C:\\Users\\Austin\\Dropbox\\Zenith's Fanart\\", 'logs': 'C:\\Users\\Austin\\Desktop\\Programming\\Logs\\', 'comms': 'C:\\Users\\Austin\\Desktop\\Programming\\Comms\\'}
+PATHS = {'art' : "/home/austin/Dropbox/Zenith's Fanart"}
 
 
 def clean_string(string):
@@ -82,7 +82,7 @@ def new():
                     print("New file found. Uploading...")
                     try:
                         image = imgur.upload_from_path(filepath, config=config, anon=False)
-                        utils_file.append_line("C:\\Users\\Austin\\Dropbox\\Zenith's Fanart\\artlist.txt", image['link'])
+                        # utils_file.append_line("C:\\Users\\Austin\\Dropbox\\Zenith's Fanart\\artlist.txt", image['link'])
                         print("Done")
                     except imgurpython.helpers.error.ImgurClientRateLimitError:
                         mercy_collection.delete_one({"hash":digest})
