@@ -85,9 +85,9 @@ def new():
                         # utils_file.append_line("C:\\Users\\Austin\\Dropbox\\Zenith's Fanart\\artlist.txt", image['link'])
                         print("Done")
                     except:
-                        mercy_collection.delete_one({"hash":digest})
+                        # mercy_collection.delete_one({"hash":digest})
                         print("Rate limited. Waiting 5 minutes...")
-                        time.sleep(60*10)
+                        # time.sleep(60*10)
 
 
 
