@@ -299,7 +299,7 @@ async def log_action(server, action, detail):
     time = datetime.utcnow().isoformat(" ")
     time = time[5:19]
     time = time[6:19] + " " + time[0:5]
-    print("Logging action")
+    # print("Logging action")
     if any(key in ["before", "after", "content", "mention"] for key in detail.keys()):
         for key in detail.keys():
             if key == "before" and isinstance(detail["before"], str):
