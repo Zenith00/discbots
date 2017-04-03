@@ -84,7 +84,7 @@ def new():
                         image = imgur.upload_from_path(filepath, config=config, anon=False)
                         # utils_file.append_line("C:\\Users\\Austin\\Dropbox\\Zenith's Fanart\\artlist.txt", image['link'])
                         print("Done")
-                    except imgurpython.helpers.error.ImgurClientRateLimitError:
+                    except:
                         mercy_collection.delete_one({"hash":digest})
                         print("Rate limited. Waiting 5 minutes...")
                         time.sleep(60*10)
