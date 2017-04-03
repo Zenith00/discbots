@@ -79,8 +79,15 @@ def new():
                     config = {
                         'album': 'PpALe'
                     }
+                elif "dva" in folderTuple[0]:
+                    config = {
+                        'album': 'xQXIi'
+                    }
                 else:
-                    config = {}
+                    config = {
+                        'album': 'umuvY'
+                    }
+
                 if not result.raw_result["updatedExisting"]:
                     print("New file found. Uploading...")
                     try:
