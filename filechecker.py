@@ -63,6 +63,7 @@ def new():
             if "NSFW" not in folderTuple[0]:
                 # print("call")
                 filepath = os.path.join(folderTuple[0], file)
+                print(filepath)
                 x = xxhash.xxh32()
                 with open(filepath, "rb") as image:
                     data = image.read()
