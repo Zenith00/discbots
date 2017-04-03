@@ -11,7 +11,7 @@ from imgurpython import ImgurClient
 import TOKENS
 # import motor.motor_asyncio
 from utils import utils_file
-
+import traceback
 path = "C:\\Users\\Austin\\Dropbox\\Zenith's Fanart\\"
 global before
 
@@ -98,5 +98,8 @@ def new():
 create()
 
 while True:
-    new()
+    try:
+        new()
+    except:
+        print(traceback.format_exc())
     time.sleep(10)
