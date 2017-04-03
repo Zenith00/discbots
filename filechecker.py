@@ -47,6 +47,7 @@ def fix_names():
     for folderTuple in os.walk(PATHS["art"]):
         for file in folderTuple[2]:
             new_file_name = ''.join(c for c in file if c in string.printable)
+            print(new_file_name)
             if new_file_name != file:
                 try:
                     os.rename(os.path.join(folderTuple[0], file), os.path.join(folderTuple[0], new_file_name))
