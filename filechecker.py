@@ -78,16 +78,16 @@ def new():
                     }
                 else:
                     config = {}
-                if not result.raw_result["updatedExisting"]:
-                    print("New file found. Uploading...")
-                    try:
-                        image = imgur.upload_from_path(filepath, config=config, anon=False)
-                        # utils_file.append_line("C:\\Users\\Austin\\Dropbox\\Zenith's Fanart\\artlist.txt", image['link'])
-                        print("Done")
-                    except:
-                        # mercy_collection.delete_one({"hash":digest})
-                        print("Rate limited. Waiting 5 minutes...")
-                        # time.sleep(60*10)
+                # if not result.raw_result["updatedExisting"]:
+                #     print("New file found. Uploading...")
+                #     try:
+                #         image = imgur.upload_from_path(filepath, config=config, anon=False)
+                #         # utils_file.append_line("C:\\Users\\Austin\\Dropbox\\Zenith's Fanart\\artlist.txt", image['link'])
+                #         print("Done")
+                #     except:
+                #         # mercy_collection.delete_one({"hash":digest})
+                #         print("Rate limited. Waiting 5 minutes...")
+                #         # time.sleep(60*10)
 
 
 
