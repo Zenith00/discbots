@@ -14,7 +14,8 @@ from utils import utils_file
 import traceback
 path = "C:\\Users\\Austin\\Dropbox\\Zenith's Fanart\\"
 global before
-
+os.environ["PYTHONUNBUFFERED"] = "True"
+sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 1)
 refreshToken = "5c52c0f6a47da6fb599e2835bf228c59c68dd902"
 accessToken = "4c80c2924ddeb63d3f1c99d19ae04e01e438b5fb"
 
@@ -74,20 +75,20 @@ def new():
                 )
                 if "mercy" in folderTuple[0]:
                     config = {
-                        'album': 'umuvY'
+                        'album': 'PpALe'
                     }
                 else:
                     config = {}
-                # if not result.raw_result["updatedExisting"]:
-                #     print("New file found. Uploading...")
-                #     try:
-                #         image = imgur.upload_from_path(filepath, config=config, anon=False)
-                #         # utils_file.append_line("C:\\Users\\Austin\\Dropbox\\Zenith's Fanart\\artlist.txt", image['link'])
-                #         print("Done")
-                #     except:
-                #         # mercy_collection.delete_one({"hash":digest})
-                #         print("Rate limited. Waiting 5 minutes...")
-                #         # time.sleep(60*10)
+                if not result.raw_result["updatedExisting"]:
+                    print("New file found. Uploading...")
+                    try:
+                        image = imgur.upload_from_path(filepath, config=config, anon=False)
+                        # utils_file.append_line("C:\\Users\\Austin\\Dropbox\\Zenith's Fanart\\artlist.txt", image['link'])
+                        print("Done")
+                    except:
+                        mercy_collection.delete_one({"hash":digest})
+                        print("Rate limited. Waiting 5 minutes...")
+                        time.sleep(60*10)
 
 
 
