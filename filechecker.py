@@ -8,7 +8,7 @@ import xxhash
 import imgurpython
 import pymongo
 from imgurpython import ImgurClient
-
+import TOKENS
 # import motor.motor_asyncio
 from utils import utils_file
 
@@ -22,7 +22,7 @@ accessToken = "4c80c2924ddeb63d3f1c99d19ae04e01e438b5fb"
 
 imgur = ImgurClient("5e1b2fcfcf0f36e",
                     "d919f14c31fa97819b1e9c82e2be40aef8bd9682", accessToken, refreshToken)
-mongo_client = pymongo.MongoClient()
+mongo_client = pymongo.MongoClient("mongodb://{usn}:{pwd}@nadir.space".format(usn=TOKENS.MONGO_USN, pwd=TOKENS.MONGO_PASS))
 
 art_db = mongo_client.art
 mercy_collection = art_db.mercy_collection
