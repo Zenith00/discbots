@@ -87,6 +87,7 @@ def new():
                         print("Done")
                     except:
                         mercy_collection.delete_one({"hash":digest})
+                        print(traceback.format_exc())
                         print("Rate limited. Waiting 5 minutes...")
                         time.sleep(60*10)
 
