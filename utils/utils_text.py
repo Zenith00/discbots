@@ -40,14 +40,14 @@ def format_rows(list_of_rows):
     for row in list_of_rows:
         new_item = format_row_to_widths(row, widths).rstrip()
         if len(block) + len(new_item) > 2000:
-            print(block)
-            print("\n"*3)
+            # print(block)
+            # print("\n"*3)
             list_of_blocks.append(block.rstrip())
             block = ""
         block += "\n" + new_item.rstrip()
-        print(block)
+        # print(block)
     list_of_blocks.append(block.rstrip())
-    print(list_of_blocks)
+    # print(list_of_blocks)
     return list_of_blocks
 
 def generate_widths(list_of_rows):
