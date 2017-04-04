@@ -2243,10 +2243,13 @@ class temprole_master:
 
     async def clear_member(self, member):
         for temprole in self.temproles:
-            # tick = await temprole.tick()
+            print("Checking {} vs {}".format(temprole.id, member.id))
             member_to_check = self.server.get_member(temprole.member_id)
             if member_to_check and member_to_check == member:
-                await client.remove_roles(member, temprole.role)
+                try:
+                    await client.remove_roles(member, temprole.role)
+                except:
+                    print(traceback.format_exc())
         await overwatch_db.roles.delete_many({"type": "temp", "member_id": member.id})
 
 
