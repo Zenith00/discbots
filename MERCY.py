@@ -2243,7 +2243,7 @@ class temprole_master:
 
     async def clear_member(self, member):
         for temprole in self.temproles:
-            print("Checking {} vs {}".format(temprole.id, member.id))
+            print("Checking {} vs {}".format(temprole.member_id, member.id))
             member_to_check = self.server.get_member(temprole.member_id)
             if member_to_check and member_to_check == member:
                 try:
