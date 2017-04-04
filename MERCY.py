@@ -813,6 +813,10 @@ async def perform_command(command, params, message_in):
                     text = await scrub_text(text, message_in.channel)
                     await temproles.add_role(member=member, role=role, end_datetime=time_dict["end"])
                     output.append((text, None))
+                if params[0] in ["remove", "-"]:
+                    member = message_in.server.get_member(params[1])
+                    await temproles.clear_member(member)
+
                 if params[0] == "tick":
                     await temproles.tick()
                 if params[0] == "list":
@@ -2236,6 +2240,14 @@ class temprole_master:
 
     async def dump(self):
         return [await temprole.dump() for temprole in self.temproles]
+
+    async def clear_member(self, member):
+        for temprole in self.temproles:
+            tick = await temprole.tick()
+            member_to_check = self.server.get_member(tick[0])
+            if member_to_check and member_to_check == member:
+                await client.remove_roles(member, tick[1])
+        await overwatch_db.roles.delete_many({"type": "temp", "member_id": member.id})
 
 
 class temprole:
