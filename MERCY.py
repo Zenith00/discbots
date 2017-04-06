@@ -1486,7 +1486,7 @@ async def generate_multi_user_channel_activity_hist(server, userid_list, gist=Fa
         print("Parsing... {}".format(userid))
         hist = defaultdict(int)
         member_name = server.get_member(userid).name
-        async for doc in overwatch_db.message_log.find({"userid": userid, "date": {"$gt": datetime.utcnow()-timedelta(days=30)}}):
+        async for doc in overwatch_db.message_log.find({"userid": userid, "date": {"$gt": (datetime.utcnow()-timedelta(days=30)).isoformat(" ")}}):
             hist[doc["channel_id"]] += len(doc["content"].split(" "))
             hist["Total"] += len(doc["content"].split(" "))
             # print("Found a message from " + str(doc["userid"]))
