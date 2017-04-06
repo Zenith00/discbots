@@ -229,6 +229,7 @@ async def on_ready():
     print('Username: ' + client.user.name)
     print('ID: ' + client.user.id)
 
+
 @client.event
 async def on_member_join(member):
     if not STATES["init"]: return
@@ -621,6 +622,7 @@ async def send(destination, text, send_type, delete_in=0):
 async def clock():
     await update()
     await client.wait_until_ready()
+    await client.change_presence(status=discord.Status.invisible)
     STATES["init"] = True
     STATES["server_log"] = True
 
