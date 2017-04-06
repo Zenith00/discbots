@@ -543,13 +543,18 @@ async def perform_command(command, params, message_in):
                             await client.delete_invite(invite)
                 except:
                     print(traceback.format_exc())
-            if command == "fix":
+            elif command == "fix":
                 for server in client.servers:
                     if server.id != "94882524378968064" and "Overwatch" not in server.name:
                         print(server.name)
                         await client.leave_server(server)
             elif command == "oauth":
                 print(discord.utils.oauth_url(client.user.id))
+            if command == "togglestatus":
+                if client.user.status == discord.Status.invisible:
+                    await client.change_presence(status=discord.Status.online)
+                else:
+                    await client.change_presence(status=discord.Status.invisible)
             elif command == "names":
                 count = 0
                 text = ""
