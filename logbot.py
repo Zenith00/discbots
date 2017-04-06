@@ -60,6 +60,11 @@ async def on_message(message_in):
             if command_list[0] == "reset":
                 del log_config[command_list[1]]
                 update()
+            if command_list[0] == "togglestatus":
+                if client.user.status == discord.Status.invisible:
+                    await client.change_presence(status=discord.Status.online)
+                else:
+                    await client.change_presence(status=discord.Status.invisible)
             if command_list[0] == "dump":
                 if len(command_list) > 1:
                     target = command_list[1]

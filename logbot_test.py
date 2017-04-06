@@ -2,8 +2,7 @@ import json
 import logging
 import textwrap
 from datetime import datetime, timedelta
-import sys
-from collections import defaultdict
+import traceback
 import discord
 import motor.motor_asyncio
 import regex as re
@@ -33,7 +32,10 @@ async def on_message(message_in):
             if command_list[0] == "reply":
                 reply_id = command_list[1]
                 reply_content = " ".join(command_list[2:])
-                await client.send_message(await client.get_user_info(reply_id), reply_content)
+                target_user = await client.get_user_info(reply_id)
+                await client.send_message(target_user, reply_content)
+                await client.send_message(message_in.author, "[" + target_user.name + "]" + "»" + reply_content)
+
                 return
         await client.send_message(await client.get_user_info("129706966460137472"),
                                   "[{id}]{name}#{discrim}: {content}".format(id=message_in.author.id, name=message_in.author.name,
@@ -55,6 +57,14 @@ async def on_message(message_in):
             if command_list[0] == "renick":
                 for server in client.servers:
                     await client.change_nickname(server.me, "Logbot")
+            if command_list[0] == "reset":
+                del log_config[command_list[1]]
+                update()
+            if command_list[0] == "togglestatus":
+                if client.user.status == discord.Status.invisible:
+                    await client.change_presence(status=discord.Status.online)
+                else:
+                    await client.change_presence(status=discord.Status.invisible)
             if command_list[0] == "dump":
                 if len(command_list) > 1:
                     target = command_list[1]
@@ -157,7 +167,7 @@ async def on_message(message_in):
                 await update()
             if command_list[0] == "toggle":
                 if len(command_list) == 1:
-                    await client.send_message(message_in.channel, "{pfx}toggle <server/message/voice> to switch the logging on and off".format(pfx=prefix))
+                    await client.send_message(message_in.channel, "Toggle <server/message/voice> to switch the logging on and off")
                     return
                 state_target = None
                 if "server" in command_list[1:]:
@@ -176,7 +186,7 @@ async def on_message(message_in):
                 else:
                     await client.send_message(message_in.channel, "Did not recognize. Please try again with either `server`, `message`, or `message`")
             if command_list[0] == "setprefix":
-                log_config[message_in.server.id]["prefix"] = command_list[1:]
+                log_config[message_in.server.id]["prefix"] = " ".join(command_list[1:])
                 await client.send_message(message_in.channel, "Setting prefix to {prefix}".format(prefix=command_list[1:]))
                 await update()
             if command_list[0] == "oauth":
@@ -188,7 +198,6 @@ async def on_message(message_in):
                     text.append([log_type, message_in.server.get_channel(server_config[log_type]).name if server_config[log_type] else "Unset", "Enabled" if server_config["states"][log_type] else "Disabled"])
                 print(text)
                 await send(destination=message_in.channel, text=text, send_type="rows")
-
             if command_list[0] == "help":
                 await client.send_message(message_in.channel,
                                           "{pfx}register to restart the registration process"
@@ -196,9 +205,7 @@ async def on_message(message_in):
                                           "\n{pfx}setprefix to change the bot's prefix"
                                           "\n{pfx}oauth to get an invite link"
                                           "\n{pfx}info to see current log positions".format(pfx=prefix))
-            if command_list[0] == "vctrack":
-                if len(command_list) == 1:
-                    pass
+
 
 @client.event
 async def on_member_remove(member):
@@ -253,12 +260,7 @@ async def on_member_update(before, after):
 
     if not STATES["init"]:
         return
-    print(before.status)
-    print(after.status)
-    if before.status != after.status:
-        print("CHANGE")
-        print(before.status)
-        print(after.status)
+
     if len(before.roles) != len(after.roles):
         await log_action(after.server, "role_change",
                          {"member": after, "old_roles": before.roles[1:], "new_roles": after.roles[1:]})
@@ -302,7 +304,7 @@ async def log_action(server, action, detail):
     time = datetime.utcnow().isoformat(" ")
     time = time[5:19]
     time = time[6:19] + " " + time[0:5]
-    print("Logging action")
+    # print("Logging action")
     if any(key in ["before", "after", "content", "mention"] for key in detail.keys()):
         for key in detail.keys():
             if key == "before" and isinstance(detail["before"], str):
@@ -323,8 +325,8 @@ async def log_action(server, action, detail):
                     word = "<" + word + ">"
                 new.append(word)
             detail[target] = " ".join(new)
-            if action not in ["leave", "ban"] and message_log:
-                detail[target] = await scrub_text(detail[target], message_log)
+            if action not in ["leave", "ban"]:
+                detail[target] = await scrub_text(detail[target], server_log)
 
     time = "`" + time + "`"
     message = None
@@ -468,7 +470,7 @@ async def log_action(server, action, detail):
                 {"date": datetime.utcnow().isoformat(" "), "action": action, "id": detail["id"]})
 
     if message and target_channel:
-        message = await scrub_text(message, target_channel)
+        message = await scrub_text(message, voice_log)
         await client.send_message(target_channel, message)
 
 # async def import_to_user_set(member, set_name, entry):
@@ -480,9 +482,41 @@ async def log_action(server, action, detail):
 #     )
 
 
-async def scrub_text(text, channel):
-    print(channel.name)
-    print(text)
+async def scrub_text(text,channel):
+    try:
+        def escape_user(match):
+            mention = match.group(0)
+            userid = re.search("\d+", mention).group(0)
+            # userid = userid.group(0)
+            member = channel.server.get_member(userid)
+            permissions = channel.permissions_for(member)
+            if permissions.read_messages:
+                return member.name
+            else:
+                return mention
+            pass
+        text = re.sub("(<@!?\d+>)", escape_user, text)
+#
+        def escape_role(match):
+            mention = match.group(0)
+            roleid = re.search("\d+", mention).group(0)
+            # print(roleid)
+            role = get_role(channel.server, roleid)
+            # print(role.name)
+            if role and role.mentionable:
+                return role.name
+            else:
+                return mention
+        text = re.sub("(<@&\d+>)", escape_role, text)
+    except:
+        print(traceback.format_exc())
+    return text
+
+            # for group in [group for group in userid_matches.groups() if group]:
+
+
+
+async def scrub_text2(text, channel):
     new_words = []
     words = re.split(r" ", text)
     for word in words:
@@ -492,11 +526,12 @@ async def scrub_text(text, channel):
             id = match.group(0)
             id = re.search(r"\d+", id)
             id = id.group(0)
-            role = await get_role(server=channel.server, roleid=id)
+            role = get_role(server=channel.server, roleid=id)
             overwrites = channel.overwrites_for(role)
             perm = overwrites.pair()[0]
             if perm.read_messages:
                 new_words.append(r"\@" + role.name)
+
             else:
                 new_words.append(word)
             continue
@@ -518,7 +553,6 @@ async def scrub_text(text, channel):
                 new_words.append("\\" + word)
         else:
             new_words.append(word)
-    # print(" ".join(new_words))
     return " ".join(new_words)
 
 async def get_role_members(role) -> list:
@@ -528,7 +562,7 @@ async def get_role_members(role) -> list:
             members.append(member)
     return members
 
-async def get_role(server, roleid):
+def get_role(server, roleid):
     for x in server.roles:
         if x.id == roleid:
             return x
@@ -584,58 +618,6 @@ async def send(destination, text, send_type, delete_in=0):
 
 
 
-
-class voice_tracker_master:
-
-    def __init__(self):
-
-        pass
-
-
-    def track(self, server_id, user_id):
-        if user_id in self.tracked[server_id]:
-            pass
-
-class streamer:
-    def __init__(self, channel, target):
-        self.target = target
-        self.channel = channel
-        self.streamer = line_stream()
-        pass
-
-
-
-    async def start(self):
-        self.message = await client.send_message(self.channel, self.target)
-
-
-
-    async def push(self, text):
-        new_text = self.streamer.push(text)
-        await client.edit_message(self.message, new_text)
-
-
-
-
-
-class line_stream:
-
-    def __init__(self):
-        self.lines = []
-        pass
-
-    def push(self, text):
-        self.lines.append(text)
-        text = "\n".join(self.lines)
-        while len(text) > 1750:
-            self.lines = self.lines[1:]
-            text = "\n".join(self.lines)
-        return text
-
-
-
-
-
 async def clock():
     await update()
     await client.wait_until_ready()
@@ -655,7 +637,10 @@ class Unbuffered(object):
     def __getattr__(self, attr):
         return getattr(self.stream, attr)
 
+import sys
+
 sys.stdout = Unbuffered(sys.stdout)
+
 async def update():
     with open(utils_file.relative_path(__file__, "log_config.json"), 'w') as config:
         json.dump(log_config, config)
@@ -663,10 +648,6 @@ async def update():
 with open(utils_file.relative_path(__file__, "log_config.json"), 'r') as config:
     log_config = json.load(config)
 
-
-vc_tracker = defaultdict(voice_tracker_master)
-
-
 client.loop.create_task(clock())
 
-client.run("MjkzOTEyNzIwNDMwOTg5MzEy.C7NfEg.b6u59nRYd3wp6wyLMlnL9joHnqU", bot=True)
+client.run(TOKENS.LOGBOT_TOKEN, bot=True)
