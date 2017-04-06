@@ -4,6 +4,7 @@ class timer:
     def __init__(self, dur):
         self.time = datetime.datetime.utcnow()
         self.duration = dur
+        self.basedur = dur
 
     def set_time(self, duration):
         self.duration = duration
