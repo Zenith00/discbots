@@ -16,6 +16,7 @@ class timer:
         # print("LT: " + str(current_time))
         timediff = current_time - self.time
         print(timediff.total_seconds())
+        print(self.duration)
 
         if timediff.total_seconds() > self.duration:
             self.time = current_time

@@ -1,6 +1,9 @@
 import logging
+import os
 
 import discord
+import sys
+
 from simplegist.simplegist import Simplegist
 from utils import utils_text, utils_file
 
@@ -8,6 +11,8 @@ import constants
 from TOKENS import *
 from utils.duration_timer import timer
 
+os.environ["PYTHONUNBUFFERED"] = "True"
+sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 1)
 
 client = discord.Client()
 logging.basicConfig(level=logging.INFO)
