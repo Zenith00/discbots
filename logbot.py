@@ -490,6 +490,8 @@ async def scrub_text(text,channel):
             userid = re.search("\d+", mention).group(0)
             # userid = userid.group(0)
             member = channel.server.get_member(userid)
+            if not member:
+                return mention
             permissions = channel.permissions_for(member)
             if permissions.read_messages:
                 return member.name
