@@ -92,7 +92,7 @@ def new():
                     print("New file found. Uploading...")
                     try:
                         image = imgur.upload_from_path(filepath, config=config, anon=False)
-                        # utils_file.append_line("C:\\Users\\Austin\\Dropbox\\Zenith's Fanart\\artlist.txt", image['link'])
+                        utils_file.append_line("/home/austin/Dropbox/artlist.txt", image['link'])
                         print("Done")
                     except:
                         mercy_collection.delete_one({"hash":digest})
