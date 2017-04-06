@@ -61,7 +61,7 @@ async def on_message(message_in):
                 del log_config[command_list[1]]
                 update()
             if command_list[0] == "togglestatus":
-                if client.user.status == discord.Status.invisible:
+                if message_in.server.me.status == discord.Status.invisible:
                     await client.change_presence(status=discord.Status.online)
                 else:
                     await client.change_presence(status=discord.Status.invisible)

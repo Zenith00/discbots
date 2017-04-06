@@ -551,7 +551,7 @@ async def perform_command(command, params, message_in):
             elif command == "oauth":
                 print(discord.utils.oauth_url(client.user.id))
             if command == "togglestatus":
-                if client.user.status == discord.Status.invisible:
+                if message_in.server.me.status == discord.Status.invisible:
                     await client.change_presence(status=discord.Status.online)
                 else:
                     await client.change_presence(status=discord.Status.invisible)
