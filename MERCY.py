@@ -854,8 +854,11 @@ async def perform_command(command, params, message_in):
                 member = message_in.server.get_member(params[0])
                 time_dict = await parse_time_to_end(" ".join(params[1:]))
                 if not member:
-                    await client.send_message(message_in.channel, "Member not recognized")
-                    return
+                    member = await client.get_user_info(params[0])
+                    if not member:
+                        await client.send_message(message_in.channel, "User not recognized")
+                        return
+                    await client.send_message(message_in.channel, "User is not a member. Applying pre-emptive mute...")
                 if not time_dict:
                     await client.send_message(message_in.channel, "Duration not recognized")
                     return
@@ -2239,7 +2242,14 @@ class temprole_master:
     async def add_role(self, member, role, end_datetime):
         # end_time = datetime.utcnow() + minutes
         self.temproles.append(temprole(member.id, role, end_datetime, self.server))
-        await client.add_roles(member, role)
+
+        if isinstance(member, discord.Member):
+            try:
+                await client.add_roles(member, role)
+            except discord.NotFound:
+                pass
+            except:
+                print(traceback.format_exc())
 
         await overwatch_db.roles.insert_one(
             {"type": "temp", "member_id": member.id, "role_id": role.id, "end_time": str(end_datetime)})
