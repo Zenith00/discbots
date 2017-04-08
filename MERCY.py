@@ -2192,7 +2192,7 @@ class temprole_master:
             # print("None found: " + member.name)
             pass
 
-    async def add_role(self, member, role, end_dateRtime):
+    async def add_role(self, member, role, end_datetime):
         # end_time = datetime.utcnow() + minutes
         self.temproles.append(temprole(member.id, role, end_datetime, self.server))
 
