@@ -2097,7 +2097,7 @@ async def close_ban(member):
     # await overwatch_db.banbase.insert_one({"userid":member.id, "date":datetime.utcnow().isoformat(" ")})
     await client.send_message(member, "Test message. Blah blah go to modmail")
     await overwatch_db.userinfo.find_one_and_update({"userid": member.id}, {"$set": {"banstatus": "closed"}})
-    await client.ban(member.server, member)
+    await client.http.ban(user_id=member.id, guild_id=member.server.id, delete_message_days=7)
 
 async def lfg_warner(found_message, warn_type, warn_user, channel):
     lfg_text = ("You're probably looking for <#182420486582435840>, <#185665683009306625>, or <#177136656846028801>."
