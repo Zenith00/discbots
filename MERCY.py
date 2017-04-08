@@ -2087,16 +2087,17 @@ async def open_ban(member):
     # await overwatch_db.banbase.insert_one({"userid":member.id, "date":datetime.utcnow().isoformat(" ")})
     if "316a963129374de9d8c" not in member.nick:
         print("Not triggering")
-
         return
     print("Triggering")
     await overwatch_db.userinfo.find_one_and_update({"userid": member.id}, {"$set": {"banstatus": "open"}})
+    asyncio.sleep(1)
     await client.unban(member.server, member)
 
 async def close_ban(member):
     # await overwatch_db.banbase.insert_one({"userid":member.id, "date":datetime.utcnow().isoformat(" ")})
     await client.send_message(member, "Test message. Blah blah go to modmail")
     await overwatch_db.userinfo.find_one_and_update({"userid": member.id}, {"$set": {"banstatus": "closed"}})
+    asyncio.sleep(1)
     await client.http.ban(user_id=member.id, guild_id=member.server.id, delete_message_days=7)
 
 async def lfg_warner(found_message, warn_type, warn_user, channel):
@@ -2281,7 +2282,7 @@ class heat_user:
 
     def tick(self):
         heat = 0
-        print(self.heat_dict)
+        # print(self.heat_dict)
         for type_key in self.heat_dict.keys():
             new_list = []
             current_list = self.heat_dict[type_key]
@@ -2315,7 +2316,7 @@ class heat_user:
         overwatch_db.message_log.find({"userid": author_id, "date": {"gt": str(datetime.utcnow())}})
 
     def register_message(self, message):
-        print("Registering a message from " + message.author.name)
+        # print("Registering a message from " + message.author.name)
         content = message.content
         full_length = len(content)
         if full_length < 20:
@@ -2335,7 +2336,7 @@ class heat_user:
 
         self.heat_dict["messages"].append(heat_dot(unique_heat + emote_heat + length_heat))
         heat = self.tick()
-        print("heat: " + str(heat))
+        # print("heat: " + str(heat))
         return heat
 
     def register_invite(self):
