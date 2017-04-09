@@ -886,7 +886,8 @@ async def perform_command(command, params, message_in):
                 raw = " ".join(params)
 
                 time_dict = await parse_time_to_end(raw.split(",")[-1])
-                asyncio.sleep(time_dict["duration"].total_seconds())
+                await asyncio.sleep(time_dict["duration"].total_seconds())
+
                 await client.send_message(message_in.channel, "{}, reminding you after {}: `{}`".format(message_in.author.mention, time_dict["readable"], raw.split(",")[0]))
 
         if "trusted" not in auths:
