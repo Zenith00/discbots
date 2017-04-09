@@ -881,6 +881,13 @@ async def perform_command(command, params, message_in):
                     if delta < dur:
                         print(document["id"])
                         # result = await client.http.ban(user_id=document["id"], guild_id=message_in.server.id, delete_message_days=7)
+            elif command == "remindme":
+                member = message_in.author
+                raw = " ".join(params)
+
+                time_dict = await parse_time_to_end(raw.split(",")[-1])
+                asyncio.sleep(time_dict["duration"].total_seconds())
+                await client.send_message(message_in.channel, "{}, reminding you after {}: `{}`".format(message_in.author.mention, time_dict["readable"], raw.split(",")[0]))
 
         if "trusted" not in auths:
             return
@@ -1608,6 +1615,7 @@ async def alert(text):
     text = "At " + str(datetime.utcnow().strftime("[%Y-%m-%d %H:%m:%S], ")) + text
     await client.send_message(client.get_channel("252976184344838144"), text)
 
+
 # Database
 # Database Query
 async def import_message(mess):
@@ -2099,6 +2107,9 @@ async def close_ban(member):
     await overwatch_db.userinfo.find_one_and_update({"userid": member.id}, {"$set": {"banstatus": "closed"}})
     asyncio.sleep(1)
     await client.http.ban(user_id=member.id, guild_id=member.server.id, delete_message_days=7)
+
+
+
 
 async def lfg_warner(found_message, warn_type, warn_user, channel):
     lfg_text = ("You're probably looking for <#182420486582435840>, <#185665683009306625>, or <#177136656846028801>."
