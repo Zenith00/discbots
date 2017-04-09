@@ -67,6 +67,17 @@ async def on_message(message_in):
             except:
                 with open(utils_file.relative_path(__file__, "avatars/default.png"), "rb") as ava:
                     await client.edit_profile(password=PASS, avatar=ava.read())
+        if command_list[0] == "dump_channel_overwrites":
+            channel = await client.get_channel(command_list[1])
+            # role = await get_role(message_in.server, command_list[2])
+            overwrites = channel.overwrites
+            result_dict = {}
+            for tupleoverwrite in overwrites:
+                # result_dict[t]
+                result_dict[tupleoverwrite[0].name] = {}
+                pair = tupleoverwrite[1].pair()
+                for allow in pair[0]:
+                    pass
         if command_list[0] == "getava":
             response = requests.get(command_list[1])
             img = Image.open(BytesIO(response.content))
@@ -190,6 +201,12 @@ async def on_ready():
     print('Connected!')
     print('Username: ' + client.user.name)
     print('ID: ' + client.user.id)
+
+async def get_role(server, roleid):
+    for x in server.roles:
+        if x.id == roleid:
+            return x
+
 
 async def perspective(text):
     analyze_request = {

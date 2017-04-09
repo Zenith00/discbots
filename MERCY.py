@@ -608,6 +608,20 @@ async def perform_command(command, params, message_in):
                 output.append(
                     await generate_multi_user_channel_activity_hist(server=message_in.server, userid_list=params,
                                                                     gist=True))
+            elif command == "rebuild_muted_perms":
+                muted_perms = discord.PermissionOverwrite()
+                muted_perms.connect = False
+                muted_perms.speak = False
+                muted_perms.mute_members = False
+                muted_perms.deafen_members = False
+                muted_perms.move_members = False
+                muted_perms.use_voice_activation = False
+                for channel in message_in.server.channels:
+                    if channel.type == discord.ChannelType.voice:
+                        await client.edit_channel_permissions(channel, await get_role(message_in.server, "110595961490792448"),
+                                                              overwrite=muted_perms)
+                        print("Applying to...{}".format(channel.name))
+
 
         if "trusted" in auths:
             if command == "ui" or command == "userinfo":
