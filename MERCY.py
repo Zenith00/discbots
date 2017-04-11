@@ -2299,7 +2299,6 @@ class temprole_master:
                                       "{mention}, you have been muted. This will prevent you from speaking in other channels and joining voice channels. Your mute will expire in {dur}".format(
                                           mention=member.mention, dur=end_dict["readable"]))
         if isinstance(member, discord.Member):
-            await client.send_message()
             try:
                 await client.add_roles(member, role)
             except discord.NotFound:
