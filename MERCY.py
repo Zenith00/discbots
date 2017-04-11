@@ -822,7 +822,7 @@ async def perform_command(command, params, message_in):
                                                                                          id=member.id,
                                                                                          dur=time_dict["readable"])
                     text = await scrub_text(text, message_in.channel)
-                    await temproles.add_role(member=member, role=role, end_datetime=time_dict["end"])
+                    await temproles.add_role(member=member, role=role, end_dict=time_dict)
                     output.append((text, None))
                 if params[0] in ["remove", "-"]:
                     member = message_in.server.get_member(params[1])
@@ -870,7 +870,7 @@ async def perform_command(command, params, message_in):
                     return
                 output.append(("Muting {mention} [{id}] for {dur}".format(mention=member.mention, id=member.id,
                                                                           dur=time_dict["readable"]), None))
-                await temproles.add_role(member=member, role=role, end_datetime=time_dict["end"])
+                await temproles.add_role(member=member, role=role, end_dict=time_dict)
             elif command == "massban":
                 print("CALLING")
                 start = params[0]
@@ -2218,11 +2218,13 @@ class temprole_master:
             # print("None found: " + member.name)
             pass
 
-    async def add_role(self, member, role, end_datetime):
+    async def add_role(self, member, role, end_dict):
         # end_time = datetime.utcnow() + minutes
-        self.temproles.append(temprole(member.id, role, end_datetime, self.server))
-
+        self.temproles.append(temprole(member.id, role, end_dict["end"], self.server))
+        if role.id == "110595961490792448":
+            await client.send_message(client.get_channel("300600769470791681"), "{mention}, you have been muted. This will prevent you from speaking in other channels and joining voice channels. Your mute will expisre in ")
         if isinstance(member, discord.Member):
+            await client.send_message()
             try:
                 await client.add_roles(member, role)
             except discord.NotFound:
@@ -2231,7 +2233,7 @@ class temprole_master:
                 print(traceback.format_exc())
 
         await overwatch_db.roles.insert_one(
-            {"type": "temp", "member_id": member.id, "role_id": role.id, "end_time": str(end_datetime)})
+            {"type": "temp", "member_id": member.id, "role_id": role.id, "end_time": str(end_dict["end"])})
 
     async def dump(self):
         return [await temprole.dump() for temprole in self.temproles]
