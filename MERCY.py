@@ -2296,7 +2296,7 @@ class temprole_master:
         self.temproles.append(temprole(member.id, role, end_dict["end"], self.server))
         if role.id == "110595961490792448":
             await client.send_message(client.get_channel("300600769470791681"),
-                                      "{mention}, you have been muted. This will prevent you from speaking in other channels and joining voice channels. Your mute will expire in {dur}".format(
+                                      "{mention}, you have been muted. This will prevent you from speaking in other channels and joining voice channels. Your mute will expire in {dur}.".format(
                                           mention=member.mention, dur=end_dict["readable"]))
         if isinstance(member, discord.Member):
             try:
