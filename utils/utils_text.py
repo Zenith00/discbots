@@ -1,4 +1,4 @@
-import re
+import regex as re
 import copy
 import urllib.request
 from datetime import datetime, timedelta
