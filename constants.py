@@ -1,4 +1,4 @@
-import re
+import regex as re
 
 CHANNELNAME_CHANNELID_DICT = {
     "overwatch-discussion"   : "109672661671505920",

@@ -1374,6 +1374,7 @@ async def parse_triggers(message) -> list:
             response_docs.append(doc)
 
     match = re.search(constants.INVITE_REGEX, content)
+
     if match:
         inv_link = match.group(0)
         try:
