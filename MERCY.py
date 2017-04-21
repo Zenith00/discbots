@@ -729,7 +729,7 @@ async def perform_command(command, params, message_in):
             elif command == "filter":
                 if params[0] == "add":
                     STATES["trigger_whitelist"].add(params[1])
-                elif params[1] == "remove":
+                elif params[0] == "remove":
                     STATES["trigger_whitelist"].remove(params[1])
 
             elif command == "channelinfo":
