@@ -479,7 +479,8 @@ async def on_message(message_in):
         await import_message(message_in)
 
         if "mod" not in auths:
-            await parse_triggers(message_in)
+            if message_in.author.id not in STATES["trigger_whitelist"]:
+                await parse_triggers(message_in)
 
 
 async def get_auths(member):
@@ -515,6 +516,7 @@ async def get_auths(member):
 
 
 async def perform_command(command, params, message_in):
+    global STATES
     if params:
         params = await mention_to_id(params.split(" "))
     output = []
@@ -724,6 +726,11 @@ async def perform_command(command, params, message_in):
                         await client.http.ban(user_id=user_id, guild_id=message_in.server.id, delete_message_days=7)
                 else:
                     await client.send_message(message_in.channel, "Cancelling...")
+            elif command == "filter":
+                if params[0] == "add":
+                    STATES["trigger_whitelist"].add(params[1])
+                elif params[1] == "remove":
+                    STATES["trigger_whitelist"].remove(params[1])
 
             elif command == "channelinfo":
                 embed = await output_channel_embed(server=message_in.server, channel_name_or_id=" ".join(params))
@@ -2494,6 +2501,7 @@ async def clock():
     await client.wait_until_ready()
     global heatmap
     STATES["init"] = True
+    STATES["trigger_whitelist"] = set()
     print(STATES["init"])
     STATES["server_log"] = True
     print("Ready")
