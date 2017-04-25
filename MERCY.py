@@ -561,6 +561,9 @@ async def perform_command(command, params, message_in):
                     await client.change_presence(status=discord.Status.online)
                 else:
                     await client.change_presence(status=discord.Status.invisible)
+            if command == "statusreset":
+                await client.change_presence(status=discord.Status.online)
+
             elif command == "names":
                 count = 0
                 text = ""

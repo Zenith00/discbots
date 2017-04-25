@@ -65,6 +65,9 @@ async def on_message(message_in):
                     await client.change_presence(status=discord.Status.online)
                 else:
                     await client.change_presence(status=discord.Status.invisible)
+            if command_list[0] == "statusreset":
+                await client.change_presence(status=discord.Status.online)
+
             if command_list[0] == "dump":
                 if len(command_list) > 1:
                     target = command_list[1]
