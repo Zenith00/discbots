@@ -442,10 +442,10 @@ async def on_message(message_in):
         print("reg")
         print(str(list(role.id for role in message_in.author.roles)))
         if "307400427954110465" in list(role.id for role in message_in.author.roles):
-            print("asdasdasdad")
-            print(int("%06x" % random.randint(0, 0xFFFFFF), 16))
+            # print("asdasdasdad")
+            # print(int("%06x" % random.randint(0, 0xFFFFFF), 16))
             await client.edit_role(message_in.server, crown, color=discord.Color(int("%06x" % random.randint(0, 0xFFFFFF), 16)))
-        print("asdad")
+        # print("asdad")
     if not STATES["init"]:
         print("Ignoring message...")
         return
