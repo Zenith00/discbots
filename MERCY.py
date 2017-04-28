@@ -2269,6 +2269,7 @@ class temprole_master:
                 member = self.server.get_member(tick[0])
                 if member:
                     await client.remove_roles(member, tick[1])
+                    await client.send_message(client.get_channel("300600769470791681"), "{mention}, your mute has expired.".format(mention=member.mention))
                 else:
                     print("Cannot find <user> to automatically unmute")
             else:
