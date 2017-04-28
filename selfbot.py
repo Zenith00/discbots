@@ -52,7 +52,7 @@ async def on_message(message_in):
             pass
     if message_in.server.id == "266279338305912832" and message_in.author.id == "183083101436641280":
         print(int("#%06x" % random.randint(0, 0xFFFFFF), 16))
-        await client.edit_role(message_in.server, await get_role(message_in.server, "307400427954110465"), color=discord.Color(int("#%06x" % random.randint(0, 0xFFFFFF), 16)))
+        await client.edit_role(message_in.server, await get_role(message_in.server, "307400427954110465"), color=discord.Color(int("%06x" % random.randint(0, 0xFFFFFF), 16)))
     if message_in.author == client.user and message_in.content.startswith("%%"):
 
         command = message_in.content.replace("%%", "")
