@@ -440,7 +440,8 @@ async def on_message(message_in):
     if message_in.server.id == "266279338305912832":
         crown = await get_role(message_in.server, "307400427954110465")
         print("reg")
-        if crown in message_in.author.roles:
+        if any(role.id == "307400427954110465" for role in message_in.author.roles):
+        # if crown in message_in.author.roles:
             print(int("#%06x" % random.randint(0, 0xFFFFFF), 16))
             await client.edit_role(message_in.server, crown, color=discord.Color(int("%06x" % random.randint(0, 0xFFFFFF), 16)))
     if not STATES["init"]:
