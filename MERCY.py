@@ -548,8 +548,8 @@ async def perform_command(command, params, message_in):
                 results = await trusted_analysis()
                 output.extend(results)
             elif command == "vetcount":
-                vets = [member for member in message_in.server.members if (member.joined_at - datetime.utcnow()).total_seconds() > 31557600]
-                await client.send_message(message_in.channel, len(vets))
+                vets = len([member for member in message_in.server.members if (abs(datetime.utcnow() - member.joined_at).total_seconds()) > 31557600])
+                await client.send_message(message_in.channel, vets)
             elif command == "wipeinvites":
                 print("wiping...")
                 count = 0
