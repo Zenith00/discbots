@@ -6,6 +6,8 @@ import dateparser
 import traceback
 # from pyshorteners import Shortener
 import math
+import textwrap
+
 
 def regex_test(reg_str, string):
     reg = re.compile(reg_str, re.IGNORECASE)
@@ -40,10 +42,12 @@ def format_rows(list_of_rows):
     for row in list_of_rows:
         new_item = format_row_to_widths(row, widths).rstrip()
         if len(block) + len(new_item) > 2000:
-            # print(block)
-            # print("\n"*3)
             list_of_blocks.append(block.rstrip())
             block = ""
+        if len(new_item.rstrip()) > 2000:
+            lines = textwrap.wrap(new_item.rstrip(), 2000, break_long_words=False)
+            list_of_blocks.extend(lines)
+            new_item = ""
         block += "\n" + new_item.rstrip()
         # print(block)
     list_of_blocks.append(block.rstrip())
