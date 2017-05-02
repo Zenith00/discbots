@@ -477,6 +477,7 @@ async def on_message(message_in):
         return
     if message_in.author.id == constants.ZENITH_ID:
         heatmap.register(message_in.author.id, "message", message_in)
+
     if message_in.server is None:
 
         def scrim_register(msg):
@@ -574,9 +575,13 @@ async def perform_command(command, params, message_in):
             called = True
         # print("Firing...")
         if "zenith" in auths:
+
             if command == "trustedinfo":
                 results = await trusted_analysis()
                 output.extend(results)
+            elif command == "vetcount":
+                vets = len([member for member in message_in.server.members if (abs(datetime.utcnow() - member.joined_at).total_seconds()) > 31557600])
+                await client.send_message(message_in.channel, vets)
             elif command == "wipeinvites":
                 print("wiping...")
                 count = 0
