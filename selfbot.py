@@ -86,13 +86,7 @@ async def on_message(message_in):
                 pair = tupleoverwrite[1].pair()
                 for allow in pair[0]:
                     pass
-        if command_list[0] == "reactions":
-            message = await client.get_message(client.get_channel(command_list[1]), command_list[2])
-            reaction_set = collections.defaultdict(int)
-            for reaction in message.reactions:
-                reaction_set[reaction.emoji if isinstance(reaction.emoji, str) else reaction.emoji.name] = reaction_set[reaction.emoji if isinstance(reaction.emoji, str) else reaction.emoji.name] + 1
 
-            await send(message_in.channel, reaction_set.items(), "rows")
 
         if command_list[0] == "getava":
             response = requests.get(command_list[1])
