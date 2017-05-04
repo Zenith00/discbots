@@ -754,7 +754,7 @@ async def perform_command(command, params, message_in):
                     reaction_set[reaction.emoji if isinstance(reaction.emoji, str) else reaction.emoji.name] = \
                     reaction_set[reaction.emoji if isinstance(reaction.emoji, str) else reaction.emoji.name] + 1
 
-                await send(message_in.channel, reaction_set.items(), "rows")
+                await send(message_in.channel, [(str(v), str(k)) for v, k in reaction_set.items()], "rows")
             elif command == "dumpinfo":
                 target = await export_user(params[0])
                 rows = [(k, str(v)) for k, v in target.items()]
