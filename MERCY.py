@@ -751,8 +751,7 @@ async def perform_command(command, params, message_in):
                 message = await client.get_message(client.get_channel(params[0]), params[1])
                 reaction_set = collections.defaultdict(int)
                 for reaction in message.reactions:
-                    reaction_set[reaction.emoji if isinstance(reaction.emoji, str) else reaction.emoji.name] = \
-                    reaction_set[reaction.emoji if isinstance(reaction.emoji, str) else reaction.emoji.name] + 1
+                    reaction_set[reaction.emoji if isinstance(reaction.emoji, str) else reaction.emoji.name] = reaction.count
 
                 await send(message_in.channel, [(str(v), str(k)) for v, k in reaction_set.items()], "rows")
             elif command == "dumpinfo":
