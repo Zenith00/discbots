@@ -18,7 +18,7 @@ from collections import defaultdict
 # import sys
 #
 # sys.stdout = Unbuffered(sys.stdout)
-
+import collections
 import discord
 import motor.motor_asyncio
 import pymongo
@@ -747,7 +747,13 @@ async def perform_command(command, params, message_in):
                     if channel.id in channel_id_name.keys():
                         await client.edit_channel(
                             channel, name=channel_id_name[channel.id])
+            if command == "reactions":
+                message = await client.get_message(client.get_channel(params[0]), params[1])
+                reaction_set = collections.defaultdict(int)
+                for reaction in message.reactions:
+                    reaction_set[reaction.emoji if isinstance(reaction.emoji, str) else reaction.emoji.name] = reaction.count
 
+                await send(message_in.channel, [(str(v), str(k)) for v, k in reaction_set.items()], "rows")
             elif command == "dumpinfo":
                 target = await export_user(params[0])
                 rows = [(k, str(v)) for k, v in target.items()]

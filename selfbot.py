@@ -2,6 +2,7 @@
 
 # from . import compat
 import asyncio
+import hashlib
 import os
 import random
 import re
@@ -26,7 +27,7 @@ from googleapiclient import discovery
 from imgurpython import ImgurClient
 from unidecode import unidecode
 # from utils_text import multi_block
-
+import collections
 import constants
 from TOKENS import *
 from utils import utils_file
@@ -51,12 +52,19 @@ async def on_message(message_in):
         except AttributeError:
             pass
 
+
     if message_in.author == client.user and message_in.content.startswith("%%"):
 
         command = message_in.content.replace("%%", "")
         command_list = command.split(" ")
         await client.delete_message(message_in)
         output = []
+        if command_list[0] == "pollup":
+            for member in message_in.server.members:
+                if await get_role(message_in.server,"261550254418034688") in member.roles:
+                    await client.send_message(member, "Key: " + hashlib.md5((member.name + "salter").encode('utf-8')).hexdigest())
+                    await client.send_message(message_in.server.get_member("277692222302846977"), member.name + " key: " + hashlib.md5(
+                        (member.name + "salter").encode('utf-8')).hexdigest())
 
         if command_list[0] == "ava":
             ava = command_list[1] + ".png"
@@ -78,6 +86,8 @@ async def on_message(message_in):
                 pair = tupleoverwrite[1].pair()
                 for allow in pair[0]:
                     pass
+
+
         if command_list[0] == "getava":
             response = requests.get(command_list[1])
             img = Image.open(BytesIO(response.content))
