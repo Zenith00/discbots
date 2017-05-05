@@ -9,7 +9,7 @@ client = discord.Client()
 
 @client.event
 async def on_message(message_in):
-    parameterized = message_in.split(" ")
+    parameterized = message_in.content.split(" ")
     command = parameterized[0]
     params = parameterized[1:]
 
