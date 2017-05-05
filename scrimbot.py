@@ -1,6 +1,7 @@
 import motor.motor_asyncio
 import discord
 import asyncio
+import TOKENS
 
 mongo_client = motor.motor_asyncio.AsyncIOMotorClient()
 client = discord.Client()
@@ -16,11 +17,11 @@ async def on_message(message_in):
         for region in params:
             region = region.lower()
             if region in ["na", "north america"]:
-                await toggle_role(message_in.author, )
+                await toggle_role(message_in.author, "310187563317067776")
             elif region in ["eu", "europe"]:
-                pass
+                await toggle_role(message_in.author, "310187546497908738")
             elif region in ["oce","aus"]:
-                pass
+                await toggle_role(message_in.author, "310187573849096193")
     pass
 
 
@@ -63,3 +64,6 @@ async def clock():
     while not client.is_closed:
         await asyncio.sleep(2)
         await tick()
+
+client.loop.create_task(clock())
+client.run(TOKENS.SCRIM_TOKEN, bot=True)
