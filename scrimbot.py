@@ -33,8 +33,11 @@ async def on_message(message_in):
                 await toggle_role(message_in.author, "310187563317067776")
             elif region in ["eu", "europe"]:
                 await toggle_role(message_in.author, "310187546497908738")
-            elif region in ["oce","aus"]:
+            elif region in ["oce", "aus"]:
                 await toggle_role(message_in.author, "310187573849096193")
+            else:
+                return
+            await client.delete_message(message_in)
 
     pass
 
