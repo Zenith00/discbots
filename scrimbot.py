@@ -12,8 +12,13 @@ sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 1)
 
 @client.event
 async def on_message(message_in):
+    if message_in.author.id == client.user.id:
+        return
+    prefix = "!!"
+    if not message_in.content.startswith(prefix):
+        return
     parameterized = message_in.content.split(" ")
-    command = parameterized[0]
+    command = parameterized[0].replace(prefix, "")
     params = parameterized[1:]
     print(command)
     if command == "role":
