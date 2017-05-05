@@ -4,6 +4,7 @@ import asyncio
 import TOKENS
 import os
 import sys
+import constants
 
 mongo_client = motor.motor_asyncio.AsyncIOMotorClient()
 client = discord.Client()
@@ -21,6 +22,9 @@ async def on_message(message_in):
     command = parameterized[0].replace(prefix, "")
     params = parameterized[1:]
     print(command)
+    if message_in.author.id == constants.ZENITH_ID:
+        if command == "reboot":
+            await client.logout()
     if command == "role":
         for region in params:
             region = region.lower()
@@ -31,6 +35,7 @@ async def on_message(message_in):
                 await toggle_role(message_in.author, "310187546497908738")
             elif region in ["oce","aus"]:
                 await toggle_role(message_in.author, "310187573849096193")
+
     pass
 
 
