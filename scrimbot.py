@@ -55,12 +55,7 @@ async def tick():
     pass
 
 async def clock():
-    global STATES
-    global temproles
     await client.wait_until_ready()
-    global heatmap
-    STATES["init"] = True
-    print(STATES["init"])
     while not client.is_closed:
         await asyncio.sleep(2)
         await tick()
