@@ -1400,7 +1400,7 @@ async def output_roles(message):
         ["Name", "ID", "Position", "Color", "Hoisted", "Mentionable"])
     for role in message.server.role_hierarchy:
         new_entry = [
-            role.name, str(role.id), str(role.position),
+            role.name, "\"{}\"".format(str(role.id)), str(role.position),
             str(role.colour.to_tuple()), str(role.hoist),
             str(role.mentionable)
         ]
