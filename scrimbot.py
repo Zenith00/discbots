@@ -2,20 +2,24 @@ import motor.motor_asyncio
 import discord
 import asyncio
 import TOKENS
+import os
+import sys
 
 mongo_client = motor.motor_asyncio.AsyncIOMotorClient()
 client = discord.Client()
-
+os.environ["PYTHONUNBUFFERED"] = "True"
+sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 1)
 
 @client.event
 async def on_message(message_in):
     parameterized = message_in.content.split(" ")
     command = parameterized[0]
     params = parameterized[1:]
-
+    print(command)
     if command == "role":
         for region in params:
             region = region.lower()
+            print(region)
             if region in ["na", "north america"]:
                 await toggle_role(message_in.author, "310187563317067776")
             elif region in ["eu", "europe"]:
