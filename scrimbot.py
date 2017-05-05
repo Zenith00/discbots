@@ -34,7 +34,8 @@ async def on_message(message_in):
     pass
 
 
-async def toggle_role(member, role):
+async def toggle_role(member, role_id):
+    role = get_role(member.server, role_id)
     if role in member.roles:
         await client.remove_roles(member, role)
     else:
