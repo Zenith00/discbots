@@ -25,6 +25,34 @@ async def on_message(message_in):
     if message_in.author.id == constants.ZENITH_ID:
         if command == "reboot":
             await client.logout()
+        elif command == "rebuild_muted_perms":
+            muted_perms = discord.PermissionOverwrite()
+            muted_perms.connect = False
+            muted_perms.speak = False
+            muted_perms.mute_members = False
+            muted_perms.deafen_members = False
+            muted_perms.move_members = False
+            muted_perms.use_voice_activation = False
+            for channel in message_in.server.channels:
+                if channel.type == discord.ChannelType.voice:
+                    await client.edit_channel_permissions(
+                        channel,
+                        await get_role(message_in.server,
+                                       "295230064302358528"),
+                        overwrite=muted_perms)
+                    print("Applying to...{}".format(channel.name))
+            muted_perms = discord.PermissionOverwrite()
+            muted_perms.send_messages = False
+            for channel in message_in.server.channels:
+                if channel.type == discord.ChannelType.text:
+                    await client.edit_channel_permissions(
+                        channel,
+                        await get_role(message_in.server,
+                                       "295230064302358528"),
+                        overwrite=muted_perms)
+                    print("Applying to...{}".format(channel.name))
+    if message_in.channel.id == "263360306984517633":
+        parse_event(message_in.content)
     if command == "role":
         for region in params:
             region = region.lower()
@@ -49,6 +77,8 @@ async def toggle_role(member, role_id):
     else:
         await client.add_roles(member, role)
 
+async def parse_event(text):
+    pass
 
 async def get_auths(member):
     if any(role in member.roles for role in [await get_role(member.server, "269494920635613194"), await get_role(member.server, "260186671641919490")]):
