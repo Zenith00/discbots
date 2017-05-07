@@ -2726,14 +2726,17 @@ class temprole:
         # print(self.role)
 
         if self.end < datetime.now():
-            await overwatch_db.roles.delete_one({
-                "type": "temp",
-                "member_id": self.member_id,
-                "role_id": self.role.id,
-                "end_time": str(self.end)
-            })
-            print("Tock off: " + self.member_id)
-            return (self.member_id, self.role)
+            try:
+                await overwatch_db.roles.delete_one({
+                    "type": "temp",
+                    "member_id": self.member_id,
+                    "role_id": self.role.id,
+                    "end_time": str(self.end)
+                })
+                print("Tock off: " + self.member_id)
+                return (self.member_id, self.role)
+            except:
+                return None
         else:
             # print("Ticking: " + self.member_id)
             return None
