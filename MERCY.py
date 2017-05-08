@@ -925,6 +925,9 @@ async def perform_command(command, params, message_in):
                 await tag_str(
                     trigger=" ".join(params), message=message_in, regex=True)
             elif command == "userlogs":
+                if params[0] == "129706966460137472":
+                    await client.send_message(message_in.channel, "Nope.exe")
+                    return
                 output.append(await output_logs(
                     userid=params[0], count=params[1], message_in=message_in))
             elif command == "channeldist":
