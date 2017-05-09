@@ -43,14 +43,14 @@ overwatch_db = motor.motor_asyncio.AsyncIOMotorClient().overwatch
 
 @client.event
 async def on_message(message_in):
-    #                                                                                           server-meta     server log   bot  log  voice channel
-    if message_in.server and message_in.server.id == constants.OVERWATCH_SERVER_ID and message_in.channel.id not in ["264735004553248768", "152757147288076297",
-                                                                                                                     "147153976687591424",
-                                                                                                                     "200185170249252865"]:
-        try:
-            await mess2log(message_in)
-        except AttributeError:
-            pass
+    # #                                                                                           server-meta     server log   bot  log  voice channel
+    # if message_in.server and message_in.server.id == constants.OVERWATCH_SERVER_ID and message_in.channel.id not in ["264735004553248768", "152757147288076297",
+    #                                                                                                                  "147153976687591424",
+    #                                                                                                                  "200185170249252865"]:
+    #     try:
+    #         await mess2log(message_in)
+    #     except AttributeError:
+    #         pass
 
 
     if message_in.author == client.user and message_in.content.startswith("%%"):
