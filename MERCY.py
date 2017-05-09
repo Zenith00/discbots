@@ -1628,8 +1628,10 @@ async def parse_triggers(message) -> list:
     if match:
         inv_link = match.group(0)
         print(inv_link)
+
         try:
             invite = await client.get_invite(inv_link)
+            print(invite.server.name)
             if invite.server.id == message.server.id:
                 if message.channel.id in [
                         constants.CHANNELNAME_CHANNELID_DICT[
@@ -1658,7 +1660,7 @@ async def parse_triggers(message) -> list:
                     "Please don't link other discord servers here"
                 })
         except discord.errors.NotFound:
-            pass
+            print(traceback.format_exc())
 
     await act_triggers(response_docs, message)
 
