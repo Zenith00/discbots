@@ -1622,7 +1622,7 @@ async def parse_triggers(message) -> list:
             print("Found: " + doc["trigger"])
             response_docs.append(doc)
 
-    match = re.search(constants.INVITE_REGEX, content)
+    match = regex_test(constants.INVITE_REGEX, content)
 
     if match:
         inv_link = match.group(0)
