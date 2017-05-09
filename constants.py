@@ -95,8 +95,8 @@ VOICE_LINES = (
     "Immer unterbricht mich jemand bei der Arbeit.")
 LFG_REGEX = re.compile(
     (r"(lf(G|\d))|(\d\d\d\d)|(plat|gold|silver|diamond)|(^LF(((NA)|(EU))|(\s?\d)))|((NA|EU) (LF(g|\d)*))|"
-     "(http(s?)://discord.gg/)|(xbox)|(ps4)"), re.IGNORECASE)
-INVITE_REGEX = re.compile(r"discord\.gg\/\w+", re.IGNORECASE)
+     "(http(s?)://discord.gg/)|(xbox)|(ps4)"))
+INVITE_REGEX = re.compile(r"discord\.gg\/\w+")
 
 HOTS_REGEX = re.compile(r"(heroes of the storm)|(storm)|(heros)|(hots)|(heroes)|(genji)|(oni)",
                         re.IGNORECASE)

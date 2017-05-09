@@ -1,7 +1,10 @@
 import re
 import regex
+import constants
+
 import utils.utils_text
 
-r = utils.utils_text.regex_test("([[:punct:]]|\s)kappa(\s|[[:punct:]])", "kappa")
+content = "https://discord.gg/fRZ8s"
+match = re.search(constants.INVITE_REGEX, content)
 
-print(r)
+print(match)
