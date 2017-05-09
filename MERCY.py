@@ -1624,9 +1624,10 @@ async def parse_triggers(message) -> list:
             response_docs.append(doc)
 
     match = regex_test(constants.INVITE_REGEX, content)
-
+    print(match)
     if match:
         inv_link = match.group(0)
+        print(inv_link)
         try:
             invite = await client.get_invite(inv_link)
             if invite.server.id == message.server.id:
