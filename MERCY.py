@@ -1585,20 +1585,9 @@ async def tag_str(trigger, message, regex):
 
 async def parse_triggers(message) -> list:
     response_docs = []
-    content = unidecode(strip_markdown(message.content.lower()))
-    print(content)
-    # trigger_cursor = overwatch_db.trigger_str_collection.find()
-    # trigger_dict = await trigger_cursor.to_list()
-    # trigger_list = [item["trigger"] for item in trigger_dict]
-    # print("Parsing triggers for " + content)
-    async for doc in overwatch_db.trigger_str_collection.find():
-
-        if regex_test(doc["trigger"], content):
-            print("Found: " + doc["trigger"])
-            response_docs.append(doc)
-
+    content = unidecode(strip_markdown(message.content))
     match = regex_test(constants.INVITE_REGEX, content)
-    print(match)
+
     if match:
         inv_link = match.group(0)
         print(inv_link)
@@ -1635,6 +1624,15 @@ async def parse_triggers(message) -> list:
                 })
         except discord.errors.NotFound:
             print(traceback.format_exc())
+
+
+    async for doc in overwatch_db.trigger_str_collection.find():
+
+        if regex_test(doc["trigger"], content):
+            print("Found: " + doc["trigger"])
+            response_docs.append(doc)
+
+
 
     await act_triggers(response_docs, message)
 
