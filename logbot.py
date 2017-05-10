@@ -256,8 +256,7 @@ async def on_message(message_in):
 
                 if state_target:
                     print("0")
-                    start_state = message_in[message_in.server.id]["states"][
-                        state_target]
+                    start_state = log_config[message_in.server.id]["states"][state_target]
                     print("1")
                     log_config[message_in.server.id]["states"][
                         state_target] = not message_in[message_in.server.
