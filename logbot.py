@@ -114,7 +114,7 @@ async def on_message(message_in):
                 await client.send_message(
                     message_in.channel,
                     "The server log records joins, leaves, bans, and unbans.\nIf you want to enable the server log, please respond with "
-                    "a channel mention or ID. Ex: `#general`. Otherwise, say `no`"
+                    "a channel mention or ID that you would like the logs to show up in. Ex: `#logs`. Otherwise, say `no`"
                 )
                 target_id = None
 
@@ -156,7 +156,7 @@ async def on_message(message_in):
                 await client.send_message(
                     message_in.channel,
                     "The message log records message edits and deletions.\nIf you want to enable the message log, please respond with"
-                    " a channel mention or ID. Ex: `#general`. Otherwise, say `no`"
+                    " a channel mention or ID that you would like the logs to show up in. Ex: `#logs`.. Otherwise, say `no`"
                 )
                 target_id = None
 
@@ -257,6 +257,7 @@ async def on_message(message_in):
                     log_config[message_in.server.id]["states"][
                         state_target] = not message_in[message_in.server.
                                                        id]["states"][state_target]
+                    print(state_target)
                     await client.send_message(
                         message_in.channel,
                         "Toggling {state} from {state_start} to {state_end}".
@@ -268,7 +269,7 @@ async def on_message(message_in):
                 else:
                     await client.send_message(
                         message_in.channel,
-                        "Did not recognize. Please try again with either `server`, `message`, or `message`"
+                        "Did not recognize. Please try again with either `server`, `message`, or `voice`"
                     )
             if command_list[0] == "setprefix":
                 log_config[message_in.server.id]["prefix"] = " ".join(
