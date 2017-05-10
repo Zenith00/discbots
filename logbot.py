@@ -255,12 +255,14 @@ async def on_message(message_in):
                 print(state_target)
 
                 if state_target:
+                    print("0")
                     start_state = message_in[message_in.server.id]["states"][
                         state_target]
+                    print("1")
                     log_config[message_in.server.id]["states"][
                         state_target] = not message_in[message_in.server.
                                                        id]["states"][state_target]
-                    print(state_target)
+                    print(":" + state_target)
                     await client.send_message(
                         message_in.channel,
                         "Toggling {state} from {state_start} to {state_end}".
