@@ -245,12 +245,15 @@ async def on_message(message_in):
                     )
                     return
                 state_target = None
+                print(command_list[1:])
                 if "server" in command_list[1:]:
                     state_target = "server_log"
                 elif "message" in command_list[1:]:
                     state_target = "message_log"
                 elif "voice" in command_list[1:]:
                     state_target = "voice_log"
+                print(state_target)
+
                 if state_target:
                     start_state = message_in[message_in.server.id]["states"][
                         state_target]
@@ -461,7 +464,7 @@ async def log_action(server, action, detail):
                     word = "<" + word + ">"
                 new.append(word)
             detail[target] = " ".join(new)
-            if action not in ["leave", "ban"]:
+            if action not in ["leave", "ban"] and server_log:
                 detail[target] = await scrub_text(detail[target], server_log)
 
     time = "`" + time + "`"
