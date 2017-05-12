@@ -69,7 +69,6 @@ async def on_message(message_in):
 
     pass
 
-
 async def toggle_role(member, role_id):
     role = await get_role(member.server, role_id)
     if role in member.roles:
@@ -98,6 +97,29 @@ async def get_role(server, roleid):
     for x in server.roles:
         if x.id == roleid:
             return x
+
+class scrim_event:
+    def __init__(self, name):
+        self.name = name
+        self.members = []
+
+    def attach(self, member):
+        self.members.append(member)
+
+    def detatch(self, member):
+        self.members.remove(member)
+
+    def output_members(self):
+        return "\n".join(member.name + " " + member.discriminator for member in self.members)
+
+    def output_pings(self):
+        return "\n".join(member.mention for member in self.members)
+
+
+    def __eq__(self, other):
+        if isinstance(other, scrim_event):
+            return self.name == other.name
+        return False
 
 async def tick():
     pass
