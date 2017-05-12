@@ -110,7 +110,7 @@ async def on_message(message_in):
                     message_in.channel,
                     "Setting prefix to {prefix}".format(
                         prefix="`" + log_config[message_in.server.id]["prefix"]
-                        + "`"))
+                               + "`"))
                 await client.send_message(
                     message_in.channel,
                     "The server log records joins, leaves, bans, and unbans.\nIf you want to enable the server log, please respond with "
@@ -260,12 +260,12 @@ async def on_message(message_in):
                     print("1")
                     log_config[message_in.server.id]["states"][
                         state_target] = not message_in[message_in.server.
-                                                       id]["states"][state_target]
+                        id]["states"][state_target]
                     print(":" + state_target)
                     await client.send_message(
                         message_in.channel,
                         "Toggling {state} from {state_start} to {state_end}".
-                        format(
+                            format(
                             state=state_target,
                             state_start=start_state,
                             state_end=not start_state))
@@ -311,6 +311,11 @@ async def on_message(message_in):
                     "\n{pfx}oauth to get an invite link"
                     "\n{pfx}info to see current log positions".format(
                         pfx=prefix))
+        if message_in.author in await get_moderators(message_in.server):
+            if command_list[0] == "track":
+                command_list = await mention_to_id(command_list)
+                if command_list[1] == "vc":
+                    pass
 
 
 @client.event
@@ -483,17 +488,17 @@ async def log_action(server, action, detail):
             target_channel = message_log
             await log_db[server.id].insert_one({
                 "date":
-                datetime.utcnow().isoformat(" "),
+                    datetime.utcnow().isoformat(" "),
                 "action":
-                action,
+                    action,
                 "channel":
-                detail["channel"],
+                    detail["channel"],
                 "mention":
-                detail["mention"],
+                    detail["mention"],
                 "id":
-                detail["id"],
+                    detail["id"],
                 "content":
-                detail["content"]
+                    detail["content"]
             })
         elif action == "edit":
             message = "{time} :pencil: [EDIT] [{channel}] [{mention}] [{id}]:\n`-BEFORE:` {before} \n`+ AFTER:` {after}".format(
@@ -506,19 +511,19 @@ async def log_action(server, action, detail):
             target_channel = message_log
             await log_db[server.id].insert_one({
                 "date":
-                datetime.utcnow().isoformat(" "),
+                    datetime.utcnow().isoformat(" "),
                 "action":
-                action,
+                    action,
                 "channel":
-                detail["channel"],
+                    detail["channel"],
                 "mention":
-                detail["mention"],
+                    detail["mention"],
                 "id":
-                detail["id"],
+                    detail["id"],
                 "before":
-                detail["before"],
+                    detail["before"],
                 "after":
-                detail["after"]
+                    detail["after"]
             })
 
     if log_config[server.id]["states"]["server_log"]:
@@ -531,13 +536,13 @@ async def log_action(server, action, detail):
             target_channel = server_log
             await log_db[server.id].insert_one({
                 "date":
-                datetime.utcnow().isoformat(" "),
+                    datetime.utcnow().isoformat(" "),
                 "action":
-                action,
+                    action,
                 "id":
-                detail["id"],
+                    detail["id"],
                 "age":
-                detail["age"]
+                    detail["age"]
             })
         elif action == "leave":
             message = "{time} :outbox_tray: [LEAVE] [{mention}] [{id}]".format(
@@ -545,11 +550,11 @@ async def log_action(server, action, detail):
             target_channel = server_log
             await log_db[server.id].insert_one({
                 "date":
-                datetime.utcnow().isoformat(" "),
+                    datetime.utcnow().isoformat(" "),
                 "action":
-                action,
+                    action,
                 "id":
-                detail["id"]
+                    detail["id"]
             })
 
         elif action == "ban":
@@ -558,18 +563,18 @@ async def log_action(server, action, detail):
                 mention=detail["member"].mention,
                 id=detail["member"].id,
                 name=detail["member"].name + "#" +
-                detail["member"].discriminator,
+                     detail["member"].discriminator,
                 nick=detail["member"].nick if detail["member"].nick else "")
             target_channel = server_log
             await log_db[server.id].insert_one({
                 "date":
-                datetime.utcnow().isoformat(" "),
+                    datetime.utcnow().isoformat(" "),
                 "action":
-                action,
+                    action,
                 "id":
-                detail["member"].id,
+                    detail["member"].id,
                 "mention":
-                detail["member"].mention
+                    detail["member"].mention
             })
 
         elif action == "unban":
@@ -579,13 +584,13 @@ async def log_action(server, action, detail):
             target_channel = server_log
             await log_db[server.id].insert_one({
                 "date":
-                datetime.utcnow().isoformat(" "),
+                    datetime.utcnow().isoformat(" "),
                 "action":
-                action,
+                    action,
                 "id":
-                detail["id"],
+                    detail["id"],
                 "mention":
-                detail["mention"]
+                    detail["mention"]
             })
         elif action == "role_change":
             # print("TRIGGERING ROLE CHANGE")
@@ -667,16 +672,34 @@ async def log_action(server, action, detail):
 
             await log_db[server.id].insert_one({
                 "date":
-                datetime.utcnow().isoformat(" "),
+                    datetime.utcnow().isoformat(" "),
                 "action":
-                action,
+                    action,
                 "id":
-                detail["id"]
+                    detail["id"]
             })
 
     if message and target_channel:
         message = await scrub_text(message, voice_log)
         await client.send_message(target_channel, message)
+
+
+async def mention_to_id(command_list):
+    """
+
+    :type command: list
+    """
+    new_command = []
+    reg = re.compile(r"<[@#](!?)\d*>", re.IGNORECASE)
+    for item in command_list:
+        match = reg.search(item)
+        if match is None:
+            new_command.append(item)
+        else:
+            idmatch = re.compile(r"\d")
+            id_chars = "".join(idmatch.findall(item))
+            new_command.append(id_chars)
+    return new_command
 
 
 # async def import_to_user_set(member, set_name, entry):
@@ -720,11 +743,12 @@ async def scrub_text(text, channel):
                 return mention
 
         text = re.sub("(<@&\d+>)", escape_role, text)
+
+        text.replace("@everyone", "*[@ everyone]")
+        text.replace("@here", "*[@ here]")
     except:
         print(traceback.format_exc())
     return text
-
-    # for group in [group for group in userid_matches.groups() if group]:
 
 
 async def scrub_text2(text, channel):
@@ -790,24 +814,6 @@ async def get_moderators(server):
     return members
 
 
-# async def import_user(member):
-#     user_info = await utils_parse.parse_member_info(member)
-#     result = await overwatch_db.userinfo.update_one(
-#         {"userid": member.id},
-#         {
-#             "$addToSet": {
-#                 "nicks": {"$each": [user_info["nick"], user_info["name"]]},
-#                 "names": {"$each": [user_info["name"]]},
-#                 "full_name":user_info["name"] + "#" + str(user_info["discrim"]),
-#                 "avatar_urls": user_info["avatar_url"],
-#                 "server_joins": user_info["joined_at"]},
-#             "$set": {"mention_str": user_info["mention_str"],
-#                      "created_at": user_info["created_at"]},
-#
-#         }
-#         , upsert=True
-#     )
-#     pass
 async def send(destination, text, send_type, delete_in=0):
     if isinstance(destination, str):
         destination = await client.get_channel(destination)
@@ -854,8 +860,32 @@ class Unbuffered(object):
         return getattr(self.stream, attr)
 
 
-import sys
+class tracker:
+    header = None
+    message = None
 
+    def __init__(self, target, destination, author):
+        self.rows = []
+        self.target = target
+        self.destination = destination
+        self.max_size = 1875
+        self.trackers = [author]
+
+    async def start(self):
+        self.header = "Starting Tracking of {mention} [{userid}]\n".format(mention=self.target.mention, userid=self.target.id)
+        self.message = await client.send_message(self.destination, self.header)
+
+    async def add_entry(self, entry):
+        self.rows.append(entry)
+        while len(self.header + "\n".join(self.rows)) > self.max_size:
+            self.rows.remove(0)
+        await client.edit_message(self.message, self.header + "\n".join(self.rows))
+
+
+
+
+
+import sys
 sys.stdout = Unbuffered(sys.stdout)
 
 

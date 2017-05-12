@@ -11,6 +11,9 @@ client = discord.Client()
 os.environ["PYTHONUNBUFFERED"] = "True"
 sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 1)
 
+event_dict = {}
+
+
 @client.event
 async def on_message(message_in):
     if message_in.author.id == client.user.id:
@@ -21,6 +24,7 @@ async def on_message(message_in):
     parameterized = message_in.content.split(" ")
     command = parameterized[0].replace(prefix, "")
     params = parameterized[1:]
+    auths = await get_auths(message_in.author)
     print(command)
     if message_in.author.id == constants.ZENITH_ID:
         if command == "reboot":
@@ -67,7 +71,26 @@ async def on_message(message_in):
                 return
             await client.delete_message(message_in)
 
+    if "host" in auths:
+        if command == "create":
+            if len(params) == 0:
+                await client.send_message(message_in.channel, "Please enter a scrim name.")
+                params[0] = (await client.wait_for_message(author=message_in.author, channel=message_in.channel)).content
+            new_scrim_name = event_dict[" ".join(params)]
+            event_dict[new_scrim_name] = scrim_event(new_scrim_name)
+
+            await client.send_message(message_in.channel, "Please enter a time in the format `hh:mm timezone`. For example, 18:30 CET")
+
+            await client.send_message(message_in.channe, "If you would like to attach a description, please respond with one. Otherwise, say `done`")
+            in_mess = await client.wait_for_message(author=message_in.author, channel=message_in.channel)
+            if in_mess.content != "done":
+                event_dict[new_scrim_name].name = in_mess.content
+
+
     pass
+
+
+
 
 async def toggle_role(member, role_id):
     role = await get_role(member.server, role_id)
@@ -76,15 +99,10 @@ async def toggle_role(member, role_id):
     else:
         await client.add_roles(member, role)
 
+
 async def parse_event(text):
     pass
 
-async def get_auths(member):
-    if any(role in member.roles for role in [await get_role(member.server, "269494920635613194"), await get_role(member.server, "260186671641919490")]):
-        return "moderator"
-    if await get_role(member.server, "261550254418034688"):
-        return "host"
-    pass
 
 async def get_role_members(role) -> list:
     members = []
@@ -93,10 +111,26 @@ async def get_role_members(role) -> list:
             members.append(member)
     return members
 
+
 async def get_role(server, roleid):
     for x in server.roles:
         if x.id == roleid:
             return x
+
+
+async def get_auths(member):
+    perms = {}
+    if "261550254418034688" in [role.id for role in member.roles]:
+        perms |= "host"
+    if any(mod_id in [role.id for role in member.roles] for mod_id in ["260186671641919490", "261550254418034688"]):
+        perms |= "mod"
+        perms |= "host"
+    if "129706966460137472" == member.id:
+        perms |= "zenith"
+        perms |= "mod"
+        perms |= "host"
+    return perms
+
 
 class scrim_event:
     def __init__(self, name):
@@ -115,20 +149,22 @@ class scrim_event:
     def output_pings(self):
         return "\n".join(member.mention for member in self.members)
 
-
     def __eq__(self, other):
         if isinstance(other, scrim_event):
             return self.name == other.name
         return False
 
+
 async def tick():
     pass
+
 
 async def clock():
     await client.wait_until_ready()
     while not client.is_closed:
         await asyncio.sleep(2)
         await tick()
+
 
 client.loop.create_task(clock())
 client.run(TOKENS.SCRIM_TOKEN, bot=True)

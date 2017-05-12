@@ -568,6 +568,15 @@ async def perform_command(command, params, message_in):
             if command == "trustedinfo":
                 results = await trusted_analysis()
                 output.extend(results)
+            if command == "mentiontest":
+                test = await client.send_message(message_in.channel, "t")
+                asyncio.sleep(2)
+                await client.edit_message(test, "<@!129706966460137472>")
+
+                asyncio.sleep(2)
+                await client.edit_message(test, ".. <@!129706966460137472>")
+                pass
+
             if command == "dumpinvite":
                 url = params[0]
                 try:
