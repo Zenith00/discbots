@@ -570,10 +570,10 @@ async def perform_command(command, params, message_in):
                 output.extend(results)
             if command == "mentiontest":
                 test = await client.send_message(message_in.channel, "t")
-                asyncio.sleep(2)
+                await asyncio.sleep(2)
                 await client.edit_message(test, "<@!129706966460137472>")
 
-                asyncio.sleep(2)
+                await asyncio.sleep(2)
                 await client.edit_message(test, ".. <@!129706966460137472>")
                 pass
 
