@@ -765,11 +765,11 @@ async def perform_command(command, params, message_in):
                 to_delete = []
                 target_reaction = None
                 for reaction in target_message.reactions:
-                    if str(reaction.emoji) == params[2]:
+                    if params[2] in str(reaction.emoji):
                         target_reaction = reaction
                         break
-                    else:
-                        print(str(reaction.emoji))
+                    # else:
+                    #     print(str(reaction.emoji))
                 if target_reaction:
                     reacted_members = await client.get_reaction_users(target_reaction)
                     for user in reacted_members:
