@@ -10,6 +10,7 @@ from utils import utils_text, utils_parse, utils_file
 import regex as re
 import TOKENS
 import constants
+import collections
 
 logging.basicConfig(level=logging.INFO)
 
@@ -23,9 +24,13 @@ client = discord.Client()
 
 STATES = {"init": False}
 
+trackers = collections.defaultdict(dict)
+
 
 @client.event
 async def on_message(message_in):
+    global trackers
+
     if message_in.author.id == client.user.id:
         return
     if message_in.channel.is_private:
@@ -315,7 +320,8 @@ async def on_message(message_in):
             if command_list[0] == "track":
                 command_list = await mention_to_id(command_list)
                 if command_list[1] == "vc":
-                    pass
+                    trackers[message_in.server.id][command_list[2]] = tracker(
+                        message_in.server.get_member(command_list[2]), message_in.channel, message_in.author)
 
 
 @client.event
@@ -669,6 +675,8 @@ async def log_action(server, action, detail):
                 usercount=in_room,
                 userlimit=room_cap,
                 count=movecount)
+            if server.id in trackers.keys() and detail["after"].id in trackers[server.id].keys():
+                trackers[server.id][detail["after"].id].add_entry(message)
 
             await log_db[server.id].insert_one({
                 "date":
@@ -863,6 +871,7 @@ class Unbuffered(object):
 class tracker:
     header = None
     message = None
+    ping = None
 
     def __init__(self, target, destination, author):
         self.rows = []
@@ -872,20 +881,24 @@ class tracker:
         self.trackers = [author]
 
     async def start(self):
-        self.header = "Starting Tracking of {mention} [{userid}]\n".format(mention=self.target.mention, userid=self.target.id)
+        self.header = "Starting Tracking of {mention} [{userid}]\n".format(mention=self.target.mention,
+                                                                           userid=self.target.id)
         self.message = await client.send_message(self.destination, self.header)
 
     async def add_entry(self, entry):
+        entry = await scrub_text(entry, self.destination)
         self.rows.append(entry)
         while len(self.header + "\n".join(self.rows)) > self.max_size:
             self.rows.remove(0)
         await client.edit_message(self.message, self.header + "\n".join(self.rows))
 
-
-
+        if self.ping:
+            await client.delete_message(self.ping)
+        self.ping = await client.send_message(self.destination, " ".join(member.mention for member in self.trackers))
 
 
 import sys
+
 sys.stdout = Unbuffered(sys.stdout)
 
 
