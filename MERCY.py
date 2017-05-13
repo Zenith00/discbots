@@ -760,7 +760,7 @@ async def perform_command(command, params, message_in):
                 rows = [(k, str(v)) for k, v in target.items()]
                 print(rows)
                 output.append((rows, "rows"))
-            elif command == " ":
+            elif command == "deletereacts":
                 target_message = await client.get_message(client.get_channel(params[0]), params[1])
                 to_delete = []
                 target_reaction = None
