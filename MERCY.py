@@ -760,7 +760,7 @@ async def perform_command(command, params, message_in):
                 rows = [(k, str(v)) for k, v in target.items()]
                 print(rows)
                 output.append((rows, "rows"))
-            elif command == "deletereacts":
+            elif command == " ":
                 target_message = await client.get_message(client.get_channel(params[0]), params[1])
                 to_delete = []
                 target_reaction = None
@@ -768,6 +768,8 @@ async def perform_command(command, params, message_in):
                     if str(reaction.emoji) == params[2]:
                         target_reaction = reaction
                         break
+                    else:
+                        print(str(reaction.emoji))
                 if target_reaction:
                     reacted_members = await client.get_reaction_users(target_reaction)
                     for user in reacted_members:
