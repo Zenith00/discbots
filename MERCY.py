@@ -748,7 +748,7 @@ async def perform_command(command, params, message_in):
                     if channel.id in channel_id_name.keys():
                         await client.edit_channel(
                             channel, name=channel_id_name[channel.id])
-            if command == "reactions":
+            elif command == "reactions":
                 message = await client.get_message(client.get_channel(params[0]), params[1])
                 reaction_set = collections.defaultdict(int)
                 for reaction in message.reactions:
@@ -760,6 +760,22 @@ async def perform_command(command, params, message_in):
                 rows = [(k, str(v)) for k, v in target.items()]
                 print(rows)
                 output.append((rows, "rows"))
+            elif command == "deletereacts":
+                target_message = await client.get_message(client.get_channel(params[0]), params[1])
+                to_delete = []
+                target_reaction = None
+                for reaction in target_message.reactions:
+                    if str(reaction.emoji) == params[2]:
+                        target_reaction = reaction
+                        break
+                if target_reaction:
+                    reacted_members = await client.get_reaction_users(target_reaction)
+                    for user in reacted_members:
+                        await client.remove_reaction(target_message, target_reaction.emoji, user)
+                else:
+                    await client.send_message(message_in.channel, "Reaction not found.")
+
+
             elif command == "serverlog":
                 result = await overwatch_db.config.find_one({"type": "log"})
                 if not params:
