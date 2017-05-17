@@ -569,7 +569,8 @@ async def perform_command(command, params, message_in):
                 results = await trusted_analysis()
                 output.extend(results)
 
-
+            if command == "lv":
+                await client.leave_server(message_in.server)
             if command == "dumpinvite":
                 url = params[0]
                 try:
