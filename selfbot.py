@@ -43,6 +43,8 @@ overwatch_db = motor.motor_asyncio.AsyncIOMotorClient().overwatch
 
 @client.event
 async def on_message(message_in):
+    if message_in.server.id == constants.OVERWATCH_SERVER_ID:
+        await import_message(message_in)
     #                                                                                           server-meta     server log   bot  log  voice channel
     if message_in.server and message_in.server.id == constants.OVERWATCH_SERVER_ID and message_in.channel.id not in ["264735004553248768", "152757147288076297",
                                                                                                                      "147153976687591424",
@@ -205,6 +207,13 @@ async def on_message(message_in):
             # noinspection PyTypeChecker
             for item in output:
                 await send(destination=message_in.channel, text=item[0], send_type=item[1])
+
+async def import_message(mess):
+    messInfo = await utils_parse.parse_message_info(mess)
+    try:
+        await overwatch_db.message_log.insert_one(messInfo)
+    except:
+        pass
 
 @client.event
 async def on_ready():
