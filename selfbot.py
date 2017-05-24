@@ -32,7 +32,11 @@ import constants
 from TOKENS import *
 from utils import utils_file
 from fuzzywuzzy import fuzz
+from simplegist.simplegist import Simplegist
+
 logging.basicConfig(level=logging.INFO)
+
+gistClient = Simplegist()
 
 perspective_api = discovery.build('commentanalyzer', 'v1alpha1', developerKey=GOOGLE_API_TOKEN)
 
@@ -84,7 +88,17 @@ async def on_message(message_in):
                 pair = tupleoverwrite[1].pair()
                 for allow in pair[0]:
                     pass
-
+        if command_list[0] == "ui":
+            embed = await output_user_embed(command_list[1], message_in)
+            if embed:
+                await client.send_message(
+                    destination=message_in.channel,
+                    content=None,
+                    embed=embed)
+            else:
+                await client.send_message(
+                    destination=message_in.channel,
+                    content="User not found")
         if command_list[0] == "find":
             # await output_find_user(message_in)
             raw_params = " ".join(command_list[1:])
@@ -100,6 +114,21 @@ async def on_message(message_in):
                     matching_ident=params[0],
                     find_type="current",
                     server=message_in.server))
+        if command_list[0] == "findow":
+            # await output_find_user(message_in)
+            raw_params = " ".join(command_list[1:])
+            params = raw_params.split("|")
+            if len(params) > 1:
+                output.append(await find_user(
+                    matching_ident=params[0],
+                    find_type="current",
+                    server=client.get_server("94882524378968064"),
+                    count=int(params[1])))
+            else:
+                output.append(await find_user(
+                    matching_ident=params[0],
+                    find_type="current",
+                    server=client.get_server("94882524378968064")))
         if command_list[0] == "findall":
             # await output_find_user(message_in)
             raw_params = " ".join(command_list[1:])
@@ -454,7 +483,134 @@ async def find_user(matching_ident,
                 userid=userid, name=ident, mention="<@!{}>".format(userid))
     return (output, None)
 
-#
+async def output_user_embed(member_id, message_in):
+    # target_member = message_in.author
+    target_member = message_in.server.get_member(member_id)
+    if not target_member:
+        target_member = await client.get_user_info(member_id)
+    if not target_member:
+        target_member = message_in.author
+
+    user_dict = await export_user(target_member.id)
+
+    embed = discord.Embed(
+        title="{name}#{discrim}'s userinfo".format(
+            name=target_member.name, discrim=str(target_member.discriminator)),
+        type="rich")
+
+    # avatar_link = shorten_link(target_member.avatar_url)
+
+    avatar_link = target_member.avatar_url
+
+    # color = "0x" + color
+
+    embed.add_field(name="ID", value=target_member.id, inline=True)
+    if user_dict:
+        if "server_joins" in user_dict.keys():
+            server_joins = user_dict["server_joins"]
+            server_joins = [join[:10] for join in server_joins]
+
+            embed.add_field(
+                name="First Join", value=server_joins[0], inline=True)
+        if "bans" in user_dict.keys():
+            bans = user_dict["bans"]
+            bans = [ban[:10] for ban in bans]
+            bans = str(bans)[1:-1]
+            embed.add_field(name="Bans", value=bans, inline=True)
+        if "unbans" in user_dict.keys():
+            unbans = user_dict["unbans"]
+            unbans = [unban[:10] for unban in unbans]
+            unbans = str(unbans)[1:-1]
+            embed.add_field(name="Unbans", value=unbans, inline=True)
+    embed.add_field(
+        name="Creation",
+        value=target_member.created_at.strftime("%B %d, %Y"),
+        inline=True)
+
+    if isinstance(target_member, discord.Member):
+        roles = [role.name for role in target_member.roles][1:]
+        if roles:
+            embed.add_field(name="Roles", value=", ".join(roles), inline=True)
+        voice = target_member.voice
+        if voice.voice_channel:
+            voice_name = voice.voice_channel.name
+            embed.add_field(name="Current VC", value=voice_name)
+        status = str(target_member.status)
+    else:
+        if target_member in await client.get_bans(message_in.server):
+            status = "Banned"
+        else:
+            status = "Not part of the server"
+    embed.add_field(name="Status", value=status, inline=False)
+    if avatar_link:
+        embed.set_thumbnail(url=avatar_link)
+        color = utils_image.average_color_url(avatar_link)
+        embed.add_field(
+            name="Avatar",
+            value=avatar_link.replace(".webp", ".png"),
+            inline=False)
+        hex_int = int(color, 16)
+        embed.colour = discord.Colour(hex_int)
+        embed.set_thumbnail(url=target_member.avatar_url)
+    return embed
+
+async def export_user(member_id):
+    """
+
+    :type member: discord.Member
+    """
+    userinfo = await overwatch_db.userinfo.find_one(
+        {
+            "userid": member_id
+        },
+        projection={
+            "_id"        : False,
+            "mention_str": False,
+            "avatar_urls": False,
+            "lfg_count"  : False
+        })
+    if not userinfo:
+        return None
+    return userinfo
+
+async def format_message_to_log(message_dict):
+    cursor = await overwatch_db.userinfo.find_one({
+        "userid":
+            message_dict["userid"]
+    })
+    try:
+        name = cursor["names"][-1]
+        if not name:
+            name = cursor["names"][-2]
+    except:
+        try:
+            await import_user(SERVERS["OW"].get_member(message_dict["userid"]))
+            cursor = await overwatch_db.userinfo.find_one({
+                "userid":
+                    message_dict["userid"]
+            })
+            name = cursor["names"][-1]
+        except:
+            name = message_dict["userid"]
+        if not name:
+            name = message_dict["userid"]
+
+    try:
+        content = message_dict["content"].replace("```", "")
+        try:
+            channel_name = constants.CHANNELID_CHANNELNAME_DICT[str(
+                message_dict["channel_id"])]
+        except KeyError:
+            channel_name = "Unknown"
+
+        return "[" + message_dict["date"][:
+        19] + "][" + channel_name + "][" + str(
+            name) + "]:" + content
+
+    except:
+        print(traceback.format_exc())
+        return "Errored Message : " + str(message_dict)
+
 # def do_gmagik(self, ctx, gif):
 # 	try:
 # 		try:
