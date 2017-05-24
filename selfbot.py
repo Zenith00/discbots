@@ -10,7 +10,7 @@ import textwrap
 import traceback
 from datetime import datetime
 from io import BytesIO
-
+import heapq
 import PIL
 import discord
 import markovify
@@ -31,7 +31,7 @@ import collections
 import constants
 from TOKENS import *
 from utils import utils_file
-
+from fuzzywuzzy import fuzz
 logging.basicConfig(level=logging.INFO)
 
 perspective_api = discovery.build('commentanalyzer', 'v1alpha1', developerKey=GOOGLE_API_TOKEN)
@@ -45,7 +45,7 @@ overwatch_db = motor.motor_asyncio.AsyncIOMotorClient().overwatch
 async def on_message(message_in):
     if message_in.server.id == constants.OVERWATCH_SERVER_ID:
         await import_message(message_in)
-    #                                                                                           server-meta     server log   bot  log  voice channel
+    # server-meta     server log   bot  log  voice channel
     if message_in.server and message_in.server.id == constants.OVERWATCH_SERVER_ID and message_in.channel.id not in ["264735004553248768", "152757147288076297",
                                                                                                                      "147153976687591424",
                                                                                                                      "200185170249252865"]:
@@ -53,7 +53,6 @@ async def on_message(message_in):
             await mess2log(message_in)
         except AttributeError:
             pass
-
 
     if message_in.author == client.user and message_in.content.startswith("%%"):
 
@@ -86,7 +85,51 @@ async def on_message(message_in):
                 for allow in pair[0]:
                     pass
 
+        if command_list[0] == "find":
+            # await output_find_user(message_in)
+            raw_params = " ".join(command_list[1:])
+            params = raw_params.split("|")
+            if len(params) > 1:
+                output.append(await find_user(
+                    matching_ident=params[0],
+                    find_type="current",
+                    server=message_in.server,
+                    count=int(params[1])))
+            else:
+                output.append(await find_user(
+                    matching_ident=params[0],
+                    find_type="current",
+                    server=message_in.server))
+        if command_list[0] == "findall":
+            # await output_find_user(message_in)
+            raw_params = " ".join(command_list[1:])
+            params = raw_params.split("|")
+            if len(params) > 1:
+                output.append(await find_user(
+                    matching_ident=params[0],
+                    find_type="history",
+                    server=message_in.server,
+                    count=int(params[1])))
+            else:
+                output.append(await find_user(
+                    matching_ident=params[0],
+                    find_type="history",
+                    server=message_in.server))
 
+        if command_list[0] == "findban":
+            raw_params = " ".join(command_list[1:])
+            params = raw_params.split("|")
+            if len(params) > 1:
+                output.append(await find_user(
+                    matching_ident=params[0],
+                    find_type="bans",
+                    server=message_in.server,
+                    count=int(params[1])))
+            else:
+                output.append(await find_user(
+                    matching_ident=params[0],
+                    find_type="bans",
+                    server=message_in.server))
         if command_list[0] == "getava":
             response = requests.get(command_list[1])
             img = Image.open(BytesIO(response.content))
@@ -223,7 +266,6 @@ async def get_role(server, roleid):
         if x.id == roleid:
             return x
 
-
 # Log Based
 async def output_logs(userid, count, message_in):
     cursor = overwatch_db.message_log.find(
@@ -303,6 +345,10 @@ async def more_jpeg(url):
     ret = imgur_client.upload_from_path(img_path, config=config, anon=True)
     return ret["link"], ratio
 
+
+
+
+
 async def send(destination, text, send_type):
     if isinstance(destination, str):
         destination = client.get_channel(destination)
@@ -347,6 +393,66 @@ async def mention_to_id(command_list):
             id_chars = "".join(idmatch.findall(item))
             new_command.append(id_chars)
     return new_command
+
+async def find_user(matching_ident,
+                    find_type,
+                    server,
+                    cast_to_lower=True,
+                    count=1):
+    ident_id_set_dict = collections.defaultdict(set)
+    if find_type == "bans":
+        banlist = await client.get_bans(server)
+        for banned_user in banlist:
+            # print(banned_user.name)
+            ident_id_set_dict[banned_user.name].add(banned_user.id)
+            ident_id_set_dict[banned_user.name +
+                              banned_user.discriminator].add(banned_user.id)
+    elif find_type == "current":
+        for member in server.members:
+            ident_id_set_dict[member.name].add(member.id)
+            ident_id_set_dict[member.name +
+                              member.discriminator].add(member.id)
+            if member.nick and member.nick is not member.name:
+                ident_id_set_dict[member.name].add(member.id)
+
+    elif find_type == "history":
+        mongo_cursor = overwatch_db.userinfo.find()
+        async for userinfo_dict in mongo_cursor:
+            try:
+                for nick in userinfo_dict["nicks"]:
+                    if nick:
+                        ident_id_set_dict[nick].add(userinfo_dict["userid"])
+                for name in userinfo_dict["names"]:
+                    if name:
+                        ident_id_set_dict[name].add(userinfo_dict["userid"])
+            except:
+                print(traceback.format_exc())
+
+    if cast_to_lower:
+        matching_ident = matching_ident.lower()
+        # ID_ROLENAME_DICT = dict([[v, k] for k, v in constants.ROLENAME_ID_DICT.items()])
+        new_dict = dict([(ident.lower(), id_set)
+                         for ident, id_set in ident_id_set_dict.items()])
+        ident_id_set_dict = new_dict
+
+    # for nick in nick_id_dict.keys():
+    #     ratio = fuzz.ratio(nick_to_find.lower(), str(nick).lower())
+    #     nick_fuzz[str(nick)] = int(ratio)
+    ident_ratio = {}
+    for ident in ident_id_set_dict.keys():
+        ratio = fuzz.ratio(matching_ident, ident)
+        ident_ratio[ident] = ratio
+
+    top_idents = heapq.nlargest(
+        int(count), ident_ratio, key=lambda k: ident_ratio[k])
+    output = "Fuzzy Searching {} with the input {}, {} ignoring case\n".format(
+        find_type, matching_ident, "" if cast_to_lower else "not")
+    for ident in top_idents:
+        id_set = ident_id_set_dict[ident]
+        for userid in id_set:
+            output += "`ID: {userid} | Name: {name} |` {mention}\n".format(
+                userid=userid, name=ident, mention="<@!{}>".format(userid))
+    return (output, None)
 
 #
 # def do_gmagik(self, ctx, gif):
