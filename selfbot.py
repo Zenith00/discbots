@@ -61,13 +61,10 @@ async def on_message(message_in):
         command_list = command.split(" ")
         await client.delete_message(message_in)
         output = []
-        if command_list[0] == "pollup":
-            for member in message_in.server.members:
-                if await get_role(message_in.server,"261550254418034688") in member.roles:
-                    await client.send_message(member, "Key: " + hashlib.md5((member.name + "salter").encode('utf-8')).hexdigest())
-                    await client.send_message(message_in.server.get_member("277692222302846977"), member.name + " key: " + hashlib.md5(
-                        (member.name + "salter").encode('utf-8')).hexdigest())
 
+        if command_list[0] == "userlogs":
+            output.append(await output_logs(
+                userid=command_list[1], count=command_list[2], message_in=message_in))
         if command_list[0] == "ava":
             ava = command_list[1] + ".png"
             print("Switching to " + ava)
@@ -226,6 +223,33 @@ async def get_role(server, roleid):
         if x.id == roleid:
             return x
 
+
+# Log Based
+async def output_logs(userid, count, message_in):
+    cursor = overwatch_db.message_log.find(
+        {
+            "userid": userid
+        }, limit=int(count))
+    cursor.sort("date", -1)
+    message_list = []
+    count = 0
+    async for message_dict in cursor:
+        if count % 500 == 0:
+            print(count)
+        count += 1
+        message_list.append(await format_message_to_log(message_dict))
+    if count == 0:
+        return ("No logs found", None)
+
+    if message_list:
+        gist = gistClient.create(
+            name="User Log",
+            description=(await client.get_user_info(userid)).name + "'s Logs",
+            public=False,
+            content="\n".join(message_list))
+        return (gist["Gist-Link"], None)
+    else:
+        return ("No logs found", None)
 
 async def perspective(text):
     analyze_request = {
