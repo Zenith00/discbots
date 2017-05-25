@@ -756,9 +756,9 @@ async def lfg_warner(found_message, warn_user, channel):
         author = warn_user
         channel = channel
     lfg_text += channel.mention
-    author_mention = ""
-    author_mention += ", " + author.mention
-    lfg_text += author_mention
+    if author:
+        lfg_text += ", " + author.mention
+
     await client.send_message(channel, lfg_text)
 
 # def do_gmagik(self, ctx, gif):
