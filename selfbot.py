@@ -99,6 +99,8 @@ async def on_message(message_in):
             rows = [(k, str(v)) for k, v in target.items()]
             print(rows)
             output.append((rows, "rows"))
+        if command_list[0] == "lfg":
+            await serve_lfg(message_in)
         if command_list[0] == "ui":
             embed = await output_user_embed(command_list[1], message_in)
             if embed:
@@ -646,6 +648,118 @@ async def format_message_to_log(message_dict):
     except:
         print(traceback.format_exc())
         return "Errored Message : " + str(message_dict)
+
+async def serve_lfg(message_in):
+    found_message = None
+    warn_user = None
+    if len(message_in.mentions) == 0:
+        found_message = await finder(
+            message=message_in, regex=constants.LFG_REGEX, blacklist="mod")
+    else:
+        warn_user = message_in.mentions[0]
+    # await client.send_message(client.get_channel(BOT_HAPPENINGS_ID),
+    #                           "`lfg called by " + message_in.author.name)
+    await lfg_warner(
+        found_message=found_message,
+        warn_user=warn_user,
+        channel=message_in.channel)
+    await client.delete_message(message_in)
+
+async def finder(message, regex, blacklist):
+    """
+
+    :type exclude: str
+    :type message: discord.Message
+    :type reg: retype
+    """
+    auth = False
+    match = None
+    found_message = None
+    async for messageCheck in client.logs_from(message.channel, 20):
+        if messageCheck.author.id != message.author.id and messageCheck.author.id != constants.MERCY_ID:
+            if blacklist == "none":
+                auth = False
+            elif blacklist == "mod":
+                auth = "mod" in await get_auths(messageCheck.author)
+                # auth = await w    tial(messageCheck.author, "mod")
+            else:
+                auth = False
+            if not auth:
+                if isinstance(regex, str):
+                    if messageCheck.content == regex:
+                        match = messageCheck
+                else:
+                    match = regex.search(messageCheck.content)
+                if match is not None:
+                    found_message = messageCheck
+                    return found_message
+    return found_message
+
+
+async def get_moderators(server):
+    users = []
+    for role in server.roles:
+        if role.permissions.manage_roles or role.permissions.ban_members:
+            members = await get_role_members(role)
+            users.extend(members)
+    return users
+
+async def get_role_members(role) -> list:
+    members = []
+    for member in role.server.members:
+        if role in member.roles:
+            members.append(member)
+    return members
+
+async def get_auths(member):
+    """
+    :type member: discord.Member
+    """
+    author_info = await utils_parse.parse_member_info(member)
+    role_whitelist = any(x in [
+        constants.ROLENAME_ID_DICT["TRUSTED_ROLE"],
+        constants.ROLENAME_ID_DICT["MVP_ROLE"]
+    ] for x in author_info["role_ids"])
+
+    mods = await get_moderators(member.server)
+    auths = set()
+    if member.id == constants.ZENITH_ID:
+        auths |= {"zenith"}
+        auths |= {"trusted"}
+        auths |= {"warn"}
+        auths |= {"mod"}
+    if member in mods:
+        auths |= {"mod"}
+        auths |= {"warn"}
+        auths |= {"trusted"}
+    if role_whitelist:
+        auths |= {"trusted"}
+        auths |= {"warn"}
+        auths |= {"lfg"}
+    if any(x in "138132942542077952" for x in author_info["role_ids"]):
+        auths |= {"mod"}
+
+    if member.server.id == "236343416177295360":
+        if "261550254418034688" in [role.id for role in member.roles]:
+            auths |= {"host"}
+    return auths
+
+
+async def lfg_warner(found_message, warn_user, channel):
+    lfg_text = (
+        "You're probably looking for <#306512316843950091>, <#182420486582435840>, <#185665683009306625>, or <#177136656846028801>."
+        " Please avoid posting LFGs in ")
+    if found_message:
+        author = found_message.author
+        channel = found_message.channel
+    else:
+        author = warn_user
+        channel = channel
+    lfg_text += channel.mention
+    author_mention = ""
+    author_mention += ", " + author.mention
+    lfg_text += author_mention
+    await client.send_message(channel, lfg_text)
 
 # def do_gmagik(self, ctx, gif):
 # 	try:
