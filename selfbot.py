@@ -30,12 +30,15 @@ from unidecode import unidecode
 import collections
 import constants
 from TOKENS import *
+import TOKENS
 from utils import utils_file
 from fuzzywuzzy import fuzz
 from simplegist.simplegist import Simplegist
 
 logging.basicConfig(level=logging.INFO)
-
+mongo_client = motor.motor_asyncio.AsyncIOMotorClient(
+    "mongodb://{usn}:{pwd}@nadir.space".format(
+        usn=TOKENS.MONGO_USN, pwd=TOKENS.MONGO_PASS))
 gistClient = Simplegist()
 
 perspective_api = discovery.build('commentanalyzer', 'v1alpha1', developerKey=GOOGLE_API_TOKEN)
@@ -43,7 +46,7 @@ perspective_api = discovery.build('commentanalyzer', 'v1alpha1', developerKey=GO
 client = discord.Client()
 imgur_client = ImgurClient(IMGUR_CLIENT_ID, IMGUR_SECRET_ID, IMGUR_ACCESS_TOKEN,
                            IMGUR_REFRESH_TOKEN)
-overwatch_db = motor.motor_asyncio.AsyncIOMotorClient().overwatch
+overwatch_db = mongo_client.overwatch
 
 @client.event
 async def on_message(message_in):
