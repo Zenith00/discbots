@@ -48,6 +48,9 @@ imgur_client = ImgurClient(IMGUR_CLIENT_ID, IMGUR_SECRET_ID, IMGUR_ACCESS_TOKEN,
                            IMGUR_REFRESH_TOKEN)
 overwatch_db = mongo_client.overwatch
 
+botClient = discord.Client()
+
+
 @client.event
 async def on_message(message_in):
     if message_in.server.id == constants.OVERWATCH_SERVER_ID:
@@ -91,6 +94,11 @@ async def on_message(message_in):
                 pair = tupleoverwrite[1].pair()
                 for allow in pair[0]:
                     pass
+        if command_list[0] == "dumpinfo":
+            target = await export_user(command_list[1])
+            rows = [(k, str(v)) for k, v in target.items()]
+            print(rows)
+            output.append((rows, "rows"))
         if command_list[0] == "ui":
             embed = await output_user_embed(command_list[1], message_in)
             if embed:
@@ -576,6 +584,31 @@ async def export_user(member_id):
         return None
     return userinfo
 
+async def import_user(member):
+    user_info = await utils_parse.parse_member_info(member)
+    result = await overwatch_db.userinfo.update_one(
+        {
+            "userid": member.id
+        }, {
+            "$addToSet": {
+                "nicks"       : {
+                    "$each": [
+                        user_info["nick"], user_info["name"],
+                        user_info["name"] + "#" + str(user_info["discrim"])
+                    ]
+                },
+                "names"       : user_info["name"],
+                "avatar_urls" : user_info["avatar_url"],
+                "server_joins": user_info["joined_at"]
+            },
+            "$set"     : {
+                "mention_str": user_info["mention_str"],
+                "created_at" : user_info["created_at"]
+            },
+        },
+        upsert=True)
+    pass
+
 async def format_message_to_log(message_dict):
     cursor = await overwatch_db.userinfo.find_one({
         "userid":
@@ -587,7 +620,7 @@ async def format_message_to_log(message_dict):
             name = cursor["names"][-2]
     except:
         try:
-            await import_user(SERVERS["OW"].get_member(message_dict["userid"]))
+            await import_user(client.get_server("94882524378968064").get_member(message_dict["userid"]))
             cursor = await overwatch_db.userinfo.find_one({
                 "userid":
                     message_dict["userid"]
