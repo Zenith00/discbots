@@ -116,6 +116,7 @@ async def on_message(message_in):
         if command_list[0] == "backfill":
             async for messInfo in overwatch_db.message_log.find():
                 toxicity = await perspective(messInfo["content"])
+                await overwatch_db.message_log.update_one({"message_id":messInfo["message_id"]}, {"$set":{"toxicity":toxicity}})
                 await overwatch_db.userinfo.update_one({"userid": messInfo["userid"]}, {"$inc": {"toxicity": toxicity, "toxicity_count": 1}})
                 await asyncio.sleep(0.1)
         if command_list[0] == "find":
