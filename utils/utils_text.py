@@ -124,10 +124,10 @@ def format_list_to_widths(list_of_rows, widths, left_just):
     output = ""
     if left_just:
         for row in list_of_rows:
-            output += ("  ".join((val.ljust(width) for val, width in zip(row, widths)))) + "\n"
+            output += ("  ".join((val.ljust(width) for val, width in zip(row, widths)))).rstrip() + "\n"
     else:
         for row in list_of_rows:
-            output += ("  ".join((val.rjust(width) for val, width in zip(row, widths)))) + "\n"
+            output += ("  ".join((val.rjust(width) for val, width in zip(row, widths)))).rstrip() + "\n"
     return output
 
 def format_row_to_widths(row,widths):
