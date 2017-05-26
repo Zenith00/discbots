@@ -69,7 +69,7 @@ async def on_message(message_in):
         command = message_in.content.replace("%%", "")
         command_list = command.split(" ")
         await client.delete_message(message_in)
-        command_list = await mention_to_id(command_list.split(" "))
+        command_list = await mention_to_id(command_list)
         output = []
 
         if command_list[0] == "userlogs":
