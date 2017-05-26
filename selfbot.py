@@ -328,7 +328,7 @@ async def output_logs(userid, count, message_in):
     if message_list:
         gist = gistClient.create(
             name="User Log",
-            description=(await client.get_user_info(userid)).name + "'s Logs",
+            description=(message_in.server.get_member(userid)).name + "'s Logs",
             public=False,
             content="\n".join(message_list))
         return (gist["Gist-Link"], None)
