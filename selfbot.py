@@ -69,6 +69,7 @@ async def on_message(message_in):
         command = message_in.content.replace("%%", "")
         command_list = command.split(" ")
         await client.delete_message(message_in)
+        command_list = await mention_to_id(command_list.split(" "))
         output = []
 
         if command_list[0] == "userlogs":
@@ -398,7 +399,10 @@ async def send(destination, text, send_type):
     if send_type == "rows":
         message_list = utils_text.multi_block(text, True)
         for message in message_list:
-            await client.send_message(destination, "```" + message + "```")
+            try:
+                await client.send_message(destination, "```" + message + "```")
+            except:
+                print(message)
         return
     if send_type == "list":
         text = str(text)[1:-1]

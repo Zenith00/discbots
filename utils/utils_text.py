@@ -79,7 +79,6 @@ def multi_block(list_of_rows, left_just):
         if (len(text)) > 500:
             final_list.append(old_list)
             test_list = [row]
-
     final_list.append(test_list)
     return multi_column(final_list, left_just)
 
