@@ -4,7 +4,7 @@
 var duplicates = [];
 
 db.runCommand(
-  {aggregate: "YOURCOLLECTION",
+  {aggregate: "message_log",
     pipeline: [
       { $group: { _id: "$message_id", dups: { "$addToSet": "$_id" }, count: { "$sum": 1 } }},
       { $match: { count: { "$gt": 1 }}}
@@ -17,4 +17,4 @@ db.runCommand(
 })
 printjson(duplicates); //optional print the list of duplicates to be removed
 
-db.YOURCOLLECTION.remove({_id:{$in:duplicates}});
+db.message_log.remove({_id:{$in:duplicates}});
