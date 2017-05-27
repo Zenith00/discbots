@@ -151,7 +151,7 @@ async def on_message(message_in):
                 seen_ids = []
                 count = 0
                 start = datetime(year=int(command_list[1]),month=int(command_list[2]),day=int(command_list[3]))
-                end = start + timedelta(days=30)
+                end = start + timedelta(days=3)
                 while end < datetime.utcnow():
                     count = 0
                     async for message in overwatch_db.message_log.find({"date": {"$lte": end.isoformat(" "), "$gte": start.isoformat(" ")}}):
