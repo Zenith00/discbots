@@ -6,7 +6,7 @@ var duplicates = [];
 db.runCommand(
   {aggregate: "YOURCOLLECTION",
     pipeline: [
-      { $group: { _id: { message_id: "$message_id"}, dups: { "$addToSet": "$_id" }, count: { "$sum": 1 } }},
+      { $group: { _id: "$message_id", dups: { "$addToSet": "$_id" }, count: { "$sum": 1 } }},
       { $match: { count: { "$gt": 1 }}}
     ],
     allowDiskUse: true }
