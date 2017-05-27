@@ -141,6 +141,7 @@ async def on_message(message_in):
                             await overwatch_db.userinfo.update_one({"userid": messInfo["userid"]}, {"$inc": {"toxicity": toxicity, "toxicity_count": 1}})
                             print("..")
                             await asyncio.sleep(0.1)
+                            count = count + 1
 
                     else:
                         more = False
