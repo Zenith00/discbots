@@ -151,13 +151,15 @@ async def on_message(message_in):
                 seen_ids = []
                 count = 0
                 async for message in overwatch_db.message_log.find({"date": {"$lte": command_list[1], "$gte": command_list[2]}}):
-                    print(count)
+                    if count % 100 == 0:
+                        print(count)
                     try:
                         overwatch_db.message_log_new.insert_one(message)
                         count += 1
-                    except pymongo.errors.DuplicateKeyError:
+                    except:
                         pass
                 print("DONE")
+                await client.send_message(message_in.channel, "Done")
 
                 # cursor = overwatch_db.message_log.aggregate(
                 #     [
