@@ -35,7 +35,7 @@ from utils import utils_file
 from fuzzywuzzy import fuzz
 from simplegist.simplegist import Simplegist
 
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.ERROR)
 mongo_client = motor.motor_asyncio.AsyncIOMotorClient(
     "mongodb://{usn}:{pwd}@nadir.space".format(
         usn=TOKENS.MONGO_USN, pwd=TOKENS.MONGO_PASS))
@@ -114,11 +114,19 @@ async def on_message(message_in):
                     destination=message_in.channel,
                     content="User not found")
         if command_list[0] == "backfill":
-            async for messInfo in overwatch_db.message_log.find():
-                toxicity = await perspective(messInfo["content"])
-                await overwatch_db.message_log.update_one({"message_id":messInfo["message_id"]}, {"$set":{"toxicity":toxicity}})
-                await overwatch_db.userinfo.update_one({"userid": messInfo["userid"]}, {"$inc": {"toxicity": toxicity, "toxicity_count": 1}})
-                await asyncio.sleep(0.1)
+            more = True
+            while more == True:
+                print("Starting up...")
+                cursor = overwatch_db.message_log.find({"toxicity":{"$exists":False}})
+                if cursor:
+                    async for messInfo in cursor:
+                        toxicity = await perspective(messInfo["content"])
+                        print(messInfo["date"])
+                        await overwatch_db.message_log.update_one({"message_id":messInfo["message_id"]}, {"$set":{"toxicity":toxicity}})
+                        await overwatch_db.userinfo.update_one({"userid": messInfo["userid"]}, {"$inc": {"toxicity": toxicity, "toxicity_count": 1}})
+                        await asyncio.sleep(0.7)
+                else:
+                    more = False
         if command_list[0] == "find":
             # await output_find_user(message_in)
             raw_params = " ".join(command_list[1:])
