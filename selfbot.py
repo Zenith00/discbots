@@ -151,9 +151,9 @@ async def on_message(message_in):
                 count = 0
                 async for message in overwatch_db.message_log.find():
                     print(count)
-                    count  = count + 1
                     try:
                         overwatch_db.message_log_new.insert_one(message)
+                        count  = count + 1
                     except pymongo.errors.DuplicateKeyError:
                         pass
                 print("DONE")
