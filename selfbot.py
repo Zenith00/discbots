@@ -148,8 +148,12 @@ async def on_message(message_in):
                         print("Ending...")
             if command_list[0] == "transfer":
                 seen_ids = []
+                count = 0
                 async for message in overwatch_db.message_log.find():
+                    print(count)
+                    count  = count + 1
                     overwatch_db.message_log_new.insert_one(message)
+                print("DONE")
 
                 # cursor = overwatch_db.message_log.aggregate(
                 #     [
