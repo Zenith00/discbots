@@ -54,258 +54,261 @@ botClient = discord.Client()
 
 @client.event
 async def on_message(message_in):
-    # if message_in.server.id == constants.OVERWATCH_SERVER_ID:
-    #     await import_message(message_in)
-    # server-meta     server log   bot  log  voice channel
-    if message_in.server and message_in.server.id == constants.OVERWATCH_SERVER_ID and message_in.channel.id not in ["264735004553248768", "152757147288076297",
-                                                                                                                     "147153976687591424",
-                                                                                                                     "200185170249252865"]:
-        try:
-            await mess2log(message_in)
-        except AttributeError:
-            pass
-
-    if message_in.author == client.user and message_in.content.startswith("%%"):
-
-        command = message_in.content.replace("%%", "")
-        command_list = command.split(" ")
-        await client.delete_message(message_in)
-        command_list = await mention_to_id(command_list)
-        output = []
-
-        if command_list[0] == "userlogs":
-            output.append(await output_logs(
-                userid=command_list[1], count=command_list[2], message_in=message_in))
-        if command_list[0] == "ava":
-            ava = command_list[1] + ".png"
-            print("Switching to " + ava)
+    try:
+        # if message_in.server.id == constants.OVERWATCH_SERVER_ID:
+        #     await import_message(message_in)
+        # server-meta     server log   bot  log  voice channel
+        if message_in.server and message_in.server.id == constants.OVERWATCH_SERVER_ID and message_in.channel.id not in ["264735004553248768", "152757147288076297",
+                                                                                                                         "147153976687591424",
+                                                                                                                         "200185170249252865"]:
             try:
-                with open(utils_file.relative_path(__file__, "avatars/" + ava), "rb") as ava:
+                await mess2log(message_in)
+            except AttributeError:
+                pass
+
+        if message_in.author == client.user and message_in.content.startswith("%%"):
+
+            command = message_in.content.replace("%%", "")
+            command_list = command.split(" ")
+            await client.delete_message(message_in)
+            command_list = await mention_to_id(command_list)
+            output = []
+
+            if command_list[0] == "userlogs":
+                output.append(await output_logs(
+                    userid=command_list[1], count=command_list[2], message_in=message_in))
+            if command_list[0] == "ava":
+                ava = command_list[1] + ".png"
+                print("Switching to " + ava)
+                try:
+                    with open(utils_file.relative_path(__file__, "avatars/" + ava), "rb") as ava:
+                        await client.edit_profile(password=PASS, avatar=ava.read())
+                except:
+                    with open(utils_file.relative_path(__file__, "avatars/default.png"), "rb") as ava:
+                        await client.edit_profile(password=PASS, avatar=ava.read())
+            if command_list[0] == "dump_channel_overwrites":
+                channel = await client.get_channel(command_list[1])
+                # role = await get_role(message_in.server, command_list[2])
+                overwrites = channel.overwrites
+                result_dict = {}
+                for tupleoverwrite in overwrites:
+                    # result_dict[t]
+                    result_dict[tupleoverwrite[0].name] = {}
+                    pair = tupleoverwrite[1].pair()
+                    for allow in pair[0]:
+                        pass
+            if command_list[0] == "dumpinfo":
+                target = await export_user(command_list[1])
+                rows = [(k, str(v)) for k, v in target.items()]
+                print(rows)
+                output.append((rows, "rows"))
+            if command_list[0] == "lfg":
+                await serve_lfg(message_in)
+            if command_list[0] == "ui":
+                embed = await output_user_embed(command_list[1], message_in)
+                if embed:
+                    await client.send_message(
+                        destination=message_in.channel,
+                        content=None,
+                        embed=embed)
+                else:
+                    await client.send_message(
+                        destination=message_in.channel,
+                        content="User not found")
+            if command_list[0] == "backfill":
+                more = True
+                while more == True:
+                    print("Starting up...")
+                    cursor = overwatch_db.message_log.find({"toxicity":{"$exists":False}}).sort("date",pymongo.DESCENDING)
+                    if cursor:
+                        async for messInfo in cursor:
+                            toxicity = await perspective(messInfo["content"])
+                            print(messInfo["date"])
+                            await overwatch_db.message_log.update_one({"message_id":messInfo["message_id"]}, {"$set":{"toxicity":toxicity}})
+                            await overwatch_db.userinfo.update_one({"userid": messInfo["userid"]}, {"$inc": {"toxicity": toxicity, "toxicity_count": 1}})
+                            await asyncio.sleep(0.7)
+                    else:
+                        more = False
+                        print("Ending...")
+            if command_list[0] == "find":
+                # await output_find_user(message_in)
+                raw_params = " ".join(command_list[1:])
+                params = raw_params.split("|")
+                if len(params) > 1:
+                    output.append(await find_user(
+                        matching_ident=params[0],
+                        find_type="current",
+                        server=message_in.server,
+                        count=int(params[1])))
+                else:
+                    output.append(await find_user(
+                        matching_ident=params[0],
+                        find_type="current",
+                        server=message_in.server))
+            if command_list[0] == "findow":
+                # await output_find_user(message_in)
+                raw_params = " ".join(command_list[1:])
+                params = raw_params.split("|")
+                if len(params) > 1:
+                    output.append(await find_user(
+                        matching_ident=params[0],
+                        find_type="current",
+                        server=client.get_server("94882524378968064"),
+                        count=int(params[1])))
+                else:
+                    output.append(await find_user(
+                        matching_ident=params[0],
+                        find_type="current",
+                        server=client.get_server("94882524378968064")))
+            if command_list[0] == "findall":
+                # await output_find_user(message_in)
+                raw_params = " ".join(command_list[1:])
+                params = raw_params.split("|")
+                if len(params) > 1:
+                    output.append(await find_user(
+                        matching_ident=params[0],
+                        find_type="history",
+                        server=message_in.server,
+                        count=int(params[1])))
+                else:
+                    output.append(await find_user(
+                        matching_ident=params[0],
+                        find_type="history",
+                        server=message_in.server))
+
+            if command_list[0] == "findban":
+                raw_params = " ".join(command_list[1:])
+                params = raw_params.split("|")
+                if len(params) > 1:
+                    output.append(await find_user(
+                        matching_ident=params[0],
+                        find_type="bans",
+                        server=message_in.server,
+                        count=int(params[1])))
+                else:
+                    output.append(await find_user(
+                        matching_ident=params[0],
+                        find_type="bans",
+                        server=message_in.server))
+            if command_list[0] == "getava":
+                response = requests.get(command_list[1])
+                img = Image.open(BytesIO(response.content))
+                img_path = utils_file.relative_path(__file__, "avatars/" + command_list[2] + ".png")
+                # if os.path.isfile(img_path):
+                #     os.remove(img_path)
+                img.save(img_path, 'PNG')
+                with open(img_path, "rb") as ava:
                     await client.edit_profile(password=PASS, avatar=ava.read())
-            except:
-                with open(utils_file.relative_path(__file__, "avatars/default.png"), "rb") as ava:
+            if command_list[0] == "stealava":
+                command_list = await mention_to_id(command_list)
+                target_user_id = command_list[1]
+                url = message_in.server.get_member(target_user_id).avatar_url
+                response = requests.get(url)
+                img = Image.open(BytesIO(response.content))
+                img_path = utils_file.relative_path(__file__, "avatars/" + target_user_id + ".png")
+                # if os.path.isfile(img_path):
+                #     os.remove(img_path)
+                img.save(img_path, 'PNG')
+                with open(img_path, "rb") as ava:
                     await client.edit_profile(password=PASS, avatar=ava.read())
-        if command_list[0] == "dump_channel_overwrites":
-            channel = await client.get_channel(command_list[1])
-            # role = await get_role(message_in.server, command_list[2])
-            overwrites = channel.overwrites
-            result_dict = {}
-            for tupleoverwrite in overwrites:
-                # result_dict[t]
-                result_dict[tupleoverwrite[0].name] = {}
-                pair = tupleoverwrite[1].pair()
-                for allow in pair[0]:
-                    pass
-        if command_list[0] == "dumpinfo":
-            target = await export_user(command_list[1])
-            rows = [(k, str(v)) for k, v in target.items()]
-            print(rows)
-            output.append((rows, "rows"))
-        if command_list[0] == "lfg":
-            await serve_lfg(message_in)
-        if command_list[0] == "ui":
-            embed = await output_user_embed(command_list[1], message_in)
-            if embed:
-                await client.send_message(
-                    destination=message_in.channel,
-                    content=None,
-                    embed=embed)
-            else:
-                await client.send_message(
-                    destination=message_in.channel,
-                    content="User not found")
-        if command_list[0] == "backfill":
-            more = True
-            while more == True:
-                print("Starting up...")
-                cursor = overwatch_db.message_log.find({"toxicity":{"$exists":False}}).sort("date",pymongo.DESCENDING)
-                if cursor:
-                    async for messInfo in cursor:
-                        toxicity = await perspective(messInfo["content"])
-                        print(messInfo["date"])
-                        await overwatch_db.message_log.update_one({"message_id":messInfo["message_id"]}, {"$set":{"toxicity":toxicity}})
-                        await overwatch_db.userinfo.update_one({"userid": messInfo["userid"]}, {"$inc": {"toxicity": toxicity, "toxicity_count": 1}})
-                        await asyncio.sleep(0.7)
-                else:
-                    more = False
-                    print("Ending...")
-        if command_list[0] == "find":
-            # await output_find_user(message_in)
-            raw_params = " ".join(command_list[1:])
-            params = raw_params.split("|")
-            if len(params) > 1:
-                output.append(await find_user(
-                    matching_ident=params[0],
-                    find_type="current",
-                    server=message_in.server,
-                    count=int(params[1])))
-            else:
-                output.append(await find_user(
-                    matching_ident=params[0],
-                    find_type="current",
-                    server=message_in.server))
-        if command_list[0] == "findow":
-            # await output_find_user(message_in)
-            raw_params = " ".join(command_list[1:])
-            params = raw_params.split("|")
-            if len(params) > 1:
-                output.append(await find_user(
-                    matching_ident=params[0],
-                    find_type="current",
-                    server=client.get_server("94882524378968064"),
-                    count=int(params[1])))
-            else:
-                output.append(await find_user(
-                    matching_ident=params[0],
-                    find_type="current",
-                    server=client.get_server("94882524378968064")))
-        if command_list[0] == "findall":
-            # await output_find_user(message_in)
-            raw_params = " ".join(command_list[1:])
-            params = raw_params.split("|")
-            if len(params) > 1:
-                output.append(await find_user(
-                    matching_ident=params[0],
-                    find_type="history",
-                    server=message_in.server,
-                    count=int(params[1])))
-            else:
-                output.append(await find_user(
-                    matching_ident=params[0],
-                    find_type="history",
-                    server=message_in.server))
+            if command_list[0] == "imp":
+                command_list = await mention_to_id(command_list)
+                target_user_id = command_list[1]
+                target_member = message_in.server.get_member(target_user_id)
+                response = requests.get(target_member.avatar_url)
+                img = Image.open(BytesIO(response.content))
+                img_path = utils_file.relative_path(__file__, "avatars/" + target_user_id + ".png")
+                # if os.path.isfile(img_path):
+                #     os.remove(img_path)
+                img.save(img_path, 'PNG')
+                with open(img_path, "rb") as ava:
+                    await client.edit_profile(password=PASS, avatar=ava.read())
+                await client.change_nickname(message_in.server.me, target_member.nick if target_member.nick else target_member.name)
 
-        if command_list[0] == "findban":
-            raw_params = " ".join(command_list[1:])
-            params = raw_params.split("|")
-            if len(params) > 1:
-                output.append(await find_user(
-                    matching_ident=params[0],
-                    find_type="bans",
-                    server=message_in.server,
-                    count=int(params[1])))
-            else:
-                output.append(await find_user(
-                    matching_ident=params[0],
-                    find_type="bans",
-                    server=message_in.server))
-        if command_list[0] == "getava":
-            response = requests.get(command_list[1])
-            img = Image.open(BytesIO(response.content))
-            img_path = utils_file.relative_path(__file__, "avatars/" + command_list[2] + ".png")
-            # if os.path.isfile(img_path):
-            #     os.remove(img_path)
-            img.save(img_path, 'PNG')
-            with open(img_path, "rb") as ava:
-                await client.edit_profile(password=PASS, avatar=ava.read())
-        if command_list[0] == "stealava":
-            command_list = await mention_to_id(command_list)
-            target_user_id = command_list[1]
-            url = message_in.server.get_member(target_user_id).avatar_url
-            response = requests.get(url)
-            img = Image.open(BytesIO(response.content))
-            img_path = utils_file.relative_path(__file__, "avatars/" + target_user_id + ".png")
-            # if os.path.isfile(img_path):
-            #     os.remove(img_path)
-            img.save(img_path, 'PNG')
-            with open(img_path, "rb") as ava:
-                await client.edit_profile(password=PASS, avatar=ava.read())
-        if command_list[0] == "imp":
-            command_list = await mention_to_id(command_list)
-            target_user_id = command_list[1]
-            target_member = message_in.server.get_member(target_user_id)
-            response = requests.get(target_member.avatar_url)
-            img = Image.open(BytesIO(response.content))
-            img_path = utils_file.relative_path(__file__, "avatars/" + target_user_id + ".png")
-            # if os.path.isfile(img_path):
-            #     os.remove(img_path)
-            img.save(img_path, 'PNG')
-            with open(img_path, "rb") as ava:
-                await client.edit_profile(password=PASS, avatar=ava.read())
-            await client.change_nickname(message_in.server.me, target_member.nick if target_member.nick else target_member.name)
+            if command_list[0] == "multinote":
+                start = int(command_list[1])
+                end = int(command_list[2])
+                reason = " ".join(command_list[3:])
 
-        if command_list[0] == "multinote":
-            start = int(command_list[1])
-            end = int(command_list[2])
-            reason = " ".join(command_list[3:])
+                for case_number in range(start, end):
+                    message = "<@!274119184953114625> update {number} {reason}, starting from {first}".format(number=case_number, reason=reason, first="715")
+                    await client.send_message(message_in.channel, message)
+            if command_list[0] == "owner":
+                output.append((message_in.server.owner.name, "text"))
+            if command_list[0] == "ud":
+                defs = str(urbandictionary.define(" ".join(command_list[1:]))[0])
+                output.append((defs, "text"))
+            if command_list[0] == "servers":
+                server_list = [[server.name, str(server.member_count)] for server in client.servers]
+                output.append((server_list, "rows"))
+            if command_list[0] == "mercyshuffle":
+                link_list = [x.link for x in imgur_client.get_album_images("umuvY")]
+                random.shuffle(link_list)
+                for link in link_list[:int(command_list[1])]:
+                    await client.send_message(message_in.channel, link)
+            if command_list[0] == "markdump":
+                command_list = await mention_to_id(command_list)
+                target_user_id = command_list[1]
+                async for message_dict in overwatch_db.message_log.find({"userid": target_user_id}):
+                    utils_file.append_line(utils_file.relative_path(__file__, "markov/" + target_user_id + ".txt"), message_dict["content"])
+            if command_list[0] == "markov":
+                command_list = await mention_to_id(command_list)
+                target_user_id = command_list[1]
+                markovify.NewlineText(utils_file.relative_path(__file__, "markov/" + target_user_id + ".txt"))
+            if command_list[0] == "emoji":
+                import re
+                emoji_id = utils_text.regex_test("\d+(?=>)", " ".join(command_list[1:])).group(0)
+                print(emoji_id)
+                server_name = None
+                for emoji in client.get_all_emojis():
+                    if emoji_id == emoji.id:
+                        server_name = emoji.server.name
+                        break
+                output.append((server_name, None))
+            if command_list[0] == "rs":
+                await client.send_message(client.get_channel("176236425384034304"), ".restart")
+            if command_list[0] == "big":
+                text = str(" ".join(command_list[1:]))
+                big_text = ""
+                for character in text:
+                    if character == " ":
+                        big_text += "     "
+                    else:
+                        big_text += "​:regional_indicator_{c}:".format(c=character)
+                output.append((big_text, "text"))
+            if command_list[0] == "jpeg":
+                url = command_list[1]
+                url = await more_jpeg(url)
+                output.append(("{url}. Compressed to {ratio}% of original".format(url=url[0], ratio=url[1]), "text"))
+            if command_list[0] == "helix":
+                helix = ("{helix_left}　{helix_right}\n   {helix_left}{helix_right}\n　 {helix_right}\n   {helix_right}{helix_left}\n {helix_right}　"
+                         "{helix_left}\n{helix_right}　　{helix_left}\n{helix_right}　　{helix_left}\n {helix_right}　{helix_left}\n  {helix_right} "
+                         "{helix_left}\n　  {helix_left}\n　{helix_left} {helix_right}\n {helix_left}　 {helix_right}\n{helix_left}　　{helix_right}\n"
+                         "{helix_left}   　 {helix_right}\n {helix_left}　  {helix_right}\n　{helix_left}{helix_right}\n     {helix_right}{helix_left}\n  "
+                         "{helix_right}    {helix_left}").format(
+                    helix_left=command_list[1], helix_right=command_list[2])
+                output.append((helix, "text"))
+            if command_list[0] == "persp":
+                text = " ".join(command_list[1:])
+                toxicity_score = await perspective(text)
+                score_text = "```{text}``` Toxicity Score: {score}%".format(text=text, score=toxicity_score * 100)
+                output.append((score_text, "text"))
 
-            for case_number in range(start, end):
-                message = "<@!274119184953114625> update {number} {reason}, starting from {first}".format(number=case_number, reason=reason, first="715")
-                await client.send_message(message_in.channel, message)
-        if command_list[0] == "owner":
-            output.append((message_in.server.owner.name, "text"))
-        if command_list[0] == "ud":
-            defs = str(urbandictionary.define(" ".join(command_list[1:]))[0])
-            output.append((defs, "text"))
-        if command_list[0] == "servers":
-            server_list = [[server.name, str(server.member_count)] for server in client.servers]
-            output.append((server_list, "rows"))
-        if command_list[0] == "mercyshuffle":
-            link_list = [x.link for x in imgur_client.get_album_images("umuvY")]
-            random.shuffle(link_list)
-            for link in link_list[:int(command_list[1])]:
-                await client.send_message(message_in.channel, link)
-        if command_list[0] == "markdump":
-            command_list = await mention_to_id(command_list)
-            target_user_id = command_list[1]
-            async for message_dict in overwatch_db.message_log.find({"userid": target_user_id}):
-                utils_file.append_line(utils_file.relative_path(__file__, "markov/" + target_user_id + ".txt"), message_dict["content"])
-        if command_list[0] == "markov":
-            command_list = await mention_to_id(command_list)
-            target_user_id = command_list[1]
-            markovify.NewlineText(utils_file.relative_path(__file__, "markov/" + target_user_id + ".txt"))
-        if command_list[0] == "emoji":
-            import re
-            emoji_id = utils_text.regex_test("\d+(?=>)", " ".join(command_list[1:])).group(0)
-            print(emoji_id)
-            server_name = None
-            for emoji in client.get_all_emojis():
-                if emoji_id == emoji.id:
-                    server_name = emoji.server.name
-                    break
-            output.append((server_name, None))
-        if command_list[0] == "rs":
-            await client.send_message(client.get_channel("176236425384034304"), ".restart")
-        if command_list[0] == "big":
-            text = str(" ".join(command_list[1:]))
-            big_text = ""
-            for character in text:
-                if character == " ":
-                    big_text += "     "
-                else:
-                    big_text += "​:regional_indicator_{c}:".format(c=character)
-            output.append((big_text, "text"))
-        if command_list[0] == "jpeg":
-            url = command_list[1]
-            url = await more_jpeg(url)
-            output.append(("{url}. Compressed to {ratio}% of original".format(url=url[0], ratio=url[1]), "text"))
-        if command_list[0] == "helix":
-            helix = ("{helix_left}　{helix_right}\n   {helix_left}{helix_right}\n　 {helix_right}\n   {helix_right}{helix_left}\n {helix_right}　"
-                     "{helix_left}\n{helix_right}　　{helix_left}\n{helix_right}　　{helix_left}\n {helix_right}　{helix_left}\n  {helix_right} "
-                     "{helix_left}\n　  {helix_left}\n　{helix_left} {helix_right}\n {helix_left}　 {helix_right}\n{helix_left}　　{helix_right}\n"
-                     "{helix_left}   　 {helix_right}\n {helix_left}　  {helix_right}\n　{helix_left}{helix_right}\n     {helix_right}{helix_left}\n  "
-                     "{helix_right}    {helix_left}").format(
-                helix_left=command_list[1], helix_right=command_list[2])
-            output.append((helix, "text"))
-        if command_list[0] == "persp":
-            text = " ".join(command_list[1:])
-            toxicity_score = await perspective(text)
-            score_text = "```{text}``` Toxicity Score: {score}%".format(text=text, score=toxicity_score * 100)
-            output.append((score_text, "text"))
-
-        if command_list[0] == "big":
-            text = str(" ".join(command_list[1:]))
-            big_text = ""
-            for character in text:
-                if character == " ":
-                    big_text += "     "
-                else:
-                    big_text += " :regional_indicator_{c}:".format(c=character)
-            output.append((big_text, None))
-        if output:
-            # noinspection PyTypeChecker
-            for item in output:
-                await send(destination=message_in.channel, text=item[0], send_type=item[1])
+            if command_list[0] == "big":
+                text = str(" ".join(command_list[1:]))
+                big_text = ""
+                for character in text:
+                    if character == " ":
+                        big_text += "     "
+                    else:
+                        big_text += " :regional_indicator_{c}:".format(c=character)
+                output.append((big_text, None))
+            if output:
+                # noinspection PyTypeChecker
+                for item in output:
+                    await send(destination=message_in.channel, text=item[0], send_type=item[1])
+    except:
+        print(traceback.format_exc())
 
 async def import_message(mess, toxicity):
     messInfo = await utils_parse.parse_message_info(mess)
