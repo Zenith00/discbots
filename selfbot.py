@@ -152,7 +152,7 @@ async def on_message(message_in):
                         {"$group": {"_id": "$message_id", "unique_ids": {"$addToSet": "$_id"}, "count": {"$sum": 1}}},
                         {"$match": {"count": {"$gte": 2}}}
                     ]
-                )
+                , allowDiskUse = True )
                 response = []
                 async for doc in cursor:
                     count = 0
