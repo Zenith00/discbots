@@ -130,6 +130,9 @@ async def on_message(message_in):
                                 count = 0
                                 operations = []
                             print(count)
+                            if not messInfo["content"] or len(messInfo["content"] < 10):
+                                print("Skipping")
+                                continue
                             toxicity = await perspective(messInfo["content"])
                             print(messInfo["date"])
                             operations.append(pymongo.operations.UpdateOne({"message_id": messInfo["message_id"]}, {"$set": {"toxicity": toxicity}}))
@@ -137,8 +140,7 @@ async def on_message(message_in):
                             print(".")
                             await overwatch_db.userinfo.update_one({"userid": messInfo["userid"]}, {"$inc": {"toxicity": toxicity, "toxicity_count": 1}})
                             print("..")
-                            # await asyncio.sleep(0.1)
-                            print("...")
+
                     else:
                         more = False
                         print("Ending...")
