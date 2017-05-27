@@ -150,7 +150,7 @@ async def on_message(message_in):
             if command_list[0] == "transfer":
                 seen_ids = []
                 count = 0
-                start = datetime(year=2015,month=1,day=1)
+                start = datetime(year=2015,month=9,day=27)
                 end = start + timedelta(days=30)
                 while end < datetime.utcnow():
                     count = 0
