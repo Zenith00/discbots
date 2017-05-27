@@ -8,7 +8,7 @@ import random
 import re
 import textwrap
 import traceback
-from datetime import datetime
+from datetime import datetime, timedelta
 from io import BytesIO
 import heapq
 import PIL
@@ -150,16 +150,20 @@ async def on_message(message_in):
             if command_list[0] == "transfer":
                 seen_ids = []
                 count = 0
-                async for message in overwatch_db.message_log.find({"date": {"$lte": command_list[1], "$gte": command_list[2]}}):
-                    if count % 100 == 0:
-                        print(count)
-                    try:
-                        overwatch_db.message_log_new.insert_one(message)
-                        count += 1
-                    except:
-                        pass
-                print("DONE")
-                await client.send_message(message_in.channel, "Done")
+                start = datetime(year=2015,month=1,day=1)
+                end = start + timedelta(days=30)
+                while end < datetime.utcnow():
+                    async for message in overwatch_db.message_log.find({"date": {"$lte": end.isoformat(" "), "$gte": start.isoformat(" ")}}):
+                        if count % 100 == 0:
+                            print(count)
+                        try:
+                            overwatch_db.message_log_new.insert_one(message)
+                            count += 1
+                        except:
+                            pass
+                        await client.send_message(message_in.channel, "Parsed {} from {} to {}".format(count, start.isoformat(" "), end.isoformat(" ")))
+                    start = start + timedelta(days=30)
+                    end = end + timedelta(days=30)
 
                 # cursor = overwatch_db.message_log.aggregate(
                 #     [
