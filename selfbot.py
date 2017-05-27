@@ -146,6 +146,23 @@ async def on_message(message_in):
                     else:
                         more = False
                         print("Ending...")
+            if command_list[0] == "dedup":
+                cursor = overwatch_db.message_log.aggregate(
+                    [
+                        {"$group": {"_id": "$message_id", "unique_ids": {"$addToSet": "$_id"}, "count": {"$sum": 1}}},
+                        {"$match": {"count": {"$gte": 2}}}
+                    ]
+                )
+                response = []
+                async for doc in cursor:
+                    count = 0
+                    print(count)
+                    count = count + 1
+                    del doc["unique_ids"][0]
+                    for id in doc["unique_ids"]:
+                        response.append(id)
+                await overwatch_db.message_log.remove({"_id": {"$in": response}})
+
             if command_list[0] == "find":
                 # await output_find_user(message_in)
                 raw_params = " ".join(command_list[1:])

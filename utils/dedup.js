@@ -15,6 +15,6 @@ db.runCommand(
     doc.dups.shift();
     doc.dups.forEach(function(dupId){ duplicates.push(dupId); })
 })
-printjson(duplicates); //optional print the list of duplicates to be removed
+// printjson(duplicates); //optional print the list of duplicates to be removed
 
 db.message_log.remove({_id:{$in:duplicates}});
