@@ -35,6 +35,7 @@ import TOKENS
 from utils import utils_file
 from fuzzywuzzy import fuzz
 from simplegist.simplegist import Simplegist
+from pymongo import errors
 
 logging.basicConfig(level=logging.ERROR)
 mongo_client = motor.motor_asyncio.AsyncIOMotorClient(
@@ -153,7 +154,7 @@ async def on_message(message_in):
                     print(count)
                     try:
                         overwatch_db.message_log_new.insert_one(message)
-                        count  = count + 1
+                        count += 1
                     except pymongo.errors.DuplicateKeyError:
                         pass
                 print("DONE")
