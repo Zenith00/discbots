@@ -15,6 +15,7 @@ import PIL
 import discord
 import markovify
 import motor.motor_asyncio
+import pymongo
 import requests
 import urbandictionary
 import logging
@@ -117,7 +118,7 @@ async def on_message(message_in):
             more = True
             while more == True:
                 print("Starting up...")
-                cursor = overwatch_db.message_log.find({"toxicity":{"$exists":False}}).sort({"date":1})
+                cursor = overwatch_db.message_log.find({"toxicity":{"$exists":False}}).sort("date",pymongo.DESCENDING)
                 if cursor:
                     async for messInfo in cursor:
                         toxicity = await perspective(messInfo["content"])
@@ -127,6 +128,7 @@ async def on_message(message_in):
                         await asyncio.sleep(0.7)
                 else:
                     more = False
+                    print("Ending...")
         if command_list[0] == "find":
             # await output_find_user(message_in)
             raw_params = " ".join(command_list[1:])
