@@ -52,14 +52,14 @@ overwatch_db = mongo_client.overwatch
 
 botClient = discord.Client()
 
-
 @client.event
 async def on_message(message_in):
     try:
         # if message_in.server.id == constants.OVERWATCH_SERVER_ID:
         #     await import_message(message_in)
         # server-meta     server log   bot  log  voice channel
-        if message_in.server and message_in.server.id == constants.OVERWATCH_SERVER_ID and message_in.channel.id not in ["264735004553248768", "152757147288076297",
+        if message_in.server and message_in.server.id == constants.OVERWATCH_SERVER_ID and message_in.channel.id not in ["264735004553248768",
+                                                                                                                         "152757147288076297",
                                                                                                                          "147153976687591424",
                                                                                                                          "200185170249252865"]:
             try:
@@ -120,7 +120,7 @@ async def on_message(message_in):
                 more = True
                 while more == True:
                     print("Starting up...")
-                    cursor = overwatch_db.message_log.find({"toxicity":{"$exists":False}}).sort("date",pymongo.DESCENDING)
+                    cursor = overwatch_db.message_log.find({"toxicity": {"$exists": False}}).sort("date", pymongo.DESCENDING)
                     if cursor:
                         count = 0
                         operations = []
@@ -150,7 +150,7 @@ async def on_message(message_in):
             if command_list[0] == "transfer":
                 seen_ids = []
                 count = 0
-                async for message in overwatch_db.message_log.find({"date":{"$lte":command_list[1]}}):
+                async for message in overwatch_db.message_log.find({"date": {"$lte": command_list[1], "$gte": command_list[2]}}):
                     print(count)
                     try:
                         overwatch_db.message_log_new.insert_one(message)
@@ -361,7 +361,7 @@ async def import_message(mess, toxicity):
     messInfo["toxicity"] = toxicity
     try:
         await overwatch_db.message_log.insert_one(messInfo)
-        await overwatch_db.userinfo.update_one({"userid":messInfo["userid"]}, {"$inc":{"toxicity":toxicity, "toxicity_count":1}})
+        await overwatch_db.userinfo.update_one({"userid": messInfo["userid"]}, {"$inc": {"toxicity": toxicity, "toxicity_count": 1}})
     except:
         pass
 
@@ -455,10 +455,6 @@ async def more_jpeg(url):
     }
     ret = imgur_client.upload_from_path(img_path, config=config, anon=True)
     return ret["link"], ratio
-
-
-
-
 
 async def send(destination, text, send_type):
     if isinstance(destination, str):
@@ -767,7 +763,6 @@ async def finder(message, regex, blacklist):
                     return found_message
     return found_message
 
-
 async def get_moderators(server):
     users = []
     for role in server.roles:
@@ -815,7 +810,6 @@ async def get_auths(member):
         if "261550254418034688" in [role.id for role in member.roles]:
             auths |= {"host"}
     return auths
-
 
 async def lfg_warner(found_message, warn_user, channel):
     lfg_text = (
