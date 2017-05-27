@@ -125,8 +125,11 @@ async def on_message(message_in):
                             toxicity = await perspective(messInfo["content"])
                             print(messInfo["date"])
                             await overwatch_db.message_log.update_one({"message_id":messInfo["message_id"]}, {"$set":{"toxicity":toxicity}})
+                            print(".")
                             await overwatch_db.userinfo.update_one({"userid": messInfo["userid"]}, {"$inc": {"toxicity": toxicity, "toxicity_count": 1}})
+                            print("..")
                             await asyncio.sleep(0.7)
+                            print("...")
                     else:
                         more = False
                         print("Ending...")
