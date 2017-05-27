@@ -130,7 +130,7 @@ async def on_message(message_in):
                                 count = 0
                                 operations = []
                             print(count)
-                            if not messInfo["content"] or len(messInfo["content"] < 10):
+                            if not messInfo["content"] or len(messInfo["content"]) < 10:
                                 print("Skipping")
                                 continue
                             toxicity = await perspective(messInfo["content"])
