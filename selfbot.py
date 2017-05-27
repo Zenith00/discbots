@@ -121,14 +121,23 @@ async def on_message(message_in):
                     print("Starting up...")
                     cursor = overwatch_db.message_log.find({"toxicity":{"$exists":False}}).sort("date",pymongo.DESCENDING)
                     if cursor:
+                        count = 0
+                        operations = []
                         async for messInfo in cursor:
+                            if count > 500:
+                                res = await overwatch_db.message_log.bulk_write(operations)
+                                print(res.modified_count)
+                                count = 0
+                                operations = []
+                            print(count)
                             toxicity = await perspective(messInfo["content"])
                             print(messInfo["date"])
-                            await overwatch_db.message_log.update_one({"message_id":messInfo["message_id"]}, {"$set":{"toxicity":toxicity}})
+                            operations.append(pymongo.operations.UpdateOne({"message_id": messInfo["message_id"]}, {"$set": {"toxicity": toxicity}}))
+                            # await overwatch_db.message_log.update_one({"message_id":messInfo["message_id"]}, {"$set":{"toxicity":toxicity}})
                             print(".")
                             await overwatch_db.userinfo.update_one({"userid": messInfo["userid"]}, {"$inc": {"toxicity": toxicity, "toxicity_count": 1}})
                             print("..")
-                            await asyncio.sleep(0.7)
+                            # await asyncio.sleep(0.1)
                             print("...")
                     else:
                         more = False
