@@ -117,7 +117,7 @@ async def on_message(message_in):
             more = True
             while more == True:
                 print("Starting up...")
-                cursor = overwatch_db.message_log.find({"toxicity":{"$exists":False}})
+                cursor = overwatch_db.message_log.find({"toxicity":{"$exists":False}}).sort({"date":1})
                 if cursor:
                     async for messInfo in cursor:
                         toxicity = await perspective(messInfo["content"])
