@@ -150,7 +150,7 @@ async def on_message(message_in):
             if command_list[0] == "transfer":
                 seen_ids = []
                 count = 0
-                async for message in overwatch_db.message_log.find():
+                async for message in overwatch_db.message_log.find({"date":{"$lte":"2016"}}):
                     print(count)
                     try:
                         overwatch_db.message_log_new.insert_one(message)
