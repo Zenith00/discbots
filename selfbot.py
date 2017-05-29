@@ -121,25 +121,28 @@ async def on_message(message_in):
                 while more == True:
                     print("Starting up...")
                     cursor = overwatch_db.message_log.find({"toxicity": {"$exists": False}}).sort("date", pymongo.DESCENDING)
-                    if cursor:
-                        count = 0
-                        async for messInfo in cursor:
-                            print(count)
-                            if not messInfo["content"] or len(messInfo["content"]) < 10:
-                                print("Skipping")
-                                continue
-                            toxicity = await perspective(messInfo["content"])
-                            print(messInfo["date"])
-                            overwatch_db.message_log.update_one({"message_id": messInfo["message_id"]}, {"$set": {"toxicity": toxicity}})
-                            print(".")
-                            await overwatch_db.userinfo.update_one({"userid": messInfo["userid"]}, {"$inc": {"toxicity": toxicity, "toxicity_count": 1}})
-                            print("..")
-                            await asyncio.sleep(0.5)
-                            count = count + 1
+                    try:
+                        if cursor:
+                            count = 0
+                            async for messInfo in cursor:
+                                print(count)
+                                if not messInfo["content"] or len(messInfo["content"]) < 10:
+                                    print("Skipping")
+                                    continue
+                                toxicity = await perspective(messInfo["content"])
+                                print(messInfo["date"])
+                                overwatch_db.message_log.update_one({"message_id": messInfo["message_id"]}, {"$set": {"toxicity": toxicity}})
+                                print(".")
+                                await overwatch_db.userinfo.update_one({"userid": messInfo["userid"]}, {"$inc": {"toxicity": toxicity, "toxicity_count": 1}})
+                                print("..")
+                                await asyncio.sleep(0.5)
+                                count = count + 1
 
-                    else:
-                        more = False
-                        print("Ending...")
+                        else:
+                            more = False
+                            print("Ending...")
+                    except:
+                        pass
             if command_list[0] == "transfer":
                 seen_ids = []
                 count = 0
