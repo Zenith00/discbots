@@ -123,25 +123,18 @@ async def on_message(message_in):
                     cursor = overwatch_db.message_log.find({"toxicity": {"$exists": False}}).sort("date", pymongo.DESCENDING)
                     if cursor:
                         count = 0
-                        operations = []
                         async for messInfo in cursor:
-                            if count > 500:
-                                res = await overwatch_db.message_log.bulk_write(operations)
-                                print(res.modified_count)
-                                count = 0
-                                operations = []
                             print(count)
                             if not messInfo["content"] or len(messInfo["content"]) < 10:
                                 print("Skipping")
                                 continue
                             toxicity = await perspective(messInfo["content"])
                             print(messInfo["date"])
-                            operations.append(pymongo.operations.UpdateOne({"message_id": messInfo["message_id"]}, {"$set": {"toxicity": toxicity}}))
-                            # await overwatch_db.message_log.update_one({"message_id":messInfo["message_id"]}, {"$set":{"toxicity":toxicity}})
+                            overwatch_db.message_log.update_one({"message_id": messInfo["message_id"]}, {"$set": {"toxicity": toxicity}})
                             print(".")
                             await overwatch_db.userinfo.update_one({"userid": messInfo["userid"]}, {"$inc": {"toxicity": toxicity, "toxicity_count": 1}})
                             print("..")
-                            await asyncio.sleep(0.1)
+                            await asyncio.sleep(0.5)
                             count = count + 1
 
                     else:
@@ -151,7 +144,7 @@ async def on_message(message_in):
                 seen_ids = []
                 count = 0
                 start = datetime(year=int(command_list[1]),month=int(command_list[2]),day=int(command_list[3]))
-                end = start + timedelta(days=3)
+                end = start + timedelta(days=1)
                 while end < datetime.utcnow():
                     count = 0
                     async for message in overwatch_db.message_log.find({"date": {"$lte": end.isoformat(" "), "$gte": start.isoformat(" ")}}):
@@ -161,11 +154,10 @@ async def on_message(message_in):
                             overwatch_db.message_log_new.insert_one(message)
                             count += 1
                         except:
-
                             pass
                     await client.send_message(message_in.channel, "Parsed {} from {} to {}".format(count, start.isoformat(" "), end.isoformat(" ")))
-                    start = start + timedelta(days=3)
-                    end = end + timedelta(days=3)
+                    start = start + timedelta(days=1)
+                    end = end + timedelta(days=1)
 
 
 
