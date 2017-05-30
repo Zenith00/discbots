@@ -132,7 +132,7 @@ async def on_message(message_in):
                             count = 0
                             async for messInfo in cursor:
                                 print(count)
-                                if not messInfo["content"] or messInfo["content"] == "":
+                                if not messInfo["content"] or messInfo["content"] == "" or len(messInfo["content"]) >= 3000:
                                     overwatch_db.message_log.update_one({"message_id": messInfo["message_id"]}, {"$set": {"toxicity": 0}})
                                     continue
                                 toxicity = await perspective(messInfo["content"])
