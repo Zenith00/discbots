@@ -118,7 +118,7 @@ async def on_message(message_in):
                         content="User not found")
             if command_list[0] == "vtox":
                 doc = await overwatch_db.userinfo.find_one({"userid":command_list[1]})
-                await client.send_message(message_in.channel, "Average of {}% toxicity over {} messages".format(doc["toxicity"], doc["toxicity_count"]))
+                await client.send_message(message_in.channel, "Average of {}% toxicity over {} processed messages".format(doc["toxicity"]/doc["toxicity_count"], doc["toxicity_count"]))
             if command_list[0] == "backfill":
                 more = True
                 while more == True:
