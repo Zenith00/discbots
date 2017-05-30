@@ -126,15 +126,12 @@ async def on_message(message_in):
                 more = True
                 while more == True:
                     print("Starting up...")
-                    cursor = overwatch_db.message_log.find({"toxicity": {"$exists": False}}).sort("date", pymongo.DESCENDING)
+                    cursor = overwatch_db.message_log.find({"toxicity": {"$exists": False}, "content":{"$exists":True}}).sort("date", pymongo.DESCENDING)
                     try:
                         if cursor:
                             count = 0
                             async for messInfo in cursor:
                                 print(count)
-                                if not messInfo["content"] or len(messInfo["content"]) < 10:
-                                    print("Skipping")
-                                    continue
                                 toxicity = await perspective(messInfo["content"])
                                 print(toxicity)
                                 print(messInfo["date"])
