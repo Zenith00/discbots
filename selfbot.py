@@ -146,6 +146,7 @@ async def on_message(message_in):
                             more = False
                             print("Ending...")
                     except:
+                        print(traceback.format_exc())
                         pass
             if command_list[0] == "transfer":
                 seen_ids = []
