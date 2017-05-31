@@ -18,7 +18,7 @@ pipeline = [
               {"$sum": 1}}},
     {"$match":
          {"count":
-              {"$gt": 1}}}]
+              {"$gt": 1}}}, ]
 
 duplicates = []
 count = 0
