@@ -967,7 +967,7 @@ async def get_auths(member):
 
 async def lfg_warner(found_message, warn_user, channel):
     lfg_text = (
-        "You're probably looking for <#306512316843950091>, <#182420486582435840>, <#185665683009306625>, or <#177136656846028801>."
+        "You're probably looking for <#182420486582435840>, <#185665683009306625>, or <#177136656846028801>."
         " Please avoid posting LFGs in ")
     if found_message:
         author = found_message.author
