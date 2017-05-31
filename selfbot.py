@@ -122,6 +122,8 @@ async def on_message(message_in):
                 await client.send_message(message_in.channel,
                                           "{}\nAverage of {}% toxicity over {} processed messages".format(target.name, round(doc["toxicity"]*100 / doc["toxicity_count"], 5),
                                                                                                       doc["toxicity_count"]))
+            if command_list[0] == "toxtop":
+                cursor = await overwatch_db.userinfo.find({"toxicity":{"$exists":True}}, limit=int(command_list[1])).sort(["toxicity",-1])
             if command_list[0] == "backfill":
                 more = True
                 while more == True:
