@@ -53,6 +53,7 @@ overwatch_db = mongo_client.overwatch
 
 botClient = discord.Client()
 
+
 @client.event
 async def on_message(message_in):
     try:
@@ -60,8 +61,8 @@ async def on_message(message_in):
         #     await import_message(message_in)
         # server-meta     server log   bot  log  voice channel
         if message_in.server and message_in.server.id == constants.OVERWATCH_SERVER_ID and message_in.channel.id not in [
-            "264735004553248768", "152757147288076297",
-            "147153976687591424", "200185170249252865"
+                "264735004553248768", "152757147288076297",
+                "147153976687591424", "200185170249252865"
         ]:
             try:
                 await mess2log(message_in)
@@ -130,24 +131,27 @@ async def on_message(message_in):
                 target = message_in.server.get_member(command_list[1])
                 doc = await overwatch_db.userinfo.find_one({
                     "userid":
-                        command_list[1]
+                    command_list[1]
                 })
                 await client.send_message(
                     message_in.channel,
                     "{}\nAverage of {}% toxicity over {} processed messages".
-                        format(target.name,
-                               round(doc["toxicity"] * 100 / doc["toxicity_count"],
-                                     5), doc["toxicity_count"]))
+                    format(target.name,
+                           round(doc["toxicity"] * 100 / doc["toxicity_count"],
+                                 5), doc["toxicity_count"]))
             if command_list[0] == "toxtop":
                 cursor = overwatch_db.userinfo.aggregate([{
                     "$match": {
                         "toxicity": {
                             "$exists": True
+                        },
+                        "toxicity_count": {
+                            "$gt": 15
                         }
                     }
                 }, {
                     "$project": {
-                        "userid"          : 1,
+                        "userid": 1,
                         "average_toxicity": {
                             "$divide": ["$toxicity", "$toxicity_count"]
                         }
@@ -157,13 +161,14 @@ async def on_message(message_in):
                         "average_toxicity": -1
                     }
                 }, {
-                    "$limit": int(command_list[1])
+                    "$limit":
+                    int(command_list[1])
                 }])
 
                 info = []
                 async for user_dict in cursor:
-                    info.append(("<@!" + user_dict["userid"] + ">", " | ", str(
-                        round(user_dict["average_toxicity"], 2))))
+                    info.append(("<@!" + user_dict["userid"] + ">", " | ",
+                                 str(round(user_dict["average_toxicity"], 2))))
                 output.append((info, "qrows"))
             if command_list[0] == "backfill":
                 more = True
@@ -173,7 +178,7 @@ async def on_message(message_in):
                         "toxicity": {
                             "$exists": False
                         },
-                        "content" : {
+                        "content": {
                             "$exists": True
                         }
                     }).sort("date", pymongo.DESCENDING)
@@ -188,7 +193,7 @@ async def on_message(message_in):
                                 except:
                                     overwatch_db.message_log.update_one({
                                         "message_id":
-                                            messInfo["message_id"]
+                                        messInfo["message_id"]
                                     }, {"$set": {
                                         "toxicity": 0
                                     }})
@@ -197,17 +202,17 @@ async def on_message(message_in):
                                 print(messInfo["date"])
                                 overwatch_db.message_log.update_one({
                                     "message_id":
-                                        messInfo["message_id"]
+                                    messInfo["message_id"]
                                 }, {"$set": {
                                     "toxicity": toxicity
                                 }})
                                 print(".")
                                 await overwatch_db.userinfo.update_one({
                                     "userid":
-                                        messInfo["userid"]
+                                    messInfo["userid"]
                                 }, {
                                     "$inc": {
-                                        "toxicity"      : toxicity,
+                                        "toxicity": toxicity,
                                         "toxicity_count": 1
                                     }
                                 })
@@ -374,7 +379,7 @@ async def on_message(message_in):
             if command_list[0] == "mercyshuffle":
                 link_list = [
                     x.link for x in imgur_client.get_album_images("umuvY")
-                    ]
+                ]
                 random.shuffle(link_list)
                 for link in link_list[:int(command_list[1])]:
                     await client.send_message(message_in.channel, link)
@@ -383,7 +388,7 @@ async def on_message(message_in):
                 target_user_id = command_list[1]
                 async for message_dict in overwatch_db.message_log.find({
                     "userid":
-                        target_user_id
+                    target_user_id
                 }):
                     utils_file.append_line(
                         utils_file.relative_path(
@@ -432,8 +437,8 @@ async def on_message(message_in):
                     "{helix_left}\n　  {helix_left}\n　{helix_left} {helix_right}\n {helix_left}　 {helix_right}\n{helix_left}　　{helix_right}\n"
                     "{helix_left}   　 {helix_right}\n {helix_left}　  {helix_right}\n　{helix_left}{helix_right}\n     {helix_right}{helix_left}\n  "
                     "{helix_right}    {helix_left}").format(
-                    helix_left=command_list[1],
-                    helix_right=command_list[2])
+                        helix_left=command_list[1],
+                        helix_right=command_list[2])
                 output.append((helix, "text"))
             if command_list[0] == "persp":
                 text = " ".join(command_list[1:])
@@ -462,6 +467,7 @@ async def on_message(message_in):
     except:
         print(traceback.format_exc())
 
+
 async def import_message(mess, toxicity):
     messInfo = await utils_parse.parse_message_info(mess)
     messInfo["toxicity"] = toxicity
@@ -470,11 +476,12 @@ async def import_message(mess, toxicity):
         await overwatch_db.userinfo.update_one({
             "userid": messInfo["userid"]
         }, {"$inc": {
-            "toxicity"      : toxicity,
+            "toxicity": toxicity,
             "toxicity_count": 1
         }})
     except:
         pass
+
 
 @client.event
 async def on_ready():
@@ -482,10 +489,12 @@ async def on_ready():
     print('Username: ' + client.user.name)
     print('ID: ' + client.user.id)
 
+
 async def get_role(server, roleid):
     for x in server.roles:
         if x.id == roleid:
             return x
+
 
 # Log Based
 async def output_logs(userid, count, message_in):
@@ -514,19 +523,21 @@ async def output_logs(userid, count, message_in):
     else:
         return ("No logs found", None)
 
+
 async def perspective(text):
     analyze_request = {
-        'comment'            : {
+        'comment': {
             'text': text
         },
         'requestedAttributes': {
             'TOXICITY': {}
         },
-        'languages'          : ["en"]
+        'languages': ["en"]
     }
     response = perspective_api.comments().analyze(
         body=analyze_request).execute()
     return response["attributeScores"]["TOXICITY"]["summaryScore"]["value"]
+
 
 async def mess2log(message):
     time = datetime.now().strftime("%I:%M:%S")
@@ -555,6 +566,7 @@ async def mess2log(message):
     #                          "111911466172424192", "195671081065906176", "258500747732189185", "218133578326867968", "133884121830129664"]:
     #     await client.send_message(client.get_channel("295260183352049664"), log_str)
 
+
 async def more_jpeg(url):
     response = requests.get(url)
     original_size = len(response.content)
@@ -571,6 +583,7 @@ async def more_jpeg(url):
     config = {'album': None, 'name': 'Added JPEG!', 'title': 'Added JPEG!'}
     ret = imgur_client.upload_from_path(img_path, config=config, anon=True)
     return ret["link"], ratio
+
 
 async def send(destination, text, send_type):
     if isinstance(destination, str):
@@ -605,6 +618,7 @@ async def send(destination, text, send_type):
         line = line.replace("<NL<", "\n")
         await client.send_message(destination, line)
 
+
 async def remind_me(command_list, message):
     try:
         time = await utils_text.parse_time_to_end(" ".join(command_list[1:]))
@@ -615,6 +629,7 @@ async def remind_me(command_list, message):
             "Reminding after " + str(time) + " seconds:\n" + command_list[0])
     except:
         print(traceback.format_exc())
+
 
 async def mention_to_id(command_list):
     new_command = []
@@ -628,6 +643,7 @@ async def mention_to_id(command_list):
             id_chars = "".join(idmatch.findall(item))
             new_command.append(id_chars)
     return new_command
+
 
 async def find_user(matching_ident,
                     find_type,
@@ -688,6 +704,7 @@ async def find_user(matching_ident,
             output += "`ID: {userid} | Name: {name} |` {mention}\n".format(
                 userid=userid, name=ident, mention="<@!{}>".format(userid))
     return (output, None)
+
 
 async def output_user_embed(member_id, message_in):
     # target_member = message_in.author
@@ -760,6 +777,7 @@ async def output_user_embed(member_id, message_in):
         embed.set_thumbnail(url=target_member.avatar_url)
     return embed
 
+
 async def export_user(member_id):
     """
 
@@ -770,14 +788,15 @@ async def export_user(member_id):
             "userid": member_id
         },
         projection={
-            "_id"        : False,
+            "_id": False,
             "mention_str": False,
             "avatar_urls": False,
-            "lfg_count"  : False
+            "lfg_count": False
         })
     if not userinfo:
         return None
     return userinfo
+
 
 async def import_user(member):
     user_info = await utils_parse.parse_member_info(member)
@@ -786,28 +805,29 @@ async def import_user(member):
             "userid": member.id
         }, {
             "$addToSet": {
-                "nicks"       : {
+                "nicks": {
                     "$each": [
                         user_info["nick"], user_info["name"],
                         user_info["name"] + "#" + str(user_info["discrim"])
                     ]
                 },
-                "names"       : user_info["name"],
-                "avatar_urls" : user_info["avatar_url"],
+                "names": user_info["name"],
+                "avatar_urls": user_info["avatar_url"],
                 "server_joins": user_info["joined_at"]
             },
-            "$set"     : {
+            "$set": {
                 "mention_str": user_info["mention_str"],
-                "created_at" : user_info["created_at"]
+                "created_at": user_info["created_at"]
             },
         },
         upsert=True)
     pass
 
+
 async def format_message_to_log(message_dict):
     cursor = await overwatch_db.userinfo.find_one({
         "userid":
-            message_dict["userid"]
+        message_dict["userid"]
     })
     try:
         name = cursor["names"][-1]
@@ -820,7 +840,7 @@ async def format_message_to_log(message_dict):
                     message_dict["userid"]))
             cursor = await overwatch_db.userinfo.find_one({
                 "userid":
-                    message_dict["userid"]
+                message_dict["userid"]
             })
             name = cursor["names"][-1]
         except:
@@ -837,12 +857,13 @@ async def format_message_to_log(message_dict):
             channel_name = "Unknown"
 
         return "[" + message_dict["date"][:
-        19] + "][" + channel_name + "][" + str(
-            name) + "]:" + content
+                                          19] + "][" + channel_name + "][" + str(
+                                              name) + "]:" + content
 
     except:
         print(traceback.format_exc())
         return "Errored Message : " + str(message_dict)
+
 
 async def serve_lfg(message_in):
     found_message = None
@@ -859,6 +880,7 @@ async def serve_lfg(message_in):
         warn_user=warn_user,
         channel=message_in.channel)
     await client.delete_message(message_in)
+
 
 async def finder(message, regex, blacklist):
     """
@@ -890,6 +912,7 @@ async def finder(message, regex, blacklist):
                     return found_message
     return found_message
 
+
 async def get_moderators(server):
     users = []
     for role in server.roles:
@@ -898,12 +921,14 @@ async def get_moderators(server):
             users.extend(members)
     return users
 
+
 async def get_role_members(role) -> list:
     members = []
     for member in role.server.members:
         if role in member.roles:
             members.append(member)
     return members
+
 
 async def get_auths(member):
     """
@@ -938,6 +963,7 @@ async def get_auths(member):
             auths |= {"host"}
     return auths
 
+
 async def lfg_warner(found_message, warn_user, channel):
     lfg_text = (
         "You're probably looking for <#306512316843950091>, <#182420486582435840>, <#185665683009306625>, or <#177136656846028801>."
@@ -953,6 +979,7 @@ async def lfg_warner(found_message, warn_user, channel):
         lfg_text += ", " + author.mention
 
     await client.send_message(channel, lfg_text)
+
 
 # def do_gmagik(self, ctx, gif):
 # 	try:
@@ -1132,6 +1159,7 @@ class Unbuffered(object):
 
     def __getattr__(self, attr):
         return getattr(self.stream, attr)
+
 
 import sys
 
