@@ -124,6 +124,10 @@ async def on_message(message_in):
                                                                                                       doc["toxicity_count"]))
             if command_list[0] == "toxtop":
                 cursor = await overwatch_db.userinfo.find({"toxicity":{"$exists":True}}, limit=int(command_list[1])).sort(["toxicity",-1])
+                info = []
+                async for user_dict in cursor:
+                    info.append(("<@!" + user_dict["userid"] + ">", " | ", round(user_dict["toxicity"] * 100 / user_dict["toxicity_count"], 2)))
+                output.append((info, "rows"))
             if command_list[0] == "backfill":
                 more = True
                 while more == True:
