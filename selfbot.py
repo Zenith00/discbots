@@ -164,7 +164,7 @@ async def on_message(message_in):
                 async for user_dict in cursor:
                     info.append(("<@!" + user_dict["userid"] + ">", " | ", str(
                         round(user_dict["average_toxicity"], 2))))
-                output.append((info, "rows"))
+                output.append((info, "qrows"))
             if command_list[0] == "backfill":
                 more = True
                 while more == True:
@@ -581,6 +581,14 @@ async def send(destination, text, send_type):
         for message in message_list:
             try:
                 await client.send_message(destination, "```" + message + "```")
+            except:
+                print(message)
+        return
+    if send_type == "qrows":
+        message_list = utils_text.multi_block(text, True)
+        for message in message_list:
+            try:
+                await client.send_message(destination, message)
             except:
                 print(message)
         return
