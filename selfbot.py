@@ -150,8 +150,8 @@ async def on_message(message_in):
                 info = []
                 async for user_dict in cursor:
                     info.append(("<@!" + user_dict["userid"] + ">", " | ",
-                                 round(user_dict["toxicity"] * 100 /
-                                       user_dict["toxicity_count"], 2)))
+                                 str(round(user_dict["toxicity"] * 100 /
+                                       user_dict["toxicity_count"], 2))))
                 output.append((info, "rows"))
             if command_list[0] == "backfill":
                 more = True
