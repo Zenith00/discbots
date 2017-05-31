@@ -140,7 +140,7 @@ async def on_message(message_in):
                            round(doc["toxicity"] * 100 / doc["toxicity_count"],
                                  5), doc["toxicity_count"]))
             if command_list[0] == "toxtop":
-                cursor = await overwatch_db.userinfo.find(
+                cursor = overwatch_db.userinfo.find(
                     {
                         "toxicity": {
                             "$exists": True
