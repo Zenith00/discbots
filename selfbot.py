@@ -128,7 +128,7 @@ async def on_message(message_in):
                         destination=message_in.channel,
                         content="User not found")
             if command_list[0] == "vtox":
-                target = message_in.server.get_member(command_list[1])
+                # target = message_in.server.get_member(command_list[1])
                 doc = await overwatch_db.userinfo.find_one({
                     "userid":
                     command_list[1]
@@ -136,7 +136,7 @@ async def on_message(message_in):
                 await client.send_message(
                     message_in.channel,
                     "{}\nAverage of {}% toxicity over {} processed messages".
-                    format(target.name,
+                    format("<@!{}>".format(command_list[1]),
                            round(doc["toxicity"] * 100 / doc["toxicity_count"],
                                  5), doc["toxicity_count"]))
             if command_list[0] == "toxtop":
