@@ -134,14 +134,14 @@ async def get_role(server, roleid):
 async def get_auths(member):
     perms = set()
     if "261550254418034688" in [role.id for role in member.roles]:
-        perms |= "host"
+        perms |= {"host"}
     if any(mod_id in [role.id for role in member.roles] for mod_id in ["260186671641919490", "261550254418034688"]):
-        perms |= "mod"
-        perms |= "host"
+        perms |= {"mod"}
+        perms |= {"host"}
     if "129706966460137472" == member.id:
-        perms |= "zenith"
-        perms |= "mod"
-        perms |= "host"
+        perms |= {"zenith"}
+        perms |= {"mod"}
+        perms |= {"host"}
     return perms
 
 
