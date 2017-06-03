@@ -116,6 +116,13 @@ async def on_message(message_in):
                 output.append((rows, "rows"))
             if command_list[0] == "lfg":
                 await serve_lfg(message_in)
+            if command_list[0] == "importusers":
+                memberlist = []
+                for member in message_in.server.members:
+                    memberlist.append(member)
+                for member in memberlist:
+                    print(member.name)
+                    await import_user(member)
             if command_list[0] == "ui":
                 embed = await output_user_embed(command_list[1], message_in)
                 if embed:
@@ -467,6 +474,63 @@ async def on_message(message_in):
                         send_type=item[1])
     except:
         print(traceback.format_exc())
+
+async def import_to_user_set(member, set_name, entry):
+    await overwatch_db.userinfo.update_one({
+        "userid": member.id
+    }, {"$addToSet": {
+        set_name: entry
+    }})
+
+@client.event
+async def on_member_remove(member):
+    if member.server.id == constants.OVERWATCH_SERVER_ID:
+        await import_to_user_set(
+            member=member,
+            set_name="server_leaves",
+            entry=datetime.utcnow().isoformat(" "))
+
+@client.event
+async def on_member_ban(member):
+    if member.server.id == constants.OVERWATCH_SERVER_ID:
+        await import_to_user_set(
+            member=member,
+            set_name="bans",
+            entry=datetime.utcnow().isoformat(" "))
+
+@client.event
+async def on_member_unban(server, member):
+    if server.id == constants.OVERWATCH_SERVER_ID:
+        await import_to_user_set(
+            member=member,
+            set_name="unbans",
+            entry=datetime.utcnow().isoformat(" "))
+
+@client.event
+async def on_voice_state_update(before, after):
+    """
+    :type after: discord.Member
+    :type before: discord.Member
+    """
+    pass
+
+# noinspection PyShadowingNames
+@client.event
+async def on_member_update(before, after):
+    """
+
+    :type after: discord.Member
+    :type before: discord.Member
+    """
+    if before.server.id == constants.OVERWATCH_SERVER_ID:
+        if before.nick != after.nick:
+            await import_to_user_set(
+                member=after, set_name="nicks", entry=after.nick)
+        if before.name != after.name:
+            await import_to_user_set(
+                member=after, set_name="names", entry=after.nick)
+    if before.voice == after.voice:
+        await import_user(after)
 
 
 async def import_message(mess, toxicity):
