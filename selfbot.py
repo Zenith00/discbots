@@ -78,7 +78,9 @@ async def on_message(message_in):
             command_list = await mention_to_id(command_list)
             output = []
             if command_list[0] == "repairperms":
-                perms = await get_role(message_in.server, )
+                comm = await get_role(message_in.server, command_list[1])
+                perms = comm.permissions
+                override = discord.PermissionOverwrite.from_pair(perms, discord.Permissions.all())
             if command_list[0] == "getroles":
                 output.append(await output_roles(message_in))
             if command_list[0] == "userlogs":
