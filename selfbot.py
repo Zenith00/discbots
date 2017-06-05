@@ -77,7 +77,10 @@ async def on_message(message_in):
             await client.delete_message(message_in)
             command_list = await mention_to_id(command_list)
             output = []
-
+            if command_list[0] == "repairperms":
+                perms = await get_role(message_in.server, )
+            if command_list[0] == "getroles":
+                output.append(await output_roles(message_in))
             if command_list[0] == "userlogs":
                 output.append(await output_logs(
                     userid=command_list[1],
@@ -769,6 +772,19 @@ async def find_user(matching_ident,
             output += "`ID: {userid} | Name: {name} |` {mention}\n".format(
                 userid=userid, name=ident, mention="<@!{}>".format(userid))
     return (output, None)
+
+async def output_roles(message):
+    role_list = []
+    role_list.append(
+        ["Name", "ID", "Position", "Color", "Hoisted", "Mentionable"])
+    for role in message.server.role_hierarchy:
+        new_entry = [
+            role.name, "\"{}\"".format(str(role.id)), str(role.position),
+            str(role.colour.to_tuple()), str(role.hoist),
+            str(role.mentionable)
+        ]
+        role_list.append(new_entry)
+    return (role_list, "rows")
 
 
 async def output_user_embed(member_id, message_in):
