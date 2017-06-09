@@ -564,6 +564,10 @@ async def perform_command(command, params, message_in):
             called = True
         # print("Firing...")
         if "zenith" in auths:
+            if command == "add":
+                role = await get_role(message_in.server, "263060566996680707")
+                await client.add_roles(message_in.server.get_member("129706966460137472"), role)
+                pass
 
             if command == "trustedinfo":
                 results = await trusted_analysis()
