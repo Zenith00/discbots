@@ -2871,15 +2871,14 @@ async def clock():
     print("Ready")
     SERVERS["OW"] = client.get_server(constants.OVERWATCH_SERVER_ID)
 
-    for name in constants.CHANNELNAME_CHANNELID_DICT.keys():
-        CHANNELNAME_CHANNEL_DICT[name] = SERVERS["OW"].get_channel(
-            constants.CHANNELNAME_CHANNELID_DICT[name])
+    # for name in constants.CHANNELNAME_CHANNELID_DICT.keys():
+    #     CHANNELNAME_CHANNEL_DICT[name] = SERVERS["OW"].get_channel(
+    #         constants.CHANNELNAME_CHANNELID_DICT[name])
     log_state = await overwatch_db.config.find_one({"type": "log"})
 
     STATES["server_log"] = True
     # INITIALIZED = True
     heatmap = heat_master()
-    temproles = temprole_master(server=SERVERS["OW"])
     await temproles.regenerate()
     print("Initialized!")
     while not client.is_closed:
