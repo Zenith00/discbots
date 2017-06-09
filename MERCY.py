@@ -2883,7 +2883,7 @@ async def clock():
     print("Initialized!")
     while not client.is_closed:
         await asyncio.sleep(2)
-        await temproles.tick()
+        # await temproles.tick()
 
 client.loop.create_task(clock())
 client.run(TOKENS.MERCY_TOKEN, bot=True)
