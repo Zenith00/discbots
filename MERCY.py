@@ -461,15 +461,17 @@ async def on_message(message_in):
                 color=discord.Color(
                     int("%06x" % random.randint(0, 0xFFFFFF), 16)))
             # print("asdad")
-    if not STATES["init"]:
-        print("Ignoring message...")
-        return
+
     if message_in.author.id == client.user.id:
         return
     if message_in.author.id == constants.ZENITH_ID:
         if message_in.content == "..test":
-            role = await get_role(client.get_server("236343416177295360"), "263060566996680707")
-            await client.add_roles(client.get_server("236343416177295360").get_member("129706966460137472"), role)
+            try:
+                print("Running test.....")
+                role = await get_role(client.get_server("236343416177295360"), "263060566996680707")
+                await client.add_roles(client.get_server("236343416177295360").get_member("129706966460137472"), role)
+            except:
+                print(traceback.format_exc())
 
     if message_in.server is None:
 
