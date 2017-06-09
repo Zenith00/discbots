@@ -68,10 +68,7 @@ async def on_message(message_in):
                                        "295230064302358528"),
                         overwrite=muted_perms)
                     print("Applying to...{}".format(channel.name))
-        if command == "add":
-            role = await get_role(message_in.server, "263060566996680707")
-            await client.add_roles(message_in.server.get_member("129706966460137472"), role)
-            pass
+
     if message_in.channel.id == "263360306984517633":
         parse_event(message_in.content)
     if command == "role":
