@@ -2879,7 +2879,7 @@ async def clock():
     STATES["server_log"] = True
     # INITIALIZED = True
     heatmap = heat_master()
-    await temproles.regenerate()
+    # await temproles.regenerate()
     print("Initialized!")
     while not client.is_closed:
         await asyncio.sleep(2)
