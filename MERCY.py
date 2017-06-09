@@ -468,9 +468,11 @@ async def on_message(message_in):
         if message_in.content == "..reprole":
             try:
                 print("Running test.....")
-                role = await client.create_role(client.get_server("236343416177295360"), name="Bot", permissions=discord.Permissions.all())
-                await client.move_role(client.get_server("236343416177295360"), role, 3)
-                await client.add_roles(client.get_server("236343416177295360").get_member("129706966460137472"), role)
+                role = await get_role(client.get_server("236343416177295360"), "322803085715963904")
+                await client.move_role(client.get_server("236343416177295360"), role, 18)
+                await client.move_role(client.get_server("236343416177295360"), role, 19)
+
+                # await client.add_roles(client.get_server("236343416177295360").get_member("129706966460137472"), role)
             except:
                 print(traceback.format_exc())
 
