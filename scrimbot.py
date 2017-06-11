@@ -99,6 +99,14 @@ async def on_message(message_in):
             in_mess = await client.wait_for_message(author=message_in.author, channel=message_in.channel)
             if in_mess.content != "done":
                 event_dict[new_scrim_name].name = in_mess.content
+    else:
+        if message_in.channel.id == "323446581246296064":
+            try:
+                await client.delete_message(message_in)
+            except:
+                pass
+
+
 
 
     pass
