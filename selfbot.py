@@ -152,7 +152,7 @@ async def on_message(message_in):
                                      5), doc["toxicity_count"]))
             if command_list[0] == "mosttox":
                 target_user_id = command_list[1]
-                count = command_list[2]
+                count = int(command_list[2])
                 cursor = overwatch_db.message_log.find({"userid": target_user_id}, sort=[("toxicity", pymongo.DESCENDING), ], limit=count)
                 cursor.sort("toxicity", -1)
                 content = ""
