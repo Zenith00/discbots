@@ -157,7 +157,7 @@ async def on_message(message_in):
                 cursor.sort("toxicity", -1)
                 content = ""
                 async for document in cursor:
-                    content += "```{}```\n{}\n--\n".format(document["content"], document["toxicity"])
+                    content += "```{}``` \n{}\n-\n".format(document["content"].replace("```","``"), document["toxicity"])
                 output.append((content, None))
             if command_list[0] == "toxtop":
                 cursor = overwatch_db.userinfo.aggregate([{
