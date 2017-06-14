@@ -36,6 +36,7 @@ from utils import utils_file
 from fuzzywuzzy import fuzz
 from simplegist.simplegist import Simplegist
 from pymongo import errors
+import unicodedata
 
 logging.basicConfig(level=logging.ERROR)
 mongo_client = motor.motor_asyncio.AsyncIOMotorClient(
@@ -150,6 +151,12 @@ async def on_message(message_in):
                         format("<@!{}>".format(command_list[1]),
                                round(doc["toxicity"] * 100 / doc["toxicity_count"],
                                      5), doc["toxicity_count"]))
+            if command_list[0] == "unidecode":
+                text = " ".join(command_list[1:])
+                result = ""
+                for c in text:
+                    result += "{} | {} | {} \n".format(c, unicodedata.name(c), ord(c))
+                output.append((result, ""))
             if command_list[0] == "mosttox":
                 target_user_id = command_list[1]
                 count = int(command_list[2])
