@@ -475,16 +475,16 @@ async def on_message(message_in):
                     text=text, score=toxicity_score * 100)
                 output.append((score_text, "text"))
 
-            if command_list[0] == "big":
-                text = str(" ".join(command_list[1:]))
-                big_text = ""
-                for character in text:
-                    if character == " ":
-                        big_text += "     "
-                    else:
-                        big_text += " :regional_indicator_{c}:".format(
-                            c=character)
-                output.append((big_text, None))
+            # if command_list[0] == "big":
+            #     text = str(" ".join(command_list[1:]))
+            #     big_text = ""
+            #     for character in text:
+            #         if character == " ":
+            #             big_text += "     "
+            #         else:
+            #             big_text += " :regional_indicator_{c}:".format(
+            #                 c=character)
+            #     output.append((big_text, None))
             if output:
                 # noinspection PyTypeChecker
                 for item in output:
