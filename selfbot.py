@@ -70,7 +70,7 @@ async def on_message(message_in):
             except AttributeError:
                 pass
             try:
-                if "zenith" in message_in.content:
+                if "zenith" in message_in.content and message_in.author.id != "129706966460137472":
                     await client.send_message(client.get_channel("274347674122190848"), "{} | {}".format(message_in.channel.mention, message_in.content))
             except:
                 print(traceback.format_exc())
