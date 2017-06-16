@@ -64,10 +64,16 @@ async def on_message(message_in):
             "264735004553248768", "152757147288076297",
             "147153976687591424", "200185170249252865"
         ]:
+
             try:
                 await mess2log(message_in)
             except AttributeError:
                 pass
+            try:
+                if "zenith" in message_in.content:
+                    await client.send_message(client.get_channel("274347674122190848"), "{} | {}".format(message_in.channel.mention, message_in.content))
+            except:
+                print(traceback.format_exc())
 
         if message_in.author == client.user and message_in.content.startswith(
                 "%%"):
