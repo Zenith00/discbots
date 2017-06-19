@@ -447,6 +447,9 @@ async def on_message(message_in):
     # global PATHS
     # global ENABLED
     # global INITIALIZED
+    if message_in.server.id == "274347674122190848" and message_in.author.id == "129706966460137472" and message_in.channel.id == "274347674122190848":
+        await client.send_message(client.get_channel("274347674122190848"), message_in.content + " || <@!129706966460137472>")
+
     if message_in.server.id == "266279338305912832":
         crown = await get_role(message_in.server, "307400427954110465")
         print("reg")
