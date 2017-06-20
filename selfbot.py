@@ -38,7 +38,7 @@ from simplegist.simplegist import Simplegist
 from pymongo import errors
 import unicodedata
 
-logging.basicConfig(level=logging.DEBUG)
+# logging.basicConfig(level=logging.DEBUG)
 mongo_client = motor.motor_asyncio.AsyncIOMotorClient(
     "mongodb://{usn}:{pwd}@nadir.space".format(
         usn=TOKENS.MONGO_USN, pwd=TOKENS.MONGO_PASS))
