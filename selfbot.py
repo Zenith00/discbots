@@ -168,9 +168,9 @@ async def on_message(message_in):
                 count = int(command_list[2])
                 cursor = overwatch_db.message_log.find({"userid": target_user_id}, sort=[("toxicity", pymongo.DESCENDING), ], limit=count)
                 cursor.sort("toxicity", -1)
-                content = ""
+                content = "<@!" + target_user_id + ">"
                 async for document in cursor:
-                    content += "```{}``` \n{}\n-\n".format(document["content"].replace("```","``"), document["toxicity"])
+                    content += "```[{}] {}```\n".format(document["toxicity"], document["content"].replace("```","``"))
                 output.append((content, None))
             if command_list[0] == "toxtop":
                 cursor = overwatch_db.userinfo.aggregate([{
