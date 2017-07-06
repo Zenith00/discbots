@@ -1,8 +1,11 @@
 import logging
 import os
+import traceback
 
 import discord
 import sys
+from imgurpython import ImgurClient
+
 
 from simplegist.simplegist import Simplegist
 from utils import utils_text, utils_file
@@ -10,7 +13,8 @@ from utils import utils_text, utils_file
 import constants
 from TOKENS import *
 from utils.duration_timer import timer
-
+refreshToken = "5c52c0f6a47da6fb599e2835bf228c59c68dd902"
+accessToken = "4c80c2924ddeb63d3f1c99d19ae04e01e438b5fb"
 os.environ["PYTHONUNBUFFERED"] = "True"
 sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 1)
 
@@ -18,54 +22,28 @@ client = discord.Client()
 logging.basicConfig(level=logging.INFO)
 gistClient = Simplegist()
 
-art_timer = timer(60*60*1)
-art_on = False
+art_timer = timer(1)
+art_on = True
+imgur = ImgurClient("5e1b2fcfcf0f36e",
+                    "d919f14c31fa97819b1e9c82e2be40aef8bd9682", accessToken, refreshToken)
 @client.event
 async def on_ready():
     print('Connected!')
     print('Username: ' + client.user.name)
     print('ID: ' + client.user.id)
 
+    for image in imgur.get_album_images("KWuZF"):
+        await client.send_message(client.get_channel("331605496077484034") , image.link)
+
+
 @client.event
 async def on_message(message_in):
-    global art_on
-    if message_in.author == client.user:
-        if message_in.content.startswith("@@"):
-            command = message_in.content.replace("@@", "")
-            await client.delete_message(message_in)
-            if command == "art":
-                await client.send_message(client.get_server("262761876373372938"), "Toggling artbot from {} to {}".format(art_on, not art_on))
-                art_on = not art_on
-            if command.startswith("set"):
-                command = command.replace("set ","")
-                art_timer.set_time(int(command))
-            if command == "1":
-                modlist = await get_moderators(message_in.server)
-                infodump = []
-                for mod in modlist:
-                    infodump.append([ascii(mod.name), mod.id])
-                info = await utils_text.pretty_column(infodump, True)
-                print(str(info))
-                # info = info.replace("'","")
-                gist = gistClient.create(name="Modlist", description=message_in.server.name + " moderators",
-                                         public=False,
-                                         content=info)
-                await client.send_message(client.get_server(constants.OVERWATCH_SERVER_ID).get_member(constants.ZENITH_ID), gist["Gist-Link"])
-
-            if command == "linesplit":
-                command = command.split("\n")
-                channel = message_in.channel
-                await client.delete_message(message_in)
-                for x in command:
-                    await client.send_message(channel, x)
+    pass
 
 
-    if art_timer.is_next() and art_on:
-        file = utils_file.extract_line("/home/austin/Dropbox/artlist.txt")
-        if file != "":
-            await client.send_message(client.get_server(constants.OVERWATCH_SERVER_ID).get_channel("168567769573490688"), file)
-        else:
-            print("empty")
+
+
+
 async def get_moderators(server):
     users = []
     for role in server.roles:
@@ -81,4 +59,4 @@ async def get_role_members(role) -> list:
             members.append(member)
     return members
 
-client.run(APSIS_AUTH_TOKEN, bot=False)
+client.run(ZENITH_AUTH_TOKEN, bot=False)

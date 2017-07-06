@@ -38,6 +38,9 @@ from simplegist.simplegist import Simplegist
 from pymongo import errors
 import unicodedata
 
+import twitter
+
+
 # logging.basicConfig(level=logging.DEBUG)
 mongo_client = motor.motor_asyncio.AsyncIOMotorClient(
     "mongodb://{usn}:{pwd}@nadir.space".format(
@@ -68,7 +71,7 @@ async def on_message(message_in):
             try:
                 await mess2log(message_in)
             except AttributeError:
-                pass
+                print(traceback.format_exc())
             try:
                 if "zenith" in message_in.content and message_in.author.id != "129706966460137472":
                     await client.send_message(client.get_channel("274347674122190848"), "{} | {}".format(message_in.channel.mention, message_in.content))
