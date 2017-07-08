@@ -409,7 +409,7 @@ async def on_message(message_in):
                 defs = str(
                     urbandictionary.define(" ".join(command_list[1:]))[0])
                 output.append((defs, "text"))
-            if command_list[0] == "servers":
+            if command_list[0] == "servers":#
                 server_list = [[server.name, str(server.member_count)]
                                for server in client.servers]
                 output.append((server_list, "rows"))
