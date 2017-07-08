@@ -424,9 +424,12 @@ async def on_message(message_in):
                 for link in link_list[:int(command_list[1])]:
                     await client.send_message(message_in.channel, link)
             if command_list[0] == "derpishuffle":
-                top_scoring = [post for post in Search().sort_by(sort.SCORE).limit(int(command_list[1]))]
-                for post in top_scoring:
-                    await client.send_message(message_in.channel, post.url)
+                params = Search().sort_by(sort.SCORE).limit(command_list[1]).parameters
+                top_scoring = Search(**params)
+                top_explicit = top_scoring.query("explicit")
+
+                for post in top_explicit:
+                    await client.send_message(message_in.channel, post.full())
             if command_list[0] == "markdump":
                 command_list = await mention_to_id(command_list)
                 target_user_id = command_list[1]
