@@ -37,7 +37,7 @@ from fuzzywuzzy import fuzz
 from simplegist.simplegist import Simplegist
 from pymongo import errors
 import unicodedata
-
+from derpibooru import Search, sort
 import twitter
 
 
@@ -423,6 +423,10 @@ async def on_message(message_in):
                 random.shuffle(link_list)
                 for link in link_list[:int(command_list[1])]:
                     await client.send_message(message_in.channel, link)
+            if command_list[0] == "derpishuffle":
+                top_scoring = [post for post in Search().sort_by(sort.SCORE).limit(int(command_list[1]))]
+                for post in top_scoring:
+                    await client.send_message(message_in.channel, post.url)
             if command_list[0] == "markdump":
                 command_list = await mention_to_id(command_list)
                 target_user_id = command_list[1]
@@ -433,7 +437,7 @@ async def on_message(message_in):
                     utils_file.append_line(
                         utils_file.relative_path(
                             __file__, "markov/" + target_user_id + ".txt"),
-                        message_dict["content"])##
+                        message_dict["content"])
             if command_list[0] == "markov":
                 command_list = await mention_to_id(command_list)
                 target_user_id = command_list[1]
