@@ -430,6 +430,7 @@ async def on_message(message_in):
                     top_explicit = top_scoring.query("explicit")
 
                     for post in top_explicit:
+                        print(post.url)
                         await client.send_message(message_in.channel, post.full)
                 except:
                     print(traceback.format_exc())
