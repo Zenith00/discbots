@@ -425,7 +425,7 @@ async def on_message(message_in):
                     await client.send_message(message_in.channel, link)
             if command_list[0] == "derpishuffle":
                 try:
-                    params = Search().sort_by(sort.SCORE).limit(command_list[1]).parameters
+                    params = Search().sort_by(sort.SCORE).limit(int(command_list[1])).parameters
                     top_scoring = Search(**params)
                     top_explicit = top_scoring.query("explicit")
 
