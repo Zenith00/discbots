@@ -413,9 +413,12 @@ async def on_message(message_in):
                 server_list = [[server.name, str(server.member_count)]
                                for server in client.servers]
                 output.append((server_list, "rows"))
-            if command_list[0] == "mercyshuffle":
+            if command_list[0] == "mercyshuffle"
+                album_id = command_list[2]
+                if album_id == "ow":
+                    album_id = "umuvY"
                 link_list = [
-                    x.link for x in imgur_client.get_album_images("umuvY")
+                    x.link for x in imgur_client.get_album_images(album_id)
                     ]
                 random.shuffle(link_list)
                 for link in link_list[:int(command_list[1])]:
