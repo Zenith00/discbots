@@ -413,7 +413,7 @@ async def on_message(message_in):
                 server_list = [[server.name, str(server.member_count)]
                                for server in client.servers]
                 output.append((server_list, "rows"))
-            if command_list[0] == "imgurshuffle"
+            if command_list[0] == "imgurshuffle":
                 album_id = command_list[2]
                 if album_id == "ow":
                     album_id = "umuvY"
