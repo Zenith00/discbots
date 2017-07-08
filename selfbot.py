@@ -433,8 +433,7 @@ async def on_message(message_in):
                     utils_file.append_line(
                         utils_file.relative_path(
                             __file__, "markov/" + target_user_id + ".txt"),
-                        message_dict["content"])
-
+                        message_dict["content"])##
             if command_list[0] == "markov":
                 command_list = await mention_to_id(command_list)
                 target_user_id = command_list[1]
