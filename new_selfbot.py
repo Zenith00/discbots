@@ -51,6 +51,9 @@ overwatch_db = mongo_client.overwatch
 botClient = discord.Client()
 
 config = {}
+config["prefix"]["command"] = "%%"
+config["prefix"]["tag"] = ",,"
+
 config["query"]["user"]["embed"]["output"] = "inplace"
 config["query"]["user"]["embed"]["color_average_bar"] = True  # Fancy average color bar, disable to increase performance
 config["query"]["user"]["dump"]["output"] = "inplace"
@@ -68,27 +71,27 @@ config["logs"]["output"] = "relay"
 
 @client.event
 async def on_member_remove(member):
-    if member.server.id == constants.OVERWATCH_SERVER_ID:
-        await import_to_user_set(
-            member=member,
-            set_name="server_leaves",
-            entry=datetime.utcnow().isoformat(" "))
+    await import_to_server_user_set(
+        member=member,
+        server=member.server.id,
+        set_name="server_leaves",
+        entry=datetime.utcnow().isoformat(" "))
 
 @client.event
 async def on_member_ban(member):
-    if member.server.id == constants.OVERWATCH_SERVER_ID:
-        await import_to_user_set(
-            member=member,
-            set_name="bans",
-            entry=datetime.utcnow().isoformat(" "))
+    await import_to_server_user_set(
+        member=member,
+        server=member.server.id,
+        set_name="bans",
+        entry=datetime.utcnow().isoformat(" "))
 
 @client.event
 async def on_member_unban(server, member):
-    if server.id == constants.OVERWATCH_SERVER_ID:
-        await import_to_user_set(
-            member=member,
-            set_name="unbans",
-            entry=datetime.utcnow().isoformat(" "))
+    await import_to_server_user_set(
+        member=member,
+        server=member.server.id,
+        set_name="unbans",
+        entry=datetime.utcnow().isoformat(" "))
 
 @client.event
 async def on_voice_state_update(before, after):
@@ -98,7 +101,12 @@ async def on_voice_state_update(before, after):
     """
     pass
 
-# noinspection PyShadowingNames
+
+@client.event
+async def on_member_join(member):
+    await asyncio.sleep(5)
+    await import_user(member)
+
 @client.event
 async def on_member_update(before, after):
     """
@@ -119,18 +127,15 @@ async def on_member_update(before, after):
 @client.event
 async def on_message(message_in):
     try:
-        trigger = "%%"
-
-        if message_in.content.startswith(trigger):
-            full_command = message_in.content.replace(trigger, "")
+        if message_in.content.startswith(config["prefix"]["command"]):
+            full_command = message_in.content.replace(config["prefix"]["command"], "")
             segmented_command = full_command.split(" ", 1)
             command = segmented_command[0]
             params = segmented_command[1] if len(segmented_command) == 2 else None
-            await perform_command(
-                command=command, params=params, message_in=message_in)
+            await perform_command(command=command, params=params, message_in=message_in)
 
     except:
-        print(traceback.format_exc())
+        await send(destination=client.get_channel("334043962094387201"), text="```py\n{}\n```".format(traceback.format_exc()), send_type=None)
 
 @client.event
 async def on_ready():
@@ -231,12 +236,12 @@ async def perform_command(command, params, message_in):
             await client.send_message(message_in.channel, link)
 
     if command == "logs":
-        await output.append(await command_logs(params, message_in))
+        await output.append(await command_logs(params))
     if output:
         for item in output:
             await parse_output(item, message_in.channel)
 
-async def command_logs(params, message_in):
+async def command_logs(params):
     query = await log_query_parser(params[1:])
     if isinstance(query, str):
         return query
@@ -244,12 +249,11 @@ async def command_logs(params, message_in):
     translate = {"users": "user_id", "channels": "channel_id", "servers": "server_id"}
     for key in query.keys():
         filter[translate[key]] = {"$in": query[key]}
-
     output_text = ""
     async for doc in mongo_client.discord.message_log.find(filter=filter, sort=[("date", pymongo.DESCENDING)], limit=int(params[0])):
         output_text += await format_message_to_log(doc["content"]) + "\n"
 
-    return config["logs"]["output"],"\n".join(utils_text.hastebin(output_text)), None
+    return config["logs"]["output"], "\n".join(utils_text.hastebin(output_text)), None
 
 async def log_query_parser(query):
     try:
@@ -456,6 +460,15 @@ async def import_to_user_set(member, set_name, entry):
         "user_id": member.id
     }, {"$addToSet": {
         set_name: entry
+    }})
+
+async def import_to_server_user_set(member, server, set_name, entry):
+    await mongo_client.discord.userinfo.update_one({
+        "user_id": member.id
+    }, {"$addToSet": {
+        server: {
+            set_name: entry
+        }
     }})
 
 async def query_toxicity(params):
@@ -729,8 +742,7 @@ async def import_user(member):
                     ]
                 },
                 "names"       : user_info["name"],
-                "avatar_urls" : user_info["avatar_url"],
-                "server_joins": user_info["joined_at"]
+                "server_joins.{}".format(member.server.id): user_info["joined_at"]
             },
             "$set"     : {
                 "mention_str": user_info["mention_str"],
