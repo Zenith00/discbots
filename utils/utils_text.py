@@ -1,3 +1,5 @@
+import json
+
 import regex as re
 import copy
 import urllib.request
@@ -8,6 +10,7 @@ import traceback
 import math
 import textwrap
 
+import requests
 
 def regex_test(reg_str, string):
     reg = re.compile(reg_str, re.IGNORECASE)
@@ -130,7 +133,7 @@ def format_list_to_widths(list_of_rows, widths, left_just):
             output += ("  ".join((val.rjust(width) for val, width in zip(row, widths)))).rstrip() + "\n"
     return output
 
-def format_row_to_widths(row,widths):
+def format_row_to_widths(row, widths):
     return "  ".join((val.ljust(width) for val, width in zip(row, widths)))
 
 # def shorten_link(link) -> str:
@@ -152,14 +155,12 @@ async def parse_time_to_end(time_string):
         print(traceback.format_exc())
         return None
 
-
 def round_time(dt=None, round_to=60):
     import datetime
     if dt == None: dt = datetime.datetime.now()
     seconds = (dt.replace(tzinfo=None) - dt.min).seconds
     rounding = (seconds + round_to / 2) // round_to * round_to
     return dt + datetime.timedelta(0, rounding - seconds, -dt.microsecond)
-
 
 def parse_date(date_text):
     res = dateparser.parse(date_text)
@@ -173,7 +174,6 @@ async def get_redirected_url(url):
     request = opener.open(url)
     return request.url
 
-
 def strip_markdown(markdowned_str):
     from bs4 import BeautifulSoup
     from markdown import markdown
@@ -183,7 +183,11 @@ def strip_markdown(markdowned_str):
 
 def split_list(alist, wanted_parts=1):
     length = len(alist)
-    return [ alist[i*length // wanted_parts: (i+1)*length // wanted_parts]
-             for i in range(wanted_parts)]
+    return [alist[i * length // wanted_parts: (i + 1) * length // wanted_parts]
+            for i in range(wanted_parts)]
 
-
+def hastebin(text):
+    url = r"https://hastebin.com/documents/"
+    blocks = textwrap.wrap(text, 400000, break_long_words=False)
+    results = [requests.post(url, text) for text in blocks]
+    return ["https://hastebin.com/" + json.loads(response.text)["key"] for response in results]

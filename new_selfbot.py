@@ -38,7 +38,7 @@ from simplegist.simplegist import Simplegist
 mongo_client = motor.motor_asyncio.AsyncIOMotorClient(
     "mongodb://{usn}:{pwd}@nadir.space".format(
         usn=TOKENS.MONGO_USN, pwd=TOKENS.MONGO_PASS))
-gistClient = Simplegist()
+# gistClient = Simplegist()
 
 # perspective_api = discovery.build(
 #     'commentanalyzer', 'v1alpha1', developerKey=GOOGLE_API_TOKEN)
@@ -57,11 +57,14 @@ config["query"]["user"]["dump"]["output"] = "inplace"
 config["query"]["roles"]["list"]["output"] = "relay"
 config["query"]["roles"]["members"]["delimiter"] = "\n"  # Ex: , . | \n
 config["query"]["roles"]["members"]["output"] = "relay"
+config["query"]["emoji"]["output"] = "inplace"
+config["query"]["user"]["dump"] = "relay"
+
 config["find"]["current"]["output"] = "inplace"
 config["find"]["history"]["output"] = "inplace"
 config["find"]["bans"]["output"] = "inplace"
-config["query"]["emoji"]["output"] = "inplace"
 
+config["logs"]["output"] = "relay"
 
 @client.event
 async def on_member_remove(member):
@@ -142,9 +145,20 @@ async def run_startup():
         # Joins RELAY server to allow for relay-based output
         await client.accept_invite("sDCHMrX")
 
+    await ensure_database_struct()
+    await update_members()
+    await update_messages()
+
 async def ensure_database_struct():
     messages = mongo_client.discord.message_log
     message_index_info = await messages.index_information()
+    missing_indexes = list({"_id_", "message_id_1", "toxicity_1", "server_id_1", "channel_id_1", "user_id_1", "date_1"} - set(message_index_info.keys()))
+    for full_index_name in missing_indexes:
+        if "message_id" in full_index_name:
+            mongo_client.discord.message_log.create_index(full_index_name[:-2], unique=True)
+        else:
+            mongo_client.discord.message_log.create_index(full_index_name[:-2], background=True)
+
 async def update_members():
     for server in client.servers:
         for member in server.members:
@@ -158,7 +172,6 @@ async def update_messages():
             async for message in client.logs_from(channel, after=datetime, limit=1000000):
                 await import_message(message)
 
-
 async def perform_command(command, params, message_in):
     try:
         await mess2log(message_in)
@@ -171,11 +184,17 @@ async def perform_command(command, params, message_in):
     if command == "query":
         await output.append(await command_query(params, message_in))
     if command == "find":
-        output.append((config["find"]["current"]["output"], await find_user(matching_ident=params[:-2] if "|" in params else params, find_type="current", server=message_in.server, count=params[-1] if "|" in params else 1), None))
+        output.append((config["find"]["current"]["output"],
+                       await find_user(matching_ident=params[:-2] if "|" in params else params, find_type="current", server=message_in.server,
+                                       count=params[-1] if "|" in params else 1), None))
     if command == "findall":
-        output.append((config["find"]["history"]["output"], await find_user(matching_ident=params[:-2] if "|" in params else params, find_type="history", server=message_in.server, count=params[-1] if "|" in params else 1), None))
+        output.append((config["find"]["history"]["output"],
+                       await find_user(matching_ident=params[:-2] if "|" in params else params, find_type="history", server=message_in.server,
+                                       count=params[-1] if "|" in params else 1), None))
     if command == "findban":
-        output.append((config["find"]["bans"]["output"], await find_user(matching_ident=params[:-2] if "|" in params else params, find_type="bans", server=message_in.server, count=params[-1] if "|" in params else 1), None))
+        output.append((config["find"]["bans"]["output"],
+                       await find_user(matching_ident=params[:-2] if "|" in params else params, find_type="bans", server=message_in.server,
+                                       count=params[-1] if "|" in params else 1), None))
 
     if command == "big":
         text = " ".join(params).lower()
@@ -218,13 +237,35 @@ async def perform_command(command, params, message_in):
             await parse_output(item, message_in.channel)
 
 async def command_logs(params, message_in):
-    pass
-    if params[1] == "user":
-        pass
-    if params[1] == "channel":
-        pass
-    if params[1] == "server":
-        pass
+    query = await log_query_parser(params[1:])
+    if isinstance(query, str):
+        return query
+    filter = {}
+    translate = {"users": "user_id", "channels": "channel_id", "servers": "server_id"}
+    for key in query.keys():
+        filter[translate[key]] = {"$in": query[key]}
+
+    output_text = ""
+    async for doc in mongo_client.discord.message_log.find(filter=filter, sort=[("date", pymongo.DESCENDING)], limit=int(params[0])):
+        output_text += await format_message_to_log(doc["content"]) + "\n"
+
+    return config["logs"]["output"],"\n".join(utils_text.hastebin(output_text)), None
+
+async def log_query_parser(query):
+    try:
+        query_state = {"users": [], "channels": [], "servers": []}
+        target = ""
+        for word in query:
+            if word in ["user", "channel", "server"]:
+                word += "s"
+            if word in query_state.keys():
+                target = word
+                continue
+            query_state[target].append(word)
+        return query_state
+    except:
+        return "Syntax not recognized. Proper syntax: %%logs 500 user 1111 2222 channel 3333 4444 5555 server 6666. \n Debug: ```py\n{}```".format(
+            traceback.format_exc())
 
 async def command_query(params, message_in):
     if params[0] == "user":
@@ -289,6 +330,7 @@ async def command_query(params, message_in):
             return config["query"]["user"]["embed"]["output"], embed, None
 
         if params[1] == "dump":
+            return config["query"]["user"]["dump"], dict2rows(await export_user(params[2])), "rows"
             pass
     if params[0] == "roles":
         if params[1] == "list":
@@ -359,7 +401,6 @@ async def more_jpeg(url):
     config = {'album': None, 'name': 'Added JPEG!', 'title': 'Added JPEG!'}
     ret = imgur_client.upload_from_path(img_path, config=config, anon=True)
     return ret["link"], ratio
-
 
 async def parse_output(output, context):
     if output[0] == "inplace":
@@ -491,40 +532,6 @@ async def get_role(server, roleid):
         if x.id == roleid:
             return x
 
-# Log Based
-async def output_logs(user_id, count, server_id):
-    if server_id != "all":
-        cursor = mongo_client.discord.message_log.find(
-            {
-                "user_id"  : user_id,
-                "server_id": server_id
-            }, limit=int(count))
-    else:
-        cursor = mongo_client.discord.message_log.find(
-            {
-                "user_id": user_id
-            }, limit=int(count))
-    cursor.sort("date", -1)
-    message_list = []
-    count = 0
-    async for message_dict in cursor:
-        if count % 500 == 0:
-            print(count)
-        count += 1
-        message_list.append(await format_message_to_log(message_dict))
-    if count == 0:
-        return ("No logs found", None)
-
-    if message_list:
-        gist = gistClient.create(
-            name="User Log",
-            description=user_id + "'s Logs",
-            public=False,
-            content="\n".join(message_list))
-        return (gist["Gist-Link"], None)
-    else:
-        return ("No logs found", None)
-
 async def perspective(text):
     analyze_request = {
         'comment'            : {
@@ -557,8 +564,6 @@ async def mess2log(message):
     #         channel=channel,
     #         name=nick,
     #         content=message.content)).replace("\n", r"[\n]")
-
-
 
 async def mention_to_id(command_list):
     new_command = []
@@ -756,7 +761,7 @@ async def format_message_to_log(message_dict):
             name = message_dict["user_id"]
 
     try:
-        content = message_dict["content"].replace("```", "[QUOTE]")
+        content = message_dict["content"].replace("```", "[QUOTE]").replace("\n", r"[\n]")
         try:
             channel_name = client.get_channel(message_dict["channel_id"]).name
         except KeyError:
