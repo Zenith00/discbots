@@ -712,7 +712,7 @@ async def mention_to_id(command_list):
 
 # async def import_to_user_set(member, set_name, entry):
 #     await overwatch_db.userinfo_collection.update_one(
-#         {"userid": member.id},
+#         {"user_id": member.id},
 #         {
 #             "$addToSet": {set_name: entry}
 #         }
@@ -724,9 +724,9 @@ async def scrub_text(text, channel):
 
         def escape_user(match):
             mention = match.group(0)
-            userid = re.search("\d+", mention).group(0)
-            # userid = userid.group(0)
-            member = channel.server.get_member(userid)
+            user_id = re.search("\d+", mention).group(0)
+            # user_id = user_id.group(0)
+            member = channel.server.get_member(user_id)
             if not member:
                 return mention
             permissions = channel.permissions_for(member)
@@ -881,8 +881,8 @@ class tracker:
         self.trackers = [author]
 
     async def start(self):
-        self.header = "Starting Tracking of {mention} [{userid}]\n".format(mention=self.target.mention,
-                                                                           userid=self.target.id)
+        self.header = "Starting Tracking of {mention} [{user_id}]\n".format(mention=self.target.mention,
+                                                                           user_id=self.target.id)
         self.message = await client.send_message(self.destination, self.header)
 
     async def add_entry(self, entry):

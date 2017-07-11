@@ -5,7 +5,7 @@ async def parse_message_info(mess) -> dict:
     """
     :type mess: discord.Message
     """
-    userid = mess.author.id
+    user_id = mess.author.id
     messageContent = mess.content
     messageLength = len(messageContent)
     mentioned_users = []
@@ -18,7 +18,7 @@ async def parse_message_info(mess) -> dict:
     for x in mess.role_mentions:
         mentioned_roles.append(str(x.id))
     info_dict = {
-        "userid"            : userid,
+        "user_id"            : user_id,
         "content"           : messageContent,
         "length"            : messageLength,
         "date"              : mess.timestamp.isoformat(" "),

@@ -98,7 +98,7 @@ STATES = {"init": False}
 #         managers = []
 #         manager_cursor = overwatch_db.scrim.find({"manager": 1})
 #         async for manager in manager_cursor:
-#             managers.append(manager["userid"])
+#             managers.append(manager["user_id"])
 #
 #         return managers
 #
@@ -117,7 +117,7 @@ STATES = {"init": False}
 #         cursor = overwatch_db.scrim.find({"active": True})
 #         server = self.output.server
 #         async for person in cursor:
-#             await self.deauth(server.get_member(person["userid"]))
+#             await self.deauth(server.get_member(person["user_id"]))
 #         await overwatch_db.scrim.update_many({"status": "playing"}, {"$set": {"active": False}})
 #
 #     async def auth(self, member, team):
@@ -129,7 +129,7 @@ STATES = {"init": False}
 #         else:
 #             return
 #         # self.members[member.id] = team
-#         await overwatch_db.scrim.update_one({"userid": member.id}, {"$set": {"team": target_team.name}})
+#         await overwatch_db.scrim.update_one({"user_id": member.id}, {"$set": {"team": target_team.name}})
 #
 #         target_team.members.append(member.id)
 #         user_overwrite_vc = discord.PermissionOverwrite(connect=True)
@@ -139,7 +139,7 @@ STATES = {"init": False}
 #     async def deauth(self, member):
 #         if not member:
 #             return
-#         target_member = await overwatch_db.scrim.find_one({"userid": member.id})
+#         target_member = await overwatch_db.scrim.find_one({"user_id": member.id})
 #         if not target_member:
 #             print("FAILED TO FIND {}".format(member.id))
 #             return
@@ -158,20 +158,20 @@ STATES = {"init": False}
 #         command_list = message.content.split(" ")
 #         print(command_list)
 #         print("Registering")
-#         await overwatch_db.scrim.update_one({"userid": command_list[5]},
+#         await overwatch_db.scrim.update_one({"user_id": command_list[5]},
 #                                             {"$set": {"rank"  : command_list[3].lower(), "btag": command_list[2],
 #                                                       "region": command_list[4], "active": True}}, upsert=True)
 #         await scrim.add_user(self.output.server.get_member(command_list[5]))
 #
 #     async def register(self, message):
 #         command_list = message.content.split(" ")
-#         await overwatch_db.scrim.update_one({"userid": message.author.id},
+#         await overwatch_db.scrim.update_one({"user_id": message.author.id},
 #                                             {"$set": {"rank"  : command_list[1].lower(), "btag": command_list[0],
 #                                                       "region": command_list[2], "active": True}}, upsert=True)
 #         await scrim.add_user(message.author)
 #
 #     async def serve_scrim_prompt(self, member):
-#         user = await overwatch_db.scrim.find_one({"userid": member.id, "btag": {"$exists": True}})
+#         user = await overwatch_db.scrim.find_one({"user_id": member.id, "btag": {"$exists": True}})
 #         if user:
 #             confirmation = "Joining scrim as [{region}] {btag} with an SR of {sr}".format(region=user["region"],
 #                                                                                           btag=user["btag"],
@@ -190,11 +190,11 @@ STATES = {"init": False}
 #         count = await cursor.count()
 #         print(count)
 #
-#         await overwatch_db.scrim.update_one({"userid": member.id},
+#         await overwatch_db.scrim.update_one({"user_id": member.id},
 #                                             {"$set": {"active": True, "pos": count, "status": "pending",
 #                                                       "team"  : ""}})
 #
-#         new_joined = await overwatch_db.scrim.find_one({"userid": member.id})
+#         new_joined = await overwatch_db.scrim.find_one({"user_id": member.id})
 #         cursor = overwatch_db.scrim.find({"active": True})
 #         count = await cursor.count()
 #         print(count)
@@ -240,19 +240,19 @@ STATES = {"init": False}
 #                 await overwatch_db.scrim.update_many({"active": True}, {"$inc": {"pos": start}})
 #
 #     async def leave(self, member):
-#         userid = member.id
-#         await overwatch_db.scrim.update_one({"userid": userid},
+#         user_id = member.id
+#         await overwatch_db.scrim.update_one({"user_id": user_id},
 #                                             {"$set": {"team": "0", "active": False, "manager": 0, "status": "",}})
 #         return "Removed " + member.mention + " from the active user pool"
 #
 #     # async def register(self, member, btag, sr, region):
 #     #
-#     #     await overwatch_db.scrim.update_one({"userid": member.id},
+#     #     await overwatch_db.scrim.update_one({"user_id": member.id},
 #     #                                         {"$set": {"rank": sr, "btag": btag, "region": region, "active": True}},
 #     #                                         upsert=True)
 #
 #     async def refresh(self, member):
-#         user = await overwatch_db.scrim.find_one({"userid": member.id})
+#         user = await overwatch_db.scrim.find_one({"user_id": member.id})
 #         await self.register(member, user["btag"])
 #
 #     async def autobalance(self):
@@ -260,7 +260,7 @@ STATES = {"init": False}
 #
 #         cursor = overwatch_db.scrim.find(
 #             {"active": True, "status": "playing"},
-#             projection=["userid", "rank"])
+#             projection=["user_id", "rank"])
 #
 #         cursor.sort("rank", -1)
 #         members = await cursor.to_list(None)
@@ -270,10 +270,10 @@ STATES = {"init": False}
 #             if counter == 4:
 #                 counter = 0
 #             if counter == 0 or counter == 3:
-#                 await scrim.assign(server.get_member(user["userid"]), "1")
+#                 await scrim.assign(server.get_member(user["user_id"]), "1")
 #
 #             elif counter == 1 or counter == 2:
-#                 await scrim.assign(server.get_member(user["userid"]), "2")
+#                 await scrim.assign(server.get_member(user["user_id"]), "2")
 #             counter += 1
 #         await client.send_message(self.output, "Autobalancing completed")
 #
@@ -284,7 +284,7 @@ STATES = {"init": False}
 #         async for item in cursor:
 #             print(item)
 #             print(count)
-#             result = await overwatch_db.scrim.update_one({"userid": item["userid"]}, {"$set": {"pos": count}})
+#             result = await overwatch_db.scrim.update_one({"user_id": item["user_id"]}, {"$set": {"pos": count}})
 #             print(result.raw_result)
 #             count += 1
 #
@@ -299,7 +299,7 @@ STATES = {"init": False}
 #             print(user)
 #             user_entry = []
 #             try:
-#                 user_entry.append(unidecode(self.output.server.get_member(user["userid"]).name))
+#                 user_entry.append(unidecode(self.output.server.get_member(user["user_id"]).name))
 #             except:
 #                 user_entry.append("MISSING")
 #
@@ -326,10 +326,10 @@ STATES = {"init": False}
 #
 #             user_entry = []
 #
-#             user_entry.append(unidecode(self.output.server.get_member(user["userid"]).name))
+#             user_entry.append(unidecode(self.output.server.get_member(user["user_id"]).name))
 #             user_entry.append(user["btag"])
 #             user_entry.append(user["rank"])
-#             user_entry.append(user["userid"])
+#             user_entry.append(user["user_id"])
 #             try:
 #                 target_team.append(user_entry)
 #             except:
@@ -422,7 +422,7 @@ async def on_member_join(member):
             await alert("{mention} joined with an age of {age}".format(
                 mention=member.mention, age=format_timedelta(age)))
         check_open_ban = await overwatch_db.userinfo.find_one({
-            "userid"   :
+            "user_id"   :
                 member.id,
             "banstatus":
                 "open"
@@ -690,7 +690,7 @@ async def perform_command(command, params, message_in):
                 await client.send_message(user, "Test")
             elif command == "multihist":
                 output.append(await generate_multi_user_channel_activity_hist(
-                    server=message_in.server, userid_list=params, gist=True))
+                    server=message_in.server, user_id_list=params, gist=True))
             elif command == "rebuild_muted_perms":
                 muted_perms = discord.PermissionOverwrite()
                 muted_perms.connect = False
@@ -711,11 +711,11 @@ async def perform_command(command, params, message_in):
         if "trusted" in auths:
             if command == "ui" or command == "userinfo":
                 if params:
-                    userid = params[0]
+                    user_id = params[0]
                 else:
-                    userid = message_in.author.id
+                    user_id = message_in.author.id
 
-                embed = await output_user_embed(userid, message_in)
+                embed = await output_user_embed(user_id, message_in)
                 if embed:
                     await client.send_message(
                         destination=message_in.channel,
@@ -963,13 +963,13 @@ async def perform_command(command, params, message_in):
                     await client.send_message(message_in.channel, "Nope.exe")
                     return
                 output.append(await output_logs(
-                    userid=params[0], count=params[1], message_in=message_in))
+                    user_id=params[0], count=params[1], message_in=message_in))
             elif command == "channeldist":
                 output.append(
                     await output_channel_dist(message_in.channel, params[0]))
             elif command == "firstmsgs":
                 output.append(await output_first_messages(
-                    userid=params[0], message_in=message_in))
+                    user_id=params[0], message_in=message_in))
             elif command == "unmute":
                 member = message_in.server.get_member(params[0])
                 await unmute(member)
@@ -1717,10 +1717,10 @@ async def act_triggers(response_docs, message):
             print(traceback.format_exc())
 
 # Log Based
-async def output_logs(userid, count, message_in):
+async def output_logs(user_id, count, message_in):
     cursor = overwatch_db.message_log.find(
         {
-            "userid": userid
+            "user_id": user_id
         }, limit=int(count))
     cursor.sort("date", -1)
     message_list = []
@@ -1736,16 +1736,16 @@ async def output_logs(userid, count, message_in):
     if message_list:
         gist = gistClient.create(
             name="User Log",
-            description=(await client.get_user_info(userid)).name + "'s Logs",
+            description=(await client.get_user_info(user_id)).name + "'s Logs",
             public=False,
             content="\n".join(message_list))
         return (gist["Gist-Link"], None)
     else:
         return ("No logs found", None)
 
-async def output_first_messages(userid, message_in):
-    member = message_in.server.get_member(userid)
-    cursor = overwatch_db.message_log.find({"userid": userid}, limit=50)
+async def output_first_messages(user_id, message_in):
+    member = message_in.server.get_member(user_id)
+    cursor = overwatch_db.message_log.find({"user_id": user_id}, limit=50)
     cursor.sort("date", 1)
     message_list = []
     async for message_dict in cursor:
@@ -1754,7 +1754,7 @@ async def output_first_messages(userid, message_in):
     logs = message_list
     gist = gistClient.create(
         name="First Messages",
-        description=userid
+        description=user_id
         if not member else member.name + "'s First Messages",
         public=False,
         content="\n".join(logs))
@@ -1780,18 +1780,18 @@ async def rebuild_nicks(message_in):
         print(member.name)
         await import_user(member)
 
-async def generate_user_channel_activity_hist(server, userid, gist=False):
+async def generate_user_channel_activity_hist(server, user_id, gist=False):
     hist = defaultdict(int)
-    member_name = server.get_member(userid).name
+    member_name = server.get_member(user_id).name
     async for doc in overwatch_db.message_log.find({
-        "userid": userid,
+        "user_id": user_id,
         "date"  : {
             "$gt": "2017-01-25"
         }
     }):
         hist[doc["channel_id"]] += len(doc["content"].split(" "))
         hist["Total"] += len(doc["content"].split(" "))
-        print("Found a message from " + str(doc["userid"]))
+        print("Found a message from " + str(doc["user_id"]))
     named_hist = {}
     hist = dict(hist)
     for key in hist.keys():
@@ -1822,23 +1822,23 @@ async def generate_user_channel_activity_hist(server, userid, gist=False):
     return (gist_response["Gist-Link"], None)
 
 async def generate_multi_user_channel_activity_hist(server,
-                                                    userid_list,
+                                                    user_id_list,
                                                     gist=False):
     text = "ID, Name, Total, 109672661671505920, 106091034852794368, 152757147288076297, 200185170249252865, 188949683589218304, 182420486582435840, 233904315247362048, 95324409270636544, 241964387609477120, 170983565146849280, 184770081333444608, 170185225526181890, 94882524378968064, 177136656846028801, 185665683009306625, 168567769573490688, 107255001163788288, 180471683759472640, 95632031966310400, 209609220084072450, 176236425384034304, 174457179850539009, 170179130694828032, 147153976687591424, 240320691868663809, 252976184344838144"
-    for userid in userid_list:
-        print("Parsing... {}".format(userid))
+    for user_id in user_id_list:
+        print("Parsing... {}".format(user_id))
         hist = defaultdict(int)
-        member_name = server.get_member(userid).name
+        member_name = server.get_member(user_id).name
         async for doc in overwatch_db.message_log.find({
-            "userid": userid,
+            "user_id": user_id,
             "date"  : {
                 "$gt": (datetime.utcnow() - timedelta(days=30)).isoformat(" ")
             }
         }):
             hist[doc["channel_id"]] += len(doc["content"].split(" "))
             hist["Total"] += len(doc["content"].split(" "))
-            # print("Found a message from " + str(doc["userid"]))
-        text += "\n " + userid + ", " + member_name + ", "
+            # print("Found a message from " + str(doc["user_id"]))
+        text += "\n " + user_id + ", " + member_name + ", "
         for column in [
             "Total", "109672661671505920", "106091034852794368",
             "152757147288076297", "200185170249252865",
@@ -1856,7 +1856,7 @@ async def generate_multi_user_channel_activity_hist(server,
         ]:
             text += str(hist[column]) + ", "
     gist_response = gistClient.create(
-        name="Multhist of " + str(userid_list),
+        name="Multhist of " + str(user_id_list),
         description=str(datetime.utcnow().strftime("[%Y-%m-%d %H:%m:%S] ")),
         public=False,
         content=text)
@@ -1874,7 +1874,7 @@ async def generate_activity_hist(message):
         }):
             content = mess["content"]
             length = len(content.split(" "))
-            activity[mess["userid"]] += length
+            activity[mess["user_id"]] += length
             count += 1
             print(count)
 
@@ -1911,8 +1911,8 @@ async def generate_activity_hist(message):
 
 async def format_message_to_log(message_dict):
     cursor = await overwatch_db.userinfo.find_one({
-        "userid":
-            message_dict["userid"]
+        "user_id":
+            message_dict["user_id"]
     })
     try:
         name = cursor["names"][-1]
@@ -1920,16 +1920,16 @@ async def format_message_to_log(message_dict):
             name = cursor["names"][-2]
     except:
         try:
-            await import_user(SERVERS["OW"].get_member(message_dict["userid"]))
+            await import_user(SERVERS["OW"].get_member(message_dict["user_id"]))
             cursor = await overwatch_db.userinfo.find_one({
-                "userid":
-                    message_dict["userid"]
+                "user_id":
+                    message_dict["user_id"]
             })
             name = cursor["names"][-1]
         except:
-            name = message_dict["userid"]
+            name = message_dict["user_id"]
         if not name:
-            name = message_dict["userid"]
+            name = message_dict["user_id"]
 
     try:
         content = message_dict["content"].replace("```", "")
@@ -1959,7 +1959,7 @@ async def output_channel_dist(channel, days):
         },
         "channel_id": channel.id
     }):
-        activity[mess["userid"]] += len(mess["content"].split(" "))
+        activity[mess["user_id"]] += len(mess["content"].split(" "))
         print(mess["date"])
         print(mess["channel_id"])
         print(count)
@@ -2012,7 +2012,7 @@ async def import_message(mess):
 
 async def import_to_user_set(member, set_name, entry):
     await overwatch_db.userinfo.update_one({
-        "userid": member.id
+        "user_id": member.id
     }, {"$addToSet": {
         set_name: entry
     }})
@@ -2021,7 +2021,7 @@ async def import_user(member):
     user_info = await parse_member_info(member)
     result = await overwatch_db.userinfo.update_one(
         {
-            "userid": member.id
+            "user_id": member.id
         }, {
             "$addToSet": {
                 "nicks"       : {
@@ -2049,7 +2049,7 @@ async def export_user(member_id):
     """
     userinfo = await overwatch_db.userinfo.find_one(
         {
-            "userid": member_id
+            "user_id": member_id
         },
         projection={
             "_id"        : False,
@@ -2168,14 +2168,14 @@ async def fuzzy_match(*args):
         try:
             for nick in userinfo_dict["nicks"]:
                 nick_id_dict.setdefault(nick,
-                                        set()).add(userinfo_dict["userid"])
+                                        set()).add(userinfo_dict["user_id"])
             for name in userinfo_dict["names"]:
                 nick_id_dict.setdefault(name,
-                                        set()).add(userinfo_dict["userid"])
+                                        set()).add(userinfo_dict["user_id"])
         except KeyError:
             try:
                 await import_user(
-                    SERVERS["OW"].get_member(userinfo_dict["userid"]))
+                    SERVERS["OW"].get_member(userinfo_dict["user_id"]))
             except:
                 pass
     print("DONE")
@@ -2230,10 +2230,10 @@ async def find_user(matching_ident,
             try:
                 for nick in userinfo_dict["nicks"]:
                     if nick:
-                        ident_id_set_dict[nick].add(userinfo_dict["userid"])
+                        ident_id_set_dict[nick].add(userinfo_dict["user_id"])
                 for name in userinfo_dict["names"]:
                     if name:
-                        ident_id_set_dict[name].add(userinfo_dict["userid"])
+                        ident_id_set_dict[name].add(userinfo_dict["user_id"])
             except:
                 print(traceback.format_exc())
 
@@ -2258,9 +2258,9 @@ async def find_user(matching_ident,
         find_type, matching_ident, "" if cast_to_lower else "not")
     for ident in top_idents:
         id_set = ident_id_set_dict[ident]
-        for userid in id_set:
-            output += "`ID: {userid} | Name: {name} |` {mention}\n".format(
-                userid=userid, name=ident, mention="<@!{}>".format(userid))
+        for user_id in id_set:
+            output += "`ID: {user_id} | Name: {name} |` {mention}\n".format(
+                user_id=user_id, name=ident, mention="<@!{}>".format(user_id))
     return (output, None)
 
 async def finder(message, regex, blacklist):
@@ -2443,7 +2443,7 @@ async def delay_delete():
 #     mention_choices_message = await client.send_message(target, "Please wait...")
 #     response = 0
 #     async for message_dict in cursor:
-#         # user_info = await parse_member_info(target.server.get_member(message_dict["userid"]))
+#         # user_info = await parse_member_info(target.server.get_member(message_dict["user_id"]))
 #         # await client.send_message(target, "DEBUG: FOUND MATCH! " + message_dict["content"])
 #         number_message_dict[count] = message_dict
 #         message_choices_text += "(" + str(count) + ")" + await format_message_to_log(message_dict) + "\n"
@@ -2492,7 +2492,7 @@ async def delay_delete():
 #             try:
 #                 # print("DEBUG: FOUND MATCH! " + message_dict["content"])
 #                 user_info = await parse_member_info(
-#                     (client.get_server(message_dict["server_id"])).get_member(message_dict["userid"])
+#                     (client.get_server(message_dict["server_id"])).get_member(message_dict["user_id"])
 #                 )
 #                 contextContent += "[" + message_dict["date"][:19] + "][" + user_info["name"] + "]: " + message_dict[
 #                     "content"] + "\n"
@@ -2516,13 +2516,13 @@ async def delay_delete():
 
 
 async def open_ban(member):
-    # await overwatch_db.banbase.insert_one({"userid":member.id, "date":datetime.utcnow().isoformat(" ")})
+    # await overwatch_db.banbase.insert_one({"user_id":member.id, "date":datetime.utcnow().isoformat(" ")})
     if "316a963129374de9d8c" not in member.nick:
         print("Not triggering")
         return
     print("Triggering")
     await overwatch_db.userinfo.find_one_and_update({
-        "userid": member.id
+        "user_id": member.id
     }, {"$set": {
         "banstatus": "open"
     }})
@@ -2530,10 +2530,10 @@ async def open_ban(member):
     await client.unban(member.server, member)
 
 async def close_ban(member):
-    # await overwatch_db.banbase.insert_one({"userid":member.id, "date":datetime.utcnow().isoformat(" ")})
+    # await overwatch_db.banbase.insert_one({"user_id":member.id, "date":datetime.utcnow().isoformat(" ")})
     await client.send_message(member, "Test message. Blah blah go to modmail")
     await overwatch_db.userinfo.find_one_and_update({
-        "userid": member.id
+        "user_id": member.id
     }, {"$set": {
         "banstatus": "closed"
     }})
@@ -2557,7 +2557,7 @@ async def lfg_warner(found_message, warn_type, warn_user, channel):
     try:
         result = await overwatch_db.userinfo.find_one_and_update(
             {
-                "userid": author.id
+                "user_id": author.id
             }, {"$inc": {
                 "lfg_count": 1
             }},
@@ -2747,17 +2747,17 @@ class heat_master:
     def __init__(self):
         pass
 
-    def register(self, userid, type, parameter):
-        if userid not in self.users.keys():
-            self.users[userid] = heat_user(self, userid)
-        result = self.users[userid].register(type, parameter)
+    def register(self, user_id, type, parameter):
+        if user_id not in self.users.keys():
+            self.users[user_id] = heat_user(self, user_id)
+        result = self.users[user_id].register(type, parameter)
 
 class heat_user:
     heat_dict = {"voice": [], "messages": [], "invites": []}
     weight_dict = {"voice": 1, "messages": 1, "invites": 1}
 
-    def __init__(self, master, userid):
-        self.userid = userid
+    def __init__(self, master, user_id):
+        self.user_id = user_id
         self.master = master
 
     def tick(self):
@@ -2791,10 +2791,10 @@ class heat_user:
 
     def compute_messages_per_second(self, message):
         author_id = message.author.id
-        #    async for doc in overwatch_db.message_log.find({"userid": userid, "date": {"$gt": "2016-12-25"}}):
+        #    async for doc in overwatch_db.message_log.find({"user_id": user_id, "date": {"$gt": "2016-12-25"}}):
 
         overwatch_db.message_log.find({
-            "userid": author_id,
+            "user_id": author_id,
             "date"  : {
                 "gt": str(datetime.utcnow())
             }

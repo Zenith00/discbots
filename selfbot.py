@@ -93,7 +93,7 @@ async def on_message(message_in):
                 output.append(await output_roles(message_in))
             if command_list[0] == "userlogs":
                 output.append(await output_logs(
-                    userid=command_list[1],
+                    user_id=command_list[1],
                     count=command_list[2],
                     message_in=message_in))
             if command_list[0] == "ava":
@@ -150,7 +150,7 @@ async def on_message(message_in):
             if command_list[0] == "vtox":
                 # target = message_in.server.get_member(command_list[1])
                 doc = await overwatch_db.userinfo.find_one({
-                    "userid":
+                    "user_id":
                     command_list[1]
                 })
                 await client.send_message(
@@ -172,7 +172,7 @@ async def on_message(message_in):
                 count = int(command_list[2])
                 cursor = overwatch_db.message_log.find(
                     {
-                        "userid": target_user_id
+                        "user_id": target_user_id
                     },
                     sort=[
                         ("toxicity", pymongo.DESCENDING),
@@ -197,7 +197,7 @@ async def on_message(message_in):
                     }
                 }, {
                     "$project": {
-                        "userid": 1,
+                        "user_id": 1,
                         "average_toxicity": {
                             "$divide": ["$toxicity", "$toxicity_count"]
                         }
@@ -214,7 +214,7 @@ async def on_message(message_in):
                 info = []
                 async for user_dict in cursor:
                     info.append((str(round(user_dict["average_toxicity"], 2)),
-                                 " | ", "<@!" + user_dict["userid"] + ">"))
+                                 " | ", "<@!" + user_dict["user_id"] + ">"))
                 output.append((info, "qrows"))
             if command_list[0] == "backfill":
                 more = True
@@ -254,8 +254,8 @@ async def on_message(message_in):
                                 }})
                                 print(".")
                                 await overwatch_db.userinfo.update_one({
-                                    "userid":
-                                    messInfo["userid"]
+                                    "user_id":
+                                    messInfo["user_id"]
                                 }, {
                                     "$inc": {
                                         "toxicity": toxicity,
@@ -449,7 +449,7 @@ async def on_message(message_in):
                 command_list = await mention_to_id(command_list)
                 target_user_id = command_list[1]
                 async for message_dict in overwatch_db.message_log.find({
-                    "userid":
+                    "user_id":
                     target_user_id
                 }):
                     utils_file.append_line(
@@ -532,7 +532,7 @@ async def on_message(message_in):
 
 async def import_to_user_set(member, set_name, entry):
     await overwatch_db.userinfo.update_one({
-        "userid": member.id
+        "user_id": member.id
     }, {"$addToSet": {
         set_name: entry
     }})
@@ -599,7 +599,7 @@ async def import_message(mess, toxicity):
     try:
         await overwatch_db.message_log.insert_one(messInfo)
         await overwatch_db.userinfo.update_one({
-            "userid": messInfo["userid"]
+            "user_id": messInfo["user_id"]
         }, {"$inc": {
             "toxicity": toxicity,
             "toxicity_count": 1
@@ -622,10 +622,10 @@ async def get_role(server, roleid):
 
 
 # Log Based
-async def output_logs(userid, count, message_in):
+async def output_logs(user_id, count, message_in):
     cursor = overwatch_db.message_log.find(
         {
-            "userid": userid
+            "user_id": user_id
         }, limit=int(count))
     cursor.sort("date", -1)
     message_list = []
@@ -641,7 +641,7 @@ async def output_logs(userid, count, message_in):
     if message_list:
         gist = gistClient.create(
             name="User Log",
-            description=userid + "'s Logs",
+            description=user_id + "'s Logs",
             public=False,
             content="\n".join(message_list))
         return (gist["Gist-Link"], None)
@@ -797,10 +797,10 @@ async def find_user(matching_ident,
             try:
                 for nick in userinfo_dict["nicks"]:
                     if nick:
-                        ident_id_set_dict[nick].add(userinfo_dict["userid"])
+                        ident_id_set_dict[nick].add(userinfo_dict["user_id"])
                 for name in userinfo_dict["names"]:
                     if name:
-                        ident_id_set_dict[name].add(userinfo_dict["userid"])
+                        ident_id_set_dict[name].add(userinfo_dict["user_id"])
             except:
                 print(traceback.format_exc())
 
@@ -825,9 +825,9 @@ async def find_user(matching_ident,
         find_type, matching_ident, "" if cast_to_lower else "not")
     for ident in top_idents:
         id_set = ident_id_set_dict[ident]
-        for userid in id_set:
-            output += "`ID: {userid} | Name: {name} |` {mention}\n".format(
-                userid=userid, name=ident, mention="<@!{}>".format(userid))
+        for user_id in id_set:
+            output += "`ID: {user_id} | Name: {name} |` {mention}\n".format(
+                user_id=user_id, name=ident, mention="<@!{}>".format(user_id))
     return (output, None)
 
 
@@ -924,7 +924,7 @@ async def export_user(member_id):
     """
     userinfo = await overwatch_db.userinfo.find_one(
         {
-            "userid": member_id
+            "user_id": member_id
         },
         projection={
             "_id": False,
@@ -941,7 +941,7 @@ async def import_user(member):
     user_info = await utils_parse.parse_member_info(member)
     result = await overwatch_db.userinfo.update_one(
         {
-            "userid": member.id
+            "user_id": member.id
         }, {
             "$addToSet": {
                 "nicks": {
@@ -965,8 +965,8 @@ async def import_user(member):
 
 async def format_message_to_log(message_dict):
     cursor = await overwatch_db.userinfo.find_one({
-        "userid":
-        message_dict["userid"]
+        "user_id":
+        message_dict["user_id"]
     })
     try:
         name = cursor["names"][-1]
@@ -976,16 +976,16 @@ async def format_message_to_log(message_dict):
         try:
             await import_user(
                 client.get_server("94882524378968064").get_member(
-                    message_dict["userid"]))
+                    message_dict["user_id"]))
             cursor = await overwatch_db.userinfo.find_one({
-                "userid":
-                message_dict["userid"]
+                "user_id":
+                message_dict["user_id"]
             })
             name = cursor["names"][-1]
         except:
-            name = message_dict["userid"]
+            name = message_dict["user_id"]
         if not name:
-            name = message_dict["userid"]
+            name = message_dict["user_id"]
 
     try:
         content = message_dict["content"].replace("```", "")
