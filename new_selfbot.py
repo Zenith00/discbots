@@ -17,6 +17,7 @@ import motor.motor_asyncio
 import pymongo
 import requests
 import urbandictionary
+import logging
 
 # import wand.image
 
@@ -35,7 +36,7 @@ from fuzzywuzzy import fuzz
 from simplegist.simplegist import Simplegist
 from collections import defaultdict
 
-# logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.INFO)
 mongo_client = motor.motor_asyncio.AsyncIOMotorClient(
     "mongodb://{usn}:{pwd}@nadir.space".format(
         usn=TOKENS.MONGO_USN, pwd=TOKENS.MONGO_PASS))
