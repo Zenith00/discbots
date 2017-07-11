@@ -33,6 +33,7 @@ import TOKENS
 from utils import utils_file
 from fuzzywuzzy import fuzz
 from simplegist.simplegist import Simplegist
+from collections import defaultdict
 
 # logging.basicConfig(level=logging.DEBUG)
 mongo_client = motor.motor_asyncio.AsyncIOMotorClient(
@@ -50,7 +51,9 @@ overwatch_db = mongo_client.overwatch
 
 botClient = discord.Client()
 
-config = {}
+nested_dict = lambda: defaultdict(nested_dict)
+
+config = nested_dict()
 config["prefix"]["command"] = "%%"
 config["prefix"]["tag"] = ",,"
 
