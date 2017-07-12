@@ -333,6 +333,7 @@ async def log_query_parser(query):
                 target = word
                 continue
             query_state[target].append(word)
+        print(query_state)
         return query_state
     except:
         return "Syntax not recognized. Proper syntax: %%logs 500 user 1111 2222 channel 3333 4444 5555 server 6666. \n Debug: ```py\n{}```".format(
