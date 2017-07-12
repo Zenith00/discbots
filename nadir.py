@@ -1065,7 +1065,7 @@ async def on_message(message):
         #                 imgur_id = match.group(0)
         #                 imgur.delete_image(imgur_id)
         #                 log_action_to_nadir(message, "flagart", target=imgur_id)
-        #         found_message = await finder(message, command, "none")
+        #         found_message = await find_message(message, command, "none")
         #         if message is not None:
         #             await client.delete_message(found_message)
 
@@ -1147,7 +1147,7 @@ async def find_author(message, regex, blacklist):
 #                     imgur_id = match.group(0)
 #                     imgur.delete_image(imgur_id)
 #
-#             message = await finder(mess, command, "none")
+#             message = await find_message(mess, command, "none")
 #             print(message.content)
 #             if message is not None:
 #                 await client.delete_message(message)
@@ -1279,7 +1279,7 @@ async def find_author(message, regex, blacklist):
 #             else:
 #                 HOTS_REGEX = re.compile(r"(heroes of the storm)|(storm)|(heros)|(hots)|(heroes)|(genji)|(oni)",
 #                                         re.IGNORECASE)
-#                 found_mess = await finder(mess, HOTS_REGEX, "mod")
+#                 found_mess = await find_message(mess, HOTS_REGEX, "mod")
 #                 if found_mess is not None:
 #                     author = found_mess.author
 #             if author is not None:
@@ -1321,7 +1321,7 @@ async def find_author(message, regex, blacklist):
 #                 if len(mess.mentions) > 0:
 #                     author = mess.mentions[0]
 #                 else:
-#                     found_mess = await finder(mess, constants.LFG_REGEX, "mod")
+#                     found_mess = await find_message(mess, constants.LFG_REGEX, "mod")
 #                     if found_mess is not None:
 #                         print("Found a message!")
 #                         print(found_mess.content + " " + found_mess.author.name)

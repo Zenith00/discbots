@@ -191,3 +191,5 @@ def hastebin(text):
     blocks = textwrap.wrap(text, 400000, break_long_words=False)
     results = [requests.post(url, text) for text in blocks]
     return ["https://hastebin.com/" + json.loads(response.text)["key"] for response in results]
+def dict2rows(in_dict):
+    return [(k, str(v)) for k, v in in_dict.items()]
