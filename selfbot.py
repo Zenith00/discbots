@@ -29,7 +29,7 @@ from collections import defaultdict
 from config import *
 from utils.utils_text import dict2rows
 
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.WARN)
 
 
 if config["remote_mongo"]:
@@ -135,10 +135,14 @@ async def run_startup():
         await client.accept_invite("sDCHMrX")
 
     await ensure_database_struct()
+    print("Finished setting up database")
     await asyncio.sleep(3)
     await update_members()
+    print("Finished importing members")
     await asyncio.sleep(3)
     await update_messages()
+    print("Finished importing messages")
+
 
 
 async def ensure_database_struct():
@@ -163,6 +167,7 @@ async def ensure_database_struct():
 
 async def update_members():
     for server in client.servers:
+        print("Startup: Importing members from " + server.name)
         memberlist = []
         for member in server.members:
             memberlist.append(member)
