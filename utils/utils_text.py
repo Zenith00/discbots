@@ -188,7 +188,7 @@ def split_list(alist, wanted_parts=1):
 
 def hastebin(text):
     url = r"https://hastebin.com/documents/"
-    blocks = textwrap.wrap(text.encode('utf-8').decode('utf-8'), 400000, break_long_words=False)
+    blocks = textwrap.wrap(text.encode('utf-8'), 400000, break_long_words=False)
     results = [requests.post(url, text) for text in blocks]
     return ["https://hastebin.com/" + json.loads(response.text)["key"] for response in results]
 def dict2rows(in_dict):
