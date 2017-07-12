@@ -294,6 +294,12 @@ async def send(destination, text, send_type):
             except:
                 print(message)
         return
+    if send_type == "embed":
+        await client.send_message(
+            destination=destination,
+            content=None,
+            embed=text)
+        return
     if send_type == "list":
         text = str(text)[1:-1]
 
@@ -406,11 +412,10 @@ async def command_query(params, message_in):
                     hex_int = int(color, 16)
                     embed.colour = discord.Colour(hex_int)
                 embed.set_thumbnail(url=target_member.avatar_url)
-            return config["query"]["user"]["embed"]["output"], embed, None
+            return config["query"]["user"]["embed"]["output"], embed, "embed"
 
         if params[1] == "dump":
             return config["query"]["user"]["dump"], dict2rows(await export_user(params[2])), "rows"
-            pass
     if params[0] == "roles":
         if params[1] == "list":
             role_list = []
