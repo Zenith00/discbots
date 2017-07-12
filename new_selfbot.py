@@ -723,7 +723,7 @@ async def format_message_to_log(message_dict):
             server_name = client.get_server(message_dict["server_id"]).name
         except KeyError:
             server_name = "Unknown"
-        return unidecode("[{}][{}][{}][{}]: {}".format(server_name, message_dict["date"], channel_name, name, content))
+        return unidecode("[{}][{}][{}][{}]: {}".format(server_name, message_dict["date"][2:-7], channel_name, name, content))
 
 
     except:
