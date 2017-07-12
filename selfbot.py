@@ -719,6 +719,7 @@ async def format_message_to_log(message_dict):
 # Utilities
 async def find_user(matching_ident, find_type, server, cast_to_lower=True, count=1):
     ident_id_set_dict = collections.defaultdict(set)
+    matching_ident = " ".join(matching_ident)
     if find_type == "bans":
         banlist = await client.get_bans(server)
         for banned_user in banlist:
