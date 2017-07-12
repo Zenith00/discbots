@@ -175,9 +175,9 @@ async def on_message(message_in):
     try:
         if message_in.content.startswith(config["prefix"]["command"]):
             full_command = message_in.content.replace(config["prefix"]["command"], "")
-            segmented_command = full_command.split(" ", 1)
+            segmented_command = full_command.split(" ")
             command = segmented_command[0]
-            params = segmented_command[1] if len(segmented_command) == 2 else None
+            params = segmented_command[1] if len(segmented_command) == 2 else segmented_command[1:]
             await perform_command(command=command, params=params, message_in=message_in)
 
     except:
