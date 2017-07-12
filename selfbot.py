@@ -53,6 +53,7 @@ if config["imgur"]:
     imgur_client = ImgurClient(IMGUR_CLIENT_ID, IMGUR_SECRET_ID,
                                IMGUR_ACCESS_TOKEN, IMGUR_REFRESH_TOKEN)
 
+#test
 
 @client.event
 async def on_member_remove(member):
