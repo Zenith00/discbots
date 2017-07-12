@@ -305,6 +305,7 @@ async def command_logs(params, context):
         print(params)
         query = await log_query_parser(params[1:], context)
         if isinstance(query, str):
+            print("Failing...")
             return "relay",query,None
         filter = {}
         translate = {"users": "user_id", "channels": "channel_id", "servers": "server_id"}
