@@ -175,7 +175,7 @@ async def update_members():
         for member in memberlist:
             count+=1
             sys.stdout.write("\r")
-            sys.stdout.write("[%-20s] %d%%" % ('=' * int((count/len(memberlist))/20), int(count / len(memberlist))))
+            sys.stdout.write("[%-20s] %d%%" % ('=' * int((count*100/len(memberlist))/20), int(count * 100 / len(memberlist))))
             sys.stdout.flush()
             await import_user(member)
 
