@@ -204,7 +204,7 @@ async def perform_command(command, params, message_in):
     params = await mention_to_id(params)
     await client.delete_message(message_in)
     output = []
-    print("BASE PARAMS: " + params)
+    print("BASE PARAMS: " + str(params))
     if command == "query":
         await output.append(await command_query(params, message_in))
     if command == "find":
