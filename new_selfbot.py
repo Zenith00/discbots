@@ -16,21 +16,18 @@ import motor.motor_asyncio
 import pymongo
 import requests
 
-# import wand.image
 from googleapiclient import discovery
+from imgurpython import ImgurClient
 from unidecode import unidecode
-
 from utils import utils_text, utils_image, utils_parse
 from PIL import Image
-# from utils_text import multi_block
 import collections
-import constants
 from TOKENS import *
 import TOKENS
 from utils import utils_file
 from fuzzywuzzy import fuzz
 from collections import defaultdict
-
+from config import *
 from utils.utils_text import dict2rows
 
 logging.basicConfig(level=logging.INFO)
@@ -39,36 +36,22 @@ mongo_client = motor.motor_asyncio.AsyncIOMotorClient(
         usn=TOKENS.MONGO_USN, pwd=TOKENS.MONGO_PASS))
 # gistClient = Simplegist()
 
-# perspective_api = discovery.build(
-#     'commentanalyzer', 'v1alpha1', developerKey=GOOGLE_API_TOKEN)
 
 client = discord.Client()
-# imgur_client = ImgurClient(IMGUR_CLIENT_ID, IMGUR_SECRET_ID,
-#                            IMGUR_ACCESS_TOKEN, IMGUR_REFRESH_TOKEN)
+
 overwatch_db = mongo_client.overwatch
 
 botClient = discord.Client()
 
-nested_dict = lambda: defaultdict(nested_dict)
 
-config = nested_dict()
-config["prefix"]["command"] = "%%"
-config["prefix"]["tag"] = ",,"
 
-config["query"]["user"]["embed"]["output"] = "inplace"
-config["query"]["user"]["embed"]["color_average_bar"] = True  # Fancy average color bar, disable to increase performance
-config["query"]["user"]["dump"]["output"] = "inplace"
-config["query"]["roles"]["list"]["output"] = "relay"
-config["query"]["roles"]["members"]["delimiter"] = "\n"  # Ex: , . | \n
-config["query"]["roles"]["members"]["output"] = "relay"
-config["query"]["emoji"]["output"] = "inplace"
-config["query"]["user"]["dump"] = "relay"
+if config["perspective"]:
+    perspective_api = discovery.build(
+        'commentanalyzer', 'v1alpha1', developerKey=GOOGLE_API_TOKEN)
 
-config["find"]["current"]["output"] = "inplace"
-config["find"]["history"]["output"] = "inplace"
-config["find"]["bans"]["output"] = "inplace"
-
-config["logs"]["output"] = "relay"
+if config["imgur"]:
+    imgur_client = ImgurClient(IMGUR_CLIENT_ID, IMGUR_SECRET_ID,
+                               IMGUR_ACCESS_TOKEN, IMGUR_REFRESH_TOKEN)
 
 @client.event
 async def on_member_remove(member):
@@ -114,13 +97,13 @@ async def on_member_update(before, after):
     :type after: discord.Member
     :type before: discord.Member
     """
-    if before.server.id == constants.OVERWATCH_SERVER_ID:
-        if before.nick != after.nick:
-            await import_to_user_set(
-                member=after, set_name="nicks", entry=after.nick)
-        if before.name != after.name:
-            await import_to_user_set(
-                member=after, set_name="names", entry=after.nick)
+
+    if before.nick != after.nick:
+        await import_to_user_set(
+            member=after, set_name="nicks", entry=after.nick)
+    if before.name != after.name:
+        await import_to_user_set(
+            member=after, set_name="names", entry=after.nick)
     if before.voice == after.voice:
         await import_user(after)
 
@@ -492,8 +475,8 @@ async def serve_lfg(message_in):
     found_message = None
     warn_user = None
     if len(message_in.mentions) == 0:
-        found_message = await find_message(
-            message=message_in, regex=constants.LFG_REGEX)
+        found_message = await find_message(re.compile(
+            (r"(lf(G|\d))|(\d\d\d\d)|(plat|gold|silver|diamond)|(^LF(((NA)|(EU))|(\s?\d)))|((NA|EU) (LF(g|\d)*))|""(http(s?)://discord.gg/)|(xbox)|(ps4)")))
     else:
         warn_user = message_in.mentions[0]
 
@@ -659,7 +642,7 @@ async def import_user(member):
 
 async def import_message(mess):
     messInfo = await utils_parse.parse_message_info(mess)
-    if "googleapiclient" in sys.modules:
+    if config["perspective"] in sys.modules:
         toxicity = await perspective(mess.content)
         messInfo["toxicity"] = toxicity
 
@@ -792,7 +775,7 @@ async def find_message(message, regex, num_to_search=20):
     match = None
     found_message = None
     async for messageCheck in client.logs_from(message.channel, num_to_search):
-        if messageCheck.author.id != message.author.id and messageCheck.author.id != constants.MERCY_ID:
+        if messageCheck.author.id != message.author.id:
             if isinstance(regex, str):
                 if messageCheck.content == regex:
                     match = messageCheck
