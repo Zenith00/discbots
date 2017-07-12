@@ -356,18 +356,17 @@ async def command_query(params, message_in):
             embed.add_field(name="ID", value=target_member.id, inline=True)
             if user_dict:
                 if "server_joins" in user_dict.keys():
-                    server_joins = user_dict["server_joins"]
+                    server_joins = user_dict["server_joins"][message_in.server.id]
                     server_joins = [join[:10] for join in server_joins]
-
                     embed.add_field(
                         name="First Join", value=server_joins[0], inline=True)
                 if "bans" in user_dict.keys():
-                    bans = user_dict["bans"]
+                    bans = user_dict["bans"][message_in.server.id]
                     bans = [ban[:10] for ban in bans]
                     bans = str(bans)[1:-1]
                     embed.add_field(name="Bans", value=bans, inline=True)
                 if "unbans" in user_dict.keys():
-                    unbans = user_dict["unbans"]
+                    unbans = user_dict["unbans"][message_in.server.id]
                     unbans = [unban[:10] for unban in unbans]
                     unbans = str(unbans)[1:-1]
                     embed.add_field(name="Unbans", value=unbans, inline=True)
