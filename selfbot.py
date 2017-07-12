@@ -173,6 +173,7 @@ async def update_members():
         for member in server.members:
             memberlist.append(member)
         for member in memberlist:
+            count+=1
             sys.stdout.write("\r")
             sys.stdout.write("[%-20s] %d%%" % ('=' * int((count/len(memberlist))/20), int(count / len(memberlist))))
             sys.stdout.flush()
