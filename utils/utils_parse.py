@@ -17,6 +17,7 @@ async def parse_message_info(mess) -> dict:
         mentioned_channels.append(str(x.id))
     for x in mess.role_mentions:
         mentioned_roles.append(str(x.id))
+    server_id = mess.server.id if mess.server else mess.channel.id
     info_dict = {
         "user_id"            : user_id,
         "content"           : messageContent,
@@ -25,8 +26,8 @@ async def parse_message_info(mess) -> dict:
         "mentioned_users"   : mentioned_users,
         "mentioned_channels": mentioned_channels,
         "mentioned_roles"   : mentioned_roles,
-        "channel_id"        : mess.channel.id,
-        "server_id"         : mess.server.id if mess.server else mess.channel.id,
+        "channel_id"        : mess.channel.id   ,
+        "server_id"         : server_id,
         "message_id"           : mess.id
 
     }

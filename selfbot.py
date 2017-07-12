@@ -30,7 +30,7 @@ import tqdm
 from config import *
 from utils.utils_text import dict2rows
 
-logging.basicConfig(level=logging.WARN)
+logging.basicConfig(level=logging.DEBUG)
 
 
 if config["remote_mongo"]:
