@@ -26,7 +26,7 @@ async def parse_message_info(mess) -> dict:
         "mentioned_channels": mentioned_channels,
         "mentioned_roles"   : mentioned_roles,
         "channel_id"        : mess.channel.id,
-        "server_id"         : mess.server.id,
+        "server_id"         : mess.server.id if mess.server else mess.channel.id,
         "message_id"           : mess.id
 
     }

@@ -170,7 +170,6 @@ async def update_members():
     for server in client.servers:
         print("Startup: Importing members from " + server.name)
         memberlist = []
-        count = 0
         for member in server.members:
             memberlist.append(member)
         for member in tqdm.tqdm(memberlist):
