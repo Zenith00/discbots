@@ -589,7 +589,6 @@ async def mess2log(message):
     text = message.content
     if len(text) < 2:
         return
-    toxicity = await perspective(text)
     await import_message(message)
 
     # log_str = unidecode(
