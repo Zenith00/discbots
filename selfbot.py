@@ -388,13 +388,10 @@ async def command_query(params, message_in):
                     status = "Banned"
                 else:
                     status = "Not part of the server"
-            embed.add_field(name="Status", value=status, inline=False)
+            embed.add_field(name="Status", value=status, inline=True)
             if avatar_link:
                 embed.set_thumbnail(url=avatar_link)
-                embed.add_field(
-                    name="Avatar",
-                    value=avatar_link.replace(".webp", ".png"),
-                    inline=False)
+                embed.set_footer(text=avatar_link.replace(".webp", ".png"))
 
                 if config["query"]["user"]["embed"]["color_average_bar"]:
                     color = utils_image.average_color_url(avatar_link)
