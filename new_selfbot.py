@@ -320,7 +320,7 @@ async def command_logs(params):
         output_text = ""
         print(filter)
         async for doc in mongo_client.discord.message_log.find(filter=filter, sort=[("date", pymongo.DESCENDING)], limit=int(params[0])):
-            output_text += await format_message_to_log(doc["content"]) + "\n"
+            output_text += await format_message_to_log(doc) + "\n"
 
         return config["logs"]["output"], "\n".join(utils_text.hastebin(output_text)), None
     except:
