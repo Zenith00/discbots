@@ -206,7 +206,7 @@ async def perform_command(command, params, message_in):
     output = []
     print("BASE PARAMS: " + str(params))
     if command == "query":
-        await output.append(await command_query(params, message_in))
+        output.append(await command_query(params, message_in))
     if command == "find":
         output.append((config["find"]["current"]["output"],
                        await find_user(matching_ident=params[:-2] if "|" in params else params, find_type="current", server=message_in.server,
