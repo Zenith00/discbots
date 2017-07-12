@@ -39,8 +39,8 @@ mongo_client = motor.motor_asyncio.AsyncIOMotorClient(
         usn=TOKENS.MONGO_USN, pwd=TOKENS.MONGO_PASS))
 # gistClient = Simplegist()
 
-perspective_api = discovery.build(
-    'commentanalyzer', 'v1alpha1', developerKey=GOOGLE_API_TOKEN)
+# perspective_api = discovery.build(
+#     'commentanalyzer', 'v1alpha1', developerKey=GOOGLE_API_TOKEN)
 
 client = discord.Client()
 # imgur_client = ImgurClient(IMGUR_CLIENT_ID, IMGUR_SECRET_ID,
