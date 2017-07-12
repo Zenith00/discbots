@@ -255,7 +255,7 @@ async def perform_command(command, params, message_in):
             await client.send_message(message_in.channel, link)
 
     if command == "logs":
-        await output.append(await command_logs(params))
+        output.append(await command_logs(params))
     if output:
         for item in output:
             await parse_output(item, message_in.channel)
