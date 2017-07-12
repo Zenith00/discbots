@@ -59,4 +59,4 @@ async def get_role_members(role) -> list:
             members.append(member)
     return members
 
-client.run(ZENITH_AUTH_TOKEN, bot=False)
+client.run(USER_AUTH_TOKEN, bot=False)
