@@ -30,6 +30,8 @@ from config import *
 from utils.utils_text import dict2rows
 
 logging.basicConfig(level=logging.INFO)
+
+
 if config["remote_mongo"]:
     mongo_client = motor.motor_asyncio.AsyncIOMotorClient(
         "mongodb://{usn}:{pwd}@{site}".format(
@@ -250,7 +252,7 @@ async def perform_command(command, params, message_in):
                 big_text += "   "
             else:
                 big_text += "​:regional_indicator_{c}:".format(c=character)
-        output.append((big_text, "text"))
+        output.append(("inplace", big_text, "text"))
     if command == "ava":
         await command_avatar(params, message_in)
 
