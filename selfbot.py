@@ -162,7 +162,7 @@ async def on_message(message_in):
             full_command = message_in.content.replace(config["prefix"]["command"], "")
             segmented_command = full_command.split(" ")
             command = segmented_command[0]
-            params = [segmented_command[1]] if len(segmented_command) == 2 else segmented_command[1:]
+            params = [  segmented_command[1]] if len(segmented_command) == 2 else segmented_command[1:]
             await perform_command(command=command, params=params, message_in=message_in)
 
     except:
@@ -240,7 +240,7 @@ async def perform_command(command, params, message_in):
             await client.send_message(message_in.channel, link)
 
     if command == "logs":
-        output.append(await command_logs(params))
+        output.append(await command_logs(params, {"server":message_in.server, "channel":message_in.channel, "user":message_in.author}))
     if output:
         for item in output:
             await parse_output(item, message_in.channel)
@@ -298,10 +298,10 @@ async def send(destination, text, send_type):
         await client.send_message(destination, line)
 
 # Commands
-async def command_logs(params):
+async def command_logs(params, context):
     try:
         print(params)
-        query = await log_query_parser(params[1:])
+        query = await log_query_parser(params[1:], context)
         if isinstance(query, str):
             return query
         filter = {}
@@ -317,7 +317,7 @@ async def command_logs(params):
     except:
         return "relay", traceback.format_exc(), None
 
-async def log_query_parser(query):
+async def log_query_parser(query, context):
     try:
         query_state = {"users": [], "channels": [], "servers": []}
         target = ""
@@ -327,6 +327,8 @@ async def log_query_parser(query):
             if word in query_state.keys():
                 target = word
                 continue
+            if word in ["here","local"]:
+                target = context[target].id
             query_state[target].append(word)
         for key in ["users", "channels", "servers"]:
             if len(query_state[key]) == 0:
