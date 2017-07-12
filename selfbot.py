@@ -162,7 +162,7 @@ async def on_message(message_in):
             full_command = message_in.content.replace(config["prefix"]["command"], "")
             segmented_command = full_command.split(" ")
             command = segmented_command[0]
-            params = segmented_command[1] if len(segmented_command) == 2 else segmented_command[1:]
+            params = [segmented_command[1]] if len(segmented_command) == 2 else segmented_command[1:]
             await perform_command(command=command, params=params, message_in=message_in)
 
     except:
