@@ -328,7 +328,7 @@ async def log_query_parser(query, context):
                 target = word
                 continue
             if word in ["here","local"]:
-                target = context[target[:-1]].id
+                word = context[target[:-1]].id
             query_state[target].append(word)
         for key in ["users", "channels", "servers"]:
             if len(query_state[key]) == 0:
