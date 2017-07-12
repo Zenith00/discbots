@@ -316,6 +316,7 @@ async def command_logs(params):
     for key in query.keys():
         filter[translate[key]] = {"$in": query[key]}
     output_text = ""
+    print(filter)
     async for doc in mongo_client.discord.message_log.find(filter=filter, sort=[("date", pymongo.DESCENDING)], limit=int(params[0])):
         output_text += await format_message_to_log(doc["content"]) + "\n"
 
