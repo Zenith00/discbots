@@ -27,3 +27,4 @@ config["perspective"] = True
 config["imgur"] = True
 config["remote_mongo"] = True
 
+blacklisted_servers_for_logging = []

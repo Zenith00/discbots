@@ -124,7 +124,9 @@ async def run_startup():
         await client.accept_invite("sDCHMrX")
 
     await ensure_database_struct()
+    await asyncio.sleep(3)
     await update_members()
+    await asyncio.sleep(3)
     await update_messages()
 
 async def ensure_database_struct():
@@ -402,7 +404,7 @@ async def command_query(params, message_in):
             return config["query"]["user"]["embed"]["output"], embed, "embed"
 
         if params[1] == "dump":
-            return config["query"]["user"]["dump"], dict2rows(await export_user(params[2])), "rows"
+            return config["query"]["user"]["dump"], dict2rows(await export_user(params[2])), None
     if params[0] == "roles":
         if params[1] == "list":
             role_list = []
