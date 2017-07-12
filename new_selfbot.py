@@ -178,7 +178,6 @@ async def on_message(message_in):
             segmented_command = full_command.split(" ", 1)
             command = segmented_command[0]
             params = segmented_command[1] if len(segmented_command) == 2 else None
-            await client.delete_message(message_in)
             await perform_command(command=command, params=params, message_in=message_in)
 
     except:
