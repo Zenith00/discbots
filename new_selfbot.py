@@ -308,19 +308,23 @@ async def send(destination, text, send_type):
 
 # Commands
 async def command_logs(params):
-    query = await log_query_parser(params[1:])
-    if isinstance(query, str):
-        return query
-    filter = {}
-    translate = {"users": "user_id", "channels": "channel_id", "servers": "server_id"}
-    for key in query.keys():
-        filter[translate[key]] = {"$in": query[key]}
-    output_text = ""
-    print(filter)
-    async for doc in mongo_client.discord.message_log.find(filter=filter, sort=[("date", pymongo.DESCENDING)], limit=int(params[0])):
-        output_text += await format_message_to_log(doc["content"]) + "\n"
+    try:
+        print(params)
+        query = await log_query_parser(params[1:])
+        if isinstance(query, str):
+            return query
+        filter = {}
+        translate = {"users": "user_id", "channels": "channel_id", "servers": "server_id"}
+        for key in query.keys():
+            filter[translate[key]] = {"$in": query[key]}
+        output_text = ""
+        print(filter)
+        async for doc in mongo_client.discord.message_log.find(filter=filter, sort=[("date", pymongo.DESCENDING)], limit=int(params[0])):
+            output_text += await format_message_to_log(doc["content"]) + "\n"
 
-    return config["logs"]["output"], "\n".join(utils_text.hastebin(output_text)), None
+        return config["logs"]["output"], "\n".join(utils_text.hastebin(output_text)), None
+    except:
+        return "relay", traceback.format_exc(), None
 
 async def log_query_parser(query):
     try:
