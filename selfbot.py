@@ -226,7 +226,10 @@ async def mention_to_id(command_list):
 
 async def perform_command(command, params, message_in):
     params = await mention_to_id(params)
-    await client.delete_message(message_in)
+    try:
+        await client.delete_message(message_in)
+    except discord.errors.NotFound:
+        pass
     output = []
     print("BASE PARAMS: " + str(params))
     if command == "query":
