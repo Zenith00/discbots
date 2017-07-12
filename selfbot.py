@@ -26,6 +26,7 @@ import TOKENS
 from utils import utils_file
 from fuzzywuzzy import fuzz
 from collections import defaultdict
+import tqdm
 from config import *
 from utils.utils_text import dict2rows
 
@@ -172,11 +173,7 @@ async def update_members():
         count = 0
         for member in server.members:
             memberlist.append(member)
-        for member in memberlist:
-            count+=1
-            sys.stdout.write("\r")
-            sys.stdout.write("[%-20s] %d%%" % ('=' * int((count*100/len(memberlist))/20), int(count * 100 / len(memberlist))))
-            sys.stdout.flush()
+        for member in tqdm.tqdm(memberlist):
             await import_user(member)
 
 
