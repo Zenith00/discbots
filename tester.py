@@ -1,13 +1,12 @@
-from pymongo import MongoClient
-import pymongo
-import TOKENS
+# from pymongo import MongoClient
+# import pymongo
+# import TOKENS
+#
+# c = MongoClient(
+#     "mongodb://{usn}:{pwd}@nadir.space".format(
+#         usn=TOKENS.MONGO_USN, pwd=TOKENS.MONGO_PASS)
+# )
 
-c = MongoClient(
-    "mongodb://{usn}:{pwd}@nadir.space".format(
-        usn=TOKENS.MONGO_USN, pwd=TOKENS.MONGO_PASS)
-)
-
-c.discord.userinfo.update_many({}, {"$rename":{"server_joins":"94882524378968064.server_joins","server_leaves":"94882524378968064.server_leaves"}})
 # d = {"_id_"        : {"ns": "overwatch.message_log", "v": 1, "key": [("_id", 1)]},
 #  "message_id_1": {"v": 1, "unique": True, "key": [("message_id", 1.0)], "ns": "overwatch.message_log"},
 #  "toxicity_1"  : {"v": 1, "key": [("toxicity", 1.0)], "ns": "overwatch.message_log"},
@@ -40,3 +39,6 @@ c.discord.userinfo.update_many({}, {"$rename":{"server_joins":"94882524378968064
 #     for key in res.keys():
 #         filter[translate[key]] = {"$in": res[key]}
 # print(filter)
+
+text = "asdafdasfa \n asdasdasd \n asdasda".encode('utf-8')
+print(text)
