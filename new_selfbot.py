@@ -154,7 +154,10 @@ async def ensure_database_struct():
 
 async def update_members():
     for server in client.servers:
+        memberlist = []
         for member in server.members:
+            memberlist.append(member)
+        for member in memberlist:
             await import_user(member)
 
 async def update_messages():
