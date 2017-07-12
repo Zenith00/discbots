@@ -335,6 +335,7 @@ async def log_query_parser(query, context):
                 del query_state[key]
         return query_state
     except:
+        print(traceback.format_exc())
         return "Syntax not recognized. Proper syntax: %%logs 500 user 1111 2222 channel 3333 4444 5555 server 6666. \n Debug: ```py\n{}```".format(
             traceback.format_exc())
 
