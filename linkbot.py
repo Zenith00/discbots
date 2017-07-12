@@ -11,4 +11,4 @@ async def on_message(message_in):
     await client.delete_message(message_in)
 
 
-client.run(TOKENS.LINKBOT_TOKEN, bot=False)
+client.run(TOKENS.LINKBOT_TOKEN, bot=True)
