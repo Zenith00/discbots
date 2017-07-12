@@ -516,7 +516,7 @@ async def command_avatar(params, message_in):
     if params[0] == "get":
         image = Image.open(BytesIO(requests.get(params[1])))
     if params[0] == "copy":
-        image = message_in.server.get_member(params[1]).avatar_url
+        image = Image.open(BytesIO(requests.get(message_in.server.get_member(params[1]).avatar_url)))
     if params[0] in ["get", "copy"]:
         if len(params) > 2:
             filename = params[2]
