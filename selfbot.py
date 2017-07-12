@@ -149,7 +149,7 @@ async def ensure_database_struct():
     try:
         await mongo_client.discord.create_collection("message_log")
     except:
-        print(traceback.format_exc())
+        pass
     messages = mongo_client.discord.message_log
     message_index_info = await messages.index_information()
     missing_indexes = list({
@@ -169,9 +169,13 @@ async def update_members():
     for server in client.servers:
         print("Startup: Importing members from " + server.name)
         memberlist = []
+        count = 0
         for member in server.members:
             memberlist.append(member)
         for member in memberlist:
+            sys.stdout.write("\r")
+            sys.stdout.write("[%-20s] %d%%" % ('=' * int((count/len(memberlist))/20), int(count / len(memberlist))))
+            sys.stdout.flush()
             await import_user(member)
 
 
