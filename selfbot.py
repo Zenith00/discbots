@@ -303,7 +303,7 @@ async def command_logs(params, context):
         print(params)
         query = await log_query_parser(params[1:], context)
         if isinstance(query, str):
-            return query
+            return "relay",query,None
         filter = {}
         translate = {"users": "user_id", "channels": "channel_id", "servers": "server_id"}
         for key in query.keys():
@@ -328,7 +328,7 @@ async def log_query_parser(query, context):
                 target = word
                 continue
             if word in ["here","local"]:
-                target = context[target].id
+                target = context[target[:-1]].id
             query_state[target].append(word)
         for key in ["users", "channels", "servers"]:
             if len(query_state[key]) == 0:
