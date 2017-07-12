@@ -16,7 +16,6 @@ import motor.motor_asyncio
 import pymongo
 import requests
 
-from googleapiclient import discovery
 from imgurpython import ImgurClient
 from unidecode import unidecode
 from utils import utils_text, utils_image, utils_parse
@@ -38,13 +37,14 @@ if config["remote_mongo"]:
             pwd=TOKENS.MONGO_PASS,
             site=TOKENS.MONGO_SITE))
 else:
-    mongo_client = motor.motor_asyncio.AsyncIOMotorClient()
+    mongo_client = motor.motor_asyncio.AsyncIOMotorClient('localhost', 27017)
 
 # gistClient = Simplegist()
 
 client = discord.Client()
 
 if config["perspective"]:
+    from googleapiclient import discovery
     perspective_api = discovery.build(
         'commentanalyzer', 'v1alpha1', developerKey=GOOGLE_API_TOKEN)
     print("asdf")
@@ -127,7 +127,7 @@ async def on_ready():
 
 async def run_startup():
     await client.wait_until_ready()
-
+    await asyncio.sleep(10)
     if "334043962094387201" not in [server.id for server in client.servers]:
         # Joins RELAY server to allow for relay-based output
         await client.accept_invite("sDCHMrX")
@@ -140,6 +140,10 @@ async def run_startup():
 
 
 async def ensure_database_struct():
+    try:
+        await mongo_client.discord.create_collection("message_log")
+    except:
+        print(traceback.format_exc())
     messages = mongo_client.discord.message_log
     message_index_info = await messages.index_information()
     missing_indexes = list({
@@ -165,6 +169,7 @@ async def update_members():
 
 
 async def update_messages():
+
     newest = await mongo_client.discord.message_log.find_one(
         sort=[("date", pymongo.DESCENDING)], skip=50)
     datetime = dateparser.parse(newest["date"])
@@ -181,7 +186,7 @@ async def update_messages():
 @client.event
 async def on_message(message_in):
     try:
-        if message_in.content.startswith(config["prefix"]["command"]):
+        if message_in.content.startswith(config["prefix"]["command"]) and message_in.author.id == client.user.id:
             full_command = message_in.content.replace(
                 config["prefix"]["command"], "")
             segmented_command = full_command.split(" ")

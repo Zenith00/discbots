@@ -43,22 +43,25 @@
 # text = "asdafdasfa \n asdasdasd \n asdasda".encode('utf-8')
 # print(text)
 
-tok = "MjM2MzQxMTkzODQyMDk4MTc3.DEdB2Q.IoOntdD63XRGXABH_WClkupNu5c"
-import discord
+# tok = "MjM2MzQxMTkzODQyMDk4MTc3.DEdB2Q.IoOntdD63XRGXABH_WClkupNu5c"
+# import discord
+#
+# client = discord.Client()
+#
+#
+# @client.event
+# async def on_message(message_in):
+#     pass
+#
+# @client.event
+# async def on_ready():
+#     print('Connected!')
+#     print('Username: ' + client.user.name)
+#     print('ID: ' + client.user.id)
+#
+#
+#
+# client.run(tok, bot=True)
 
-client = discord.Client()
-
-
-@client.event
-async def on_message(message_in):
-    pass
-
-@client.event
-async def on_ready():
-    print('Connected!')
-    print('Username: ' + client.user.name)
-    print('ID: ' + client.user.id)
-
-
-
-client.run(tok, bot=True)
+import pip
+print(pip.get_installed_distributions())

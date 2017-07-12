@@ -44,4 +44,5 @@ def read_file(file) -> str:
 
 def relative_path(file,relative):
     import os
+    print(os.path.dirname(file))
     return os.path.join(os.path.dirname(file), relative)
