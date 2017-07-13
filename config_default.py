@@ -27,3 +27,4 @@ config["perspective"] = False
 config["imgur"] = False
 config["remote_mongo"] = False
 
+config["autoupdate"] = True
