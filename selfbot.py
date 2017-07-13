@@ -30,7 +30,7 @@ import tqdm
 from config import *
 from utils.utils_text import dict2rows
 
-logging.basicConfig(level=logging.INFO)
+# logging.basicConfig(level=logging.INFO)
 
 if config["remote_mongo"]:
     mongo_client = motor.motor_asyncio.AsyncIOMotorClient(
