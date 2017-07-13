@@ -750,9 +750,6 @@ async def import_message(mess):
     if config["perspective"]:
         toxicity = await perspective(mess.content)
         messInfo["toxicity"] = toxicity
-
-    try:
-        await mongo_client.discord.message_log.insert_one(messInfo)
         await mongo_client.discord.userinfo.update_one({
             "user_id":
                 messInfo["user_id"]
@@ -760,8 +757,8 @@ async def import_message(mess):
             "toxicity"      : toxicity,
             "toxicity_count": 1
         }})
-    except:
-        pass
+    await mongo_client.discord.message_log.insert_one(messInfo)
+
 
 async def import_to_user_set(member, set_name, entry):
     await mongo_client.discord.userinfo.update_one({
