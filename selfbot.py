@@ -740,7 +740,7 @@ async def import_user(member):
 
 async def import_message(mess):
     messInfo = await utils_parse.parse_message_info(mess)
-    if config["perspective"] in sys.modules:
+    if config["perspective"]:
         toxicity = await perspective(mess.content)
         messInfo["toxicity"] = toxicity
 
