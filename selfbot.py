@@ -259,7 +259,7 @@ async def perform_command(command, params, message_in):
     output = []
     print("BASE PARAMS: " + str(params))
     if command == "query":
-        output.append(await command_query(params, message_in))
+        output.extend(await command_query(params, message_in))
     if command == "find":
         output.extend((config["find"]["current"]["output"], await find_user(
             matching_ident=params[:-2] if "|" in params else params,
