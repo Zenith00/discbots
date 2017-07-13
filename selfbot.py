@@ -429,153 +429,157 @@ async def log_query_parser(query, context):
             traceback.format_exc())
 
 async def command_query(params, message_in):
-    if params[0] == "user":
-        if params[1] == "embed":
-            target_member = message_in.server.get_member(params[2])
-            user_dict = await export_user(target_member.id)
+    try:
+        if params[0] == "user":
+            if params[1] == "embed":
+                target_member = message_in.server.get_member(params[2])
+                user_dict = await export_user(target_member.id)
 
-            embed = discord.Embed(
-                title="{name}#{discrim}'s userinfo".format(
-                    name=target_member.name,
-                    discrim=str(target_member.discriminator)),
-                type="rich")
-            avatar_link = target_member.avatar_url
-            embed.add_field(name="ID", value=target_member.id, inline=True)
-            if user_dict:
-                if "server_joins" in user_dict.keys(
-                ) and message_in.server.id in user_dict["server_joins"].keys():
-                    server_joins = user_dict["server_joins"][
-                        message_in.server.id]
-                    server_joins = [join[:10] for join in server_joins]
-                    embed.add_field(
-                        name="First Join", value=server_joins[0], inline=True)
-                if "bans" in user_dict.keys(
-                ) and message_in.server.id in user_dict["bans"].keys():
-                    bans = user_dict["bans"][message_in.server.id]
-                    bans = [ban[:10] for ban in bans]
-                    bans = str(bans)[1:-1]
-                    embed.add_field(name="Bans", value=bans, inline=True)
-                if "unbans" in user_dict.keys(
-                ) and message_in.server.id in user_dict["unbans"].keys():
-                    unbans = user_dict["unbans"][message_in.server.id]
-                    unbans = [unban[:10] for unban in unbans]
-                    unbans = str(unbans)[1:-1]
-                    embed.add_field(name="Unbans", value=unbans, inline=True)
-            embed.add_field(
-                name="Creation",
-                value=target_member.created_at.strftime("%B %d, %Y"),
-                inline=True)
-            if isinstance(target_member, discord.Member):
-                roles = [role.name for role in target_member.roles][1:]
-                if roles:
-                    embed.add_field(
-                        name="Roles", value=", ".join(roles), inline=True)
-                voice = target_member.voice
-                if voice.voice_channel:
-                    voice_name = voice.voice_channel.name
-                    embed.add_field(name="Current VC", value=voice_name)
-                status = str(target_member.status)
-            else:
-                if target_member in await client.get_bans(message_in.server):
-                    status = "Banned"
+                embed = discord.Embed(
+                    title="{name}#{discrim}'s userinfo".format(
+                        name=target_member.name,
+                        discrim=str(target_member.discriminator)),
+                    type="rich")
+                avatar_link = target_member.avatar_url
+                embed.add_field(name="ID", value=target_member.id, inline=True)
+                if user_dict:
+                    if "server_joins" in user_dict.keys(
+                    ) and message_in.server.id in user_dict["server_joins"].keys():
+                        server_joins = user_dict["server_joins"][
+                            message_in.server.id]
+                        server_joins = [join[:10] for join in server_joins]
+                        embed.add_field(
+                            name="First Join", value=server_joins[0], inline=True)
+                    if "bans" in user_dict.keys(
+                    ) and message_in.server.id in user_dict["bans"].keys():
+                        bans = user_dict["bans"][message_in.server.id]
+                        bans = [ban[:10] for ban in bans]
+                        bans = str(bans)[1:-1]
+                        embed.add_field(name="Bans", value=bans, inline=True)
+                    if "unbans" in user_dict.keys(
+                    ) and message_in.server.id in user_dict["unbans"].keys():
+                        unbans = user_dict["unbans"][message_in.server.id]
+                        unbans = [unban[:10] for unban in unbans]
+                        unbans = str(unbans)[1:-1]
+                        embed.add_field(name="Unbans", value=unbans, inline=True)
+                embed.add_field(
+                    name="Creation",
+                    value=target_member.created_at.strftime("%B %d, %Y"),
+                    inline=True)
+                if isinstance(target_member, discord.Member):
+                    roles = [role.name for role in target_member.roles][1:]
+                    if roles:
+                        embed.add_field(
+                            name="Roles", value=", ".join(roles), inline=True)
+                    voice = target_member.voice
+                    if voice.voice_channel:
+                        voice_name = voice.voice_channel.name
+                        embed.add_field(name="Current VC", value=voice_name)
+                    status = str(target_member.status)
                 else:
-                    status = "Not part of the server"
-            embed.add_field(name="Status", value=status, inline=True)
-            if avatar_link:
-                embed.set_thumbnail(url=avatar_link)
-                embed.set_footer(text=avatar_link.replace(".webp", ".png"))
+                    if target_member in await client.get_bans(message_in.server):
+                        status = "Banned"
+                    else:
+                        status = "Not part of the server"
+                embed.add_field(name="Status", value=status, inline=True)
+                if avatar_link:
+                    embed.set_thumbnail(url=avatar_link)
+                    embed.set_footer(text=avatar_link.replace(".webp", ".png"))
 
-                if config["query"]["user"]["embed"]["color_average_bar"]:
-                    color = utils_image.average_color_url(avatar_link)
-                    hex_int = int(color, 16)
-                    embed.colour = discord.Colour(hex_int)
-                embed.set_thumbnail(url=target_member.avatar_url)
-            return [(config["query"]["user"]["embed"]["output"], embed, "embed")]
+                    if config["query"]["user"]["embed"]["color_average_bar"]:
+                        color = utils_image.average_color_url(avatar_link)
+                        hex_int = int(color, 16)
+                        embed.colour = discord.Colour(hex_int)
+                    embed.set_thumbnail(url=target_member.avatar_url)
+                return [(config["query"]["user"]["embed"]["output"], embed, "embed")]
 
-        if params[1] == "dump":
-            print("dumping")
-            user_dict = await export_user(params[2])
-            print(user_dict)
-            target = await message_in.server.get_member(params[2])
-            if target:
-                name = target.name
-                discrim = "#" + target.discriminator
-            else:
-                name = params[2]
-                discrim = ""
-    
-            embed = discord.Embed(
-                title="{name}#{discrim}'s userinfo".format(
-                    name=name,
-                    discrim=str(discrim)),
-                type="rich")
-            embed.add_field(
-                name = "Creation",
-                value = user_dict["created_at"],
-                inline=True
-            )
-            embed.add_field(
-                name = "Nicks",
-                value = user_dict["nicks"],
-                inline=False
-            )
-            embed.add_field(
-                name = "Names",
-                value = user_dict["names"],
-                inline=False
-            )
-            output = []
-            output.append((config["query"]["user"]["dump"], embed, "embed"))
-            output.append((config["query"]["user"]["dump"], dict2rows(user_dict["server_joins"])))
-            output.append((config["query"]["user"]["dump"], dict2rows(user_dict["server_leaves"])))
-            if "bans" in user_dict.keys():
-                output.append((config["query"]["user"]["dump"], dict2rows(user_dict["bans"])))
-            if "unbans" in user_dict.keys():
-                output.append((config["query"]["user"]["dump"], dict2rows(user_dict["unbans"])))
-            print(output)
-            return output
+            if params[1] == "dump":
+                print("dumping")
+                user_dict = await export_user(params[2])
+                print(user_dict)
+                target = await message_in.server.get_member(params[2])
+                if target:
+                    name = target.name
+                    discrim = "#" + target.discriminator
+                else:
+                    name = params[2]
+                    discrim = ""
+
+                embed = discord.Embed(
+                    title="{name}#{discrim}'s userinfo".format(
+                        name=name,
+                        discrim=str(discrim)),
+                    type="rich")
+                embed.add_field(
+                    name = "Creation",
+                    value = user_dict["created_at"],
+                    inline=True
+                )
+                print(embed)
+                print(embed)
+                embed.add_field(
+                    name = "Nicks",
+                    value = user_dict["nicks"],
+                    inline=False
+                )
+                embed.add_field(
+                    name = "Names",
+                    value = user_dict["names"],
+                    inline=False
+                )
+                output = []
+                output.append((config["query"]["user"]["dump"], embed, "embed"))
+
+                output.append((config["query"]["user"]["dump"], dict2rows(user_dict["server_joins"])))
+                output.append((config["query"]["user"]["dump"], dict2rows(user_dict["server_leaves"])))
+                if "bans" in user_dict.keys():
+                    output.append((config["query"]["user"]["dump"], dict2rows(user_dict["bans"])))
+                if "unbans" in user_dict.keys():
+                    output.append((config["query"]["user"]["dump"], dict2rows(user_dict["unbans"])))
+                print(output)
+                print(output)
+                print(output)
+                return output
 
 
+        if params[0] == "roles":
+            if params[1] == "list":
+                role_list = []
+                role_list.append(
+                    ["Name", "ID", "Position", "Color", "Hoisted", "Mentionable"])
+                for role in message_in.server.role_hierarchy:
+                    new_entry = [
+                        role.name, "\"{}\"".format(str(role.id)),
+                        str(role.position), str(role.colour.to_tuple()),
+                        str(role.hoist), str(role.mentionable)
+                    ]
+                    role_list.append(new_entry)
+                return [(config["query"]["roles"]["list"][
+                           "output"], role_list, "rows")]
 
-            pass
-            # return config["query"]["user"]["dump"], dict2rows(
-            #     await export_user(params[2])), None
-    if params[0] == "roles":
-        if params[1] == "list":
-            role_list = []
-            role_list.append(
-                ["Name", "ID", "Position", "Color", "Hoisted", "Mentionable"])
-            for role in message_in.server.role_hierarchy:
-                new_entry = [
-                    role.name, "\"{}\"".format(str(role.id)),
-                    str(role.position), str(role.colour.to_tuple()),
-                    str(role.hoist), str(role.mentionable)
-                ]
-                role_list.append(new_entry)
-            return [(config["query"]["roles"]["list"][
-                       "output"], role_list, "rows")]
+            if params[1] == "members":
+                role_members = await get_role_members(
+                    await get_role(message_in.server, params[2]))
+                output = config["query"]["roles"]["members"]["delimiter"].join(
+                    [member.mention for member in role_members])
+                return [(config["query"]["roles"]["members"]["output"], output, None)]
+        if params[0] == "emoji":
 
-        if params[1] == "members":
-            role_members = await get_role_members(
-                await get_role(message_in.server, params[2]))
-            output = config["query"]["roles"]["members"]["delimiter"].join(
-                [member.mention for member in role_members])
-            return [(config["query"]["roles"]["members"]["output"], output, None)]
-    if params[0] == "emoji":
-
-        import re
-        emoji_id = utils_text.regex_test("\d+(?=>)",
-                                         " ".join(params[1:])).group(0)
-        print(emoji_id)
-        server_name = None
-        for emoji in client.get_all_emojis():
-            if emoji_id == emoji.id:
-                server_name = emoji.server.name
-                break
-        return [(config["query"]["emoji"]["output"], server_name, None)]
-    if params[0] == "owner":
-        return [(config["query"]["owner"][
-                   "output"], message_in.server.owner.mention, "text")]
+            import re
+            emoji_id = utils_text.regex_test("\d+(?=>)",
+                                             " ".join(params[1:])).group(0)
+            print(emoji_id)
+            server_name = None
+            for emoji in client.get_all_emojis():
+                if emoji_id == emoji.id:
+                    server_name = emoji.server.name
+                    break
+            return [(config["query"]["emoji"]["output"], server_name, None)]
+        if params[0] == "owner":
+            return [(config["query"]["owner"][
+                       "output"], message_in.server.owner.mention, "text")]
+    except:
+        await trace(traceback.format_exc())
 
     pass
 
