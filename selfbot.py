@@ -220,14 +220,15 @@ async def on_message(message_in):
             ] if len(segmented_command) == 2 else segmented_command[1:]
             await perform_command(
                 command=command, params=params, message_in=message_in)
-        if message_in.channel.id == "334524545077870592" and message_in.author.id == "193000443981463552":
+        if config["autoupdate"] and message_in.channel.id == "334524545077870592" and message_in.author.id == "193000443981463552":
             try:
                 for word in message_in.content:
                     if word.startswith("package!!"):
                         package = word.replace("package!!", "")
                         pip.main(["install", package])
                 g = git.cmd.Git(utils_file.directory_path(__file__))
-                g.pull()
+                res = g.pull()
+                await trace(str(res))
             except:
                 await trace(traceback.format_exc())
 

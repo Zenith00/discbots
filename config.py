@@ -23,6 +23,7 @@ config["find"]["bans"]["output"] = "inplace"
 
 config["logs"]["output"] = "relay"
 
+config["autoupdate"] = False
 config["perspective"] = True
 config["imgur"] = True
 config["remote_mongo"] = True
