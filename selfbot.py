@@ -493,7 +493,9 @@ async def command_query(params, message_in):
             return [(config["query"]["user"]["embed"]["output"], embed, "embed")]
 
         if params[1] == "dump":
+            print("dumping")
             user_dict = await export_user(params[2])
+            print(user_dict)
             target = await message_in.server.get_member(params[2])
             if target:
                 name = target.name
