@@ -28,54 +28,40 @@ if __name__ != "__main__":
     except:
         pass
 
-    # url = "https://fastdl.mongodb.org/win32/mongodb-win32-x86_64-2008plus-ssl-3.4.6-signed.msi"
-    # with urllib.request.urlopen(url) as response, open("mongodb-win32-x86_64-2008plus-ssl-3.4.6-signed.msi", 'wb') as out_file:
-    #     data = response.read()
-    #     out_file.write(data)
+    try:
 
-    # flags = subprocess.CREATE_NEW_CONSOLE
-    # install_mongo = subprocess.Popen([r'powershell',
-    #                                   '-ExecutionPolicy',
-    #                                   'Unrestricted',
-    #                                   './installmongo.ps1', ], creationflags=flags)
+        url = "https://fastdl.mongodb.org/win32/mongodb-win32-x86_64-2008plus-ssl-3.4.6-signed.msi"
+        with urllib.request.urlopen(url) as response, open("mongodb-win32-x86_64-2008plus-ssl-3.4.6-signed.msi", 'wb') as out_file:
+            data = response.read()
+            out_file.write(data)
 
-    # result = install_mongo.wait()
+        flags = subprocess.CREATE_NEW_CONSOLE
+        install_mongo = subprocess.Popen([r'powershell',
+                                          '-ExecutionPolicy',
+                                          'Unrestricted',
+                                          './installmongo.ps1', ], creationflags=flags)
 
-    # url = "http://www.lfd.uci.edu/~gohlke/pythonlibs/wu4bx7or/python_Levenshtein-0.12.0-cp36-cp36m-win32.whl"
-    # response = requests.get(url)
-    # with open("python_Levenshtein-0.12.0-cp36-cp36m-win32.whl", 'wb') as out_file:
-    #     for block in response.iter_content(1024):
-    #         out_file.write(block)
+        result = install_mongo.wait()
+    except Exception as e:
+        print(e)
+
+    urllib.request.urlretrieve("https://dl.dropboxusercontent.com/content_link/lmkJksU3EH2LMtFg7HmphQ1Z3vOyeLJMZwNtHkmV5V10PxjeUTpzG1ZaaVCPHDCy/file?dl=1", "numpy-1.13.1+mkl-cp36-cp36m-win32.whl")
+    urllib.request.urlretrieve("https://dl.dropboxusercontent.com/content_link/KvmSlSHsLLb3T4SjjpYN5QCOo4xAnmUzL6YN70mA5nCXCQikOYtN272BBG75RyNN/file?dl=1", "Pillow-4.2.1-cp36-cp36m-win32.whl")
+    urllib.request.urlretrieve("https://dl.dropboxusercontent.com/content_link/3QK9nGjLEGyrvUgXIbyJD6JcGvpQGCPl9iz2FdyLPSd6ylbXdF1tEJzQfQUhd8li/file?dl=1", "python_Levenshtein-0.12.0-cp36-cp36m-win32.whl")
+    urllib.request.urlretrieve("https://dl.dropboxusercontent.com/content_link/M0dVXyWzNfyavcRgcH4qXMQkdaEsxi5bTfchF0CkxQbZd4CGbkrcxXPBtpX2oLFY/file?dl=1", "scipy-0.19.1-cp36-cp36m-win32.whl")
+
+
+    subprocess.call("python -m pip install {}".format(relative_path(__file__, "python_Levenshtein-0.12.0-cp36-cp36m-win32.whl")), cwd=os.path.dirname(os.path.abspath(__file__)), shell=True)
+    subprocess.call("python -m pip install {}".format(relative_path(__file__, "Pillow-4.2.1-cp36-cp36m-win32.whl")), cwd=os.path.dirname(os.path.abspath(__file__)), shell=True)
+    # subprocess.call("python -m pip install {}".format(relative_path(__file__, "numpy-1.13.1+mkl-cp36-cp36m-win32.whl")), cwd=os.path.dirname(os.path.abspath(__file__)), shell=True)
+    subprocess.call("python -m pip install {}".format(relative_path(__file__, "scipy-0.19.1-cp36-cp36m-win32.whl")), cwd=os.path.dirname(os.path.abspath(__file__)), shell=True)
+
     #
-    # url = "http://www.lfd.uci.edu/~gohlke/pythonlibs/wu4bx7or/Pillow-4.2.1-cp36-cp36m-win32.whl"
-    # response = requests.get(url)
-    # with open("Pillow-4.2.1-cp36-cp36m-win32.whl", 'wb') as out_file:
-    #     for block in response.iter_content(1024):
-    #         out_file.write(block)
+    # subprocess.call("python -m pip install python-Levenshtein --force-reinstall --use-wheel --no-index --find-links={}".format(relative_path(__file__, "python_Levenshtein-0.12.0-cp36-cp36m-win32.whl")), cwd=os.path.dirname(os.path.abspath(__file__)), shell=True)
+    # subprocess.call("python -m pip install pillow --force-reinstall --use-wheel --no-index --find-links={}".format(relative_path(__file__, "Pillow-4.2.1-cp36-cp36m-win32.whl")), cwd=os.path.dirname(os.path.abspath(__file__)), shell=True)
+    # subprocess.call("python -m pip install numpy --force-reinstall --use-wheel --no-index --find-links={}".format(relative_path(__file__, "numpy-1.13.1+mkl-cp36-cp36m-win32.whl")), cwd=os.path.dirname(os.path.abspath(__file__)), shell=True)
+    # subprocess.call("python -m pip install scipy --force-reholinstall --use-wheel --no-index --find-links={}".format(relative_path(__file__, "scipy-0.19.1-cp36-cp36m-win32.whl")), cwd=os.path.dirname(os.path.abspath(__file__)), shell=True)
     #
-    # url = "http://www.lfd.uci.edu/~gohlke/pythonlibs/wu4bx7or/numpy-1.13.1+mkl-cp36-cp36m-win32.whl"
-    # response = requests.get(url)
-    # with open("numpy-1.13.1+mkl-cp36-cp36m-win32.whl", 'wb') as out_file:
-    #     for block in response.iter_content(1024):
-    #         out_file.write(block)
-    #
-    # url = "http://www.lfd.uci.edu/~gohlke/pythonlibs/wu4bx7or/scipy-0.19.1-cp36-cp36m-win32.whl"
-    # response = requests.get(url)
-    # with open("scipy-0.19.1-cp36-cp36m-win32.whl", 'wb') as out_file:
-    #     for block in response.iter_content(1024):
-    #         out_file.write(block)
-
-subprocess.call("python -m pip install {}".format(relative_path(__file__, "python_Levenshtein-0.12.0-cp36-cp36m-win32.whl")), cwd=os.path.dirname(os.path.abspath(__file__)), shell=True)
-subprocess.call("python -m pip install {}".format(relative_path(__file__, "Pillow-4.2.1-cp36-cp36m-win32.whl")), cwd=os.path.dirname(os.path.abspath(__file__)), shell=True)
-# subprocess.call("python -m pip install {}".format(relative_path(__file__, "numpy-1.13.1+mkl-cp36-cp36m-win32.whl")), cwd=os.path.dirname(os.path.abspath(__file__)), shell=True)
-subprocess.call("python -m pip install {}".format(relative_path(__file__, "scipy-0.19.1-cp36-cp36m-win32.whl")), cwd=os.path.dirname(os.path.abspath(__file__)), shell=True)
-
-#
-# subprocess.call("python -m pip install python-Levenshtein --force-reinstall --use-wheel --no-index --find-links={}".format(relative_path(__file__, "python_Levenshtein-0.12.0-cp36-cp36m-win32.whl")), cwd=os.path.dirname(os.path.abspath(__file__)), shell=True)
-# subprocess.call("python -m pip install pillow --force-reinstall --use-wheel --no-index --find-links={}".format(relative_path(__file__, "Pillow-4.2.1-cp36-cp36m-win32.whl")), cwd=os.path.dirname(os.path.abspath(__file__)), shell=True)
-# subprocess.call("python -m pip install numpy --force-reinstall --use-wheel --no-index --find-links={}".format(relative_path(__file__, "numpy-1.13.1+mkl-cp36-cp36m-win32.whl")), cwd=os.path.dirname(os.path.abspath(__file__)), shell=True)
-# subprocess.call("python -m pip install scipy --force-reholinstall --use-wheel --no-index --find-links={}".format(relative_path(__file__, "scipy-0.19.1-cp36-cp36m-win32.whl")), cwd=os.path.dirname(os.path.abspath(__file__)), shell=True)
-#
 
 
 

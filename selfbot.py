@@ -178,18 +178,6 @@ async def ensure_database_struct():
                         response.append(id)
 
                 await mongo_client.discord.userinfo.delete_many({"_id": {"$in": response}})
-                # async for dup in mongo_client.discord.userinfo.aggregate([
-                #     {"$group": {"_id": "user_id", "dups": {"$addToSet": "$_id"}, "count": {"$sum": 1}}},
-                #     {"$match": {"count": {"$gt": 1}}}
-                # ], allowDiskUse=True):
-                #     print("processing")
-                #     duplicates = dup["dups"]
-                # print(duplicates)
-                # await mongo_client.discord.userinfo.delete_many({"_id":{"$in":duplicates}})
-                #
-                #
-                #
-                # await mongo_client.discord.userinfo.create_index("user_id", unique=True)
             except:
                 await relay(traceback.format_exc())
                 print(traceback.format_exc())
