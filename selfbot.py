@@ -259,7 +259,7 @@ async def perform_command(command, params, message_in):
     output = []
     print("BASE PARAMS: " + str(params))
     if command == "query":
-        output.extend(await command_query(params, message_in))
+        output.append(await command_query(params, message_in))
     if command == "find":
         output.extend((config["find"]["current"]["output"], await find_user(
             matching_ident=params[:-2] if "|" in params else params,
@@ -267,13 +267,13 @@ async def perform_command(command, params, message_in):
             server=message_in.server,
             count=params[-1] if "|" in params else 1), None))
     if command == "findall":
-        output.extend((config["find"]["history"]["output"], await find_user(
+        output.append((config["find"]["history"]["output"], await find_user(
             matching_ident=params[:-2] if "|" in params else params,
             find_type="history",
             server=message_in.server,
             count=params[-1] if "|" in params else 1), None))
     if command == "findban":
-        output.extend((config["find"]["bans"]["output"], await find_user(
+        output.append((config["find"]["bans"]["output"], await find_user(
             matching_ident=params[:-2] if "|" in params else params,
             find_type="bans",
             server=message_in.server,
@@ -327,6 +327,7 @@ async def perform_command(command, params, message_in):
             time_dict["readable"], raw.split(",")[0]))
     if output:
         for item in output:
+            print(item)
             await parse_output(item, message_in.channel)
 
 async def parse_output(output, context):
