@@ -162,18 +162,33 @@ async def ensure_database_struct():
             await mongo_client.discord.userinfo.create_index("user_id", unique=True)
         except:
             try:
-                async for dup in mongo_client.discord.userinfo.aggregate([
-                    {"$group": {"_id": "user_id", "dups": {"$addToSet": "$_id"}, "count": {"$sum": 1}}},
-                    {"$match": {"count": {"$gt": 1}}}
-                ], allowDiskUse=True):
-                    print("processing")
-                    duplicates = dup["dups"]
-                print(duplicates)
-                await mongo_client.discord.userinfo.delete_many({"_id":{"$in":duplicates}})
+                cursor = mongo_client.discord.userinfo.aggregate(
+                    [
+                        {"$group": {"_id": "$user_id", "unique_ids": {"$addToSet": "$_id"}, "count": {"$sum": 1}}},
+                        {"$match": {"count": {"$gte": 2}}}
+                    ]
+                )
 
+                response = []
+                async for doc in cursor:
+                    print("Running...")
+                    del doc["unique_ids"][0]
+                    for id in doc["unique_ids"]:
+                        response.append(id)
 
-
-                await mongo_client.discord.userinfo.create_index("user_id", unique=True)
+                await mongo_client.discord.userinfo.delete_many({"_id": {"$in": response}})
+                # async for dup in mongo_client.discord.userinfo.aggregate([
+                #     {"$group": {"_id": "user_id", "dups": {"$addToSet": "$_id"}, "count": {"$sum": 1}}},
+                #     {"$match": {"count": {"$gt": 1}}}
+                # ], allowDiskUse=True):
+                #     print("processing")
+                #     duplicates = dup["dups"]
+                # print(duplicates)
+                # await mongo_client.discord.userinfo.delete_many({"_id":{"$in":duplicates}})
+                #
+                #
+                #
+                # await mongo_client.discord.userinfo.create_index("user_id", unique=True)
             except:
                 await relay(traceback.format_exc())
                 print(traceback.format_exc())

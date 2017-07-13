@@ -8,16 +8,17 @@ c = MongoClient(
 )
 count = 0
 
-# for dup in c.discord.userinfo.aggregate([
-#     {"$group": {"_id": "user_id", "dups": {"$addToSet": "$_id"}, "count": {"$sum": 1}}},
-#     {"$match": {"count": {"$gt": 1}}}
-# ], allowDiskUse=True):
-#     duplicates = dup["dups"]
+for dup in c.discord.userinfo.aggregate([
+    {"$group": {"_id": "user_id", "dups": {"$addToSet": "$_id"}, "count": {"$sum": 1}}},
+    {"$match": {"count": {"$gt": 1}}}
+], allowDiskUse=True):
+    print(dup)
+    duplicates = dup["dups"]
 #
-from utils import utils_file
-
-# utils_file.pickle_file(duplicates, "dups")
-duplicates = utils_file.unpickle_file("dups")
+# from utils import utils_file
+#
+# # utils_file.pickle_file(duplicates, "dups")
+# duplicates = utils_file.unpickle_file("dups")
 
 print(duplicates)
 
