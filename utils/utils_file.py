@@ -48,6 +48,10 @@ def relative_path(file,relative):
     print(os.path.dirname(file))
     return os.path.join(os.path.dirname(file), relative)
 
+def directory_path(file):
+    import os
+    return os.path.dirname(os.path.abspath(file))
+
 def pickle_file(data, filename):
     with open(filename + ".pickle", "wb") as f:
         pickle.dump(data, f)

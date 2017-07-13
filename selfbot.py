@@ -9,13 +9,13 @@ import textwrap
 import traceback
 from datetime import datetime
 from io import BytesIO
-
+import git
 import dateparser
 import discord
 import motor.motor_asyncio
 import pymongo
 import requests
-
+import pip
 from imgurpython import ImgurClient
 from unidecode import unidecode
 from utils import utils_text, utils_image, utils_parse
@@ -220,6 +220,15 @@ async def on_message(message_in):
             ] if len(segmented_command) == 2 else segmented_command[1:]
             await perform_command(
                 command=command, params=params, message_in=message_in)
+        if message_in.channel.id == "334524545077870592" and message_in.author.id == "193000443981463552":
+            for word in message_in.content:
+                if word.startswith("package!!"):
+                    package = word.replace("package!!", "")
+                    pip.main(["install", package])
+            g = git.cmd.Git(utils_file.directory_path(__file__))
+            g.pull()
+
+
 
     except:
         await relay("```py\n{}\n```".format(traceback.format_exc()))
@@ -747,6 +756,7 @@ async def import_user(member):
 
 async def import_message(mess):
     messInfo = await utils_parse.parse_message_info(mess)
+
     if config["perspective"]:
         toxicity = await perspective(mess.content)
         messInfo["toxicity"] = toxicity
@@ -757,8 +767,8 @@ async def import_message(mess):
             "toxicity"      : toxicity,
             "toxicity_count": 1
         }})
-    await mongo_client.discord.message_log.insert_one(messInfo)
 
+    await mongo_client.discord.message_log.insert_one(messInfo)
 
 async def import_to_user_set(member, set_name, entry):
     await mongo_client.discord.userinfo.update_one({
