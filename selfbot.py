@@ -179,7 +179,7 @@ async def ensure_database_struct():
 
                 await mongo_client.discord.userinfo.delete_many({"_id": {"$in": response}})
             except:
-                await relay(traceback.format_exc())
+                await trace(traceback.format_exc())
                 print(traceback.format_exc())
 
         pass
@@ -231,7 +231,7 @@ async def on_message(message_in):
 
 
     except:
-        await relay("```py\n{}\n```".format(traceback.format_exc()))
+        await trace("{}".format(traceback.format_exc()))
 
 async def mention_to_id(command_list):
     new_command = []
@@ -907,16 +907,7 @@ async def find_message(message, regex, num_to_search=20):
                 return found_message
     return found_message
 
-async def remind_me(time, message):
-    try:
-        time = await utils_text.parse_time_to_end(" ".join(command_list[1:]))
-        await asyncio.sleep(time["delt"].total_seconds())
 
-        await client.send_message(
-            message.channel,
-            "Reminding after " + str(time) + " seconds:\n" + command_list[0])
-    except:
-        await relay(traceback.format_exc())
 
 async def relay(text):
     await send(
@@ -924,6 +915,8 @@ async def relay(text):
         text=text,
         send_type=None)
 
+async def trace(text):
+    await client.send_message(client.get_channel("335171044014948352"), "```" + text + "```")
 class Unbuffered(object):
     def __init__(self, stream):
         self.stream = stream
