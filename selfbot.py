@@ -166,6 +166,7 @@ async def ensure_database_struct():
                     {"$group": {"_id": "user_id", "dups": {"$addToSet": "$_id"}, "count": {"$sum": 1}}},
                     {"$match": {"count": {"$gt": 1}}}
                 ], allowDiskUse=True):
+                    nonlocal duplicates
                     duplicates = dup["dups"]
 
                 await mongo_client.discord.userinfo.delete_many({"_id":{"$in":duplicates}})
