@@ -530,8 +530,10 @@ async def command_query(params, message_in):
                 output = []
                 output.append((config["query"]["user"]["dump"], embed, "embed"))
 
-                output.append((config["query"]["user"]["dump"], dict2rows(user_dict["server_joins"])))
-                output.append((config["query"]["user"]["dump"], dict2rows(user_dict["server_leaves"])))
+                if "server_joins" in user_dict.keys():
+                    output.append((config["query"]["user"]["dump"], dict2rows(user_dict["server_joins"])))
+                if "server_leaves" in user_dict.keys():
+                    output.append((config["query"]["user"]["dump"], dict2rows(user_dict["server_leaves"])))
                 if "bans" in user_dict.keys():
                     output.append((config["query"]["user"]["dump"], dict2rows(user_dict["bans"])))
                 if "unbans" in user_dict.keys():
