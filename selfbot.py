@@ -157,6 +157,7 @@ async def ensure_database_struct():
                 full_index_name[:-2], background=True)
 
     if "user_id_1" not in (await mongo_client.discord.userinfo.index_information()).keys():
+        duplicates = []
         try:
             await mongo_client.discord.userinfo.create_index("user_id", unique=True)
         except:
@@ -165,6 +166,7 @@ async def ensure_database_struct():
                     {"$group": {"_id": "user_id", "dups": {"$addToSet": "$_id"}, "count": {"$sum": 1}}},
                     {"$match": {"count": {"$gt": 1}}}
                 ], allowDiskUse=True):
+                    print("processing")
                     duplicates = dup["dups"]
                 print(duplicates)
                 await mongo_client.discord.userinfo.delete_many({"_id":{"$in":duplicates}})
