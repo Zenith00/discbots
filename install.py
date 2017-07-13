@@ -16,7 +16,7 @@ def relative_path(file,relative):
 
 if __name__ == "__main__":
     to_install = ["regex", "imgurpython", "fuzzywuzzy", "dateparser", "asteval","pyshorteners", "pymongo", "motor", "discord.py[voice]",
-                  "unidecode", "tqdm"]
+                  "unidecode", "tqdm", "gitpython"]
     for x in to_install:
         install(x)
 

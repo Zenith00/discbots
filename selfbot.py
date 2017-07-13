@@ -259,21 +259,21 @@ async def perform_command(command, params, message_in):
     output = []
     print("BASE PARAMS: " + str(params))
     if command == "query":
-        output.append(await command_query(params, message_in))
+        output.extend(await command_query(params, message_in))
     if command == "find":
-        output.append((config["find"]["current"]["output"], await find_user(
+        output.extend((config["find"]["current"]["output"], await find_user(
             matching_ident=params[:-2] if "|" in params else params,
             find_type="current",
             server=message_in.server,
             count=params[-1] if "|" in params else 1), None))
     if command == "findall":
-        output.append((config["find"]["history"]["output"], await find_user(
+        output.extend((config["find"]["history"]["output"], await find_user(
             matching_ident=params[:-2] if "|" in params else params,
             find_type="history",
             server=message_in.server,
             count=params[-1] if "|" in params else 1), None))
     if command == "findban":
-        output.append((config["find"]["bans"]["output"], await find_user(
+        output.extend((config["find"]["bans"]["output"], await find_user(
             matching_ident=params[:-2] if "|" in params else params,
             find_type="bans",
             server=message_in.server,
@@ -287,7 +287,7 @@ async def perform_command(command, params, message_in):
                 big_text += "   "
             else:
                 big_text += "​:regional_indicator_{c}:".format(c=character)
-        output.append(("inplace", big_text, "text"))
+        output.extend(("inplace", big_text, "text"))
     if command == "ava":
         await command_avatar(params, message_in)
 
@@ -295,7 +295,7 @@ async def perform_command(command, params, message_in):
     if command == "jpeg":
         url = params[0]
         url = await more_jpeg(url)
-        output.append(("{url}. Compressed to {ratio}% of original".format(
+        output.extend(("{url}. Compressed to {ratio}% of original".format(
             url=url[0], ratio=url[1]), "text"))
     # Requires IMGUR
     # Posts X images from a given imgur album's ID: http://imgur.com/a/ID
@@ -310,7 +310,7 @@ async def perform_command(command, params, message_in):
             await client.send_message(message_in.channel, link)
 
     if command == "logs":
-        output.append(await command_logs(params, {
+        output.extend(await command_logs(params, {
             "server" : message_in.server,
             "channel": message_in.channel,
             "user"   : message_in.author
@@ -383,7 +383,7 @@ async def command_logs(params, context):
         query = await log_query_parser(params[1:], context)
         if isinstance(query, str):
             print("Failing...")
-            return "relay", query, None
+            return [("relay", query, None)]
         filter = {}
         translate = {
             "users"   : "user_id",
@@ -400,10 +400,10 @@ async def command_logs(params, context):
                 limit=int(params[0])):
             output_text += await format_message_to_log(doc) + "\n"
 
-        return config["logs"]["output"], "\n".join(
-            utils_text.hastebin(output_text)), None
+        return [(config["logs"]["output"], "\n".join(
+            utils_text.hastebin(output_text)), None)]
     except:
-        return "relay", traceback.format_exc(), None
+        return [("relay", traceback.format_exc(), None)]
 
 async def log_query_parser(query, context):
     try:
@@ -489,11 +489,53 @@ async def command_query(params, message_in):
                     hex_int = int(color, 16)
                     embed.colour = discord.Colour(hex_int)
                 embed.set_thumbnail(url=target_member.avatar_url)
-            return config["query"]["user"]["embed"]["output"], embed, "embed"
+            return [(config["query"]["user"]["embed"]["output"], embed, "embed")]
 
         if params[1] == "dump":
-            return config["query"]["user"]["dump"], dict2rows(
-                await export_user(params[2])), None
+            user_dict = await export_user(params[2])
+            target = await message_in.server.get_member(params[2])
+            if target:
+                name = target.name
+                discrim = "#" + target.discriminator
+            else:
+                name = params[2]
+                discrim = ""
+    
+            embed = discord.Embed(
+                title="{name}#{discrim}'s userinfo".format(
+                    name=name,
+                    discrim=str(discrim)),
+                type="rich")
+            embed.add_field(
+                name = "Creation",
+                value = user_dict["created_at"],
+                inline=True
+            )
+            embed.add_field(
+                name = "Nicks",
+                value = user_dict["nicks"],
+                inline=False
+            )
+            embed.add_field(
+                name = "Names",
+                value = user_dict["names"],
+                inline=False
+            )
+            output = []
+            output.append((config["query"]["user"]["dump"], embed, "embed"))
+            output.append((config["query"]["user"]["dump"], dict2rows(user_dict["server_joins"])))
+            output.append((config["query"]["user"]["dump"], dict2rows(user_dict["server_leaves"])))
+            if "bans" in user_dict.keys():
+                output.append((config["query"]["user"]["dump"], dict2rows(user_dict["bans"])))
+            if "unbans" in user_dict.keys():
+                output.append((config["query"]["user"]["dump"], dict2rows(user_dict["unbans"])))
+            return output
+
+
+
+            pass
+            # return config["query"]["user"]["dump"], dict2rows(
+            #     await export_user(params[2])), None
     if params[0] == "roles":
         if params[1] == "list":
             role_list = []
@@ -506,14 +548,15 @@ async def command_query(params, message_in):
                     str(role.hoist), str(role.mentionable)
                 ]
                 role_list.append(new_entry)
-            return config["query"]["roles"]["list"][
-                       "output"], role_list, "rows"
+            return [(config["query"]["roles"]["list"][
+                       "output"], role_list, "rows")]
+
         if params[1] == "members":
             role_members = await get_role_members(
                 await get_role(message_in.server, params[2]))
             output = config["query"]["roles"]["members"]["delimiter"].join(
                 [member.mention for member in role_members])
-            return config["query"]["roles"]["members"]["output"], output, None
+            return [(config["query"]["roles"]["members"]["output"], output, None)]
     if params[0] == "emoji":
 
         import re
@@ -525,10 +568,10 @@ async def command_query(params, message_in):
             if emoji_id == emoji.id:
                 server_name = emoji.server.name
                 break
-        return config["query"]["emoji"]["output"], server_name, None
+        return [(config["query"]["emoji"]["output"], server_name, None)]
     if params[0] == "owner":
-        return config["query"]["owner"][
-                   "output"], message_in.server.owner.mention, "text"
+        return [(config["query"]["owner"][
+                   "output"], message_in.server.owner.mention, "text")]
 
     pass
 
