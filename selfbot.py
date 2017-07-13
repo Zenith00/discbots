@@ -162,9 +162,10 @@ async def ensure_database_struct():
             await mongo_client.discord.userinfo.create_index("user_id", unique=True)
         except:
             try:
+                print("Running.….")
                 cursor = mongo_client.discord.userinfo.aggregate(
                     [
-                        {"$group": {"_id": "$user_id", "unique_ids": {"$addToSet": "$_id"}, "count": {"$sum": 1}}},
+                        {"$group": {"_id": "user_id", "unique_ids": {"$addToSet": "$_id"}, "count": {"$sum": 1}}},
                         {"$match": {"count": {"$gte": 2}}}
                     ]
                 )
