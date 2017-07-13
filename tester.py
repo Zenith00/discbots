@@ -19,8 +19,7 @@ from utils import utils_file
 # utils_file.pickle_file(duplicates, "dups")
 duplicates = utils_file.unpickle_file("dups")
 
-for dup in duplicates:
-    print(dup)
+print(duplicates)
 
 
 # d = {"_id_"        : {"ns": "overwatch.message_log", "v": 1, "key": [("_id", 1)]},
