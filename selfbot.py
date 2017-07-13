@@ -161,14 +161,12 @@ async def ensure_database_struct():
             await mongo_client.discord.userinfo.create_index("user_id", unique=True)
         except:
             try:
-                duplicates= None
                 async for dup in mongo_client.discord.userinfo.aggregate([
                     {"$group": {"_id": "user_id", "dups": {"$addToSet": "$_id"}, "count": {"$sum": 1}}},
                     {"$match": {"count": {"$gt": 1}}}
                 ], allowDiskUse=True):
-                    nonlocal duplicates
                     duplicates = dup["dups"]
-
+                print(duplicates)
                 await mongo_client.discord.userinfo.delete_many({"_id":{"$in":duplicates}})
 
 
