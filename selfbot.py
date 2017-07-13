@@ -497,7 +497,7 @@ async def command_query(params, message_in):
                 print("dumping")
                 user_dict = await export_user(params[2])
                 print(user_dict)
-                target = await message_in.server.get_member(params[2])
+                target = message_in.server.get_member(params[2])
                 if target:
                     name = target.name
                     discrim = "#" + target.discriminator
