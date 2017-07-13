@@ -32,7 +32,6 @@ from utils.utils_text import dict2rows
 
 logging.basicConfig(level=logging.INFO)
 
-
 if config["remote_mongo"]:
     mongo_client = motor.motor_asyncio.AsyncIOMotorClient(
         "mongodb://{usn}:{pwd}@{site}".format(
@@ -48,6 +47,7 @@ client = discord.Client()
 
 if config["perspective"]:
     from googleapiclient import discovery
+
     perspective_api = discovery.build(
         'commentanalyzer', 'v1alpha1', developerKey=GOOGLE_API_TOKEN)
     print("asdf")
@@ -56,7 +56,7 @@ if config["imgur"]:
     imgur_client = ImgurClient(IMGUR_CLIENT_ID, IMGUR_SECRET_ID,
                                IMGUR_ACCESS_TOKEN, IMGUR_REFRESH_TOKEN)
 
-#test
+# test
 
 @client.event
 async def on_member_remove(member):
@@ -66,7 +66,6 @@ async def on_member_remove(member):
         set_name="server_leaves",
         entry=datetime.utcnow().isoformat(" "))
 
-
 @client.event
 async def on_member_ban(member):
     await import_to_server_user_set(
@@ -74,7 +73,6 @@ async def on_member_ban(member):
         server=member.server.id,
         set_name="bans",
         entry=datetime.utcnow().isoformat(" "))
-
 
 @client.event
 async def on_member_unban(server, member):
@@ -84,7 +82,6 @@ async def on_member_unban(server, member):
         set_name="unbans",
         entry=datetime.utcnow().isoformat(" "))
 
-
 @client.event
 async def on_voice_state_update(before, after):
     """
@@ -93,12 +90,10 @@ async def on_voice_state_update(before, after):
     """
     pass
 
-
 @client.event
 async def on_member_join(member):
     await asyncio.sleep(5)
     await import_user(member)
-
 
 @client.event
 async def on_member_update(before, after):
@@ -117,7 +112,6 @@ async def on_member_update(before, after):
     if before.voice == after.voice:
         await import_user(after)
 
-
 # Startup
 
 
@@ -126,7 +120,6 @@ async def on_ready():
     print('Connected!')
     print('Username: ' + client.user.name)
     print('ID: ' + client.user.id)
-
 
 async def run_startup():
     await client.wait_until_ready()
@@ -144,8 +137,6 @@ async def run_startup():
     await update_messages()
     print("Finished importing messages")
 
-
-
 async def ensure_database_struct():
     try:
         await mongo_client.discord.create_collection("message_log")
@@ -154,9 +145,9 @@ async def ensure_database_struct():
     messages = mongo_client.discord.message_log
     message_index_info = await messages.index_information()
     missing_indexes = list({
-        "_id_", "message_id_1", "toxicity_1", "server_id_1", "channel_id_1",
-        "user_id_1", "date_1"
-    } - set(message_index_info.keys()))
+                               "_id_", "message_id_1", "toxicity_1", "server_id_1", "channel_id_1",
+                               "user_id_1", "date_1"
+                           } - set(message_index_info.keys()))
     for full_index_name in missing_indexes:
         if "message_id" in full_index_name:
             mongo_client.discord.message_log.create_index(
@@ -165,6 +156,28 @@ async def ensure_database_struct():
             mongo_client.discord.message_log.create_index(
                 full_index_name[:-2], background=True)
 
+    if "user_id_1" not in (await mongo_client.discord.userinfo.index_information()).keys():
+        try:
+            await mongo_client.discord.userinfo.create_index("user_id", unique=True)
+        except:
+            try:
+                duplicates= None
+                async for dup in mongo_client.discord.userinfo.aggregate([
+                    {"$group": {"_id": "user_id", "dups": {"$addToSet": "$_id"}, "count": {"$sum": 1}}},
+                    {"$match": {"count": {"$gt": 1}}}
+                ], allowDiskUse=True):
+                    duplicates = dup["dups"]
+
+                await mongo_client.discord.userinfo.delete_many({"_id":{"$in":duplicates}})
+
+
+
+                await mongo_client.discord.userinfo.create_index("user_id", unique=True)
+            except:
+                await relay(traceback.format_exc())
+                print(traceback.format_exc())
+
+        pass
 
 async def update_members():
     for server in client.servers:
@@ -175,18 +188,15 @@ async def update_members():
         for member in tqdm.tqdm(memberlist):
             await import_user(member)
 
-
 async def update_messages():
-
     newest = await mongo_client.discord.message_log.find_one(
         sort=[("date", pymongo.DESCENDING)], skip=50)
     datetime = dateparser.parse(newest["date"])
     for server in client.servers:
         for channel in server.channels:
             async for message in client.logs_from(
-                channel, after=datetime, limit=1000000):
+                    channel, after=datetime, limit=1000000):
                 await import_message(message)
-
 
 # Frontend
 
@@ -209,7 +219,6 @@ async def on_message(message_in):
     except:
         await relay("```py\n{}\n```".format(traceback.format_exc()))
 
-
 async def mention_to_id(command_list):
     new_command = []
     reg = re.compile(r"<[@#](!?)\d*>", re.IGNORECASE)
@@ -222,7 +231,6 @@ async def mention_to_id(command_list):
             id_chars = "".join(idmatch.findall(item))
             new_command.append(id_chars)
     return new_command
-
 
 async def perform_command(command, params, message_in):
     params = await mention_to_id(params)
@@ -285,9 +293,9 @@ async def perform_command(command, params, message_in):
 
     if command == "logs":
         output.append(await command_logs(params, {
-            "server": message_in.server,
+            "server" : message_in.server,
             "channel": message_in.channel,
-            "user": message_in.author
+            "user"   : message_in.author
         }))
 
     if command == "remindme":
@@ -303,7 +311,6 @@ async def perform_command(command, params, message_in):
         for item in output:
             await parse_output(item, message_in.channel)
 
-
 async def parse_output(output, context):
     if output[0] == "inplace":
         await send(destination=context, text=output[1], send_type=output[2])
@@ -313,7 +320,6 @@ async def parse_output(output, context):
             destination=client.get_channel("334043962094387201"),
             text=output[1],
             send_type=output[2])
-
 
 async def send(destination, text, send_type):
     if isinstance(destination, str):
@@ -352,7 +358,6 @@ async def send(destination, text, send_type):
         line = line.replace("<NL<", "\n")
         await client.send_message(destination, line)
 
-
 # Commands
 async def command_logs(params, context):
     try:
@@ -363,25 +368,24 @@ async def command_logs(params, context):
             return "relay", query, None
         filter = {}
         translate = {
-            "users": "user_id",
+            "users"   : "user_id",
             "channels": "channel_id",
-            "servers": "server_id"
+            "servers" : "server_id"
         }
         for key in query.keys():
             filter[translate[key]] = {"$in": query[key]}
         output_text = ""
         print(filter)
         async for doc in mongo_client.discord.message_log.find(
-            filter=filter,
-            sort=[("date", pymongo.DESCENDING)],
-            limit=int(params[0])):
+                filter=filter,
+                sort=[("date", pymongo.DESCENDING)],
+                limit=int(params[0])):
             output_text += await format_message_to_log(doc) + "\n"
 
         return config["logs"]["output"], "\n".join(
             utils_text.hastebin(output_text)), None
     except:
         return "relay", traceback.format_exc(), None
-
 
 async def log_query_parser(query, context):
     try:
@@ -404,7 +408,6 @@ async def log_query_parser(query, context):
         print(traceback.format_exc())
         return "Syntax not recognized. Proper syntax: %%logs 500 user 1111 2222 channel 3333 4444 5555 server 6666. \n Debug: ```py\n{}```".format(
             traceback.format_exc())
-
 
 async def command_query(params, message_in):
     if params[0] == "user":
@@ -486,7 +489,7 @@ async def command_query(params, message_in):
                 ]
                 role_list.append(new_entry)
             return config["query"]["roles"]["list"][
-                "output"], role_list, "rows"
+                       "output"], role_list, "rows"
         if params[1] == "members":
             role_members = await get_role_members(
                 await get_role(message_in.server, params[2]))
@@ -507,10 +510,9 @@ async def command_query(params, message_in):
         return config["query"]["emoji"]["output"], server_name, None
     if params[0] == "owner":
         return config["query"]["owner"][
-            "output"], message_in.server.owner.mention, "text"
+                   "output"], message_in.server.owner.mention, "text"
 
     pass
-
 
 async def command_avatar(params, message_in):
     if params[0] == "get":
@@ -526,7 +528,7 @@ async def command_avatar(params, message_in):
                     utils_file.relative_path(__file__,
                                              utils_file.relative_path(
                                                  __file__, "avatars/" +
-                                                 str(num)))):
+                                                         str(num)))):
                 num += 1
             filename = str(num)
         image_path = utils_file.relative_path(__file__,
@@ -535,7 +537,6 @@ async def command_avatar(params, message_in):
         with open(image_path, "rb") as ava:
             await client.edit_profile(
                 password=DISCORD_PASSWORD, avatar=ava.read())
-
 
 # IMGUR
 async def more_jpeg(url):
@@ -554,7 +555,6 @@ async def more_jpeg(url):
     config = {'album': None, 'name': 'Added JPEG!', 'title': 'Added JPEG!'}
     ret = imgur_client.upload_from_path(img_path, config=config, anon=True)
     return ret["link"], ratio
-
 
 # Output
 
@@ -577,7 +577,6 @@ async def serve_lfg(message_in):
         channel=message_in.channel)
     await client.delete_message(message_in)
 
-
 async def lfg_warner(found_message, warn_user, channel):
     lfg_text = (
         "You're probably looking for <#182420486582435840>, <#185665683009306625>, or <#177136656846028801>."
@@ -594,22 +593,20 @@ async def lfg_warner(found_message, warn_user, channel):
 
     await client.send_message(channel, lfg_text)
 
-
 # PERSPECTIVE
 async def perspective(text):
     analyze_request = {
-        'comment': {
+        'comment'            : {
             'text': text
         },
         'requestedAttributes': {
             'TOXICITY': {}
         },
-        'languages': ["en"]
+        'languages'          : ["en"]
     }
     response = perspective_api.comments().analyze(
         body=analyze_request).execute()
     return response["attributeScores"]["TOXICITY"]["summaryScore"]["value"]
-
 
 async def query_toxicity(params):
     if params[0] == "mosttox":
@@ -634,7 +631,7 @@ async def query_toxicity(params):
     if params[0] == "toxtop":
         cursor = mongo_client.discord.userinfo.aggregate([{
             "$match": {
-                "toxicity": {
+                "toxicity"      : {
                     "$exists": True
                 },
                 "toxicity_count": {
@@ -643,7 +640,7 @@ async def query_toxicity(params):
             }
         }, {
             "$project": {
-                "user_id": 1,
+                "user_id"         : 1,
                 "average_toxicity": {
                     "$divide": ["$toxicity", "$toxicity_count"]
                 }
@@ -654,7 +651,7 @@ async def query_toxicity(params):
             }
         }, {
             "$limit":
-            int(params[1])
+                int(params[1])
         }])
 
         info = []
@@ -662,7 +659,6 @@ async def query_toxicity(params):
             info.append((str(round(user_dict["average_toxicity"], 2)), " | ",
                          "<@!" + user_dict["user_id"] + ">"))
         return (info, "qrows")
-
 
 # API Wrappers
 
@@ -674,12 +670,10 @@ async def get_role_members(role) -> list:
             members.append(member)
     return members
 
-
 async def get_role(server, roleid):
     for x in server.roles:
         if x.id == roleid:
             return x
-
 
 # Database
 async def mess2log(message):
@@ -696,7 +690,6 @@ async def mess2log(message):
     #         name=nick,
     #         content=message.content)).replace("\n", r"[\n]")
 
-
 async def export_user(member_id):
     """
 
@@ -707,15 +700,14 @@ async def export_user(member_id):
             "user_id": member_id
         },
         projection={
-            "_id": False,
+            "_id"        : False,
             "mention_str": False,
             "avatar_urls": False,
-            "lfg_count": False
+            "lfg_count"  : False
         })
     if not userinfo:
         return None
     return userinfo
-
 
 async def import_user(member):
     user_info = await utils_parse.parse_member_info(member)
@@ -724,23 +716,22 @@ async def import_user(member):
             "user_id": member.id
         }, {
             "$addToSet": {
-                "nicks": {
+                "nicks"                                   : {
                     "$each": [
                         user_info["nick"], user_info["name"],
                         user_info["name"] + "#" + str(user_info["discrim"])
                     ]
                 },
-                "names": user_info["name"],
+                "names"                                   : user_info["name"],
                 "server_joins.{}".format(member.server.id):
-                user_info["joined_at"]
+                    user_info["joined_at"]
             },
-            "$set": {
+            "$set"     : {
                 "mention_str": user_info["mention_str"],
-                "created_at": user_info["created_at"]
+                "created_at" : user_info["created_at"]
             },
         },
         upsert=True)
-
 
 async def import_message(mess):
     messInfo = await utils_parse.parse_message_info(mess)
@@ -752,14 +743,13 @@ async def import_message(mess):
         await mongo_client.discord.message_log.insert_one(messInfo)
         await mongo_client.discord.userinfo.update_one({
             "user_id":
-            messInfo["user_id"]
+                messInfo["user_id"]
         }, {"$inc": {
-            "toxicity": toxicity,
+            "toxicity"      : toxicity,
             "toxicity_count": 1
         }})
     except:
         pass
-
 
 async def import_to_user_set(member, set_name, entry):
     await mongo_client.discord.userinfo.update_one({
@@ -767,7 +757,6 @@ async def import_to_user_set(member, set_name, entry):
     }, {"$addToSet": {
         set_name: entry
     }})
-
 
 async def import_to_server_user_set(member, server, set_name, entry):
     await mongo_client.discord.userinfo.update_one({
@@ -778,14 +767,13 @@ async def import_to_server_user_set(member, server, set_name, entry):
         }
     }})
 
-
 # Logging
 
 
 async def format_message_to_log(message_dict):
     cursor = await mongo_client.discord.userinfo.find_one({
         "user_id":
-        message_dict["user_id"]
+            message_dict["user_id"]
     })
     try:
         name = cursor["names"][-1]
@@ -795,7 +783,7 @@ async def format_message_to_log(message_dict):
         try:
             cursor = await mongo_client.discord.userinfo.find_one({
                 "user_id":
-                message_dict["user_id"]
+                    message_dict["user_id"]
             })
             name = cursor["names"][-1]
         except:
@@ -816,12 +804,11 @@ async def format_message_to_log(message_dict):
             server_name = "Unknown"
         return unidecode(
             "[{}][{}][{}][{}]: {}".format(server_name, message_dict["date"][
-                2:-7], channel_name, name, content))
+                                                       2:-7], channel_name, name, content))
 
     except:
         print(traceback.format_exc())
         return "Errored Message : " + str(message_dict)
-
 
 # Utilities
 async def find_user(matching_ident,
@@ -880,7 +867,6 @@ async def find_user(matching_ident,
                 user_id=user_id, name=ident, mention="<@!{}>".format(user_id))
     return (output, None)
 
-
 async def find_message(message, regex, num_to_search=20):
     """
 
@@ -902,7 +888,6 @@ async def find_message(message, regex, num_to_search=20):
                 return found_message
     return found_message
 
-
 async def remind_me(time, message):
     try:
         time = await utils_text.parse_time_to_end(" ".join(command_list[1:]))
@@ -914,13 +899,11 @@ async def remind_me(time, message):
     except:
         await relay(traceback.format_exc())
 
-
 async def relay(text):
     await send(
         destination=client.get_channel("334043962094387201"),
         text=text,
         send_type=None)
-
 
 class Unbuffered(object):
     def __init__(self, stream):
@@ -933,9 +916,7 @@ class Unbuffered(object):
     def __getattr__(self, attr):
         return getattr(self.stream, attr)
 
-
 import sys
-
 
 sys.stdout = Unbuffered(sys.stdout)
 

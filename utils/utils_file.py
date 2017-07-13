@@ -1,4 +1,5 @@
 import subprocess
+import pickle
 def delete_lines(file, count):
     with open(file, "r") as lines:
         data = lines.readlines()
@@ -46,3 +47,13 @@ def relative_path(file,relative):
     import os
     print(os.path.dirname(file))
     return os.path.join(os.path.dirname(file), relative)
+
+def pickle_file(data, filename):
+    with open(filename + ".pickle", "wb") as f:
+        pickle.dump(data, f)
+
+
+def unpickle_file(filename):
+    with open(filename + ".pickle", 'rb') as f:
+        data = pickle.load(f)
+    return data

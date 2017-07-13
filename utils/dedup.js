@@ -1,10 +1,10 @@
-
+function run{
 var duplicates = [];
 
 db.runCommand(
   {aggregate: "message_log",
     pipeline: [
-      { $group: { _id: "$message_id", dups: { "$addToSet": "$_id" }, count: { "$sum": 1 } }},
+      { $group: { _id: "user_id", dups: { "$addToSet": "$_id" }, count: { "$sum": 1 } }},
       { $match: { count: { "$gt": 1 }}}
     ],
     allowDiskUse: true }
@@ -15,3 +15,4 @@ db.runCommand(
 });
 
 db.message_log.remove({_id:{$in:duplicates}});
+}

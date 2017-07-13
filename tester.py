@@ -1,11 +1,27 @@
-# from pymongo import MongoClient
-# import pymongo
-# import TOKENS
+from pymongo import MongoClient
+import pymongo
+import TOKENS
+
+c = MongoClient(
+    "mongodb://{usn}:{pwd}@nadir.space".format(
+        usn=TOKENS.MONGO_USN, pwd=TOKENS.MONGO_PASS)
+)
+count = 0
+
+# for dup in c.discord.userinfo.aggregate([
+#     {"$group": {"_id": "user_id", "dups": {"$addToSet": "$_id"}, "count": {"$sum": 1}}},
+#     {"$match": {"count": {"$gt": 1}}}
+# ], allowDiskUse=True):
+#     duplicates = dup["dups"]
 #
-# c = MongoClient(
-#     "mongodb://{usn}:{pwd}@nadir.space".format(
-#         usn=TOKENS.MONGO_USN, pwd=TOKENS.MONGO_PASS)
-# )
+from utils import utils_file
+
+# utils_file.pickle_file(duplicates, "dups")
+duplicates = utils_file.unpickle_file("dups")
+
+for dup in duplicates:
+    print(dup)
+
 
 # d = {"_id_"        : {"ns": "overwatch.message_log", "v": 1, "key": [("_id", 1)]},
 #  "message_id_1": {"v": 1, "unique": True, "key": [("message_id", 1.0)], "ns": "overwatch.message_log"},
@@ -63,5 +79,5 @@
 #
 # client.run(tok, bot=True)
 
-import pip
-print(pip.get_installed_distributions())
+# import pip
+# print(pip.get_installed_distributions())
