@@ -530,6 +530,7 @@ async def command_query(params, message_in):
                 output.append((config["query"]["user"]["dump"], dict2rows(user_dict["bans"])))
             if "unbans" in user_dict.keys():
                 output.append((config["query"]["user"]["dump"], dict2rows(user_dict["unbans"])))
+            print(output)
             return output
 
 
