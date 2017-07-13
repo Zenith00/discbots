@@ -538,8 +538,15 @@ async def command_avatar(params, message_in):
             filename = str(num)
         image_path = utils_file.relative_path(__file__,
                                               "avatars/" + filename + ".png")
+
         image.save(image_path, "PNG")
         with open(image_path, "rb") as ava:
+            await client.edit_profile(
+                password=DISCORD_PASSWORD, avatar=ava.read())
+    if params[0] == "set":
+        with open(
+                utils_file.relative_path(
+                    __file__, "avatars/" + params[1]), "rb") as ava:
             await client.edit_profile(
                 password=DISCORD_PASSWORD, avatar=ava.read())
 
