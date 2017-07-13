@@ -221,12 +221,15 @@ async def on_message(message_in):
             await perform_command(
                 command=command, params=params, message_in=message_in)
         if message_in.channel.id == "334524545077870592" and message_in.author.id == "193000443981463552":
-            for word in message_in.content:
-                if word.startswith("package!!"):
-                    package = word.replace("package!!", "")
-                    pip.main(["install", package])
-            g = git.cmd.Git(utils_file.directory_path(__file__))
-            g.pull()
+            try:
+                for word in message_in.content:
+                    if word.startswith("package!!"):
+                        package = word.replace("package!!", "")
+                        pip.main(["install", package])
+                g = git.cmd.Git(utils_file.directory_path(__file__))
+                g.pull()
+            except:
+                await trace(traceback.format_exc())
 
 
 
