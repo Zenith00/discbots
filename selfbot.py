@@ -535,22 +535,22 @@ async def command_query(params, message_in):
                 print(output)
 
                 if "server_joins" in user_dict.keys():
-                    base = ["Server Joins",""]
+                    base = [["Server Joins",""]]
                     output.append([config["query"]["user"]["dump"], base.extend(dict2rows(user_dict["server_joins"])), "rows"])
                     print(output)
 
                 if "server_leaves" in user_dict.keys():
-                    base = ["Server Leaves",""]
+                    base = [["Server Leaves",""]]
                     output.append([config["query"]["user"]["dump"], base.extend(dict2rows(user_dict["server_leaves"])), "rows"])
                     print(output)
 
                 if "bans" in user_dict.keys():
-                    base = ["Server Bans",""]
+                    base = [["Server Bans",""]]
                     output.append([config["query"]["user"]["dump"], base.extend(dict2rows(user_dict["bans"])), "rows"])
                     print(output)
 
                 if "unbans" in user_dict.keys():
-                    base = ["Server Unbans",""]
+                    base = [["Server Unbans",""]]
                     output.append([config["query"]["user"]["dump"], base.extend(dict2rows(user_dict["unbans"])), "rows"])
                     print(output)
 
