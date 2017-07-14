@@ -139,9 +139,9 @@ async def run_startup():
     print("Finished importing messages")
 
 async def ensure_database_struct():
-    if "message_log" not in mongo_client.discord.collection_names():
+    if "message_log" not in await mongo_client.discord.collection_names():
         await mongo_client.discord.create_collection("message_log")
-    if "tags" not in mongo_client.discord.collection_names():
+    if "tags" not in await mongo_client.discord.collection_names():
         await mongo_client.discord.create_collection("tags")
 
     messages = mongo_client.discord.message_log
