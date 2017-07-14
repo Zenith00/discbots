@@ -499,7 +499,7 @@ async def command_query(params, message_in):
                 user_dict = await export_user(params[2])
                 user_dict = utils_text.remove_none(user_dict)
                 print(user_dict)
-                await trace("```py\n"+user_dict+"```")
+                await trace("```py\n" + str(user_dict) + "\n```")
                 target = message_in.server.get_member(params[2])
                 if target:
                     name = target.name
@@ -514,28 +514,28 @@ async def command_query(params, message_in):
                         discrim=str(discrim)),
                     type="rich")
                 embed.add_field(
-                    name = "Creation",
-                    value = user_dict["created_at"],
+                    name="Creation",
+                    value=user_dict["created_at"],
                     inline=True
                 )
                 embed.add_field(
-                    name = "Nicks",
-                    value = user_dict["nicks"],
+                    name="Nicks",
+                    value=user_dict["nicks"],
                     inline=False
                 )
                 embed.add_field(
-                    name = "Names",
-                    value = user_dict["names"],
+                    name="Names",
+                    value=user_dict["names"],
                     inline=False
                 )
                 output = []
                 output.append((config["query"]["user"]["dump"], embed, "embed"))
                 list_of_rows = []
 
-                print("!"*20)
+                print("!" * 20)
 
                 if "server_joins" in user_dict.keys():
-                    base = [["Server Joins","--"]]
+                    base = [["Server Joins", "--"]]
                     named_dict = {}
                     for key in user_dict["server_joins"].keys():
                         if client.get_server(key):
@@ -547,7 +547,7 @@ async def command_query(params, message_in):
                     # print(output)
 
                 if "server_leaves" in user_dict.keys():
-                    base = [["Server Leaves","--"]]
+                    base = [["Server Leaves", "--"]]
                     named_dict = {}
                     for key in user_dict["server_leaves"].keys():
                         if client.get_server(key):
@@ -559,7 +559,7 @@ async def command_query(params, message_in):
                     # print(output)
 
                 if "bans" in user_dict.keys():
-                    base = [["Server Bans","--"]]
+                    base = [["Server Bans", "--"]]
                     named_dict = {}
                     for key in user_dict["bans"].keys():
                         if client.get_server(key):
@@ -571,7 +571,7 @@ async def command_query(params, message_in):
                     # print(output)
 
                 if "unbans" in user_dict.keys():
-                    base = [["Server Unbans","--"]]
+                    base = [["Server Unbans", "--"]]
                     named_dict = {}
                     for key in user_dict["unbans"].keys():
                         if client.get_server(key):
@@ -584,7 +584,6 @@ async def command_query(params, message_in):
 
                 # print(output)
                 return output
-
 
         if params[0] == "roles":
             if params[1] == "list":
@@ -599,7 +598,7 @@ async def command_query(params, message_in):
                     ]
                     role_list.append(new_entry)
                 return [(config["query"]["roles"]["list"][
-                           "output"], role_list, "rows")]
+                             "output"], role_list, "rows")]
 
             if params[1] == "members":
                 role_members = await get_role_members(
@@ -624,8 +623,6 @@ async def command_query(params, message_in):
 
     except:
         await trace(traceback.format_exc())
-
-
 
 async def command_avatar(params, message_in):
     if params[0] == "get":
@@ -1005,8 +1002,6 @@ async def find_message(message, regex, num_to_search=20):
                 found_message = messageCheck
                 return found_message
     return found_message
-
-
 
 async def relay(text):
     await send(
