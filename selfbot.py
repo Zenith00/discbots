@@ -283,6 +283,8 @@ async def perform_command(command, params, message_in):
         pass
     output = []
     print("BASE PARAMS: " + str(params))
+    if command == "tag":
+        output.extend(await command_tag(params, message_in))
     if command == "query":
         output.extend(await command_query(params, message_in))
     if command == "find":
@@ -315,6 +317,7 @@ async def perform_command(command, params, message_in):
         output.extend(("inplace", big_text, "text"))
     if command == "ava":
         await command_avatar(params, message_in)
+
 
     # Requires IMGUR
     if command == "jpeg":
@@ -670,9 +673,7 @@ async def command_avatar(params, message_in):
             await client.edit_profile(
                 password=DISCORD_PASSWORD, avatar=ava.read())
     if params[0] == "set":
-        with open(
-                utils_file.relative_path(
-                    __file__, "avatars/" + params[1] + ".png"), "rb") as ava:
+        with open(os.path.join(os.path.dirname(__file__), "avatars", params[1] + ".png"), "rb") as ava:
             await client.edit_profile(
                 password=DISCORD_PASSWORD, avatar=ava.read())
 
