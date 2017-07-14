@@ -232,7 +232,8 @@ async def on_message(message_in):
                     else:
                         expanded_list.append(word)
                 if set(expanded_list) != set(base_list):
-                    await client.edit_message(message_in, " ".join(expanded_list))
+                    if not message_in.content.startswith(config["prefix"]["command"]):
+                        await client.edit_message(message_in, " ".join(expanded_list))
                     message_in.content = " ".join(expanded_list)
 
             if message_in.content.startswith(config["prefix"]["command"]):
@@ -685,16 +686,19 @@ async def command_tag(params, message_in):
         tag_str = params[1]
         expansion = " ".join(params[2:])
         await mongo_client.discord.tags.update_one({"tag":tag_str},{"$set":{"expansion": expansion}}, upsert=True)
-        await relay("Set {}`{}`\n to expand to \n ```\n{}\n```".format(config["prefix"]["tag"], tag_str, expansion))
+        await relay("Set `{}{}`\n to expand to \n ```\n{}\n```".format(config["prefix"]["tag"], tag_str, expansion))
     if params[0] == "list":
         tags = {}
         async for doc in mongo_client.discord.tags.find({}):
             tags[doc["tag"]] = doc["expansion"]
-        await relay(dict2rows(tags), "rows")
-    if params[0] == "remove":
+        if tags:
+            await relay(dict2rows(tags), "rows")
+        else:
+            await relay("No tags")
+    if params[0] == "unset":
         res = await mongo_client.discord.tags.find_one_and_delete({"tag":params[1]})
         if res:
-            await relay("Unset {}`{}`\n expanding to \n ```\n{}\n```".format(config["prefix"]["tag"], res["tag"], res["expansion"]))
+            await relay("Unset `{}{}`\n expanding to \n ```\n{}\n```".format(config["prefix"]["tag"], res["tag"], res["expansion"]))
         else:
             await relay("Tag not found")
 # IMGUR
