@@ -75,8 +75,8 @@ def multi_column(list_of_list_of_rows, left_just):
 def multi_block(list_of_rows, left_just):
     test_list = []
     final_list = []
+
     for row in list_of_rows:
-        row = remove_none(row)
 
         old_list = copy.deepcopy(test_list)
         test_list.append(row)
@@ -204,5 +204,8 @@ def hastebin(text):
     results = [requests.post(url, text) for text in blocks]
     print(results)
     return ["https://hastebin.com/" + json.loads(response.text)["key"] for response in results]
+
 def dict2rows(in_dict):
     return [(k, str(v)) for k, v in in_dict.items()]
+
+
