@@ -533,22 +533,22 @@ async def command_query(params, message_in):
                 list_of_rows = []
                 print(list_of_rows)
                 print(output)
+
                 if "server_joins" in user_dict.keys():
-                    list_of_rows.append(dict2rows(user_dict["server_joins"]))
+                    base = ["Server Joins",""]
+                    output.append((config["query"]["user"]["dump"], base + dict2rows(user_dict["server_joins"]), "rows"))
                 if "server_leaves" in user_dict.keys():
-                    list_of_rows.append(dict2rows(user_dict["server_leaves"]))
+                    base = ["Server Leaves",""]
+
+                    output.append((config["query"]["user"]["dump"], base + dict2rows(user_dict["server_leaves"]), "rows"))
                 if "bans" in user_dict.keys():
-                    list_of_rows.append(dict2rows(user_dict["bans"]))
+                    base = ["Server Bans",""]
+
+                    output.append((config["query"]["user"]["dump"], base + dict2rows(user_dict["bans"]), "rows"))
                 if "unbans" in user_dict.keys():
-                    list_of_rows.append(dict2rows(user_dict["unbans"]))
-                if list_of_rows:
-                    print("ROWS")
-                    for rows in list_of_rows:
-                        named_rows = []
-                        for row in rows:
-                            named_rows.append([client.get_server(row[0]).name, row[1]])
-                        print(named_rows)
-                        output.append((config["query"]["user"]["dump"], copy.deepcopy(named_rows), "rows"))
+                    base = ["Server Unbans",""]
+                    output.append((config["query"]["user"]["dump"], base + dict2rows(user_dict["unbans"]), "rows"))
+
                 print(output)
                 return output
 
