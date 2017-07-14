@@ -1,3 +1,4 @@
+import logging
 import traceback
 
 import discord
@@ -5,6 +6,7 @@ import TOKENS
 
 
 client = discord.Client()
+logging.basicConfig(level=logging.INFO)
 
 
 @client.event
