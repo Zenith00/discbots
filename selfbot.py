@@ -543,9 +543,9 @@ async def command_query(params, message_in):
                     for rows in list_of_rows:
                         named_rows = []
                         for row in rows:
-                            temprow = copy.deepcopy(row)
-                            named_rows.append([client.get_server(temprow[0]).name, temprow[1]])
-                        output.append((config["query"]["user"]["dump"], named_rows, "rows"))
+                            named_rows.append([client.get_server(row[0]).name, row[1]])
+                        output.append((config["query"]["user"]["dump"], copy.deepcopy(named_rows), "rows"))
+                print(output)
                 return output
 
 
