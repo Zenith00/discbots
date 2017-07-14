@@ -530,7 +530,6 @@ async def command_query(params, message_in):
                 )
                 output = []
                 output.append((config["query"]["user"]["dump"], embed, "embed"))
-                rows = None
                 list_of_rows = []
                 if "server_joins" in user_dict.keys():
                     list_of_rows.append(dict2rows(user_dict["server_joins"]))
@@ -540,7 +539,7 @@ async def command_query(params, message_in):
                     list_of_rows.append(dict2rows(user_dict["bans"]))
                 if "unbans" in user_dict.keys():
                     list_of_rows.append(dict2rows(user_dict["unbans"]))
-                if rows:
+                if list_of_rows:
                     for rows in list_of_rows:
                         named_rows = []
                         for row in rows:
