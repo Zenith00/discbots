@@ -219,20 +219,21 @@ async def on_message(message_in):
     await mess2log(message_in)
     try:
         if message_in.author.id == client.user.id:
-            base_list = message_in.content.split(" ")
-            expanded_list = []
-            for word in base_list:
-                if word.startswith(config["prefix"]["tag"]):
-                    res = await mongo_client.discord.tags.find_one({"tag":word[2:]})
-                    if res:
-                        expanded_list.append(res["expansion"])
+            if message_in.channel.id != "334043962094387201":
+                base_list = message_in.content.split(" ")
+                expanded_list = []
+                for word in base_list:
+                    if word.startswith(config["prefix"]["tag"]):
+                        res = await mongo_client.discord.tags.find_one({"tag":word[2:]})
+                        if res:
+                            expanded_list.append(res["expansion"])
+                        else:
+                            await relay("Ignored unset tag call `{}`".format(word))
                     else:
-                        await relay("Ignored unset tag call `{}`".format(word))
-                else:
-                    expanded_list.append(word)
-            if set(expanded_list) != set(base_list):
-                await client.edit_message(message_in, " ".join(expanded_list))
-                message_in.content = " ".join(expanded_list)
+                        expanded_list.append(word)
+                if set(expanded_list) != set(base_list):
+                    await client.edit_message(message_in, " ".join(expanded_list))
+                    message_in.content = " ".join(expanded_list)
 
             if message_in.content.startswith(config["prefix"]["command"]):
                 full_command = message_in.content.replace(
