@@ -537,7 +537,7 @@ async def command_query(params, message_in):
                 if "server_joins" in user_dict.keys():
                     base = ["Server Joins",""]
                     print(output)
-                    output.append([config["query"]["user"]["dump"], base + dict2rows(user_dict["server_joins"]), "rows"})
+                    output.append([config["query"]["user"]["dump"], base + dict2rows(user_dict["server_joins"]), "rows"])
                 if "server_leaves" in user_dict.keys():
                     print(output)
                     base = ["Server Leaves",""]
@@ -577,7 +577,6 @@ async def command_query(params, message_in):
                     [member.mention for member in role_members])
                 return [(config["query"]["roles"]["members"]["output"], output, None)]
         if params[0] == "emoji":
-
             import re
             emoji_id = utils_text.regex_test("\d+(?=>)",
                                              " ".join(params[1:])).group(0)
@@ -589,12 +588,13 @@ async def command_query(params, message_in):
                     break
             return [(config["query"]["emoji"]["output"], server_name, None)]
         if params[0] == "owner":
-            return [(config["query"]["owner"][
-                       "output"], message_in.server.owner.mention, "text")]
+            return [(config["query"]["owner"]["output"], message_in.server.owner.mention, "text")]
+
+
     except:
         await trace(traceback.format_exc())
 
-    pass
+
 
 async def command_avatar(params, message_in):
     if params[0] == "get":
