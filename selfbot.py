@@ -683,7 +683,7 @@ async def command_tag(params, message_in):
     if params[0] == "set":
         tag_str = params[1]
         expansion = " ".join(params[2:])
-        await mongo_client.discord.tags.update_one({"tag":tag_str},{"expansion": expansion}, upsert=True)
+        await mongo_client.discord.tags.update_one({"tag":tag_str},{"$set":{"expansion": expansion}}, upsert=True)
         await relay("Set {}`{}`\n to expand to \n ```\n{}\n```".format(config["prefix"]["tag"], tag_str, expansion))
     if params[0] == "list":
         tags = {}
