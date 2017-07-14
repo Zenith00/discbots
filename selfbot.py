@@ -537,7 +537,10 @@ async def command_query(params, message_in):
                     base = [["Server Joins",""]]
                     named_dict = {}
                     for key in user_dict["server_joins"].keys():
-                        named_dict[client.get_server(key).name] = user_dict["server_joins"][key]
+                        if client.get_server(key):
+                            named_dict[client.get_server(key).name] = user_dict["server_joins"][key]
+                        else:
+                            print(key)
                     base.extend(dict2rows(named_dict))
                     output.append([config["query"]["user"]["dump"], base, "rows"])
                     print(output)
@@ -546,7 +549,10 @@ async def command_query(params, message_in):
                     base = [["Server Leaves",""]]
                     named_dict = {}
                     for key in user_dict["server_leaves"].keys():
-                        named_dict[client.get_server(key).name] = user_dict["server_leaves"][key]
+                        if client.get_server(key):
+                            named_dict[client.get_server(key).name] = user_dict["server_leaves"][key]
+                        else:
+                            print(key)
                     base.extend(dict2rows(named_dict))
                     output.append([config["query"]["user"]["dump"], base, "rows"])
                     print(output)
@@ -555,7 +561,10 @@ async def command_query(params, message_in):
                     base = [["Server Bans",""]]
                     named_dict = {}
                     for key in user_dict["bans"].keys():
-                        named_dict[client.get_server(key).name] = user_dict["bans"][key]
+                        if client.get_server(key):
+                            named_dict[client.get_server(key).name] = user_dict["bans"][key]
+                        else:
+                            print(key)
                     base.extend(dict2rows(named_dict))
                     output.append([config["query"]["user"]["dump"], base, "rows"])
                     print(output)
@@ -564,7 +573,10 @@ async def command_query(params, message_in):
                     base = [["Server Unbans",""]]
                     named_dict = {}
                     for key in user_dict["unbans"].keys():
-                        named_dict[client.get_server(key).name] = user_dict["unbans"][key]
+                        if client.get_server(key):
+                            named_dict[client.get_server(key).name] = user_dict["unbans"][key]
+                        else:
+                            print(key)
                     base.extend(dict2rows(named_dict))
                     output.append([config["query"]["user"]["dump"], base, "rows"])
                     print(output)
