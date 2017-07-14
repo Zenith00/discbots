@@ -536,25 +536,37 @@ async def command_query(params, message_in):
 
                 if "server_joins" in user_dict.keys():
                     base = [["Server Joins",""]]
-                    base.extend(dict2rows(user_dict["server_joins"]))
+                    named_dict = {}
+                    for key in user_dict["server_joins"].keys():
+                        named_dict[client.get_server(key).name] = user_dict["server_joins"][key]
+                    base.extend(dict2rows(named_dict))
                     output.append([config["query"]["user"]["dump"], base, "rows"])
                     print(output)
 
                 if "server_leaves" in user_dict.keys():
                     base = [["Server Leaves",""]]
-                    base.extend(dict2rows(user_dict["server_leaves"]))
+                    named_dict = {}
+                    for key in user_dict["server_leaves"].keys():
+                        named_dict[client.get_server(key).name] = user_dict["server_leaves"][key]
+                    base.extend(dict2rows(named_dict))
                     output.append([config["query"]["user"]["dump"], base, "rows"])
                     print(output)
 
                 if "bans" in user_dict.keys():
                     base = [["Server Bans",""]]
-                    base.extend(dict2rows(user_dict["bans"]))
+                    named_dict = {}
+                    for key in user_dict["bans"].keys():
+                        named_dict[client.get_server(key).name] = user_dict["bans"][key]
+                    base.extend(dict2rows(named_dict))
                     output.append([config["query"]["user"]["dump"], base, "rows"])
                     print(output)
 
                 if "unbans" in user_dict.keys():
                     base = [["Server Unbans",""]]
-                    base.extend(dict2rows(user_dict["unbans"]))
+                    named_dict = {}
+                    for key in user_dict["unbans"].keys():
+                        named_dict[client.get_server(key).name] = user_dict["unbans"][key]
+                    base.extend(dict2rows(named_dict))
                     output.append([config["query"]["user"]["dump"], base, "rows"])
                     print(output)
 
