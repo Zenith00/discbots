@@ -1,5 +1,6 @@
 # from . import compat
 import asyncio
+import copy
 import heapq
 import logging
 import os
@@ -529,16 +530,23 @@ async def command_query(params, message_in):
                 )
                 output = []
                 output.append((config["query"]["user"]["dump"], embed, "embed"))
-
+                rows = None
+                list_of_rows = []
                 if "server_joins" in user_dict.keys():
-                    output.append((config["query"]["user"]["dump"], dict2rows(user_dict["server_joins"]), "rows"))
+                    list_of_rows.append(dict2rows(user_dict["server_joins"]))
                 if "server_leaves" in user_dict.keys():
-                    output.append((config["query"]["user"]["dump"], dict2rows(user_dict["server_leaves"]), "rows"))
+                    list_of_rows.append(dict2rows(user_dict["server_leaves"]))
                 if "bans" in user_dict.keys():
-                    output.append((config["query"]["user"]["dump"], dict2rows(user_dict["bans"]), "rows"))
+                    list_of_rows.append(dict2rows(user_dict["bans"]))
                 if "unbans" in user_dict.keys():
-                    output.append((config["query"]["user"]["dump"], dict2rows(user_dict["unbans"]), "rows"))
-                print(output)
+                    list_of_rows.append(dict2rows(user_dict["unbans"]))
+                if rows:
+                    for rows in list_of_rows:
+                        named_rows = []
+                        for row in rows:
+                            temprow = copy.deepcopy(row)
+                            named_rows.append([client.get_server(temprow[0]).name, temprow[1]])
+                        output.append((config["query"]["user"]["dump"], named_rows, "rows"))
                 return output
 
 
