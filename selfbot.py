@@ -534,7 +534,7 @@ async def command_query(params, message_in):
                 print("!"*20)
 
                 if "server_joins" in user_dict.keys():
-                    base = [["Server Joins",""]]
+                    base = [["Server Joins","--"]]
                     named_dict = {}
                     for key in user_dict["server_joins"].keys():
                         if client.get_server(key):
@@ -546,7 +546,7 @@ async def command_query(params, message_in):
                     print(output)
 
                 if "server_leaves" in user_dict.keys():
-                    base = [["Server Leaves",""]]
+                    base = [["Server Leaves","--"]]
                     named_dict = {}
                     for key in user_dict["server_leaves"].keys():
                         if client.get_server(key):
@@ -558,7 +558,7 @@ async def command_query(params, message_in):
                     print(output)
 
                 if "bans" in user_dict.keys():
-                    base = [["Server Bans",""]]
+                    base = [["Server Bans","--"]]
                     named_dict = {}
                     for key in user_dict["bans"].keys():
                         if client.get_server(key):
@@ -570,7 +570,7 @@ async def command_query(params, message_in):
                     print(output)
 
                 if "unbans" in user_dict.keys():
-                    base = [["Server Unbans",""]]
+                    base = [["Server Unbans","--"]]
                     named_dict = {}
                     for key in user_dict["unbans"].keys():
                         if client.get_server(key):
