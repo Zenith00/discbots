@@ -139,10 +139,11 @@ async def run_startup():
     print("Finished importing messages")
 
 async def ensure_database_struct():
-    try:
+    if "message_log" not in mongo_client.discord.collection_names():
         await mongo_client.discord.create_collection("message_log")
-    except:
-        pass
+    if "tags" not in mongo_client.discord.collection_names():
+        await mongo_client.discord.create_collection("tags")
+
     messages = mongo_client.discord.message_log
     message_index_info = await messages.index_information()
     missing_indexes = list({
@@ -184,7 +185,13 @@ async def ensure_database_struct():
                 print(traceback.format_exc())
 
         pass
-    await mongo_client.discord.userinfo.update_many({}, {"$pull":{"server_joins":None, "server_leaves":None, "bans":None, "unbans":None}})
+    if "tag_1" not in (await mongo_client.discord.tags.index_information()).keys():
+        try:
+            await mongo_client.discord.tags.create_index("tag", unique=True)
+        except:
+            await trace(traceback.format_exc())
+
+    # await mongo_client.discord.userinfo.update_many({}, {"$pull": {"server_joins": None, "server_leaves": None, "bans": None, "unbans": None}})
 
 async def update_members():
     for server in client.servers:
@@ -206,7 +213,6 @@ async def update_messages():
                 await import_message(message)
 
 # Frontend
-
 
 @client.event
 async def on_message(message_in):
@@ -230,7 +236,6 @@ async def on_message(message_in):
                         pip.main(["install", package])
                 g = git.cmd.Git(utils_file.directory_path(__file__))
                 res = g.pull()
-                await trace(str(res))
             except:
                 await trace(traceback.format_exc())
 
@@ -653,6 +658,25 @@ async def command_avatar(params, message_in):
             await client.edit_profile(
                 password=DISCORD_PASSWORD, avatar=ava.read())
 
+async def command_tag(params, message_in):
+    pass
+
+    if params[0] == "set":
+        tag_str = params[1]
+        expansion = " ".join(params[2:])
+        await mongo_client.discord.tags.update_one({"tag":tag_str},{"expansion": expansion}, upsert=True)
+        await relay("Set {}`{}`\n to expand to \n ```\n{}\n```".format(config["prefix"]["tag"], tag_str, expansion))
+    if params[0] == "list":
+        tags = {}
+        async for doc in mongo_client.discord.tags.find({}):
+            tags[doc["tag"]] = doc["expansion"]
+        await relay(dict2rows(tags), "rows")
+    if params[0] == "remove":
+        res = await mongo_client.discord.tags.find_one_and_delete({"tag":params[1]})
+        if res:
+            await relay("Unset {}`{}`\n expanding to \n ```\n{}\n```".format(config["prefix"]["tag"], res["tag"], res["expansion"]))
+        else:
+            await relay("Tag not found")
 # IMGUR
 async def more_jpeg(url):
     response = requests.get(url)
@@ -1001,11 +1025,11 @@ async def find_message(message, regex, num_to_search=20):
                 return found_message
     return found_message
 
-async def relay(text):
+async def relay(text, send_type=None):
     await send(
         destination=client.get_channel("334043962094387201"),
         text=text,
-        send_type=None)
+        send_type=send_type)
 
 async def trace(text):
     await client.send_message(client.get_channel("335171044014948352"), "```" + text + "```")
