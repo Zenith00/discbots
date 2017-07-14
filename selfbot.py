@@ -284,7 +284,7 @@ async def perform_command(command, params, message_in):
     output = []
     print("BASE PARAMS: " + str(params))
     if command == "tag":
-        output.extend(await command_tag(params, message_in))
+        await command_tag(params, message_in)
     if command == "query":
         output.extend(await command_query(params, message_in))
     if command == "find":
