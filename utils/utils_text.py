@@ -75,8 +75,9 @@ def multi_column(list_of_list_of_rows, left_just):
 def multi_block(list_of_rows, left_just):
     test_list = []
     final_list = []
-    list_of_rows = remove_none(list_of_rows)
     for row in list_of_rows:
+        row = remove_none(row)
+
         old_list = copy.deepcopy(test_list)
         test_list.append(row)
         text = pretty_column(test_list, left_just)
