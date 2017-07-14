@@ -531,6 +531,8 @@ async def command_query(params, message_in):
                 output = []
                 output.append((config["query"]["user"]["dump"], embed, "embed"))
                 list_of_rows = []
+                print(list_of_rows)
+                print(output)
                 if "server_joins" in user_dict.keys():
                     list_of_rows.append(dict2rows(user_dict["server_joins"]))
                 if "server_leaves" in user_dict.keys():
@@ -540,10 +542,12 @@ async def command_query(params, message_in):
                 if "unbans" in user_dict.keys():
                     list_of_rows.append(dict2rows(user_dict["unbans"]))
                 if list_of_rows:
+                    print("ROWS")
                     for rows in list_of_rows:
                         named_rows = []
                         for row in rows:
                             named_rows.append([client.get_server(row[0]).name, row[1]])
+                        print(named_rows)
                         output.append((config["query"]["user"]["dump"], copy.deepcopy(named_rows), "rows"))
                 print(output)
                 return output
