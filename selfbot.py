@@ -497,7 +497,7 @@ async def command_query(params, message_in):
             if params[1] == "dump":
                 print("dumping")
                 user_dict = await export_user(params[2])
-                print(user_dict)
+                print(user_dict.keys())
                 target = message_in.server.get_member(params[2])
                 if target:
                     name = target.name
@@ -516,8 +516,6 @@ async def command_query(params, message_in):
                     value = user_dict["created_at"],
                     inline=True
                 )
-                print(embed)
-                print(embed)
                 embed.add_field(
                     name = "Nicks",
                     value = user_dict["nicks"],
@@ -531,8 +529,9 @@ async def command_query(params, message_in):
                 output = []
                 output.append((config["query"]["user"]["dump"], embed, "embed"))
                 list_of_rows = []
-                print(list_of_rows)
+                print("*"*20)
                 print(output)
+                print("!"*20)
 
                 if "server_joins" in user_dict.keys():
                     base = [["Server Joins",""]]
