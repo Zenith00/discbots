@@ -634,20 +634,11 @@ async def command_query(params, message_in):
 async def command_avatar(params, message_in):
     if params[0] == "get":
         image = Image.open(BytesIO(requests.get(params[1]).content))
+        filename = params[2]
     if params[0] == "copy":
         image = Image.open(BytesIO(requests.get(message_in.server.get_member(params[1]).avatar_url).content))
+        filename = params[1]
     if params[0] in ["get", "copy"]:
-        if len(params) > 2:
-            filename = params[2]
-        else:
-            num = 0
-            while os.path.exists(
-                    utils_file.relative_path(__file__,
-                                             utils_file.relative_path(
-                                                 __file__, "avatars/" +
-                                                         str(num)))):
-                num += 1
-            filename = str(num)
         image_path = utils_file.relative_path(__file__,
                                               "avatars/" + filename + ".png")
 
