@@ -498,7 +498,7 @@ async def command_query(params, message_in):
                 print("dumping")
                 user_dict = await export_user(params[2])
                 user_dict = utils_text.remove_none(user_dict)
-                print(user_dict.keys())
+                print(user_dict)
                 target = message_in.server.get_member(params[2])
                 if target:
                     name = target.name
@@ -530,8 +530,7 @@ async def command_query(params, message_in):
                 output = []
                 output.append((config["query"]["user"]["dump"], embed, "embed"))
                 list_of_rows = []
-                print("*"*20)
-                print(output)
+
                 print("!"*20)
 
                 if "server_joins" in user_dict.keys():
@@ -544,7 +543,7 @@ async def command_query(params, message_in):
                             print(key)
                     base.extend(dict2rows(named_dict))
                     output.append([config["query"]["user"]["dump"], base, "rows"])
-                    print(output)
+                    # print(output)
 
                 if "server_leaves" in user_dict.keys():
                     base = [["Server Leaves","--"]]
@@ -556,7 +555,7 @@ async def command_query(params, message_in):
                             print(key)
                     base.extend(dict2rows(named_dict))
                     output.append([config["query"]["user"]["dump"], base, "rows"])
-                    print(output)
+                    # print(output)
 
                 if "bans" in user_dict.keys():
                     base = [["Server Bans","--"]]
@@ -568,7 +567,7 @@ async def command_query(params, message_in):
                             print(key)
                     base.extend(dict2rows(named_dict))
                     output.append([config["query"]["user"]["dump"], base, "rows"])
-                    print(output)
+                    # print(output)
 
                 if "unbans" in user_dict.keys():
                     base = [["Server Unbans","--"]]
@@ -580,9 +579,9 @@ async def command_query(params, message_in):
                             print(key)
                     base.extend(dict2rows(named_dict))
                     output.append([config["query"]["user"]["dump"], base, "rows"])
-                    print(output)
+                    # print(output)
 
-                print(output)
+                # print(output)
                 return output
 
 
