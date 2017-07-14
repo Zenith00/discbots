@@ -499,6 +499,7 @@ async def command_query(params, message_in):
                 user_dict = await export_user(params[2])
                 user_dict = utils_text.remove_none(user_dict)
                 print(user_dict)
+                await trace("```py\n"+user_dict+"```")
                 target = message_in.server.get_member(params[2])
                 if target:
                     name = target.name
