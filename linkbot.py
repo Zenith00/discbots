@@ -16,7 +16,7 @@ async def on_message(message_in):
             if len(message_in.embeds) > 0 and message_in.content:
                 await client.send_message(message_in.author, message_in.content, embed=discord.Embed().from_data(message_in.embeds[0]))
             elif len(message_in.embeds) > 0:
-                await client.send_message(message_in.author, embed=message_in.embeds[0])
+                await client.send_message(message_in.author, embed=discord.Embed().from_data(message_in.embeds[0]))
             elif message_in.content:
                 await client.send_message(message_in.author, message_in.content)
 
