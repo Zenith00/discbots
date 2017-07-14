@@ -184,6 +184,7 @@ async def ensure_database_struct():
                 print(traceback.format_exc())
 
         pass
+    await mongo_client.discord.userinfo.update_many({}, {"$pull":{"server_joins":None, "server_leaves":None, "bans":None, "unbans":None}})
 
 async def update_members():
     for server in client.servers:
@@ -539,7 +540,13 @@ async def command_query(params, message_in):
                     named_dict = {}
                     for key in user_dict["server_joins"].keys():
                         if client.get_server(key):
-                            named_dict[client.get_server(key).name] = user_dict["server_joins"][key]
+                            try:
+                                name = client.get_server(key).name
+                                if not name:
+                                    name = key
+                            except:
+                                name = key
+                            named_dict[name] = user_dict["server_joins"][key]
                         else:
                             print(key)
                     base.extend(dict2rows(named_dict))
