@@ -1,6 +1,7 @@
 import os
 import shutil
 import subprocess
+import traceback
 import urllib.request
 
 import pip
@@ -23,10 +24,12 @@ if __name__ == "__main__":
     try:
         if not os.path.isfile('config.py'):
             shutil.copy2('config_default.py', 'config.py')
+            print("Created config.py")
         if not os.path.isfile('TOKENS.py'):
+            print("Created TOKENS.py")
             shutil.copy2('TOKENS_DEFAULT.py', 'TOKENS.py')
     except:
-        pass
+        print(traceback.format_exc())
 
     try:
 
@@ -34,27 +37,28 @@ if __name__ == "__main__":
         with urllib.request.urlopen(url) as response, open("mongodb-win32-x86_64-2008plus-ssl-3.4.6-signed.msi", 'wb') as out_file:
             data = response.read()
             out_file.write(data)
+        print("Downloaded mongodb")
 
         flags = subprocess.CREATE_NEW_CONSOLE
         install_mongo = subprocess.Popen([r'powershell',
                                           '-ExecutionPolicy',
                                           'Unrestricted',
                                           './installmongo.ps1', ], creationflags=flags)
-
+        print("Installed mongodb...?")
         result = install_mongo.wait()
-    except Exception as e:
-        print(e)
+    except:
+        print(traceback.format_exc())
 
-    urllib.request.urlretrieve("https://dl.dropboxusercontent.com/content_link/lmkJksU3EH2LMtFg7HmphQ1Z3vOyeLJMZwNtHkmV5V10PxjeUTpzG1ZaaVCPHDCy/file?dl=1", "numpy-1.13.1+mkl-cp36-cp36m-win32.whl")
-    urllib.request.urlretrieve("https://dl.dropboxusercontent.com/content_link/KvmSlSHsLLb3T4SjjpYN5QCOo4xAnmUzL6YN70mA5nCXCQikOYtN272BBG75RyNN/file?dl=1", "Pillow-4.2.1-cp36-cp36m-win32.whl")
-    urllib.request.urlretrieve("https://dl.dropboxusercontent.com/content_link/3QK9nGjLEGyrvUgXIbyJD6JcGvpQGCPl9iz2FdyLPSd6ylbXdF1tEJzQfQUhd8li/file?dl=1", "python_Levenshtein-0.12.0-cp36-cp36m-win32.whl")
-    urllib.request.urlretrieve("https://dl.dropboxusercontent.com/content_link/M0dVXyWzNfyavcRgcH4qXMQkdaEsxi5bTfchF0CkxQbZd4CGbkrcxXPBtpX2oLFY/file?dl=1", "scipy-0.19.1-cp36-cp36m-win32.whl")
+    urllib.request.urlretrieve("https://www.dropbox.com/s/7sz2rzan8u74kw4/numpy-1.11.3%2Bmkl-cp36-cp36m-win32.whl?dl=1", "numpy-1.13.1+mkl-cp36-cp36m-win32.whl")
+    urllib.request.urlretrieve("https://www.dropbox.com/s/tm8r7sq00j9qe8c/Pillow-4.2.1-cp36-cp36m-win32.whl?dl=1", "Pillow-4.2.1-cp36-cp36m-win32.whl")
+    urllib.request.urlretrieve("https://www.dropbox.com/s/bdwknr7exzeytqt/python_Levenshtein-0.12.0-cp36-cp36m-win32.whl?dl=1", "python_Levenshtein-0.12.0-cp36-cp36m-win32.whl")
+    urllib.request.urlretrieve("https://www.dropbox.com/s/vfrzpycvugfyp4t/scipy-0.19.1-cp36-cp36m-win32.whl?dl=1", "scipy-0.19.1-cp36-cp36m-win32.whl")
 
-
+    print("")
     subprocess.call("python -m pip install {}".format(relative_path(__file__, "python_Levenshtein-0.12.0-cp36-cp36m-win32.whl")), cwd=os.path.dirname(os.path.abspath(__file__)), shell=True)
     subprocess.call("python -m pip install {}".format(relative_path(__file__, "Pillow-4.2.1-cp36-cp36m-win32.whl")), cwd=os.path.dirname(os.path.abspath(__file__)), shell=True)
-    # subprocess.call("python -m pip install {}".format(relative_path(__file__, "numpy-1.13.1+mkl-cp36-cp36m-win32.whl")), cwd=os.path.dirname(os.path.abspath(__file__)), shell=True)
     subprocess.call("python -m pip install {}".format(relative_path(__file__, "scipy-0.19.1-cp36-cp36m-win32.whl")), cwd=os.path.dirname(os.path.abspath(__file__)), shell=True)
+    # subprocess.call("python -m pip install {}".format(relative_path(__file__, "numpy-1.13.1+mkl-cp36-cp36m-win32.whl")), cwd=os.path.dirname(os.path.abspath(__file__)), shell=True)
 
     #
     # subprocess.call("python -m pip install python-Levenshtein --force-reinstall --use-wheel --no-index --find-links={}".format(relative_path(__file__, "python_Levenshtein-0.12.0-cp36-cp36m-win32.whl")), cwd=os.path.dirname(os.path.abspath(__file__)), shell=True)

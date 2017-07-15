@@ -1,26 +1,28 @@
+import urllib.request
+
 from pymongo import MongoClient
 import pymongo
 import TOKENS
 
-c = MongoClient(
-    "mongodb://{usn}:{pwd}@nadir.space".format(
-        usn=TOKENS.MONGO_USN, pwd=TOKENS.MONGO_PASS)
-)
-count = 0
-
-for dup in c.discord.userinfo.aggregate([
-    {"$group": {"_id": "user_id", "dups": {"$addToSet": "$_id"}, "count": {"$sum": 1}}},
-    {"$match": {"count": {"$gt": 1}}}
-], allowDiskUse=True):
-    print(dup)
-    duplicates = dup["dups"]
+# TOKENSc = MongoClient(
+#     "mongodb://{usn}:{pwd}@nadir.space".format(
+#         usn=TOKENS.MONGO_USN, pwd=TOKENS.MONGO_PASS)
+# )
+# count = 0
+#
+# for dup in c.discord.userinfo.aggregate([
+#     {"$group": {"_id": "user_id", "dups": {"$addToSet": "$_id"}, "count": {"$sum": 1}}},
+#     {"$match": {"count": {"$gt": 1}}}
+# ], allowDiskUse=True):
+#     print(dup)
+#     duplicates = dup["dups"]
 #
 # from utils import utils_file
 #
 # # utils_file.pickle_file(duplicates, "dups")
 # duplicates = utils_file.unpickle_file("dups")
 
-print(duplicates)
+# print(dupslicates)
 
 # d = {"_id_" : {"ns": "overwatch.message_log", "v": 1, "key": [("_id", 1)]},
 # "message_id_1": {"v": 1, "unique": True, "key": [("message_id", 1.0)], "ns": "overwatch.message_log"},
@@ -80,6 +82,8 @@ print(duplicates)
 
 # import pip
 # print(pip.get_installed_dstributions())
+urllib.request.urlretrieve("https://www.dropbox.com/s/7sz2rzan8u74kw4/numpy-1.11.3%2Bmkl-cp36-cp36m-win32.whl?dl=1",
+                           "numpy-1.13.1+mkl-cp36-cp36m-win32.whl")
 
 a = ['relay', [['Server Joins', '--'], ('/r/Overwatch', "['2016-06-27 05:51:15.380000']"), ('Thonk-Collection', "['2017-07-11 07:03:58.272799']"),
                ('1072', "['2017-01-30 23:38:29.870000']"), ('Hype Nig (no space)', "['2017-01-23 01:09:10.820000']"),
