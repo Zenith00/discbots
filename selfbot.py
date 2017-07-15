@@ -676,6 +676,8 @@ async def command_avatar(params, message_in):
             await client.edit_profile(
                 password=DISCORD_PASSWORD, avatar=ava.read())
     if params[0] == "set":
+        if "." not in params[1]:
+            params[1] += ".png"
         with open(os.path.join(os.path.dirname(__file__), "avatars", params[1] + ".png"), "rb") as ava:
             await client.edit_profile(
                 password=DISCORD_PASSWORD, avatar=ava.read())
