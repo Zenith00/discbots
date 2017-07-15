@@ -228,6 +228,7 @@ async def on_message(message_in):
                         if res:
                             expanded_list.append(res["expansion"])
                         else:
+                            expanded_list.append(word)
                             await relay("Ignored unset tag call `{}`".format(word))
                     else:
                         expanded_list.append(word)
