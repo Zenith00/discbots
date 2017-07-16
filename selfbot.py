@@ -195,7 +195,7 @@ async def ensure_database_struct():
 
 async def update_members():
     for server in client.servers:
-        print("Startup: Importing members from " + server.name)
+        print("Startup: Importing members from " + server.name if server.name else server.id)
         memberlist = []
         for member in server.members:
             memberlist.append(member)
@@ -362,14 +362,17 @@ async def perform_command(command, params, message_in):
             await parse_output(item, message_in.channel)
 
 async def parse_output(output, context):
-    if output[0] == "inplace":
-        await send(destination=context, text=output[1], send_type=output[2])
-    elif output[0] == "relay":
-        await send(
-            #                               Relay
-            destination=client.get_channel("334043962094387201"),
-            text=output[1],
-            send_type=output[2])
+    try:
+        if output[0] == "inplace":
+            await send(destination=context, text=output[1], send_type=output[2])
+        elif output[0] == "relay":
+            await send(
+                #                               Relay
+                destination=client.get_channel("334043962094387201"),
+                text=output[1],
+                send_type=output[2])
+    except:
+        await trace(traceback.format_exc())
 
 async def send(destination, text, send_type):
     if isinstance(destination, str):
@@ -678,7 +681,7 @@ async def command_avatar(params, message_in):
     if params[0] == "set":
         if "." not in params[1]:
             params[1] += ".png"
-        with open(os.path.join(os.path.dirname(__file__), "avatars", params[1] + ".png"), "rb") as ava:
+        with open(os.path.join(os.path.dirname(__file__), "avatars", params[1]), "rb") as ava:
             await client.edit_profile(
                 password=DISCORD_PASSWORD, avatar=ava.read())
 
