@@ -483,7 +483,7 @@ async def on_message(message_in):
                     if character == " ":
                         big_text += "     "
                     else:
-                        big_text += "​:regional_indicator_{c} :".format(
+                        big_text += "​:regional_indicator_{c}: ".format(
                             c=character)
                 output.append((big_text, "text"))
             if command_list[0] == "jpeg":
