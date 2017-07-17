@@ -495,7 +495,7 @@ async def command_exec(params, message_in):
             return ("inplace", "```py\nInput:\n{}\nOutput:\n{}\n```".format(input_command, redirected_output.getvalue()), None)
     if params[0] == "eval":
         input_command = " ".join(params[1:])
-        res = await eval(input_command)
+        res = eval(input_command)
         return ("inplace", "```py\nInput:\n{}\nOutput:\n{}\n```".format(input_command, res), None)
 
     if params[0] == "base":
