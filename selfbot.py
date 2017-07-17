@@ -470,7 +470,7 @@ async def command_exec(params, message_in):
     if "..ch" in input_command:
         input_command = input_command.replace("..ch", 'client.get_channel("{}")'.format(message_in.channel.id))
     if "..sh" in input_command:
-        input_command = input_command.replace("..ch", 'client.get_server("{}")'.format(message_in.server.id))
+        input_command = input_command.replace("..sh", 'client.get_server("{}")'.format(message_in.server.id))
 
     if params[0] == "aeval":
         print(input_command)
