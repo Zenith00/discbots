@@ -325,7 +325,7 @@ async def perform_command(command, params, message_in):
     if command == "ava":
         await command_avatar(params, message_in)
     if command == "exec":
-        await command_exec(params, message_in)
+        output.append(await command_exec(params, message_in))
     # Requires IMGUR
     if command == "jpeg":
         url = params[0]
@@ -486,7 +486,7 @@ async def command_exec(params, message_in):
         finally:
             sys.stdout = old_stdout
         if redirected_output.getvalue():
-            return "inplace", "```py\nInput:\n{}\nOutput:\n{}\n```".format(input_command, redirected_output.getvalue()), "none"
+            return ("inplace", "```py\nInput:\n{}\nOutput:\n{}\n```".format(input_command, redirected_output.getvalue()), "none")
 
     if params[0] == "base":
         input_command = " ".join(params[1:])
