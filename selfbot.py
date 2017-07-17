@@ -470,6 +470,8 @@ async def command_exec(params, message_in):
         input_command = " ".join(params[1:])
         await eval(input_command)
     if params[0] == "co":
+
+        ""
         input_command = " ".join(params[1:])
         command = (
             'import asyncio\n'
@@ -481,6 +483,30 @@ async def command_exec(params, message_in):
         await relay(input_command)
         old_stdout = sys.stdout
         redirected_output = sys.stdout = StringIO()
+        try:
+            exec(input_command)
+        except Exception:
+            await relay('```py\n{}\n```'.format(traceback.format_exc()))
+        finally:
+            sys.stdout = old_stdout
+        if redirected_output.getvalue():
+            return ("inplace", "```py\nInput:\n{}\nOutput:\n{}\n```".format(input_command, redirected_output.getvalue()), "none")
+    if params[0] == "co2":
+
+        ""
+        input_command = " ".join(params[1:])
+        command = (
+            '    import asyncio\n'
+            '    def do_task(message):\n'
+            '        asyncio.get_event_loop().create_task({command})\n'
+            '\n'
+            '    asyncio.get_event_loop().call_soon_threadsafe(do_task, mess)\n'
+            'except RuntimeError:\n'
+            '    pass\n').format(command=input_command)
+        await relay(input_command)
+        old_stdout = sys.stdout
+        redirected_output = sys.stdout = StringIO()
+        await relay(command)
         try:
             exec(input_command)
         except Exception:
