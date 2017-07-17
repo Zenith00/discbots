@@ -473,7 +473,7 @@ async def command_exec(params, message_in):
             'def do_task():\n'
             '   client.loop.create_task({command})\n'
             '\n'
-            'client.loop.call_soon_threadsafe(do_task, message_in,client)').format(command=input_command)
+            'client.loop.call_soon_threadsafe(do_task)').format(command=input_command)
         await relay(command)
         await relay(input_command)
         old_stdout = sys.stdout
