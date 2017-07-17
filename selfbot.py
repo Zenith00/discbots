@@ -467,10 +467,10 @@ async def log_query_parser(query, context):
             traceback.format_exc())
 async def command_exec(params, message_in):
     if params[0] == "co":
-        input_command = " ".join(params[1:]).replace("\n", "\n   ")
+        input_command = " ".join(params[1:])
         command = (
             'import asyncio\n'
-            'async def do_task():\n'
+            'def do_task():\n'
             '   client.loop.create_task({command})\n'
             '\n'
             'client.loop.call_soon_threadsafe(do_task, message_in,client)').format(command=input_command)
@@ -481,8 +481,7 @@ async def command_exec(params, message_in):
         try:
             exec(input_command)
         except Exception:
-            formatted_lines = traceback.format_exc().splitlines()
-            await relay('```py\n{}\n{}\n```'.format(formatted_lines[-1], '\n'.join(formatted_lines[4:-1])))
+            await relay('```py\n{}\n```'.format(traceback.format_exc()))
         finally:
             sys.stdout = old_stdout
         if redirected_output.getvalue():
