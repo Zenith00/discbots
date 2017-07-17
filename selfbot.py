@@ -466,20 +466,16 @@ async def log_query_parser(query, context):
         return "Syntax not recognized. Proper syntax: %%logs 500 user 1111 2222 channel 3333 4444 5555 server 6666. \n Debug: ```py\n{}```".format(
             traceback.format_exc())
 async def command_exec(params, message_in):
-    if params[0] == "eval":
+    if params[0] == "aeval":
         input_command = " ".join(params[1:])
         res = await eval(input_command)
-        return ("inplace", res, None)
     if params[0] == "co":
 
         ""
         input_command = " ".join(params[1:])
         command = (
             'import asyncio\n'
-            'def do_task():\n'
-            '   client.loop.create_task({command})\n'
-            '\n'
-            'client.loop.call_soon_threadsafe(do_task)').format(command=input_command)
+            'client.loop.create_task({command})').format(command=input_command)
         await relay(command)
         await relay(input_command)
         old_stdout = sys.stdout
@@ -492,30 +488,10 @@ async def command_exec(params, message_in):
             sys.stdout = old_stdout
         if redirected_output.getvalue():
             return ("inplace", "```py\nInput:\n{}\nOutput:\n{}\n```".format(input_command, redirected_output.getvalue()), None)
-    if params[0] == "co2":
-
-        ""
+    if params[0] == "eval":
         input_command = " ".join(params[1:])
-        command = (
-            '    import asyncio\n'
-            '    def do_task(message):\n'
-            '        asyncio.get_event_loop().create_task({command})\n'
-            '\n'
-            '    asyncio.get_event_loop().call_soon_threadsafe(do_task, mess)\n'
-            'except RuntimeError:\n'
-            '    pass\n').format(command=input_command)
-        await relay(input_command)
-        old_stdout = sys.stdout
-        redirected_output = sys.stdout = StringIO()
-        await relay(command)
-        try:
-            exec(input_command)
-        except Exception:
-            await relay('```py\n{}\n```'.format(traceback.format_exc()))
-        finally:
-            sys.stdout = old_stdout
-        if redirected_output.getvalue():
-            return ("inplace", "```py\nInput:\n{}\nOutput:\n{}\n```".format(input_command, redirected_output.getvalue()), None)
+        res = await eval(input_command)
+        return ("inplace", "```py\nInput:\n{}\nOutput:\n{}\n```".format(input_command, res), None)
 
     if params[0] == "base":
         input_command = " ".join(params[1:])
@@ -530,7 +506,7 @@ async def command_exec(params, message_in):
             sys.stdout = old_stdout
         if redirected_output.getvalue():
             return "inplace", "```py\nInput:\n{}\nOutput:\n{}\n```".format(input_command, redirected_output.getvalue()), None
-
+    return "trash",None, None
 async def command_query(params, message_in):
     try:
         if params[0] == "user":
@@ -1144,6 +1120,7 @@ class Unbuffered(object):
 
     def __getattr__(self, attr):
         return getattr(self.stream, attr)
+
 
 import sys
 
