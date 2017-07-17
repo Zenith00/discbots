@@ -468,7 +468,8 @@ async def log_query_parser(query, context):
 async def command_exec(params, message_in):
     if params[0] == "eval":
         input_command = " ".join(params[1:])
-        await eval(input_command)
+        res = await eval(input_command)
+        return ("inplace", res, None)
     if params[0] == "co":
 
         ""
@@ -490,7 +491,7 @@ async def command_exec(params, message_in):
         finally:
             sys.stdout = old_stdout
         if redirected_output.getvalue():
-            return ("inplace", "```py\nInput:\n{}\nOutput:\n{}\n```".format(input_command, redirected_output.getvalue()), "none")
+            return ("inplace", "```py\nInput:\n{}\nOutput:\n{}\n```".format(input_command, redirected_output.getvalue()), None)
     if params[0] == "co2":
 
         ""
@@ -514,7 +515,7 @@ async def command_exec(params, message_in):
         finally:
             sys.stdout = old_stdout
         if redirected_output.getvalue():
-            return ("inplace", "```py\nInput:\n{}\nOutput:\n{}\n```".format(input_command, redirected_output.getvalue()), "none")
+            return ("inplace", "```py\nInput:\n{}\nOutput:\n{}\n```".format(input_command, redirected_output.getvalue()), None)
 
     if params[0] == "base":
         input_command = " ".join(params[1:])
@@ -528,7 +529,7 @@ async def command_exec(params, message_in):
         finally:
             sys.stdout = old_stdout
         if redirected_output.getvalue():
-            return "inplace", "```py\nInput:\n{}\nOutput:\n{}\n```".format(input_command, redirected_output.getvalue()), "none"
+            return "inplace", "```py\nInput:\n{}\nOutput:\n{}\n```".format(input_command, redirected_output.getvalue()), None
 
 async def command_query(params, message_in):
     try:
