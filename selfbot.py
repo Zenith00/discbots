@@ -469,9 +469,9 @@ async def command_exec(params, message_in):
     if params[0] == "aeval":
         input_command = " ".join(params[1:])
         if "..ch" in input_command:
-            input_command.replace("..ch", "client.get_channel({})".format(message_in.channel.id))
+            input_command = input_command.replace("..ch", "client.get_channel({})".format(message_in.channel.id))
         if "..sh" in input_command:
-            input_command.replace("..ch", "client.get_server({})".format(message_in.server.id))
+            input_command = input_command.replace("..ch", "client.get_server({})".format(message_in.server.id))
 
         res = await eval(input_command)
     if params[0] == "co":
