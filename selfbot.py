@@ -466,18 +466,18 @@ async def log_query_parser(query, context):
         return "Syntax not recognized. Proper syntax: %%logs 500 user 1111 2222 channel 3333 4444 5555 server 6666. \n Debug: ```py\n{}```".format(
             traceback.format_exc())
 async def command_exec(params, message_in):
+    input_command = " ".join(params[1:])
+    if "..ch" in input_command:
+        input_command = input_command.replace("..ch", 'client.get_channel("{}")'.format(message_in.channel.id))
+    if "..sh" in input_command:
+        input_command = input_command.replace("..ch", 'client.get_server("{}")'.format(message_in.server.id))
+
     if params[0] == "aeval":
-        input_command = " ".join(params[1:])
-        if "..ch" in input_command:
-            input_command = input_command.replace("..ch", 'client.get_channel("{}")'.format(message_in.channel.id))
-        if "..sh" in input_command:
-            input_command = input_command.replace("..ch", 'client.get_server("{}")'.format(message_in.server.id))
         print(input_command)
         res = await eval(input_command)
     if params[0] == "co":
 
         ""
-        input_command = " ".join(params[1:])
         command = (
             'import asyncio\n'
             'client.loop.create_task({command})').format(command=input_command)
@@ -494,12 +494,10 @@ async def command_exec(params, message_in):
         if redirected_output.getvalue():
             return ("inplace", "```py\nInput:\n{}\nOutput:\n{}\n```".format(input_command, redirected_output.getvalue()), None)
     if params[0] == "eval":
-        input_command = " ".join(params[1:])
         res = eval(input_command)
         return ("inplace", "```py\nInput:\n{}\nOutput:\n{}\n```".format(input_command, res), None)
 
     if params[0] == "base":
-        input_command = " ".join(params[1:])
         old_stdout = sys.stdout
         redirected_output = sys.stdout = StringIO()
         try:
