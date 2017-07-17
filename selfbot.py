@@ -467,10 +467,10 @@ async def command_exec(params, message_in):
         input_command = " ".join(params[1:]).replace("\n", "\n   ")
         command = (
             'import asyncio\n'
-            'async def do_task():\n'
-            '   {command}'
+            'async def do_task(message_in):\n'
+            '   asyncio.get_event_loop().create_task({command})\n'
             '\n'
-            'client.loop.create_task(do_task())').format(command=input_command)
+            'asyncio.get_event_loop().call_soon_threadsafe(do_task, message_in').format(command=input_command)
         await relay(command)
         await relay(input_command)
         old_stdout = sys.stdout
