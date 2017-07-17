@@ -209,9 +209,12 @@ async def update_messages():
     datetime = dateparser.parse(newest["date"])
     for server in client.servers:
         for channel in server.channels:
-            async for message in client.logs_from(
-                    channel, after=datetime, limit=1000000):
-                await import_message(message)
+            try:
+                async for message in client.logs_from(
+                        channel, after=datetime, limit=1000000):
+                    await import_message(message)
+            except discord.errors.Forbidden:
+                pass
 
 # Frontend
 
