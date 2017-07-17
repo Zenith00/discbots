@@ -17,7 +17,7 @@ import motor.motor_asyncio
 import pymongo
 import requests
 import pip
-from StringIO import StringIO
+from io import BytesIO, StringIO
 from imgurpython import ImgurClient
 from unidecode import unidecode
 from utils import utils_text, utils_image, utils_parse
