@@ -472,7 +472,7 @@ async def command_exec(params, message_in):
             input_command = input_command.replace("..ch", "client.get_channel({})".format(message_in.channel.id))
         if "..sh" in input_command:
             input_command = input_command.replace("..ch", "client.get_server({})".format(message_in.server.id))
-
+        print(input_command)
         res = await eval(input_command)
     if params[0] == "co":
 
