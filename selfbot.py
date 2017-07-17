@@ -17,6 +17,7 @@ import motor.motor_asyncio
 import pymongo
 import requests
 import pip
+from StringIO import StringIO
 from imgurpython import ImgurClient
 from unidecode import unidecode
 from utils import utils_text, utils_image, utils_parse
@@ -461,6 +462,44 @@ async def log_query_parser(query, context):
         print(traceback.format_exc())
         return "Syntax not recognized. Proper syntax: %%logs 500 user 1111 2222 channel 3333 4444 5555 server 6666. \n Debug: ```py\n{}```".format(
             traceback.format_exc())
+async def comamnd_exec(params, message_in):
+    if params[0] == "co":
+        input_command = " ".join(params[1:]).replace("\n","\n   ")
+        command = (
+            'import asyncio\n'
+            'async def do_task():\n'
+            '   {command}'
+            '\n'
+            'client.loop.create_task(do_task())').format(command=input_command)
+        await relay(command)
+        await relay(input_command)
+        old_stdout = sys.stdout
+        redirected_output = sys.stdout = StringIO()
+        try:
+            exec(input_command)
+        except Exception:
+            formatted_lines = traceback.format_exc().splitlines()
+            await relay('```py\n{}\n{}\n```'.format(formatted_lines[-1], '\n'.join(formatted_lines[4:-1])))
+        finally:
+            sys.stdout = old_stdout
+        if redirected_output.getvalue():
+            return "inplace","```py\nInput:\n{}\nOutput:\n{}\n```".format(input_command,redirected_output.getvalue()), "none"
+
+    if params[0] == "base":
+        input_command = " ".join(params[1:])
+        old_stdout = sys.stdout
+        redirected_output = sys.stdout = StringIO()
+        try:
+            exec(input_command)
+        except Exception:
+            formatted_lines = traceback.format_exc().splitlines()
+            await relay('```py\n{}\n{}\n```'.format(formatted_lines[-1], '\n'.join(formatted_lines[4:-1])))
+        finally:
+            sys.stdout = old_stdout
+        if redirected_output.getvalue():
+            return "inplace","```py\nInput:\n{}\nOutput:\n{}\n```".format(input_command,redirected_output.getvalue()), "none"
+
+
 
 async def command_query(params, message_in):
     try:
