@@ -509,7 +509,7 @@ async def command_exec(params, message_in):
             sys.stdout = old_stdout
         if redirected_output.getvalue():
             return "inplace", "```py\nInput:\n{}\nOutput:\n{}\n```".format(input_command, redirected_output.getvalue()), None
-    return "trash",None, None
+    return "trash", None, None
 async def command_query(params, message_in):
     try:
         if params[0] == "user":
@@ -956,6 +956,8 @@ async def import_message(mess):
     messInfo = await utils_parse.parse_message_info(mess)
 
     if config["perspective"]:
+        if len(mess.content) > 3000:
+            mess.content = mess.content[:2999]
         toxicity = await perspective(mess.content)
         messInfo["toxicity"] = toxicity
         await mongo_client.discord.userinfo.update_one({
@@ -1082,7 +1084,7 @@ async def find_user(matching_ident,
         for user_id in id_set:
             output += "`ID: {user_id} | Name: {name} |` {mention}\n".format(
                 user_id=user_id, name=ident, mention="<@!{}>".format(user_id))
-    return (output, None)
+    return ("relay", output, None)
 
 async def find_message(message, regex, num_to_search=20):
     """
@@ -1123,7 +1125,6 @@ class Unbuffered(object):
 
     def __getattr__(self, attr):
         return getattr(self.stream, attr)
-
 
 import sys
 
