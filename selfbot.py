@@ -332,7 +332,7 @@ async def perform_command(command, params, message_in):
     if command == "jpeg":
         url = params[0]
         url = await more_jpeg(url)
-        output.extend(("inplace", "{url}. Compressed to {ratio}% of original".format(
+        output.append(("inplace", "{url}. Compressed to {ratio}% of original".format(
             url=url[0], ratio=url[1]), "text"))
     # Requires IMGUR
     # Posts X images from a given imgur album's ID: http://imgur.com/a/ID
