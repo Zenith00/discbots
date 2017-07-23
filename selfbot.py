@@ -503,17 +503,15 @@ async def command_exec(params, message_in):
         return ("inplace", "```py\nInput:\n{}\nOutput:\n{}\n```".format(input_command, res), None)
 
     if params[0] == "base":
-        old_stdout = sys.stdout
-        redirected_output = sys.stdout = StringIO()
-        try:
-            exec(input_command)
-        except:
-            await relay('```py\n{}\n```'.format(traceback.format_exc()))
-        finally:
-            sys.stdout = old_stdout
-        print(redirected_output)
-        if redirected_output.getvalue():
-            return "inplace", "```py\nInput:\n{}\nOutput:\n{}\n```".format(input_command, redirected_output.getvalue()), None
+        # old_stdout = sys.stdout
+        # redirected_output = sys.stdout = StringIO()
+        with utils_text.stdoutIO() as output:
+            try:
+                exec(input_command)
+            except:
+                await relay('```py\n{}\n```'.format(traceback.format_exc()))
+        if output.getvalue():
+            return "inplace", "```py\nInput:\n{}\nOutput:\n{}\n```".format(input_command, output.getvalue()), None
     return "trash", None, None
 async def command_query(params, message_in):
     try:

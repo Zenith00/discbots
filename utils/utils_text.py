@@ -1,5 +1,7 @@
+import contextlib
 import json
 
+import StringIO
 import regex as re
 import copy
 import urllib.request
@@ -11,6 +13,7 @@ import math
 import textwrap
 
 import requests
+import sys
 
 def regex_test(reg_str, string):
     reg = re.compile(reg_str, re.IGNORECASE)
@@ -208,4 +211,11 @@ def hastebin(text):
 def dict2rows(in_dict):
     return [(k, str(v)) for k, v in in_dict.items()]
 
-
+@contextlib.contextmanager
+def stdoutIO(stdout=None):
+    old = sys.stdout
+    if stdout is None:
+        stdout = StringIO.StringIO()
+    sys.stdout = stdout
+    yield stdout
+    sys.stdout = old
