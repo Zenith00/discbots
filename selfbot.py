@@ -41,8 +41,8 @@ if config["remote_mongo"]:
             pwd=TOKENS.MONGO_PASS,
             site=TOKENS.MONGO_SITE))
     pymongo_client = pymongo.MongoClient(
-    "mongodb://{usn}:{pwd}@nadir.space".format(
-        usn=TOKENS.MONGO_USN, pwd=TOKENS.MONGO_PASS))
+        "mongodb://{usn}:{pwd}@nadir.space".format(
+            usn=TOKENS.MONGO_USN, pwd=TOKENS.MONGO_PASS))
 else:
     mongo_client = motor.motor_asyncio.AsyncIOMotorClient('localhost', 27017)
 
@@ -221,7 +221,7 @@ async def update_messages():
 
 # Frontend
 
-#test
+
 @client.event
 async def on_message(message_in):
     await mess2log(message_in)
@@ -261,8 +261,8 @@ async def on_message(message_in):
                         if word.startswith("package!!"):
                             package = word.replace("package!!", "")
                             pip.main(["install", package])
-                    if message_in.content.startswith("config!!"):
-                        new_config = message_in.content.replace("config!!", "")
+                    if "config!!" in message_in.content:
+                        new_config = utils_text.regex_test("(?<=config!!).*(?=!!config)", message_in.content).group(0)
                         utils_file.append_line("config.py", new_config)
 
                     g = git.cmd.Git(utils_file.directory_path(__file__))
