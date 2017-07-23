@@ -1,7 +1,7 @@
 import contextlib
 import json
 
-import StringIO
+from io import StringIO
 import regex as re
 import copy
 import urllib.request
