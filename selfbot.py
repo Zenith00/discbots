@@ -40,6 +40,9 @@ if config["remote_mongo"]:
             usn=TOKENS.MONGO_USN,
             pwd=TOKENS.MONGO_PASS,
             site=TOKENS.MONGO_SITE))
+    pymongo_client = pymongo.MongoClient(
+    "mongodb://{usn}:{pwd}@nadir.space".format(
+        usn=TOKENS.MONGO_USN, pwd=TOKENS.MONGO_PASS))
 else:
     mongo_client = motor.motor_asyncio.AsyncIOMotorClient('localhost', 27017)
 
@@ -489,7 +492,7 @@ async def command_exec(params, message_in):
         redirected_output = sys.stdout = StringIO()
         try:
             exec(input_command)
-        except Exception:
+        except:
             await relay('```py\n{}\n```'.format(traceback.format_exc()))
         finally:
             sys.stdout = old_stdout
@@ -504,11 +507,11 @@ async def command_exec(params, message_in):
         redirected_output = sys.stdout = StringIO()
         try:
             exec(input_command)
-        except Exception:
-            formatted_lines = traceback.format_exc().splitlines()
-            await relay('```py\n{}\n{}\n```'.format(formatted_lines[-1], '\n'.join(formatted_lines[4:-1])))
+        except:
+            await relay('```py\n{}\n```'.format(traceback.format_exc()))
         finally:
             sys.stdout = old_stdout
+        print(redirected_output)
         if redirected_output.getvalue():
             return "inplace", "```py\nInput:\n{}\nOutput:\n{}\n```".format(input_command, redirected_output.getvalue()), None
     return "trash", None, None
