@@ -260,6 +260,10 @@ async def on_message(message_in):
                         if word.startswith("package!!"):
                             package = word.replace("package!!", "")
                             pip.main(["install", package])
+                        if word.startswith("config!!"):
+                            new_config = word.replace("config!!", "")
+                            utils_file.append_line("config.py", new_config)
+
                     g = git.cmd.Git(utils_file.directory_path(__file__))
                     res = g.pull()
                 except:

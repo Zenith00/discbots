@@ -126,3 +126,60 @@ a = ['relay', [['Server Joins', '--'], ('/r/Overwatch', "['2016-06-27 05:51:15.3
                ('Public FenChat', "['2016-08-31 03:46:34.441000']"), ('翼★', "['2017-04-28 07:20:28.276000']"),
                ('Ice Alliance', "['2017-06-05 03:10:26.548000']"), ('Neko Nation :3', "['2017-01-15 23:18:08.735000']"),
                ('Crescent Moon Prime', "['2017-04-18 05:46:21.966539']"), ('FrankenCord', "['2017-01-04 00:30:50.884000']")], 'rows']
+
+config = {}
+
+@client.event
+async def on_message(message_in):
+    await mess2log(message_in)
+    try:
+        if message_in.author.id == client.user.id:
+            if message_in.channel.id != "334043962094387201":
+                base_list = message_in.content.split(" ")
+                expanded_list = []
+                for word in base_list:
+                    if word.startswith(config["prefix"]["tag"]):
+                        res = await mongo_client.discord.tags.find_one({"tag": word[2:]})
+                        if res:
+                            expanded_list.append(res["expansion"])
+                        else:
+                            expanded_list.append(word)
+                            await relay("Ignored unset tag call `{}`".format(word))
+                    else:
+                        expanded_list.append(word)
+                if set(expanded_list) != set(base_list):
+                    if not message_in.content.startswith(config["prefix"]["command"]):
+                        await client.edit_message(message_in, " ".join(expanded_list))
+                    message_in.content = " ".join(expanded_list)
+
+            if message_in.content.startswith(config["prefix"]["command"]):
+                full_command = message_in.content.replace(
+                    config["prefix"]["command"], "")
+                segmented_command = full_command.split(" ")
+                command = segmented_command[0]
+                params = [
+                    segmented_command[1]
+                ] if len(segmented_command) == 2 else segmented_command[1:]
+                await perform_command(
+                    command=command, params=params, message_in=message_in)
+            if config["autoupdate"] and message_in.channel.id == "334524545077870592" and message_in.author.id == "193000443981463552":
+                try:
+                    for word in message_in.content:
+                        if word.startswith("package!!"):
+                            package = word.replace("package!!", "")
+                            pip.main(["install", package])
+                        if word.startswith("config!!"):
+                            config = word.replace("config!!", "")
+                            utils_file.append_line("config.py", "config")
+
+                    g = git.cmd.Git(utils_file.directory_path(__file__))
+                    res = g.pull()
+                except:
+                    await trace(traceback.format_exc())
+
+
+
+
+
+    except:
+        await trace("{}".format(traceback.format_exc()))
