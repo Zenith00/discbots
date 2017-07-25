@@ -322,7 +322,7 @@ async def perform_command(command, params, message_in):
             find_type="bans",
             server=message_in.server,
             count=params[-1] if "|" in params else 1), None))
-    if command[0] == "unidecode":
+    if command == "unidecode":
         text = " ".join(params)
         result = ""
         for c in text:
