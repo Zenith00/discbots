@@ -18,6 +18,8 @@ import pymongo
 import requests
 import pip
 from io import BytesIO, StringIO
+
+import unicodedata
 from imgurpython import ImgurClient
 from unidecode import unidecode
 from utils import utils_text, utils_image, utils_parse
@@ -320,6 +322,14 @@ async def perform_command(command, params, message_in):
             find_type="bans",
             server=message_in.server,
             count=params[-1] if "|" in params else 1), None))
+    if command[0] == "unidecode":
+        text = " ".join(params)
+        result = ""
+        for c in text:
+            result += "{} | {} | {} \n".format(c,
+                                               unicodedata.name(c),
+                                               ord(c))
+        output.append(("relay", result, ""))
     if command == "repeat":
         for x in range(0, int(params[0])):
             await client.send_message(message_in.channel, " ".join(params[1:]))
