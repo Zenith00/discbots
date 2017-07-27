@@ -455,18 +455,17 @@ async def on_message(message_in):
     # global PATHS
     # global ENABLED
     # global INITIALIZED
-    if message_in.server.id == "274347674122190848" and message_in.author.id == "129706966460137472" and message_in.channel.id == "274347674122190848":
-        await client.send_message(client.get_channel("274347674122190848"), message_in.content + " || <@!129706966460137472>")
+    # if message_in.server.id == "274347674122190848" and message_in.author.id == "129706966460137472" and message_in.channel.id == "274347674122190848":
+    #     await client.send_message(client.get_channel("274347674122190848"), message_in.content + " || <@!129706966460137472>")
 
     if message_in.server.id == "266279338305912832":
         crown = await get_role(message_in.server, "307400427954110465")
-        print("reg")
-        print(str(list(role.id for role in message_in.author.roles)))
+        # print(str(list(role.id for role in message_in.author.roles)))
         if "307400427954110465" in list(role.id
                                         for role in message_in.author.roles):
-            # print("asdasdasdad")
-            # print(int("%06x" % random.randint(0, 0xFFFFFF), 16))
+
             rgb = colorsys.hsv_to_rgb(random.randint(90, 150), random.uniform(0.15,1),random.uniform(0.15,1))
+            rgb = [int(x*255) for x in rgb]
             print(rgb)
             await client.edit_role(
                 message_in.server,
