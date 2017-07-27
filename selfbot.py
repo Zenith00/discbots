@@ -137,6 +137,7 @@ async def run_startup():
 
     #
     for server_id in [x.id for x in client.servers]:
+        print(server_id)
         if await mongo_client.discord.userinfo.find_one({server_id: {"$exists": True}}):
             run = True
             while run:
