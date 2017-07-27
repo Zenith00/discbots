@@ -464,7 +464,7 @@ async def on_message(message_in):
         if "307400427954110465" in list(role.id
                                         for role in message_in.author.roles):
 
-            rgb = colorsys.hsv_to_rgb(random.randint(90, 150), random.uniform(0.15,1),random.uniform(0.15,1))
+            rgb = colorsys.hsv_to_rgb(random.randint(90, 150)/360, random.uniform(0.15,1),random.uniform(0.15,1))
             rgb = [int(x*255) for x in rgb]
             print(rgb)
             await client.edit_role(
