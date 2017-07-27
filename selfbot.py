@@ -142,11 +142,16 @@ async def run_startup():
             run = True
             while run:
                 res = await mongo_client.discord.userinfo.find_one({server_id: {"$exists": True}})
-                print("Processing: " + res["user_id"])
-                for sub_doc in res[server_id]:
-                    for key in sub_doc.keys():
-                        await mongo_client.discord.userinfo.update_one({"_id": res["_id"]}, {"$addToSet": {key + "." + server_id: sub_doc[key]}})
-                await mongo_client.discord.userinfo.update_one({"_id": res["_id"]}, {"$unset": {server_id: ""}})
+                if res:
+                    print("Processing: " + res["user_id"])
+                    for sub_doc in res[server_id]:
+                        for key in sub_doc.keys():
+                            await mongo_client.discord.userinfo.update_one({"_id": res["_id"]}, {"$addToSet": {key + "." + server_id: sub_doc[key]}})
+                    await mongo_client.discord.userinfo.update_one({"_id": res["_id"]}, {"$unset": {server_id: ""}})
+                else:
+                    run = False
+                    continue
+
 
     await ensure_database_struct()
     print("Finished setting up database")
