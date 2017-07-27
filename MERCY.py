@@ -467,6 +467,7 @@ async def on_message(message_in):
             # print("asdasdasdad")
             # print(int("%06x" % random.randint(0, 0xFFFFFF), 16))
             rgb = colorsys.hsv_to_rgb(random.randint(90, 150), random.uniform(0.15,1),random.uniform(0.15,1))
+            print(rgb)
             await client.edit_role(
                 message_in.server,
                 crown,
