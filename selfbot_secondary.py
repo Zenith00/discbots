@@ -27,6 +27,9 @@ async def on_ready():
 @client.event
 async def on_message(message_in):
 
+    if message_in.startswith("..getbans") and message_in.author == client.self:
+        bans = await client.get_bans(message_in.server)
+        print("\n".join(user.id for user in bans))
 
 
 client.run(USER_AUTH_TOKEN, bot=False)
