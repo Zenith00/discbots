@@ -26,19 +26,7 @@ async def on_ready():
 
 @client.event
 async def on_message(message_in):
-    if message_in.author.id == "192169418502045697":
-        try:
-            code = utils_text.regex_test(r'[A-Z0-9]+-[A-Z0-9]+-[A-Z0-9]+', message_in.content).group(0)
-        except:
-            print("No code?")
-            return
-        if code:
-            r = Tk()
-            r.withdraw()
-            r.clipboard_clear()
-            r.clipboard_append(code)
-            r.update()
-            r.destroy()
+
 
 
 client.run(USER_AUTH_TOKEN, bot=False)

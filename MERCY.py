@@ -3,6 +3,7 @@ import logging
 import random
 import textwrap
 from collections import defaultdict
+import colorsys
 
 # class Unbuffered(object):
 #     def __init__(self, stream):
@@ -440,6 +441,13 @@ async def on_message_edit(before, after):
         if "mod" not in auths:
             await parse_triggers(after)
 
+def getIfromRGB(rgb):
+    red = rgb[0]
+    green = rgb[1]
+    blue = rgb[2]
+    RGBint = (red<<16) + (green<<8) + blue
+    return RGBint
+
 @client.event
 async def on_message(message_in):
     # global VCMess
@@ -458,67 +466,67 @@ async def on_message(message_in):
                                         for role in message_in.author.roles):
             # print("asdasdasdad")
             # print(int("%06x" % random.randint(0, 0xFFFFFF), 16))
+            rgb = colorsys.hsv_to_rgb(random.randint(90, 150), random.uniform(0.15,1),random.uniform(0.15,1))
             await client.edit_role(
                 message_in.server,
                 crown,
-                color=discord.Color(
-                    int("%06x" % random.randint(0, 0xFFFFFF), 16)))
+                color=discord.Color(getIfromRGB(rgb)))
             # print("asdad")
-
-    if message_in.author.id == client.user.id:
-        return
-    if message_in.author.id == constants.ZENITH_ID:
-        if message_in.content == "..reprole":
-            try:
-                print("Running test.....")
-                role = await get_role(client.get_server("236343416177295360"), "322803085715963904")
-                await client.move_role(client.get_server("236343416177295360"), role, 18)
-                await client.move_role(client.get_server("236343416177295360"), role, 19)
-
-                # await client.add_roles(client.get_server("236343416177295360").get_member("129706966460137472"), role)
-            except:
-                print(traceback.format_exc())
-
-    if message_in.server is None:
-
-        def scrim_register(msg):
-            content = msg.content
-            items = content.split(" ")
-            if len(items) == 3 and regex_test(reg_str=r"^\D.{2,12}#\d{4,6}$", string=items[0]) and \
-                    regex_test(reg_str=r"^(\d{1,4})|(unplaced)$", string=items[1]) and \
-                    regex_test(reg_str=r"^(EU|NA|KR)$", string=items[2]):
-                return True
-
-            return False
-
-        if scrim and scrim_register(message_in):
-            await scrim.register(message_in)
-
-        await client.send_message(
-            await client.get_user_info(constants.ZENITH_ID),
-            "[" + message_in.author.name + "]: " + message_in.content)
-        return
-
-    auths = await get_auths(message_in.author)
-    trigger = ".."
-
-    if message_in.content.startswith(trigger):
-        full_command = message_in.content.replace(trigger, "")
-        segmented_command = full_command.split(" ", 1)
-        command = segmented_command[0]
-        params = segmented_command[1] if len(segmented_command) == 2 else None
-        await perform_command(
-            command=command, params=params, message_in=message_in)
-
-    if message_in.server.id == constants.OVERWATCH_SERVER_ID:
-        # if message_in.content.startswith("`scrim start"):
-        #     await scrim_start(message_in)
-        #     return
-        await import_message(message_in)
-
-        if "mod" not in auths:
-            if message_in.author.id not in STATES["trigger_whitelist"]:
-                await parse_triggers(message_in)
+    #
+    # if message_in.author.id == client.user.id:
+    #     return
+    # if message_in.author.id == constants.ZENITH_ID:
+    #     if message_in.content == "..reprole":
+    #         try:
+    #             print("Running test.....")
+    #             role = await get_role(client.get_server("236343416177295360"), "322803085715963904")
+    #             await client.move_role(client.get_server("236343416177295360"), role, 18)
+    #             await client.move_role(client.get_server("236343416177295360"), role, 19)
+    #
+    #             # await client.add_roles(client.get_server("236343416177295360").get_member("129706966460137472"), role)
+    #         except:
+    #             print(traceback.format_exc())
+    #
+    # if message_in.server is None:
+    #
+    #     def scrim_register(msg):
+    #         content = msg.content
+    #         items = content.split(" ")
+    #         if len(items) == 3 and regex_test(reg_str=r"^\D.{2,12}#\d{4,6}$", string=items[0]) and \
+    #                 regex_test(reg_str=r"^(\d{1,4})|(unplaced)$", string=items[1]) and \
+    #                 regex_test(reg_str=r"^(EU|NA|KR)$", string=items[2]):
+    #             return True
+    #
+    #         return False
+    #
+    #     if scrim and scrim_register(message_in):
+    #         await scrim.register(message_in)
+    #
+    #     await client.send_message(
+    #         await client.get_user_info(constants.ZENITH_ID),
+    #         "[" + message_in.author.name + "]: " + message_in.content)
+    #     return
+    #
+    # auths = await get_auths(message_in.author)
+    # trigger = ".."
+    #
+    # if message_in.content.startswith(trigger):
+    #     full_command = message_in.content.replace(trigger, "")
+    #     segmented_command = full_command.split(" ", 1)
+    #     command = segmented_command[0]
+    #     params = segmented_command[1] if len(segmented_command) == 2 else None
+    #     await perform_command(
+    #         command=command, params=params, message_in=message_in)
+    #
+    # if message_in.server.id == constants.OVERWATCH_SERVER_ID:
+    #     # if message_in.content.startswith("`scrim start"):
+    #     #     await scrim_start(message_in)
+    #     #     return
+    #     await import_message(message_in)
+    #
+    #     if "mod" not in auths:
+    #         if message_in.author.id not in STATES["trigger_whitelist"]:
+    #             await parse_triggers(message_in)
 
 async def get_auths(member):
     """
