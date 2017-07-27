@@ -135,16 +135,16 @@ async def run_startup():
         # Joins RELAY server to allow for relay-based output
         await client.accept_invite("sDCHMrX")
 
-#
+    #
     for server_id in [x.id for x in client.servers]:
-        if await mongo_client.discord.userinfo.find_one({server_id:{"$exists":True}}):
+        if await mongo_client.discord.userinfo.find_one({server_id: {"$exists": True}}):
             run = True
             while run:
-                res = await mongo_client.discord.userinfo.find_one({server_id:{"$exists":True}})
+                res = await mongo_client.discord.userinfo.find_one({server_id: {"$exists": True}})
                 print("Processing: " + res["user_id"])
                 for sub_doc in res[server_id]:
                     for key in sub_doc.keys():
-                        await mongo_client.discord.userinfo.update_one({"_id":res["_id"]}, {"$addToSet":{key + "." + server_id:sub_doc[key]}})
+                        await mongo_client.discord.userinfo.update_one({"_id": res["_id"]}, {"$addToSet": {key + "." + server_id: sub_doc[key]}})
                 await mongo_client.discord.userinfo.update_one({"_id": res["_id"]}, {"$unset": {server_id: ""}})
 
     await ensure_database_struct()
