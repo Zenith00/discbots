@@ -143,7 +143,7 @@ async def run_startup():
                 print("Processing: " + res["user_id"])
                 for sub_doc in res[server_id]:
                     for key in sub_doc.keys():
-                        await mongo_client.discord.userinfo.update_one({"_id":res["_id"]}, {"$addToSet":{key:sub_doc[key]}})
+                        await mongo_client.discord.userinfo.update_one({"_id":res["_id"]}, {"$addToSet":{key + "." + server_id:sub_doc[key]}})
                 await mongo_client.discord.userinfo.update_one({"_id": res["_id"]}, {"$unset": {server_id: ""}})
 
     await ensure_database_struct()
