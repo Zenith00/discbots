@@ -999,8 +999,8 @@ async def import_to_server_user_set(member, server, set_name, entry):
     await mongo_client.discord.userinfo.update_one({
         "user_id": member.id
     }, {"$addToSet": {
-        server: {
-            set_name: entry
+        set_name: {
+            server: entry
         }
     }})
 
