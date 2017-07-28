@@ -138,6 +138,12 @@ async def run_startup():
     #
     for server_id in [x.id for x in client.servers]:
         print(server_id)
+        fields = ["server_leaves","server_joins","bans","unbans",server_id]
+        for field in fields:
+            res = await mongo_client.discord.userinfo.find_one({field + ".0": {"$exists": True}})
+            if res:
+                await mongo_client.discord.userinfo.update_one({"_id": res["_id"]}, {"$unset": {field: ""}})
+
         if await mongo_client.discord.userinfo.find_one({server_id: {"$exists": True}}):
             run = True
             while run:
