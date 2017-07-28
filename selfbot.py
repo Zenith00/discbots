@@ -138,28 +138,25 @@ async def run_startup():
     #
     for server_id in [x.id for x in client.servers]:
         print(server_id)
-        fields = ["server_leaves","server_joins","bans","unbans",server_id]
+        fields = ["server_leaves", "server_joins", "bans", "unbans", server_id]
         for field in fields:
-            res = await mongo_client.discord.userinfo.find_one({field + ".0": {"$exists": True}})
-            if res:
-                await mongo_client.discord.userinfo.update_one({"_id": res["_id"]}, {"$unset": {field: ""}})
-
-        if await mongo_client.discord.userinfo.find_one({server_id: {"$exists": True}}):
-            run = True
-            while run:
-                res = await mongo_client.discord.userinfo.find_one({server_id: {"$exists": True}})
+            while await mongo_client.discord.userinfo.find_one({field + ".0": {"$exists": True}}):
+                res = await mongo_client.discord.userinfo.find_one({field + ".0": {"$exists": True}})
                 if res:
-                    print("Processing: " + res["user_id"])
-                    for sub_doc in res[server_id]:
-                        print("     " + str(sub_doc))
-                        for key in sub_doc.keys():
-                            print("          " + str(key))
-                            print("          " + key + "." + server_id + "|" + str(sub_doc[key]))
-                            await mongo_client.discord.userinfo.update_one({"_id": res["_id"]}, {"$addToSet": {key + "." + server_id: sub_doc[key]}})
-                    await mongo_client.discord.userinfo.update_one({"_id": res["_id"]}, {"$unset": {server_id: ""}})
-                else:
-                    run = False
-                    continue
+                    await mongo_client.discord.userinfo.update_one({"_id": res["_id"]}, {"$unset": {field: ""}})
+
+        while await mongo_client.discord.userinfo.find_one({server_id: {"$exists": True}}):
+            res = await mongo_client.discord.userinfo.find_one({server_id: {"$exists": True}})
+            if res:
+                print("Processing: " + res["user_id"])
+                for sub_doc in res[server_id]:
+                    print("     " + str(sub_doc))
+                    for key in sub_doc.keys():
+                        print("          " + str(key))
+                        print("          " + key + "." + server_id + "|" + str(sub_doc[key]))
+                        await mongo_client.discord.userinfo.update_one({"_id": res["_id"]}, {"$addToSet": {key + "." + server_id: sub_doc[key]}})
+                await mongo_client.discord.userinfo.update_one({"_id": res["_id"]}, {"$unset": {server_id: ""}})
+
 
     await ensure_database_struct()
     print("Finished setting up database")
