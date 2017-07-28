@@ -155,7 +155,6 @@ async def run_startup():
                     run = False
                     continue
 
-
     await ensure_database_struct()
     print("Finished setting up database")
     await asyncio.sleep(3)
@@ -1020,10 +1019,9 @@ async def import_to_server_user_set(member, server, set_name, entry):
     await mongo_client.discord.userinfo.update_one({
         "user_id": member.id
     }, {"$addToSet": {
-        set_name: {
-            server: entry
-        }
-    }})
+        "{}.{}".format(set_name, server): entry
+    }
+    })
 
 # Logging
 
