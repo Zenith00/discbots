@@ -537,8 +537,11 @@ async def command_exec(params, message_in):
         if redirected_output.getvalue():
             return ("inplace", "```py\nInput:\n{}\nOutput:\n{}\n```".format(input_command, redirected_output.getvalue()), None)
     if params[0] == "eval":
-        res = eval(input_command)
-        return ("inplace", "```py\nInput:\n{}\nOutput:\n{}\n```".format(input_command, res), None)
+        try:
+            res = eval(input_command)
+            return ("inplace", "```py\nInput:\n{}\nOutput:\n{}\n```".format(input_command, res), None)
+        except:
+            await trace(traceback.format_exc())
 
     if params[0] == "base":
         # old_stdout = sys.stdout
