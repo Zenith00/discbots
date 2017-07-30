@@ -748,12 +748,38 @@ async def command_query(params, message_in):
             emoji_id = utils_text.regex_test("\d+(?=>)",
                                              " ".join(params[1:])).group(0)
             print(emoji_id)
-            server_name = None
+            target_emoji = None
             for emoji in client.get_all_emojis():
                 if emoji_id == emoji.id:
-                    server_name = emoji.server.name
+                    target_emoji = emoji
                     break
-            return [(config["query"]["emoji"]["output"], server_name, None)]
+            embed = discord.Embed(
+                title=target_emoji.name,
+                type="rich")
+            embed.set_footer(text=target_emoji.url)
+            embed.set_image(url=target_emoji.url)
+            embed.add_field(name="Server Name",value=target_emoji.server.name, inline=True)
+            embed.add_field(name="Server ID", value=target_emoji.server.id, inline=True)
+            invite = None
+            try:
+                invite = await client.create_invite(target_emoji.server, unique=False)
+            except:
+                for channel in target_emoji.server.channels:
+                    if not invite:
+                        try:
+                            invite = await client.create_invite(channel, unique=False)
+                        except:
+                            pass
+                    else:
+                        break
+            if invite:
+                embed.add_field(name="Invite", value=invite.url, inline=False)
+
+
+
+
+
+            return [(config["query"]["emoji"]["output"], embed, "embed")]
         if params[0] == "owner":
             return [(config["query"]["owner"]["output"], message_in.server.owner.mention, "text")]
 
