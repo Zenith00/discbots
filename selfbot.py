@@ -137,7 +137,7 @@ async def run_startup():
         await client.accept_invite("sDCHMrX")
 
     #
-    for server_id in [x.id for x in client.servers]:
+    for server_id in tqdm.tqdm([x.id for x in client.servers]):
         print(server_id)
         fields = ["server_leaves", "server_joins", "bans", "unbans", server_id]
         for field in fields:
@@ -235,7 +235,7 @@ async def update_messages():
     newest = await mongo_client.discord.message_log.find_one(
         sort=[("date", pymongo.DESCENDING)], skip=50)
     datetime = dateparser.parse(newest["date"])
-    for server in client.servers:
+    for server in tqdm.tqdm(client.servers):
         for channel in server.channels:
             try:
                 async for message in client.logs_from(
