@@ -36,6 +36,7 @@ from utils.utils_text import dict2rows
 
 # logging.basicConfig(level=logging.INFO)
 
+stack = []
 if config["remote_mongo"]:
     mongo_client = motor.motor_asyncio.AsyncIOMotorClient(
         "mongodb://{usn}:{pwd}@{site}".format(
@@ -156,7 +157,6 @@ async def run_startup():
                         print("          " + key + "." + server_id + "|" + str(sub_doc[key]))
                         await mongo_client.discord.userinfo.update_one({"_id": res["_id"]}, {"$addToSet": {key + "." + server_id: sub_doc[key]}})
                 await mongo_client.discord.userinfo.update_one({"_id": res["_id"]}, {"$unset": {server_id: ""}})
-
 
     await ensure_database_struct()
     print("Finished setting up database")
@@ -508,6 +508,12 @@ async def log_query_parser(query, context):
         print(traceback.format_exc())
         return "Syntax not recognized. Proper syntax: %%logs 500 user 1111 2222 channel 3333 4444 5555 server 6666. \n Debug: ```py\n{}```".format(
             traceback.format_exc())
+
+async def add_stack(obj_type, obj_id, context):
+    if obj_type == "role":
+        role_got = await get_role(context, obj_id)
+        stack.append(role_got)
+
 async def command_exec(params, message_in):
     input_command = " ".join(params[1:])
     if "..ch" in input_command:
