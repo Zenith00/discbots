@@ -761,6 +761,7 @@ async def command_query(params, message_in):
             embed.add_field(name="Server Name",value=target_emoji.server.name, inline=True)
             embed.add_field(name="Server ID", value=target_emoji.server.id, inline=True)
             invite = None
+
             try:
                 invite = await client.create_invite(target_emoji.server, unique=False)
             except:
