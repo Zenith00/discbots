@@ -757,7 +757,7 @@ async def command_query(params, message_in):
                 title=target_emoji.name,
                 type="rich")
             embed.set_footer(text=target_emoji.url)
-            embed.set_image(url=target_emoji.url)
+            embed.set_thumbnail(url=target_emoji.url)
             embed.add_field(name="Server Name",value=target_emoji.server.name, inline=True)
             embed.add_field(name="Server ID", value=target_emoji.server.id, inline=True)
             invite = None
