@@ -752,14 +752,17 @@ async def command_query(params, message_in):
             for emoji in client.get_all_emojis():
                 if emoji_id == emoji.id:
                     target_emoji = emoji
+                    print(target_emoji)
                     break
             embed = discord.Embed(
                 title=target_emoji.name,
                 type="rich")
             embed.set_footer(text=target_emoji.url)
             embed.set_thumbnail(url=target_emoji.url)
+
             embed.add_field(name="Server Name",value=target_emoji.server.name, inline=True)
             embed.add_field(name="Server ID", value=target_emoji.server.id, inline=True)
+            print(embed)
             invite = None
 
             try:
