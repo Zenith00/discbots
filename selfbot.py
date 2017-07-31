@@ -139,7 +139,7 @@ async def run_startup():
     #
     for server_id in tqdm.tqdm([x.id for x in client.servers]):
         # print(server_id)
-        fields = ["server_leaves", "server_joins", "bans", "unbans", server_id]
+        fields = ["server_leaves", "server_joins", "bans", "unbans", "server_id"]
         for field in fields:
             while await mongo_client.discord.userinfo.find_one({field + ".0": {"$exists": True}}):
                 res = await mongo_client.discord.userinfo.find_one({field + ".0": {"$exists": True}})
@@ -765,14 +765,7 @@ async def command_query(params, message_in):
             try:
                 invite = await client.create_invite(target_emoji.server, unique=False)
             except:
-                for channel in target_emoji.server.channels:
-                    if not invite:
-                        try:
-                            invite = await client.create_invite(channel, unique=False)
-                        except:
-                            pass
-                    else:
-                        break
+                pass
             if invite:
                 embed.add_field(name="Invite", value=invite.url, inline=False)
 

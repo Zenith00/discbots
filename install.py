@@ -20,7 +20,6 @@ if __name__ == "__main__":
                   "unidecode", "tqdm", "gitpython"]
     for x in to_install:
         install(x)
-
     try:
         if not os.path.isfile('config.py'):
             shutil.copy2('config_default.py', 'config.py')
