@@ -2,6 +2,7 @@ import heapq
 import logging
 import random
 import textwrap
+import urllib
 from collections import defaultdict
 import colorsys
 

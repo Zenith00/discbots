@@ -18,7 +18,7 @@ import pymongo
 import requests
 import pip
 from io import BytesIO, StringIO
-
+import ast
 import unicodedata
 from imgurpython import ImgurClient
 from unidecode import unidecode
@@ -509,10 +509,14 @@ async def log_query_parser(query, context):
         return "Syntax not recognized. Proper syntax: %%logs 500 user 1111 2222 channel 3333 4444 5555 server 6666. \n Debug: ```py\n{}```".format(
             traceback.format_exc())
 
-async def add_stack(obj_type, obj_id, context):
-    if obj_type == "role":
-        role_got = await get_role(context, obj_id)
+async def add_stack(add_type, obj_info, context, coll=None,**kwargs):
+    if add_type == "role":
+        role_got = await get_role(context, obj_info)
         stack.append(role_got)
+    if add_type == "mongo":
+        query = ast.literal_eval(obj_info)
+        cursor = mongo_client.get_collection(coll).find(query, **kwargs)
+
 
 async def command_exec(params, message_in):
     input_command = " ".join(params[1:])
