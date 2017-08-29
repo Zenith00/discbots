@@ -33,6 +33,7 @@ from collections import defaultdict
 import tqdm
 from config import *
 from utils.utils_text import dict2rows
+import urllib
 
 # logging.basicConfig(level=logging.INFO)
 
