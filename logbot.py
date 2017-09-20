@@ -1,6 +1,7 @@
 import json
 import logging
 import textwrap
+from io import BytesIO, StringIO
 from datetime import datetime, timedelta
 import traceback
 import discord
@@ -72,6 +73,8 @@ async def on_message(message_in):
         command_list = input.split(" ")
         if message_in.author.id == "129706966460137472":
             print(command_list)
+            if command_list[0] == "exec":
+                await command_exec(command_list[1:], message_in)
             if command_list[0] == "renick":
                 for server in client.servers:
                     await client.change_nickname(server.me, "Logbot")
@@ -323,6 +326,47 @@ async def on_message(message_in):
                     trackers[message_in.server.id][command_list[2]] = tracker(
                         message_in.server.get_member(command_list[2]), message_in.channel, message_in.author)
 
+
+
+async def command_exec(params, message_in):
+    input_command = " ".join(params[1:])
+    if "..ch" in input_command:
+        input_command = input_command.replace("..ch", 'client.get_channel("{}")'.format(message_in.channel.id))
+    if "..sh" in input_command:
+        input_command = input_command.replace("..sh", 'client.get_server("{}")'.format(message_in.server.id))
+
+    if params[0] == "aeval":
+        print(input_command)
+        res = await eval(input_command)
+    if params[0] == "co":
+
+        ""
+        command = (
+            'import asyncio\n'
+            'client.loop.create_task({command})').format(command=input_command)
+
+        old_stdout = sys.stdout
+        redirected_output = sys.stdout = StringIO()
+        try:
+            exec(input_command)
+        finally:
+            sys.stdout = old_stdout
+        if redirected_output.getvalue():
+            return ("inplace", "```py\nInput:\n{}\nOutput:\n{}\n```".format(input_command, redirected_output.getvalue()), None)
+    if params[0] == "eval":
+        res = eval(input_command)
+        return ("inplace", "```py\nInput:\n{}\nOutput:\n{}\n```".format(input_command, res), None)
+
+
+    if params[0] == "base":
+        # old_stdout = sys.stdout
+        # redirected_output = sys.stdout = StringIO()
+        with utils_text.stdoutIO() as output:
+            exec(input_command)
+
+        if output.getvalue():
+            return "inplace", "```py\nInput:\n{}\nOutput:\n{}\n```".format(input_command, output.getvalue()), None
+    return "trash", None, None
 
 @client.event
 async def on_member_remove(member):

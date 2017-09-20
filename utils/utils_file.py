@@ -52,6 +52,15 @@ def directory_path(file):
     import os
     return os.path.dirname(os.path.abspath(file))
 
+def make_dir(directory):
+    import os
+    import errno
+    try:
+        os.makedirs(directory)
+    except OSError as e:
+        if e.errno != errno.EEXIST:
+            raise
+
 def pickle_file(data, filename):
     with open(filename + ".pickle", "wb") as f:
         pickle.dump(data, f)
