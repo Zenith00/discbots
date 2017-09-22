@@ -1047,7 +1047,7 @@ async def import_message(mess):
     log_str = unidecode(
         "[{time}][{channel}][{name}] {content}".format(
             time=mess.timestamp.isoformat(" ")[:16],
-            channel=client.get_channel(messInfo["channel"]).name,
+            channel=mess.channel.name,
             name=mess.author.name,
             content=mess.content)).replace(r"\n", r"[\n]")
 
