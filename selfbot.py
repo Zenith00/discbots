@@ -510,7 +510,7 @@ async def log_query_parser(query, context):
         return "Syntax not recognized. Proper syntax: %%logs 500 user 1111 2222 channel 3333 4444 5555 server 6666. \n Debug: ```py\n{}```".format(
             traceback.format_exc())
 
-async def add_stack(add_type, obj_info, context, coll=None,**kwargs):
+async def add_stack(add_type, obj_info, context, coll=None, **kwargs):
     if add_type == "role":
         role_got = await get_role(context, obj_info)
         stack.append(role_got)
@@ -520,7 +520,6 @@ async def add_stack(add_type, obj_info, context, coll=None,**kwargs):
     if add_type == "invites":
         invites = await client.get_invites(context)
         stack.append(invites)
-
 
 async def command_exec(params, message_in):
     input_command = " ".join(params[1:])
@@ -768,7 +767,7 @@ async def command_query(params, message_in):
             embed.set_footer(text=target_emoji.url)
             embed.set_thumbnail(url=target_emoji.url)
 
-            embed.add_field(name="Server Name",value=target_emoji.server.name, inline=True)
+            embed.add_field(name="Server Name", value=target_emoji.server.name, inline=True)
             embed.add_field(name="Server ID", value=target_emoji.server.id, inline=True)
             print(embed)
             invite = None
@@ -779,10 +778,6 @@ async def command_query(params, message_in):
                 pass
             if invite:
                 embed.add_field(name="Invite", value=invite.url, inline=False)
-
-
-
-
 
             return [(config["query"]["emoji"]["output"], embed, "embed")]
         if params[0] == "owner":
@@ -1049,6 +1044,12 @@ async def import_message(mess):
             "toxicity_count": 1
         }})
 
+    log_str = unidecode(
+        "[{time}][{channel}][{name}] {content}".format(
+            time=mess.timestamp.isoformat(" ")[:16],
+            channel=client.get_channel(messInfo["channel"]).name,
+            name=mess.author.name,
+            content=mess.content)).("\n", r"[\n]")
     await mongo_client.discord.message_log.insert_one(messInfo)
 
 async def import_to_user_set(member, set_name, entry):
