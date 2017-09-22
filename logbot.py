@@ -75,7 +75,7 @@ async def on_message(message_in):
             print(command_list)
             if command_list[0] == "exec":
                 res = await command_exec(command_list[1:], message_in)
-                await client.send_message(message_in.channel, res)
+                await client.send_message(message_in.channel, res[1])
             if command_list[0] == "renick":
                 for server in client.servers:
                     await client.change_nickname(server.me, "Logbot")

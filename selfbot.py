@@ -517,6 +517,9 @@ async def add_stack(add_type, obj_info, context, coll=None,**kwargs):
     if add_type == "mongo":
         query = ast.literal_eval(obj_info)
         cursor = mongo_client.get_collection(coll).find(query, **kwargs)
+    if add_type == "invites":
+        invites = await client.get_invites(context)
+        stack.append(invites)
 
 
 async def command_exec(params, message_in):
