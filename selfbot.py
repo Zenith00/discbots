@@ -1044,14 +1044,15 @@ async def import_message(mess):
             "toxicity_count": 1
         }})
 
-    log_str = unidecode(
-        "[{time}][{channel}][{name}] {content}".format(
-            time=mess.timestamp.isoformat(" ")[:16],
-            channel=mess.channel.name,
-            name=mess.author.name,
-            content=mess.content)).replace(r"\n", r"[\n]")
 
-    utils_file.append_line(r"/home/austin/develop/discbots/logfile.txt", log_str)
+    if mess.channel.id == "170185225526181890":
+        log_str = unidecode(
+            "[{time}][{channel}][{name}] {content}".format(
+                time=mess.timestamp.isoformat(" ")[:16],
+                channel=mess.channel.name,
+                name=mess.author.name,
+                content=mess.content)).replace(r"\n", r"[\n]")
+        utils_file.append_line(r"/home/austin/develop/discbots/logfile.txt", log_str)
     await mongo_client.discord.message_log.insert_one(messInfo)
 
 async def import_to_user_set(member, set_name, entry):
