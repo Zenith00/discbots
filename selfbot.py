@@ -1050,6 +1050,7 @@ async def import_message(mess):
             channel=client.get_channel(messInfo["channel"]).name,
             name=mess.author.name,
             content=mess.content)).("\n", r"[\n]")
+    utils_file.append_line("/home/austin/develop/discbots/logfile.txt", log_str)
     await mongo_client.discord.message_log.insert_one(messInfo)
 
 async def import_to_user_set(member, set_name, entry):
