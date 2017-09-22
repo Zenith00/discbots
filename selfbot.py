@@ -1051,7 +1051,7 @@ async def import_message(mess):
                 time=mess.timestamp.isoformat(" ")[:16],
                 channel=mess.channel.name,
                 name=mess.author.name,
-                content=mess.content)).replace(r"\n", r"[\n]")
+                content=mess.clean_content)).replace(r"\n", r"[\n]")
         utils_file.append_line(r"/home/austin/develop/discbots/logfile.txt", log_str)
     await mongo_client.discord.message_log.insert_one(messInfo)
 
