@@ -56,7 +56,7 @@ async def on_message(message_in):
                                       content=message_in.content))
         await client.send_message(
             message_in.author,
-            "[[register to start the registation process. For more help, PM me an invite link to your server"
+            "To add me to your server, use https://discordapp.com/oauth2/authorize?client_id=236341193842098177&scope=bot \n[[register once added to start the registation process. For more help, PM me an invite link to your server"
         )
         if message_in.content.startswith("[["):
             await client.send_message(

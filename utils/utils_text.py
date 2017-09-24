@@ -110,6 +110,23 @@ def format_timedelta(timedelta):
 # duration = duration + timedelta(microseconds=499999)
 # duration = duration // 1000000 * 1000000
 
+# async def parse_time_to_end(timedelta=None, time_string=None):
+#     if timedelta:
+#         timedelta = round_timedelta(timedelta)
+#         readable = format_timedelta(timedelta)
+#         return {
+#             "end"     : datetime.now() + timedelta,
+#             "duration": timedelta,
+#             "readable": readable
+#         }
+#     else:
+#         end = dateparser.parse("in " + time_string)
+#         delt = end - datetime.now()
+#         delt = round_timedelta(delt)
+#         readable = format_timedelta(delt)
+#         return {"end": end, "duration": delt, "readable": readable}
+
+
 def round_timedelta(delta) -> timedelta:
     delta = delta + timedelta(microseconds=499999)
     delta = delta // 1000000 * 1000000
@@ -148,6 +165,8 @@ def format_row_to_widths(row, widths):
 
 def reverse_dict(input_dict) -> dict:
     return dict((v, k) for k, v in input_dict.items())
+
+
 async def parse_time_to_end(time_string):
     print(time_string)
     try:
