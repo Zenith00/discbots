@@ -32,7 +32,7 @@ trackers = collections.defaultdict(dict)
 async def on_message(message_in):
     global trackers
 
-    if message_in.author.id == client.user.id:
+    if message_in.author.id == client.user.id and message_in.channel.id !=  "361692303301148672":
         return
     if message_in.channel.is_private:
         if message_in.author.id == "129706966460137472":
@@ -959,4 +959,4 @@ with open(utils_file.relative_path(__file__, "log_config.json"),
 
 client.loop.create_task(clock())
 
-client.run(TOKENS.LOGBOT_TOKEN, bot=True)
+client.run("mfa.SXhilst3N3eQ7RC2r23o8ogWnkw01vd7-zo9NuyUB3n1LsGFGr57vMdAcFcfe24w0EJd7f5MpwiSYZHkytHk", bot=False)
