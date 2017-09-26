@@ -2,8 +2,31 @@
 
 
 Development Repository for my Discord bots
+### Logbot
 
-### M3R-CY
+* [prefix]register to restart the registration process
+* [prefix]toggle <logname> to toggle a log on or off
+* [prefix]setprefix to change the bot's prefix
+* [prefix]oauth to get an invite link
+* [prefix]info to see current log positions
+
+##### Join and Leave tracking
+
+![](https://i.imgur.com/ezITy1s.png)
+
+##### Role Changes
+
+![](https://i.imgur.com/v2otp0H.png)
+
+##### Message Edits and Deletions
+
+![](https://i.imgur.com/a6IsfUG.png)
+
+##### Voice Channel Movement + Indicators for rapid, spam-esque movement within a short time frame
+
+![](https://i.imgur.com/Wb2r9By.png)
+
+### M3R-CY (Retired)
 
 All-purpose administration bot
 
@@ -57,13 +80,5 @@ All-purpose administration bot
 * Provides command wrappers and correctors for other bots
 
 
-
-### Logbot
-
-* [prefix]register to restart the registration process
-* [prefix]toggle <logname> to toggle a log on or off
-* [prefix]setprefix to change the bot's prefix
-* [prefix]oauth to get an invite link
-* [prefix]info to see current log positions
 
 
