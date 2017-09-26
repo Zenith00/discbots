@@ -12,11 +12,11 @@ Development Repository for my Discord bots
 
 ##### Join and Leave tracking
 
-![](https://i.imgur.com/ezITy1s.png)
+![](https://i.imgur.com/aHhGfx0.png)
 
 ##### Role Changes
 
-![](https://i.imgur.com/v2otp0H.png)
+![](https://i.imgur.com/BEz2URd.png)
 
 ##### Message Edits and Deletions
 
