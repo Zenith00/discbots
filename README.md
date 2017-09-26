@@ -12,7 +12,7 @@ Development Repository for my Discord bots
 
 ##### Join and Leave tracking
 
-![](https://i.imgur.com/aHhGfx0.png)
+![](https://i.imgur.com/gBC6FrM.png)
 
 ##### Role Changes
 
