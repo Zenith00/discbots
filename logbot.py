@@ -974,4 +974,4 @@ with open(utils_file.relative_path(__file__, "log_config.json"),
 
 client.loop.create_task(clock())
 
-client.run("MjM2MzQxMTkzODQyMDk4MTc3.DK2gXw.qNjGXSJKSp5WnCNqMXcpVqoLiIw", bot=False)
+client.run("MjM2MzQxMTkzODQyMDk4MTc3.DK2gXw.qNjGXSJKSp5WnCNqMXcpVqoLiIw", bot=True)
