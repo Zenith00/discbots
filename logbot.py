@@ -745,7 +745,11 @@ async def log_action(server, action, detail):
 
     if message and target_channel:
         message = await scrub_text(message, voice_log)
-        await client.send_message(target_channel, message)
+        try:
+            await client.send_message(target_channel, message)
+        except discord.Forbidden:
+            print(target_channel + target_channel.server.name + target_channel.server.id)
+
 
 
 async def mention_to_id(command_list):
