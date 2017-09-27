@@ -56,12 +56,23 @@ async def on_message(message_in):
                                       content=message_in.content))
         await client.send_message(
             message_in.author,
-            "To add me to your server, use https://discordapp.com/oauth2/authorize?client_id=236341193842098177&scope=bot \n[[register once added to start the registation process. For more help, PM me an invite link to your server"
+            "To add me to your server, use https://discordapp.com/oauth2/authorize?client_id=236341193842098177&scope=bot \n[[register once added to start the registation process. [[help for a list of commands. For more help, PM me an invite link to your server"
         )
         if message_in.content.startswith("[["):
+            if message_in.content.startswith("[[help"):
+                await client.send_message(
+                    message_in.channel,
+                    "{pfx}register to restart the registration process"
+                    "\n{pfx}toggle <logname> to toggle a log on or off"
+                    "\n{pfx}setprefix to change the bot's prefix"
+                    "\n{pfx}oauth to get an invite link"
+                    "\n{pfx}info to see current log positions".format(
+                        pfx="[["))
+
             await client.send_message(
                 message_in.author,
                 "Commands must be used in a specific server")
+
         return
     if message_in.server.id in log_config.keys():
         prefix = log_config[message_in.server.id]["prefix"]
