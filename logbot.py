@@ -448,7 +448,7 @@ async def on_member_update(before, after):
 
     if before.nick != after.nick:
         print("nick change")
-        await log_action(after.server, "nick_change", {"member": after, "old_nick": before.name, "new_name": after.name})
+        await log_action(after.server, "nick_change", {"member": after, "old_nick": before.name, "new_nick": after.name})
 
     if len(before.roles) != len(after.roles):
         await log_action(after.server, "role_change", {
