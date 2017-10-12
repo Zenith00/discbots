@@ -91,7 +91,7 @@ async def on_message(message_in):
                     await client.change_nickname(server.me, "Logbot")
             if command_list[0] == "reset":
                 del log_config[command_list[1]]
-                update()
+                await update()
             if command_list[0] == "togglestatus":
                 if message_in.server.me.status == discord.Status.invisible:
                     await client.change_presence(status=discord.Status.online)
@@ -443,9 +443,11 @@ async def on_member_update(before, after):
         return
 
     if before.name != after.name:
+        print("name change")
         await log_action(after.server, "name_change", {"member": after, "old_name": before.name, "new_name": after.name})
 
     if before.nick != after.nick:
+        print("nick change")
         await log_action(after.server, "nick_change", {"member": after, "old_nick": before.name, "new_name": after.name})
 
     if len(before.roles) != len(after.roles):
@@ -670,21 +672,26 @@ async def log_action(server, action, detail):
             message = await scrub_text(message, target_channel)
 
         elif action == "name_change":
-            message = "{time} :wrench: [NAMECHANGE] [{mention}] [{id}]:\n`-BEFORE:` {before} \n`+ AFTER:` {after}".format(
+            print("NAME CHANGEEE")
+            message = "{time} :gear: [NAMECHANGE] [{mention}] [{id}]:\n`-BEFORE:` {before} \n`+ AFTER:` {after}".format(
                 time=time,
                 mention=detail["member"].mention,
                 id=detail["member"].id,
                 before=detail["old_name"],
                 after=detail["new_name"]
             )
+            message = await scrub_text(message, target_channel)
+
         elif action == "nick_change":
-            message = "{time} :wrench: [NAMECHANGE] [{mention}] [{id}]:\n`-BEFORE:` {before} \n`+ AFTER:` {after}".format(
+            message = "{time} :gear: [NAMECHANGE] [{mention}] [{id}]:\n`-BEFORE:` {before} \n`+ AFTER:` {after}".format(
                 time=time,
                 mention=detail["member"].mention,
                 id=detail["member"].id,
                 before=detail["old_nick"] if detail["old_nick"] else "{None}",
                 after=detail["new_nick"] if detail["new_nick"] else "{None}"
             )
+            message = await scrub_text(message, target_channel)
+
 
     if log_config[server.id]["states"]["voice_log"]:
         if action == "voice_update":
