@@ -27,12 +27,11 @@ STATES = {"init": False}
 
 trackers = collections.defaultdict(dict)
 
-
 @client.event
 async def on_message(message_in):
     global trackers
 
-    if message_in.author.id == client.user.id and message_in.channel.id !=  "361692303301148672":
+    if message_in.author.id == client.user.id and message_in.channel.id != "361692303301148672":
         return
     if message_in.channel.is_private:
         if message_in.author.id == "129706966460137472":
@@ -338,8 +337,6 @@ async def on_message(message_in):
                     trackers[message_in.server.id][command_list[2]] = tracker(
                         message_in.server.get_member(command_list[2]), message_in.channel, message_in.author)
 
-
-
 async def command_exec(params, message_in):
     input_command = " ".join(params[1:])
     if "..ch" in input_command:
@@ -369,7 +366,6 @@ async def command_exec(params, message_in):
         res = eval(input_command)
         return ("inplace", "```py\nInput:\n{}\nOutput:\n{}\n```".format(input_command, res), None)
 
-
     if params[0] == "base":
         # old_stdout = sys.stdout
         # redirected_output = sys.stdout = StringIO()
@@ -386,14 +382,12 @@ async def on_member_remove(member):
         return
     await log_action(member.server, "leave",
                      {"mention": member.mention,
-                      "id": member.id})
-
+                      "id"     : member.id})
 
 @client.event
 async def on_member_ban(member):
     if not STATES["init"]: return
     await log_action(member.server, "ban", {"member": member})
-
 
 @client.event
 async def on_member_unban(server, member):
@@ -401,15 +395,13 @@ async def on_member_unban(server, member):
     await log_action(
         server,
         "unban", {"mention": "<@!{id}>".format(id=member.id),
-                  "id": member.id})
-
+                  "id"     : member.id})
 
 @client.event
 async def on_ready():
     print('Connected!')
     print('Username: ' + client.user.name)
     print('ID: ' + client.user.id)
-
 
 @client.event
 async def on_member_join(member):
@@ -419,10 +411,9 @@ async def on_member_join(member):
     age = abs(current_date - member.created_at)
     await log_action(member.server, "join", {
         "mention": member.mention,
-        "id": member.id,
-        "age": str(age)[:-7]
+        "id"     : member.id,
+        "age"    : str(age)[:-7]
     })
-
 
 @client.event
 async def on_voice_state_update(before, after):
@@ -435,9 +426,8 @@ async def on_voice_state_update(before, after):
     if before.voice.voice_channel != after.voice.voice_channel:
         await log_action(after.server, "voice_update",
                          {"before": before,
-                          "after": after,
-                          "id": before.id})
-
+                          "after" : after,
+                          "id"    : before.id})
 
 # noinspection PyShadowingNames
 @client.event
@@ -452,13 +442,18 @@ async def on_member_update(before, after):
     if not STATES["init"]:
         return
 
+    if before.name != after.name:
+        await log_action(after.server, "name_change", {"member": after, "old_name": before.name, "new_name": after.name})
+
+    if before.nick != after.nick:
+        await log_action(after.server, "nick_change", {"member": after, "old_nick": before.name, "new_name": after.name})
+
     if len(before.roles) != len(after.roles):
         await log_action(after.server, "role_change", {
-            "member": after,
+            "member"   : after,
             "old_roles": before.roles[1:],
             "new_roles": after.roles[1:]
         })
-
 
 @client.event
 async def on_server_join(server):
@@ -470,7 +465,6 @@ async def on_server_join(server):
         pass
     await client.change_nickname(server.me, "Logbot")
 
-
 @client.event
 async def on_message_edit(before, after):
     if not STATES["init"]: return
@@ -479,11 +473,10 @@ async def on_message_edit(before, after):
     await log_action(after.server, "edit", {
         "channel": before.channel.mention,
         "mention": before.author.mention,
-        "id": before.author.id,
-        "before": before.content,
-        "after": after.content
+        "id"     : before.author.id,
+        "before" : before.content,
+        "after"  : after.content
     })
-
 
 @client.event
 async def on_message_delete(message):
@@ -492,10 +485,9 @@ async def on_message_delete(message):
     await log_action(message.server, "delete", {
         "channel": message.channel.mention,
         "mention": mention,
-        "id": message.author.id,
+        "id"     : message.author.id,
         "content": message.content
     })
-
 
 async def log_action(server, action, detail):
     if server.id in log_config.keys():
@@ -549,15 +541,15 @@ async def log_action(server, action, detail):
                 content=detail["content"])
             target_channel = message_log
             await log_db[server.id].insert_one({
-                "date":
+                "date"   :
                     datetime.utcnow().isoformat(" "),
-                "action":
+                "action" :
                     action,
                 "channel":
                     detail["channel"],
                 "mention":
                     detail["mention"],
-                "id":
+                "id"     :
                     detail["id"],
                 "content":
                     detail["content"]
@@ -572,23 +564,24 @@ async def log_action(server, action, detail):
                 after=detail["after"])
             target_channel = message_log
             await log_db[server.id].insert_one({
-                "date":
+                "date"   :
                     datetime.utcnow().isoformat(" "),
-                "action":
+                "action" :
                     action,
                 "channel":
                     detail["channel"],
                 "mention":
                     detail["mention"],
-                "id":
+                "id"     :
                     detail["id"],
-                "before":
+                "before" :
                     detail["before"],
-                "after":
+                "after"  :
                     detail["after"]
             })
 
     if log_config[server.id]["states"]["server_log"]:
+
         if action == "join":
             message = "{time} :inbox_tray: [JOIN] [{mention}] [{id}]. Account Age: {age}".format(
                 time=time,
@@ -597,13 +590,13 @@ async def log_action(server, action, detail):
                 age=detail["age"])
             target_channel = server_log
             await log_db[server.id].insert_one({
-                "date":
+                "date"  :
                     datetime.utcnow().isoformat(" "),
                 "action":
                     action,
-                "id":
+                "id"    :
                     detail["id"],
-                "age":
+                "age"   :
                     detail["age"]
             })
         elif action == "leave":
@@ -611,11 +604,11 @@ async def log_action(server, action, detail):
                 time=time, mention=detail["mention"], id=detail["id"])
             target_channel = server_log
             await log_db[server.id].insert_one({
-                "date":
+                "date"  :
                     datetime.utcnow().isoformat(" "),
                 "action":
                     action,
-                "id":
+                "id"    :
                     detail["id"]
             })
 
@@ -629,11 +622,11 @@ async def log_action(server, action, detail):
                 nick=detail["member"].nick if detail["member"].nick else "")
             target_channel = server_log
             await log_db[server.id].insert_one({
-                "date":
+                "date"   :
                     datetime.utcnow().isoformat(" "),
-                "action":
+                "action" :
                     action,
-                "id":
+                "id"     :
                     detail["member"].id,
                 "mention":
                     detail["member"].mention
@@ -645,11 +638,11 @@ async def log_action(server, action, detail):
 
             target_channel = server_log
             await log_db[server.id].insert_one({
-                "date":
+                "date"   :
                     datetime.utcnow().isoformat(" "),
-                "action":
+                "action" :
                     action,
-                "id":
+                "id"     :
                     detail["id"],
                 "mention":
                     detail["mention"]
@@ -676,6 +669,23 @@ async def log_action(server, action, detail):
                 after=after)
             message = await scrub_text(message, target_channel)
 
+        elif action == "name_change":
+            message = "{time} :wrench: [NAMECHANGE] [{mention}] [{id}]:\n`-BEFORE:` {before} \n`+ AFTER:` {after}".format(
+                time=time,
+                mention=detail["member"].mention,
+                id=detail["member"].id,
+                before=detail["old_name"],
+                after=detail["new_name"]
+            )
+        elif action == "nick_change":
+            message = "{time} :wrench: [NAMECHANGE] [{mention}] [{id}]:\n`-BEFORE:` {before} \n`+ AFTER:` {after}".format(
+                time=time,
+                mention=detail["member"].mention,
+                id=detail["member"].id,
+                before=detail["old_nick"] if detail["old_nick"] else "{None}",
+                after=detail["new_nick"] if detail["new_nick"] else "{None}"
+            )
+
     if log_config[server.id]["states"]["voice_log"]:
         if action == "voice_update":
             # if log_config[]
@@ -699,8 +709,8 @@ async def log_action(server, action, detail):
 
             movecount = await (log_db[server.id].find({
                 "action": action,
-                "id": detail["id"],
-                "date": {
+                "id"    : detail["id"],
+                "date"  : {
                     "$gt": date_text
                 }
             }).count())
@@ -735,11 +745,11 @@ async def log_action(server, action, detail):
                 trackers[server.id][detail["after"].id].add_entry(message)
 
             await log_db[server.id].insert_one({
-                "date":
+                "date"  :
                     datetime.utcnow().isoformat(" "),
                 "action":
                     action,
-                "id":
+                "id"    :
                     detail["id"]
             })
 
@@ -749,8 +759,6 @@ async def log_action(server, action, detail):
             await client.send_message(target_channel, message)
         except discord.Forbidden:
             print(target_channel + target_channel.server.name + target_channel.server.id)
-
-
 
 async def mention_to_id(command_list):
     """
@@ -768,7 +776,6 @@ async def mention_to_id(command_list):
             id_chars = "".join(idmatch.findall(item))
             new_command.append(id_chars)
     return new_command
-
 
 # async def import_to_user_set(member, set_name, entry):
 #     await overwatch_db.userinfo_collection.update_one(
@@ -818,7 +825,6 @@ async def scrub_text(text, channel):
         print(traceback.format_exc())
     return text
 
-
 async def scrub_text2(text, channel):
     new_words = []
     words = re.split(r" ", text)
@@ -858,7 +864,6 @@ async def scrub_text2(text, channel):
             new_words.append(word)
     return " ".join(new_words)
 
-
 async def get_role_members(role) -> list:
     members = []
     for member in role.server.members:
@@ -866,12 +871,10 @@ async def get_role_members(role) -> list:
             members.append(member)
     return members
 
-
 def get_role(server, roleid):
     for x in server.roles:
         if x.id == roleid:
             return x
-
 
 async def get_moderators(server):
     members = []
@@ -880,7 +883,6 @@ async def get_moderators(server):
             members = await get_role_members(role)
             members.extend(members)
     return members
-
 
 async def send(destination, text, send_type, delete_in=0):
     if isinstance(destination, str):
@@ -905,7 +907,6 @@ async def send(destination, text, send_type, delete_in=0):
         line = line.replace("<NL<", "\n")
         await client.send_message(destination, line)
 
-
 async def clock():
     await update()
     await client.wait_until_ready()
@@ -914,7 +915,6 @@ async def clock():
     STATES["server_log"] = True
 
     print("Ready")
-
 
 class Unbuffered(object):
     def __init__(self, stream):
@@ -926,7 +926,6 @@ class Unbuffered(object):
 
     def __getattr__(self, attr):
         return getattr(self.stream, attr)
-
 
 class tracker:
     header = None
@@ -942,7 +941,7 @@ class tracker:
 
     async def start(self):
         self.header = "Starting Tracking of {mention} [{user_id}]\n".format(mention=self.target.mention,
-                                                                           user_id=self.target.id)
+                                                                            user_id=self.target.id)
         self.message = await client.send_message(self.destination, self.header)
 
     async def add_entry(self, entry):
@@ -956,17 +955,14 @@ class tracker:
             await client.delete_message(self.ping)
         self.ping = await client.send_message(self.destination, " ".join(member.mention for member in self.trackers))
 
-
 import sys
 
 sys.stdout = Unbuffered(sys.stdout)
-
 
 async def update():
     with open(utils_file.relative_path(__file__, "log_config.json"),
               'w') as config:
         json.dump(log_config, config)
-
 
 with open(utils_file.relative_path(__file__, "log_config.json"),
           'r') as config:
