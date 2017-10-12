@@ -448,7 +448,7 @@ async def on_member_update(before, after):
 
     if before.nick != after.nick:
         print("nick change")
-        await log_action(after.server, "nick_change", {"member": after, "old_nick": before.name, "new_nick": after.name})
+        await log_action(after.server, "nick_change", {"member": after, "old_nick": before.nick, "new_nick": after.nick})
 
     if len(before.roles) != len(after.roles):
         await log_action(after.server, "role_change", {
@@ -583,7 +583,6 @@ async def log_action(server, action, detail):
             })
 
     if log_config[server.id]["states"]["server_log"]:
-        print(action)
         target_channel = server_log
 
         if action == "join":
@@ -670,7 +669,6 @@ async def log_action(server, action, detail):
 
         elif action == "name_change":
 
-            print("NAME CHANGEEE")
             message = "{time} :gear: [NAMECHANGE] [{mention}] [{id}]:\n`-BEFORE:` {before} \n`+ AFTER:` {after}".format(
                 time=time,
                 mention=detail["member"].mention,
@@ -682,8 +680,7 @@ async def log_action(server, action, detail):
 
         elif action == "nick_change":
 
-            print("NICK CHANGEEEE")
-            message = "{time} :gear: [NAMECHANGE] [{mention}] [{id}]:\n`-BEFORE:` {before} \n`+ AFTER:` {after}".format(
+            message = "{time} :gear: [NICKCHANGE] [{mention}] [{id}]:\n`-BEFORE:` {before} \n`+ AFTER:` {after}".format(
                 time=time,
                 mention=detail["member"].mention,
                 id=detail["member"].id,
