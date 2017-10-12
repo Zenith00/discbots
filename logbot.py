@@ -583,7 +583,7 @@ async def log_action(server, action, detail):
             })
 
     if log_config[server.id]["states"]["server_log"]:
-
+        print(action)
         if action == "join":
             message = "{time} :inbox_tray: [JOIN] [{mention}] [{id}]. Account Age: {age}".format(
                 time=time,
@@ -683,6 +683,7 @@ async def log_action(server, action, detail):
             message = await scrub_text(message, target_channel)
 
         elif action == "nick_change":
+            print("NICK CHANGEEEE")
             message = "{time} :gear: [NAMECHANGE] [{mention}] [{id}]:\n`-BEFORE:` {before} \n`+ AFTER:` {after}".format(
                 time=time,
                 mention=detail["member"].mention,
