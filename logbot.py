@@ -584,13 +584,14 @@ async def log_action(server, action, detail):
 
     if log_config[server.id]["states"]["server_log"]:
         print(action)
+        target_channel = server_log
+
         if action == "join":
             message = "{time} :inbox_tray: [JOIN] [{mention}] [{id}]. Account Age: {age}".format(
                 time=time,
                 mention=detail["mention"],
                 id=detail["id"],
                 age=detail["age"])
-            target_channel = server_log
             await log_db[server.id].insert_one({
                 "date"  :
                     datetime.utcnow().isoformat(" "),
@@ -604,7 +605,6 @@ async def log_action(server, action, detail):
         elif action == "leave":
             message = "{time} :outbox_tray: [LEAVE] [{mention}] [{id}]".format(
                 time=time, mention=detail["mention"], id=detail["id"])
-            target_channel = server_log
             await log_db[server.id].insert_one({
                 "date"  :
                     datetime.utcnow().isoformat(" "),
@@ -622,7 +622,6 @@ async def log_action(server, action, detail):
                 name=detail["member"].name + "#" +
                      detail["member"].discriminator,
                 nick=detail["member"].nick if detail["member"].nick else "")
-            target_channel = server_log
             await log_db[server.id].insert_one({
                 "date"   :
                     datetime.utcnow().isoformat(" "),
@@ -638,7 +637,6 @@ async def log_action(server, action, detail):
             message = "{time} :white_check_mark:  [UNBAN] [{mention}] [{id}]".format(
                 time=time, mention="<@!" + detail["id"] + ">", id=detail["id"])
 
-            target_channel = server_log
             await log_db[server.id].insert_one({
                 "date"   :
                     datetime.utcnow().isoformat(" "),
@@ -651,7 +649,6 @@ async def log_action(server, action, detail):
             })
         elif action == "role_change":
             # print("TRIGGERING ROLE CHANGE")
-            target_channel = server_log
 
             member = detail["member"]
             old_roles = detail["old_roles"]
@@ -672,6 +669,7 @@ async def log_action(server, action, detail):
             message = await scrub_text(message, target_channel)
 
         elif action == "name_change":
+
             print("NAME CHANGEEE")
             message = "{time} :gear: [NAMECHANGE] [{mention}] [{id}]:\n`-BEFORE:` {before} \n`+ AFTER:` {after}".format(
                 time=time,
@@ -683,6 +681,7 @@ async def log_action(server, action, detail):
             message = await scrub_text(message, target_channel)
 
         elif action == "nick_change":
+
             print("NICK CHANGEEEE")
             message = "{time} :gear: [NAMECHANGE] [{mention}] [{id}]:\n`-BEFORE:` {before} \n`+ AFTER:` {after}".format(
                 time=time,
