@@ -817,14 +817,14 @@ async def scrub_text(text, channel):
             role = get_role(channel.server, roleid)
             # print(role.name)
             if role and role.mentionable:
-                return role.name
+                return "*[@ " + role.name + "]"
             else:
                 return mention
 
         text = re.sub("(<@&\d+>)", escape_role, text)
 
-        text.replace("@everyone", "*[@ everyone]")
-        text.replace("@here", "*[@ here]")
+        text = text.replace("@everyone", "*[@ everyone]")
+        text = text.replace("@here", "*[@ here]")
     except:
         print(traceback.format_exc())
     return text
