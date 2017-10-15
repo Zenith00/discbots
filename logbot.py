@@ -762,7 +762,7 @@ async def log_action(server, action, detail):
         try:
             await client.send_message(target_channel, message)
         except discord.Forbidden:
-            print(target_channel + target_channel.server.name + target_channel.server.id)
+            print(target_channel.server.name + target_channel.server.id)
 
 async def mention_to_id(command_list):
     """
