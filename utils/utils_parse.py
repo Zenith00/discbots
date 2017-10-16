@@ -6,7 +6,14 @@ async def parse_message_info(mess) -> dict:
     :type mess: discord.Message
     """
     user_id = mess.author.id
-    messageContent = mess.content
+    if mess.content:
+        messageContent = mess.content
+    else:
+        messageContent = ""
+    for embed in mess.embeds:
+        messageContent += "\n[EMBED]: " + embed["url"]
+
+
     messageLength = len(messageContent)
     mentioned_users = []
     mentioned_channels = []
