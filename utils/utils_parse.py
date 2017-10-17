@@ -11,7 +11,10 @@ async def parse_message_info(mess) -> dict:
     else:
         messageContent = ""
     for embed in mess.embeds:
-        messageContent += "\n[EMBED]: " + embed["url"]
+        try:
+            messageContent += "\n[EMBED]: " + embed["url"]
+        except:
+            print(embed)
 
 
     messageLength = len(messageContent)
