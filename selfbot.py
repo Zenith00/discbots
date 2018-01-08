@@ -448,7 +448,6 @@ async def command_analyze(params, message_in):
         embed.add_field(name="Messages inside trusted-chat", value=trusted_chat_ct, inline=True)
         embed.add_field(name="Messages outside trusted-chat", value=non_trusted_chat_ct, inline=True)
 
-
         if avatar_link:
             embed.set_thumbnail(url=avatar_link)
             embed.set_footer(text=avatar_link.replace(".webp", ".png"))
@@ -466,33 +465,24 @@ async def command_analyze(params, message_in):
         trusteds = {}
         for member in await get_role_members(await get_role(message_in.server, "169728613216813056")):
             trusteds[member.id] = (await count_trusted(member.id), await count_non_trusted(member.id))
-        sorted_trusted = sorted(trusteds.items(), key=lambda x:x[1][1])[::-1]
+        sorted_trusted = sorted(trusteds.items(), key=lambda x: x[1][1])[::-1]
         output = [["Member", "In Trusted", "Outside Trusted"]]
         for trusted in sorted_trusted:
             output.append([message_in.server.get_member(trusted[0]), trusted[1][0], trusted[1][1]])
         return [(config["lyze"]["rank"], output, "rows")]
 
-
-
-
-
-
-
-def parse_output(output, context):
+async def parse_output(output, context):
     try:
         if output[0] == "inplace":
-            await
-            send(destination=context, text=output[1], send_type=output[2])
+            await send(destination=context, text=output[1], send_type=output[2])
         elif output[0] == "relay":
-            await
-            send(
+            await send(
                 #                               Relay
                 destination=client.get_channel("334043962094387201"),
                 text=output[1],
                 send_type=output[2])
     except:
-        await
-        trace(traceback.format_exc())
+        await trace(traceback.format_exc())
 
 async def send(destination, text, send_type):
     if isinstance(destination, str):
