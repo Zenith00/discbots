@@ -6,9 +6,10 @@ import logging
 import os
 import random
 import re
+import operator
 import textwrap
 import traceback
-from datetime import datetime
+from datetime import datetime, timedelta
 from io import BytesIO
 import git
 import dateparser
@@ -387,6 +388,9 @@ async def perform_command(command, params, message_in):
         random.shuffle(link_list)
         for link in link_list[:int(params[0])]:
             await client.send_message(message_in.channel, link)
+    if command == "lyze":
+        output.append(await command_analyze(params, message_in))
+        pass
 
     if command == "logs":
         output.extend(await command_logs(params, {
@@ -409,18 +413,79 @@ async def perform_command(command, params, message_in):
             print(item)
             await parse_output(item, message_in.channel)
 
-async def parse_output(output, context):
+async def command_analyze(params, message_in):
+    query_type = params[0]
+
+    target = params[1]
+
+    async def count_trusted(member_id):
+        return await mongo_client.discord.message_log.find(
+            {"user_id"   : target, "server_id": message_in.server.id, "date": {"$gte": (datetime.utcnow() - timedelta(days=30)).isoformat(" ")},
+             "channel_id": "170185225526181890"}).count()
+
+    async def count_non_trusted(member_id):
+        return await mongo_client.discord.message_log.find(
+            {"user_id"   : target, "server_id": message_in.server.id, "date": {"$gte": (datetime.utcnow() - timedelta(days=30)).isoformat(" ")},
+             "channel_id": "170185225526181890"}).count()
+
+    if query_type == "member":
+        target_member = message_in.server.get_member(target)
+        trusted_chat_ct = await count_trusted(target)
+        non_trusted_chat_ct = await count_non_trusted(target)
+
+        embed = discord.Embed(
+            title="{name}#{discrim}'s info".format(
+                name=target_member.name,
+                discrim=str(target_member.discriminator)),
+            type="rich")
+        avatar_link = target_member.avatar_url
+        embed.add_field(name="ID", value=target_member.id, inline=True)
+        embed.add_field(name="Messages inside trusted-chat", value=trusted_chat_ct)
+        embed.add_field(name="Messages outside trusted-chat", value=non_trusted_chat_ct)
+
+
+        if avatar_link:
+            embed.set_thumbnail(url=avatar_link)
+            embed.set_footer(text=avatar_link.replace(".webp", ".png"))
+
+            if config["query"]["user"]["embed"]["color_average_bar"]:
+                color = utils_image.average_color_url(avatar_link)
+                hex_int = int(color, 16)
+                embed.colour = discord.Colour(hex_int)
+            embed.set_thumbnail(url=target_member.avatar_url)
+        return [(config["query"]["user"]["embed"]["output"], embed, "embed")]
+
+    if query_type == "rank":
+        trusteds = {}
+        for member in await get_role_members(await get_role(message_in.server, "169728613216813056")):
+            trusteds[member.id] = (await count_trusted(member.id), await count_non_trusted(member.id))
+        sorted_trusted = sorted(trusteds.items(), key=lambda x:x[1][1])[::-1]
+        output = [["Member", "In Trusted", "Outside Trusted"]]
+        for trusted in sorted_trusted:
+            output.append([message_in.server.get_member(trusted[0]), trusted[1][0], trusted[1][1]])
+        return [(config["lyze"]["rank"], output, "rows")]
+
+
+
+
+
+
+
+def parse_output(output, context):
     try:
         if output[0] == "inplace":
-            await send(destination=context, text=output[1], send_type=output[2])
+            await
+            send(destination=context, text=output[1], send_type=output[2])
         elif output[0] == "relay":
-            await send(
+            await
+            send(
                 #                               Relay
                 destination=client.get_channel("334043962094387201"),
                 text=output[1],
                 send_type=output[2])
     except:
-        await trace(traceback.format_exc())
+        await
+        trace(traceback.format_exc())
 
 async def send(destination, text, send_type):
     if isinstance(destination, str):
@@ -521,7 +586,6 @@ async def add_stack(add_type, obj_info, context, coll=None, **kwargs):
         invites = await client.get_invites(context)
         stack.append(invites)
 
-
 async def command_exec(params, message_in):
     input_command = " ".join(params[1:])
     if "..ch" in input_command:
@@ -568,6 +632,7 @@ async def command_exec(params, message_in):
         if output.getvalue():
             return "inplace", "```py\nInput:\n{}\nOutput:\n{}\n```".format(input_command, output.getvalue()), None
     return "trash", None, None
+
 async def command_query(params, message_in):
     try:
         if params[0] == "user":
@@ -834,6 +899,7 @@ async def command_tag(params, message_in):
                 await relay("Tag not found")
     except:
         await trace(traceback.format_exc())
+
 # IMGUR
 async def more_jpeg(url):
     response = requests.get(url)
@@ -1045,7 +1111,6 @@ async def import_message(mess):
             "toxicity_count": 1
         }})
 
-
     if mess.channel.id == "170185225526181890":
         log_str = unidecode(
             "[{time}][{channel}][{name}] {content}".format(
@@ -1200,6 +1265,7 @@ async def relay(text, send_type=None):
 
 async def trace(text):
     await client.send_message(client.get_channel("335171044014948352"), "```" + text + "```")
+
 class Unbuffered(object):
     def __init__(self, stream):
         self.stream = stream

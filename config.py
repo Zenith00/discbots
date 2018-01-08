@@ -23,6 +23,9 @@ config["find"]["bans"]["output"] = "inplace"
 
 config["logs"]["output"] = "relay"
 
+config["lyze"]["member"] = "relay"
+config["lyze"]["rank"] = "relay"
+
 config["autoupdate"] = False
 config["perspective"] = True
 config["imgur"] = True
