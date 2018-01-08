@@ -23,7 +23,7 @@ config["find"]["bans"]["output"] = "inplace"
 
 config["logs"]["output"] = "relay"
 
-config["lyze"]["member"] = "relay"
+config["lyze"]["member"] = "inplace"
 config["lyze"]["rank"] = "relay"
 
 config["autoupdate"] = False
