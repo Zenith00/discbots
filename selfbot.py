@@ -421,12 +421,12 @@ async def command_analyze(params, message_in):
 
     async def count_trusted(member_id):
         return await mongo_client.discord.message_log.find(
-            {"user_id"   : target, "server_id": message_in.server.id, "date": {"$gte": (datetime.utcnow() - timedelta(days=int(days))).isoformat(" ")},
+            {"user_id"   : member_id, "server_id": message_in.server.id, "date": {"$gte": (datetime.utcnow() - timedelta(days=int(days))).isoformat(" ")},
              "channel_id": "170185225526181890"}).count()
 
     async def count_non_trusted(member_id):
         return await mongo_client.discord.message_log.find(
-            {"user_id"   : target, "server_id": message_in.server.id, "date": {"$gte": (datetime.utcnow() - timedelta(days=int(days))).isoformat(" ")},
+            {"user_id"   : member_id, "server_id": message_in.server.id, "date": {"$gte": (datetime.utcnow() - timedelta(days=int(days))).isoformat(" ")},
              "channel_id": {"$ne": "170185225526181890"}}).count()
 
     if query_type == "member":
