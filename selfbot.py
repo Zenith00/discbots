@@ -443,20 +443,10 @@ async def command_analyze(params, message_in):
                 name=target_member.name,
                 discrim=str(target_member.discriminator)),
             type="rich")
-        avatar_link = target_member.avatar_url
         embed.add_field(name="ID", value=target_member.id, inline=True)
         embed.add_field(name="Messages inside trusted-chat", value=trusted_chat_ct, inline=True)
         embed.add_field(name="Messages outside trusted-chat", value=non_trusted_chat_ct, inline=True)
 
-        if avatar_link:
-            embed.set_thumbnail(url=avatar_link)
-            embed.set_footer(text=avatar_link.replace(".webp", ".png"))
-
-            if config["query"]["user"]["embed"]["color_average_bar"]:
-                color = utils_image.average_color_url(avatar_link)
-                hex_int = int(color, 16)
-                embed.colour = discord.Colour(hex_int)
-            embed.set_thumbnail(url=target_member.avatar_url)
         print("SUCCESS?")
         print(config["lyze"]["member"])
         return [(config["lyze"]["member"], embed, "embed")]
