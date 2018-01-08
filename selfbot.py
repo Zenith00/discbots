@@ -460,7 +460,6 @@ async def command_analyze(params, message_in):
                 status = "Banned"
             else:
                 status = "Not part of the server"
-        embed.add_field(name="Status", value=status, inline=True)
 
         if avatar_link:
             embed.set_thumbnail(url=avatar_link)
