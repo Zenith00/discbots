@@ -449,7 +449,14 @@ async def command_analyze(params, message_in):
 
         print("SUCCESS?")
         print(config["lyze"]["member"])
-        return [(config["lyze"]["member"], embed, "embed")]
+        embed2 = discord.Embed(
+            title="{name}#{discrim}'s userinfo".format(
+                name=target_member.name,
+                discrim=str(target_member.discriminator)),
+            type="rich")
+        embed.add_field(name="ID", value=target_member.id, inline=True)
+
+        return [(config["lyze"]["member"], embed, "embed"), ("inplace", embed2, "embed")]
 
     if query_type == "rank":
         trusteds = {}
