@@ -390,7 +390,6 @@ async def perform_command(command, params, message_in):
             await client.send_message(message_in.channel, link)
     if command == "lyze":
         output.append(await command_analyze(params, message_in))
-        pass
 
     if command == "logs":
         output.extend(await command_logs(params, {
@@ -431,17 +430,21 @@ async def command_analyze(params, message_in):
     if query_type == "member":
         target_member = message_in.server.get_member(target)
         trusted_chat_ct = await count_trusted(target)
+        print("TCHAT CT")
+        print(trusted_chat_ct)
         non_trusted_chat_ct = await count_non_trusted(target)
+        print("NTCHAT")
+        print(non_trusted_chat_ct)
 
         embed = discord.Embed(
-            title="{name}#{discrim}'s info".format(
+            title="{name}#{discrim}'s message info".format(
                 name=target_member.name,
                 discrim=str(target_member.discriminator)),
             type="rich")
         avatar_link = target_member.avatar_url
         embed.add_field(name="ID", value=target_member.id, inline=True)
-        embed.add_field(name="Messages inside trusted-chat", value=trusted_chat_ct)
-        embed.add_field(name="Messages outside trusted-chat", value=non_trusted_chat_ct)
+        embed.add_field(name="Messages inside trusted-chat", value=trusted_chat_ct, inline=True)
+        embed.add_field(name="Messages outside trusted-chat", value=non_trusted_chat_ct, inline=True)
 
 
         if avatar_link:
@@ -453,6 +456,8 @@ async def command_analyze(params, message_in):
                 hex_int = int(color, 16)
                 embed.colour = discord.Colour(hex_int)
             embed.set_thumbnail(url=target_member.avatar_url)
+        print("SUCCESS?")
+        print(config["lyze"]["member"])
         return [(config["lyze"]["member"], embed, "embed")]
 
     if query_type == "rank":
