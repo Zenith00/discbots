@@ -488,7 +488,7 @@ async def command_analyze(params, message_in):
         print(sorted_trusted)
         output = [["Member", "In Trusted", "Outside Trusted"]]
         for trusted in sorted_trusted:
-            output.append([message_in.server.get_member(trusted[0]).name, trusted[1][0], trusted[1][1]])
+            output.append([message_in.server.get_member(trusted[0]).name, str(trusted[1][0]), str(trusted[1][1])])
         return [(config["lyze"]["rank"], output, "rows")]
 
 async def parse_output(output, context):
