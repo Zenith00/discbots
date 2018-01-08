@@ -444,8 +444,36 @@ async def command_analyze(params, message_in):
                 discrim=str(target_member.discriminator)),
             type="rich")
         embed.add_field(name="ID", value=target_member.id, inline=True)
-        embed.add_field(name="Messages inside trusted-chat", value=str(trusted_chat_ct), inline=True)
-        embed.add_field(name="Messages outside trusted-chat", value=str(non_trusted_chat_ct), inline=True)
+        avatar_link = target_member.avatar_url
+        if isinstance(target_member, discord.Member):
+            roles = [role.name for role in target_member.roles][1:]
+            if roles:
+                embed.add_field(
+                    name="Roles", value=", ".join(roles), inline=True)
+            voice = target_member.voice
+            if voice.voice_channel:
+                voice_name = voice.voice_channel.name
+                embed.add_field(name="Current VC", value=voice_name)
+            status = str(target_member.status)
+        else:
+            if target_member in await client.get_bans(message_in.server):
+                status = "Banned"
+            else:
+                status = "Not part of the server"
+        embed.add_field(name="Status", value=status, inline=True)
+
+        if avatar_link:
+            embed.set_thumbnail(url=avatar_link)
+            embed.set_footer(text=avatar_link.replace(".webp", ".png"))
+
+            if config["query"]["user"]["embed"]["color_average_bar"]:
+                color = utils_image.average_color_url(avatar_link)
+                hex_int = int(color, 16)
+                embed.colour = discord.Colour(hex_int)
+            embed.set_thumbnail(url=target_member.avatar_url)
+
+        embed.add_field(name="Messages inside trusted-chat", value=str(trusted_chat_ct), inline=False)
+        embed.add_field(name="Messages outside trusted-chat", value=str(non_trusted_chat_ct), inline=False)
 
         print("SUCCESS?")
         print(config["lyze"]["member"])
