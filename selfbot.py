@@ -484,9 +484,11 @@ async def command_analyze(params, message_in):
         for member in await get_role_members(await get_role(message_in.server, "169728613216813056")):
             trusteds[member.id] = (await count_trusted(member.id), await count_non_trusted(member.id))
         sorted_trusted = sorted(trusteds.items(), key=lambda x: x[1][1])[::-1]
+        print(trusteds)
+        print(sorted_trusted)
         output = [["Member", "In Trusted", "Outside Trusted"]]
         for trusted in sorted_trusted:
-            output.append([message_in.server.get_member(trusted[0]), trusted[1][0], trusted[1][1]])
+            output.append([message_in.server.get_member(trusted[0]).name, trusted[1][0], trusted[1][1]])
         return [(config["lyze"]["rank"], output, "rows")]
 
 async def parse_output(output, context):
