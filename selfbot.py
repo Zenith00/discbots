@@ -389,7 +389,7 @@ async def perform_command(command, params, message_in):
         for link in link_list[:int(params[0])]:
             await client.send_message(message_in.channel, link)
     if command == "lyze":
-        output.append(await command_analyze(params, message_in))
+        output.extend(await command_analyze(params, message_in))
 
     if command == "logs":
         output.extend(await command_logs(params, {
