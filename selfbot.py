@@ -439,9 +439,9 @@ async def command_analyze(params, message_in):
         print(non_trusted_chat_ct)
 
         embed = discord.Embed(
-            title="{name}#{discrim}'s message info".format(
+            title="{name}#{discrim}'s message info in the last {dayct} days".format(
                 name=target_member.name,
-                discrim=str(target_member.discriminator)),
+                discrim=str(target_member.discriminator),dayct=days),
             type="rich")
         embed.add_field(name="ID", value=target_member.id, inline=True)
         avatar_link = target_member.avatar_url
