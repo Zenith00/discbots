@@ -453,7 +453,7 @@ async def command_analyze(params, message_in):
                 hex_int = int(color, 16)
                 embed.colour = discord.Colour(hex_int)
             embed.set_thumbnail(url=target_member.avatar_url)
-        return [(config["query"]["user"]["embed"]["output"], embed, "embed")]
+        return [(config["lyze"]["member"], embed, "embed")]
 
     if query_type == "rank":
         trusteds = {}
