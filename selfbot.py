@@ -444,8 +444,8 @@ async def command_analyze(params, message_in):
                 discrim=str(target_member.discriminator)),
             type="rich")
         embed.add_field(name="ID", value=target_member.id, inline=True)
-        embed.add_field(name="Messages inside trusted-chat", value=trusted_chat_ct, inline=True)
-        embed.add_field(name="Messages outside trusted-chat", value=non_trusted_chat_ct, inline=True)
+        embed.add_field(name="Messages inside trusted-chat", value=str(trusted_chat_ct), inline=True)
+        embed.add_field(name="Messages outside trusted-chat", value=str(non_trusted_chat_ct), inline=True)
 
         print("SUCCESS?")
         print(config["lyze"]["member"])
