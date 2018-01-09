@@ -1486,10 +1486,13 @@ async def update_trusted_data(start, end):
     new_row = [time]
     new_row_non = [time]
     for trusted_id in id_list:
-        trusted = await count_trusted(trusted_id)
-        new_row.append(trusted)
-        non_trusted = await count_non_trusted(trusted_id)
-        new_row_non.append(non_trusted)
+        try:
+            trusted = await count_trusted(trusted_id)
+            new_row += str(trusted)
+            non_trusted = await count_non_trusted(trusted_id)
+            new_row_non += str(non_trusted)
+        except:
+            print(traceback.format_exc())
     trusted_data.get_worksheet(0).append_row(new_row)
     trusted_data.get_worksheet(1).append_row(new_row_non)
 
