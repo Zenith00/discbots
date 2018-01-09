@@ -1495,8 +1495,10 @@ async def update_trusted_data(start, end):
                 non_trusted = await count_non_trusted(trusted_id)
                 new_row_non += str(non_trusted)
                 print("NEW ROW")
+                print(len(new_row))
                 print(new_row)
                 print("NEW ROW NON TRUSTED")
+                print(len(new_row_non))
                 print(new_row_non)
             except:
                 print(traceback.format_exc())
