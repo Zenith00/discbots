@@ -1480,7 +1480,7 @@ async def update_trusted_data(start, end):
         trusted_data.get_worksheet(1).add_cols(1)
         trusted_data.get_worksheet(1).update_cell(1, trusted_data.get_worksheet(0).col_count, missing_id)
         trusted_data.get_worksheet(1).update_cell(2, trusted_data.get_worksheet(0).col_count, await get_fullname(r_ow.get_member(missing_id)))
-    id_list = trusted_data.get_worksheet(0).row_values(1)
+    id_list = trusted_data.get_worksheet(0).row_values(1)[1:]
     time = datetime.utcnow().strftime(r"%Y-%m-%d")
 
     new_row = [time]
