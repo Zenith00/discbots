@@ -1493,17 +1493,13 @@ async def update_trusted_data(start, end):
                 trusted = await count_trusted(trusted_id)
                 print("Adding Trusted Count: " + str(trusted))
                 new_row.append(str(trusted))
-                print("NEW ROW")
                 print(len(new_row))
-                print(new_row)
 
 
                 non_trusted = await count_non_trusted(trusted_id)
                 print("Adding NonTrusted Count: " + str(non_trusted))
                 new_row_non.append(str(non_trusted))
-                print("NEW ROW NON TRUSTED")
                 print(len(new_row_non))
-                print(new_row_non)
             except:
                 print(traceback.format_exc())
         trusted_data.get_worksheet(0).append_row(new_row)
