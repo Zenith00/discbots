@@ -1433,7 +1433,7 @@ async def update_trusted_data(start, end):
                 member_id,
             "server_id" :
                 r_ow.id,
-            "date" : {
+            "date"      : {
                 "$gte":
                     start.isoformat(" "),
                 "$lte":
@@ -1450,7 +1450,7 @@ async def update_trusted_data(start, end):
                 member_id,
             "server_id" :
                 r_ow.id,
-            "date": {
+            "date"      : {
                 "$gte":
                     start.isoformat(" "),
                 "$lte":
@@ -1463,16 +1463,22 @@ async def update_trusted_data(start, end):
 
     id_list = trusted_data.get_worksheet(0).row_values(1)
     trusted_role = await get_role(r_ow, "169728613216813056")
-    trusteds = await get_role_members(trusted_role)
+    mod_role = await get_role(r_ow, "397922982632226816")
+    mod_perms = await get_role(r_ow, "172950000412655616")
+    admin_role = await get_role(r_ow, "397922334540824577")
+    admin_perms = await get_role(r_ow, "172949857164722176")
+
+    trusteds = await get_role_members(trusted_role) + await get_role_members(mod_role) + await get_role_members(mod_perms) + await get_role_members(
+        admin_role) + await get_role_members(admin_perms)
     trusted_id_list = [member.id for member in trusteds]
     missing = set(trusted_id_list) - set(id_list)
     for missing_id in missing:
         trusted_data.get_worksheet(0).add_cols(1)
-        trusted_data.get_worksheet(0).update_cell(1,trusted_data.get_worksheet(0).col_count, missing_id)
-        trusted_data.get_worksheet(0).update_cell(2,trusted_data.get_worksheet(0).col_count, await get_fullname(r_ow.get_member(missing_id)))
+        trusted_data.get_worksheet(0).update_cell(1, trusted_data.get_worksheet(0).col_count, missing_id)
+        trusted_data.get_worksheet(0).update_cell(2, trusted_data.get_worksheet(0).col_count, await get_fullname(r_ow.get_member(missing_id)))
         trusted_data.get_worksheet(1).add_cols(1)
-        trusted_data.get_worksheet(1).update_cell(1,trusted_data.get_worksheet(0).col_count, missing_id)
-        trusted_data.get_worksheet(1).update_cell(2,trusted_data.get_worksheet(0).col_count, await get_fullname(r_ow.get_member(missing_id)))
+        trusted_data.get_worksheet(1).update_cell(1, trusted_data.get_worksheet(0).col_count, missing_id)
+        trusted_data.get_worksheet(1).update_cell(2, trusted_data.get_worksheet(0).col_count, await get_fullname(r_ow.get_member(missing_id)))
     id_list = trusted_data.get_worksheet(0).row_values(1)
     time = datetime.utcnow().strftime(r"%Y-%m-%d")
 
@@ -1483,7 +1489,8 @@ async def update_trusted_data(start, end):
         new_row.append(trusted)
         non_trusted = await count_non_trusted(trusted_id)
         new_row_non.append(non_trusted)
-
+    trusted_data.get_worksheet(0).append_row(new_row)
+    trusted_data.get_worksheet(1).append_row(new_row_non)
 
 class Unbuffered(object):
     def __init__(self, stream):
