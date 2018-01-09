@@ -141,6 +141,7 @@ async def on_ready():
     print('ID: ' + client.user.id)
 
 async def run_startup():
+    return
     await client.wait_until_ready()
     await asyncio.sleep(10)
     if "334043962094387201" not in [server.id for server in client.servers]:
@@ -1493,6 +1494,8 @@ async def update_trusted_data(start, end):
                 new_row += str(trusted)
                 non_trusted = await count_non_trusted(trusted_id)
                 new_row_non += str(non_trusted)
+                print(new_row)
+                print(new_row_non)
             except:
                 print(traceback.format_exc())
         trusted_data.get_worksheet(0).append_row(new_row)
