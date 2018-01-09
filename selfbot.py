@@ -1486,7 +1486,7 @@ async def update_trusted_data(start, end):
 
     new_row = [time]
     new_row_non = [time]
-    for trusted_id in id_list:
+    for trusted_id in list(filter(None, id_list)):
         try:
             print(trusted_id)
             trusted = await count_trusted(trusted_id)
