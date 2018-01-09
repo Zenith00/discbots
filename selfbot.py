@@ -1435,9 +1435,9 @@ async def update_trusted_data(start, end):
                 r_ow.id,
             "date"      : {
                 "$gte":
-                    start.isoformat(" "),
+                    start,
                 "$lte":
-                    end.isoformat(" "),
+                    end,
             },
             "channel_id":
                 "170185225526181890"
@@ -1452,9 +1452,9 @@ async def update_trusted_data(start, end):
                 r_ow.id,
             "date"      : {
                 "$gte":
-                    start.isoformat(" "),
+                    start,
                 "$lte":
-                    end.isoformat(" "),
+                    end,
             },
             "channel_id": {
                 "$ne": "170185225526181890"
