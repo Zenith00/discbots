@@ -1468,8 +1468,8 @@ async def update_trusted_data(start, end):
     admin_role = await get_role(r_ow, "397922334540824577")
     admin_perms = await get_role(r_ow, "172949857164722176")
 
-    trusteds = await get_role_members(trusted_role) + await get_role_members(mod_role) + await get_role_members(mod_perms) + await get_role_members(
-        admin_role) + await get_role_members(admin_perms)
+    trusteds = set(await get_role_members(trusted_role) + await get_role_members(mod_role) + await get_role_members(mod_perms) + await get_role_members(
+        admin_role) + await get_role_members(admin_perms))
     trusted_id_list = [member.id for member in trusteds]
     missing = set(trusted_id_list) - set(id_list)
     for missing_id in missing:
@@ -1481,12 +1481,14 @@ async def update_trusted_data(start, end):
         trusted_data.get_worksheet(1).update_cell(1, trusted_data.get_worksheet(0).col_count, missing_id)
         trusted_data.get_worksheet(1).update_cell(2, trusted_data.get_worksheet(0).col_count, await get_fullname(r_ow.get_member(missing_id)))
     id_list = trusted_data.get_worksheet(0).row_values(1)[1:]
+    print(id_list)
     time = datetime.utcnow().strftime(r"%Y-%m-%d")
 
     new_row = [time]
     new_row_non = [time]
     for trusted_id in id_list:
         try:
+            print(trusted)
             trusted = await count_trusted(trusted_id)
             new_row += str(trusted)
             non_trusted = await count_non_trusted(trusted_id)
