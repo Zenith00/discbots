@@ -1425,78 +1425,80 @@ async def get_fullname(member):
 
 async def update_trusted_data(start, end):
     r_ow = client.get_server("94882524378968064")
+    try:
+        async def count_trusted(member_id):
+            print("Lyzing: " + str(member_id))
+            return await mongo_client.discord.message_log.find({
+                "user_id"   :
+                    member_id,
+                "server_id" :
+                    r_ow.id,
+                "date"      : {
+                    "$gte":
+                        start,
+                    "$lte":
+                        end,
+                },
+                "channel_id":
+                    "170185225526181890"
+            }).count()
 
-    async def count_trusted(member_id):
-        print("Lyzing: " + str(member_id))
-        return await mongo_client.discord.message_log.find({
-            "user_id"   :
-                member_id,
-            "server_id" :
-                r_ow.id,
-            "date"      : {
-                "$gte":
-                    start,
-                "$lte":
-                    end,
-            },
-            "channel_id":
-                "170185225526181890"
-        }).count()
+        async def count_non_trusted(member_id):
+            print("Lyzing: " + str(member_id))
+            return await mongo_client.discord.message_log.find({
+                "user_id"   :
+                    member_id,
+                "server_id" :
+                    r_ow.id,
+                "date"      : {
+                    "$gte":
+                        start,
+                    "$lte":
+                        end,
+                },
+                "channel_id": {
+                    "$ne": "170185225526181890"
+                }
+            }).count()
 
-    async def count_non_trusted(member_id):
-        print("Lyzing: " + str(member_id))
-        return await mongo_client.discord.message_log.find({
-            "user_id"   :
-                member_id,
-            "server_id" :
-                r_ow.id,
-            "date"      : {
-                "$gte":
-                    start,
-                "$lte":
-                    end,
-            },
-            "channel_id": {
-                "$ne": "170185225526181890"
-            }
-        }).count()
+        id_list = trusted_data.get_worksheet(0).row_values(1)[1:]
+        trusted_role = await get_role(r_ow, "169728613216813056")
+        mod_role = await get_role(r_ow, "397922982632226816")
+        mod_perms = await get_role(r_ow, "172950000412655616")
+        admin_role = await get_role(r_ow, "397922334540824577")
+        admin_perms = await get_role(r_ow, "172949857164722176")
 
-    id_list = trusted_data.get_worksheet(0).row_values(1)[1:]
-    trusted_role = await get_role(r_ow, "169728613216813056")
-    mod_role = await get_role(r_ow, "397922982632226816")
-    mod_perms = await get_role(r_ow, "172950000412655616")
-    admin_role = await get_role(r_ow, "397922334540824577")
-    admin_perms = await get_role(r_ow, "172949857164722176")
+        trusteds = set(await get_role_members(trusted_role) + await get_role_members(mod_role) + await get_role_members(mod_perms) + await get_role_members(
+            admin_role) + await get_role_members(admin_perms))
+        trusted_id_list = [member.id for member in trusteds]
+        missing = set(trusted_id_list) - set(id_list)
+        for missing_id in missing:
+            print("Adding " + missing_id)
+            trusted_data.get_worksheet(0).add_cols(1)
+            trusted_data.get_worksheet(0).update_cell(1, trusted_data.get_worksheet(0).col_count, missing_id)
+            trusted_data.get_worksheet(0).update_cell(2, trusted_data.get_worksheet(0).col_count, await get_fullname(r_ow.get_member(missing_id)))
+            trusted_data.get_worksheet(1).add_cols(1)
+            trusted_data.get_worksheet(1).update_cell(1, trusted_data.get_worksheet(0).col_count, missing_id)
+            trusted_data.get_worksheet(1).update_cell(2, trusted_data.get_worksheet(0).col_count, await get_fullname(r_ow.get_member(missing_id)))
+        id_list = trusted_data.get_worksheet(0).row_values(1)[1:]
+        print(id_list)
+        time = datetime.utcnow().strftime(r"%Y-%m-%d")
 
-    trusteds = set(await get_role_members(trusted_role) + await get_role_members(mod_role) + await get_role_members(mod_perms) + await get_role_members(
-        admin_role) + await get_role_members(admin_perms))
-    trusted_id_list = [member.id for member in trusteds]
-    missing = set(trusted_id_list) - set(id_list)
-    for missing_id in missing:
-        print("Adding " + missing_id)
-        trusted_data.get_worksheet(0).add_cols(1)
-        trusted_data.get_worksheet(0).update_cell(1, trusted_data.get_worksheet(0).col_count, missing_id)
-        trusted_data.get_worksheet(0).update_cell(2, trusted_data.get_worksheet(0).col_count, await get_fullname(r_ow.get_member(missing_id)))
-        trusted_data.get_worksheet(1).add_cols(1)
-        trusted_data.get_worksheet(1).update_cell(1, trusted_data.get_worksheet(0).col_count, missing_id)
-        trusted_data.get_worksheet(1).update_cell(2, trusted_data.get_worksheet(0).col_count, await get_fullname(r_ow.get_member(missing_id)))
-    id_list = trusted_data.get_worksheet(0).row_values(1)[1:]
-    print(id_list)
-    time = datetime.utcnow().strftime(r"%Y-%m-%d")
-
-    new_row = [time]
-    new_row_non = [time]
-    for trusted_id in list(filter(None, id_list)):
-        try:
-            print(trusted_id)
-            trusted = await count_trusted(trusted_id)
-            new_row += str(trusted)
-            non_trusted = await count_non_trusted(trusted_id)
-            new_row_non += str(non_trusted)
-        except:
-            print(traceback.format_exc())
-    trusted_data.get_worksheet(0).append_row(new_row)
-    trusted_data.get_worksheet(1).append_row(new_row_non)
+        new_row = [time]
+        new_row_non = [time]
+        for trusted_id in list(filter(None, id_list)):
+            try:
+                print(trusted_id)
+                trusted = await count_trusted(trusted_id)
+                new_row += str(trusted)
+                non_trusted = await count_non_trusted(trusted_id)
+                new_row_non += str(non_trusted)
+            except:
+                print(traceback.format_exc())
+        trusted_data.get_worksheet(0).append_row(new_row)
+        trusted_data.get_worksheet(1).append_row(new_row_non)
+    except:
+        print(traceback.format_exc())
 
 class Unbuffered(object):
     def __init__(self, stream):
