@@ -1491,12 +1491,16 @@ async def update_trusted_data(start, end):
             try:
                 print(trusted_id)
                 trusted = await count_trusted(trusted_id)
+                print("Adding Trusted Count: " + str(trusted))
                 new_row += str(trusted)
-                non_trusted = await count_non_trusted(trusted_id)
-                new_row_non += str(non_trusted)
                 print("NEW ROW")
                 print(len(new_row))
                 print(new_row)
+
+
+                non_trusted = await count_non_trusted(trusted_id)
+                print("Adding NonTrusted Count: " + str(non_trusted))
+                new_row_non += str(non_trusted)
                 print("NEW ROW NON TRUSTED")
                 print(len(new_row_non))
                 print(new_row_non)
