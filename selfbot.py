@@ -35,6 +35,14 @@ import tqdm
 from config import *
 from utils.utils_text import dict2rows
 import urllib
+from oauth2client.service_account import ServiceAccountCredentials
+import gspread
+
+scope = ['https://spreadsheets.google.com/feeds']
+credentials = ServiceAccountCredentials.from_json_keyfile_name(
+    "selfbot-c8131927d12c.json", scope)
+gc = gspread.authorize(credentials)
+trusted_data = gc.open_by_key("1psiviI5Uurvq4qdREBuS1Egf79oPpJr1YdHNlyAWHVU")
 
 # logging.basicConfig(level=logging.INFO)
 
@@ -67,6 +75,7 @@ if config["imgur"]:
                                IMGUR_ACCESS_TOKEN, IMGUR_REFRESH_TOKEN)
 
 # test
+
 
 @client.event
 async def on_member_remove(member):
@@ -141,15 +150,38 @@ async def run_startup():
     #
     for server_id in tqdm.tqdm([x.id for x in client.servers]):
         # print(server_id)
-        fields = ["server_leaves", "server_joins", "bans", "unbans", "server_id"]
+        fields = [
+            "server_leaves", "server_joins", "bans", "unbans", "server_id"
+        ]
         for field in fields:
-            while await mongo_client.discord.userinfo.find_one({field + ".0": {"$exists": True}}):
-                res = await mongo_client.discord.userinfo.find_one({field + ".0": {"$exists": True}})
+            while await mongo_client.discord.userinfo.find_one({
+                        field + ".0": {
+                    "$exists": True
+                }
+            }):
+                res = await mongo_client.discord.userinfo.find_one({
+                    field + ".0": {
+                        "$exists": True
+                    }
+                })
                 if res:
-                    await mongo_client.discord.userinfo.update_one({"_id": res["_id"]}, {"$unset": {field: ""}})
+                    await mongo_client.discord.userinfo.update_one({
+                        "_id":
+                            res["_id"]
+                    }, {"$unset": {
+                        field: ""
+                    }})
 
-        while await mongo_client.discord.userinfo.find_one({server_id: {"$exists": True}}):
-            res = await mongo_client.discord.userinfo.find_one({server_id: {"$exists": True}})
+        while await mongo_client.discord.userinfo.find_one({
+            server_id: {
+                "$exists": True
+            }
+        }):
+            res = await mongo_client.discord.userinfo.find_one({
+                server_id: {
+                    "$exists": True
+                }
+            })
             if res:
                 # print("Processing: " + res["user_id"])
                 for sub_doc in res[server_id]:
@@ -157,8 +189,20 @@ async def run_startup():
                     for key in sub_doc.keys():
                         # print("          " + str(key))
                         # print("          " + key + "." + server_id + "|" + str(sub_doc[key]))
-                        await mongo_client.discord.userinfo.update_one({"_id": res["_id"]}, {"$addToSet": {key + "." + server_id: sub_doc[key]}})
-                await mongo_client.discord.userinfo.update_one({"_id": res["_id"]}, {"$unset": {server_id: ""}})
+                        await mongo_client.discord.userinfo.update_one({
+                            "_id":
+                                res["_id"]
+                        }, {
+                            "$addToSet": {
+                                key + "." + server_id: sub_doc[key]
+                            }
+                        })
+                await mongo_client.discord.userinfo.update_one({
+                    "_id":
+                        res["_id"]
+                }, {"$unset": {
+                    server_id: ""
+                }})
 
     await ensure_database_struct()
     print("Finished setting up database")
@@ -189,19 +233,32 @@ async def ensure_database_struct():
             mongo_client.discord.message_log.create_index(
                 full_index_name[:-2], background=True)
 
-    if "user_id_1" not in (await mongo_client.discord.userinfo.index_information()).keys():
+    if "user_id_1" not in (
+            await mongo_client.discord.userinfo.index_information()).keys():
         duplicates = []
         try:
-            await mongo_client.discord.userinfo.create_index("user_id", unique=True)
+            await mongo_client.discord.userinfo.create_index(
+                "user_id", unique=True)
         except:
             try:
                 print("Running.….")
-                cursor = mongo_client.discord.userinfo.aggregate(
-                    [
-                        {"$group": {"_id": "user_id", "unique_ids": {"$addToSet": "$_id"}, "count": {"$sum": 1}}},
-                        {"$match": {"count": {"$gte": 2}}}
-                    ]
-                )
+                cursor = mongo_client.discord.userinfo.aggregate([{
+                    "$group": {
+                        "_id"       : "user_id",
+                        "unique_ids": {
+                            "$addToSet": "$_id"
+                        },
+                        "count"     : {
+                            "$sum": 1
+                        }
+                    }
+                }, {
+                    "$match": {
+                        "count": {
+                            "$gte": 2
+                        }
+                    }
+                }])
 
                 response = []
                 async for doc in cursor:
@@ -210,13 +267,18 @@ async def ensure_database_struct():
                     for id in doc["unique_ids"]:
                         response.append(id)
 
-                await mongo_client.discord.userinfo.delete_many({"_id": {"$in": response}})
+                await mongo_client.discord.userinfo.delete_many({
+                    "_id": {
+                        "$in": response
+                    }
+                })
             except:
                 await trace(traceback.format_exc())
                 print(traceback.format_exc())
 
         pass
-    if "tag_1" not in (await mongo_client.discord.tags.index_information()).keys():
+    if "tag_1" not in (await
+                       mongo_client.discord.tags.index_information()).keys():
         try:
             await mongo_client.discord.tags.create_index("tag", unique=True)
         except:
@@ -226,7 +288,8 @@ async def ensure_database_struct():
 
 async def update_members():
     for server in client.servers:
-        print("Startup: Importing members from " + server.name if server.name else server.id)
+        print("Startup: Importing members from " + server.name
+              if server.name else server.id)
         memberlist = []
         for member in server.members:
             memberlist.append(member)
@@ -259,17 +322,23 @@ async def on_message(message_in):
                 expanded_list = []
                 for word in base_list:
                     if word.startswith(config["prefix"]["tag"]):
-                        res = await mongo_client.discord.tags.find_one({"tag": word[2:]})
+                        res = await mongo_client.discord.tags.find_one({
+                            "tag":
+                                word[2:]
+                        })
                         if res:
                             expanded_list.append(res["expansion"])
                         else:
                             expanded_list.append(word)
-                            await relay("Ignored unset tag call `{}`".format(word))
+                            await relay(
+                                "Ignored unset tag call `{}`".format(word))
                     else:
                         expanded_list.append(word)
                 if set(expanded_list) != set(base_list):
-                    if not message_in.content.startswith(config["prefix"]["command"]):
-                        await client.edit_message(message_in, " ".join(expanded_list))
+                    if not message_in.content.startswith(
+                            config["prefix"]["command"]):
+                        await client.edit_message(message_in,
+                                                  " ".join(expanded_list))
                     message_in.content = " ".join(expanded_list)
 
             if message_in.content.startswith(config["prefix"]["command"]):
@@ -289,17 +358,15 @@ async def on_message(message_in):
                             package = word.replace("package!!", "")
                             pip.main(["install", package])
                     if "config!!" in message_in.content:
-                        new_config = utils_text.regex_test("(?<=config!!).*(?=!!config)", message_in.content).group(0)
+                        new_config = utils_text.regex_test(
+                            "(?<=config!!).*(?=!!config)",
+                            message_in.content).group(0)
                         utils_file.append_line("config.py", new_config)
 
                     g = git.cmd.Git(utils_file.directory_path(__file__))
                     res = g.pull()
                 except:
                     await trace(traceback.format_exc())
-
-
-
-
 
     except:
         await trace("{}".format(traceback.format_exc()))
@@ -351,9 +418,7 @@ async def perform_command(command, params, message_in):
         text = " ".join(params)
         result = ""
         for c in text:
-            result += "{} | {} | {} \n".format(c,
-                                               unicodedata.name(c),
-                                               ord(c))
+            result += "{} | {} | {} \n".format(c, unicodedata.name(c), ord(c))
         output.append(("relay", result, ""))
     if command == "repeat":
         for x in range(0, int(params[0])):
@@ -375,8 +440,9 @@ async def perform_command(command, params, message_in):
     if command == "jpeg":
         url = params[0]
         url = await more_jpeg(url)
-        output.append(("inplace", "{url}. Compressed to {ratio}% of original".format(
-            url=url[0], ratio=url[1]), "text"))
+        output.append(("inplace",
+                       "{url}. Compressed to {ratio}% of original".format(
+                           url=url[0], ratio=url[1]), "text"))
     # Requires IMGUR
     # Posts X images from a given imgur album's ID: http://imgur.com/a/ID
     # %%imgurshuffle X umuvY
@@ -407,6 +473,10 @@ async def perform_command(command, params, message_in):
 
         await relay("Reminding you after {}: `{}`".format(
             time_dict["readable"], raw.split(",")[0]))
+
+    if command == "trustedtest":
+        await update_trusted_data(params[0], params[1])
+
     if output:
         for item in output:
             print(item)
@@ -421,16 +491,34 @@ async def command_analyze(params, message_in):
 
     async def count_trusted(member_id):
         print("Lyzing: " + str(member_id))
-        return await mongo_client.discord.message_log.find(
-            {"user_id"   : member_id, "server_id": message_in.server.id, "date": {"$gte": (datetime.utcnow() - timedelta(days=int(days))).isoformat(" ")},
-             "channel_id": "170185225526181890"}).count()
+        return await mongo_client.discord.message_log.find({
+            "user_id"   :
+                member_id,
+            "server_id" :
+                message_in.server.id,
+            "date"      : {
+                "$gte":
+                    (datetime.utcnow() - timedelta(days=int(days))).isoformat(" ")
+            },
+            "channel_id":
+                "170185225526181890"
+        }).count()
 
     async def count_non_trusted(member_id):
         print("Lyzing: " + str(member_id))
-        return await mongo_client.discord.message_log.find(
-
-            {"user_id"   : member_id, "server_id": message_in.server.id, "date": {"$gte": (datetime.utcnow() - timedelta(days=int(days))).isoformat(" ")},
-             "channel_id": {"$ne": "170185225526181890"}}).count()
+        return await mongo_client.discord.message_log.find({
+            "user_id"   :
+                member_id,
+            "server_id" :
+                message_in.server.id,
+            "date"      : {
+                "$gte":
+                    (datetime.utcnow() - timedelta(days=int(days))).isoformat(" ")
+            },
+            "channel_id": {
+                "$ne": "170185225526181890"
+            }
+        }).count()
 
     if query_type == "member":
         target_member = message_in.server.get_member(target)
@@ -442,9 +530,11 @@ async def command_analyze(params, message_in):
         print(non_trusted_chat_ct)
 
         embed = discord.Embed(
-            title="{name}#{discrim}'s message info in the last {dayct} days".format(
+            title=
+            "{name}#{discrim}'s message info in the last {dayct} days".format(
                 name=target_member.name,
-                discrim=str(target_member.discriminator),dayct=days),
+                discrim=str(target_member.discriminator),
+                dayct=days),
             type="rich")
         embed.add_field(name="ID", value=target_member.id, inline=True)
         avatar_link = target_member.avatar_url
@@ -473,31 +563,42 @@ async def command_analyze(params, message_in):
                 embed.colour = discord.Colour(hex_int)
             embed.set_thumbnail(url=target_member.avatar_url)
 
-        embed.add_field(name="Messages inside trusted-chat", value=str(trusted_chat_ct), inline=False)
-        embed.add_field(name="Messages outside trusted-chat", value=str(non_trusted_chat_ct), inline=False)
+        embed.add_field(
+            name="Messages inside trusted-chat",
+            value=str(trusted_chat_ct),
+            inline=False)
+        embed.add_field(
+            name="Messages outside trusted-chat",
+            value=str(non_trusted_chat_ct),
+            inline=False)
 
         print("SUCCESS?")
         print(config["lyze"]["member"])
-
 
         return [(config["lyze"]["member"], embed, "embed")]
 
     if query_type == "rank":
         trusteds = {}
-        for member in await get_role_members(await get_role(message_in.server, "169728613216813056")):
-            trusteds[member.id] = (await count_trusted(member.id), await count_non_trusted(member.id))
+        for member in await get_role_members(
+                await get_role(message_in.server, "169728613216813056")):
+            trusteds[member.id] = (await count_trusted(member.id), await
+            count_non_trusted(member.id))
         sorted_trusted = sorted(trusteds.items(), key=lambda x: x[1][1])[::-1]
         print(trusteds)
         print(sorted_trusted)
         output = [["Member", "In Trusted", "Outside Trusted"]]
         for trusted in sorted_trusted:
-            output.append([message_in.server.get_member(trusted[0]).name, str(trusted[1][0]), str(trusted[1][1])])
+            output.append([
+                message_in.server.get_member(trusted[0]).name,
+                str(trusted[1][0]), str(trusted[1][1])
+            ])
         return [(config["lyze"]["rank"], output, "rows")]
 
 async def parse_output(output, context):
     try:
         if output[0] == "inplace":
-            await send(destination=context, text=output[1], send_type=output[2])
+            await send(
+                destination=context, text=output[1], send_type=output[2])
         elif output[0] == "relay":
             await send(
                 #                               Relay
@@ -568,8 +669,8 @@ async def command_logs(params, context):
                 limit=int(params[0])):
             output_text += await format_message_to_log(doc) + "\n"
 
-        return [(config["logs"]["output"], "\n".join(
-            utils_text.hastebin(output_text)), None)]
+        return [(config["logs"]["output"],
+                 "\n".join(utils_text.hastebin(output_text)), None)]
     except:
         return [("relay", traceback.format_exc(), None)]
 
@@ -609,9 +710,11 @@ async def add_stack(add_type, obj_info, context, coll=None, **kwargs):
 async def command_exec(params, message_in):
     input_command = " ".join(params[1:])
     if "..ch" in input_command:
-        input_command = input_command.replace("..ch", 'client.get_channel("{}")'.format(message_in.channel.id))
+        input_command = input_command.replace(
+            "..ch", 'client.get_channel("{}")'.format(message_in.channel.id))
     if "..sh" in input_command:
-        input_command = input_command.replace("..sh", 'client.get_server("{}")'.format(message_in.server.id))
+        input_command = input_command.replace(
+            "..sh", 'client.get_server("{}")'.format(message_in.server.id))
 
     if params[0] == "aeval":
         print(input_command)
@@ -619,9 +722,9 @@ async def command_exec(params, message_in):
     if params[0] == "co":
 
         ""
-        command = (
-            'import asyncio\n'
-            'client.loop.create_task({command})').format(command=input_command)
+        command = ('import asyncio\n'
+                   'client.loop.create_task({command})').format(
+            command=input_command)
         await relay(command)
         await relay(input_command)
         old_stdout = sys.stdout
@@ -633,11 +736,13 @@ async def command_exec(params, message_in):
         finally:
             sys.stdout = old_stdout
         if redirected_output.getvalue():
-            return ("inplace", "```py\nInput:\n{}\nOutput:\n{}\n```".format(input_command, redirected_output.getvalue()), None)
+            return ("inplace", "```py\nInput:\n{}\nOutput:\n{}\n```".format(
+                input_command, redirected_output.getvalue()), None)
     if params[0] == "eval":
         try:
             res = eval(input_command)
-            return ("inplace", "```py\nInput:\n{}\nOutput:\n{}\n```".format(input_command, res), None)
+            return ("inplace", "```py\nInput:\n{}\nOutput:\n{}\n```".format(
+                input_command, res), None)
         except:
             await trace(traceback.format_exc())
 
@@ -650,7 +755,8 @@ async def command_exec(params, message_in):
             except:
                 await relay('```py\n{}\n```'.format(traceback.format_exc()))
         if output.getvalue():
-            return "inplace", "```py\nInput:\n{}\nOutput:\n{}\n```".format(input_command, output.getvalue()), None
+            return "inplace", "```py\nInput:\n{}\nOutput:\n{}\n```".format(
+                input_command, output.getvalue()), None
     return "trash", None, None
 
 async def command_query(params, message_in):
@@ -669,12 +775,15 @@ async def command_query(params, message_in):
                 embed.add_field(name="ID", value=target_member.id, inline=True)
                 if user_dict:
                     if "server_joins" in user_dict.keys(
-                    ) and message_in.server.id in user_dict["server_joins"].keys():
+                    ) and message_in.server.id in user_dict["server_joins"].keys(
+                    ):
                         server_joins = user_dict["server_joins"][
                             message_in.server.id]
                         server_joins = [join[:10] for join in server_joins]
                         embed.add_field(
-                            name="First Join", value=server_joins[0], inline=True)
+                            name="First Join",
+                            value=server_joins[0],
+                            inline=True)
                     if "bans" in user_dict.keys(
                     ) and message_in.server.id in user_dict["bans"].keys():
                         bans = user_dict["bans"][message_in.server.id]
@@ -686,7 +795,8 @@ async def command_query(params, message_in):
                         unbans = user_dict["unbans"][message_in.server.id]
                         unbans = [unban[:10] for unban in unbans]
                         unbans = str(unbans)[1:-1]
-                        embed.add_field(name="Unbans", value=unbans, inline=True)
+                        embed.add_field(
+                            name="Unbans", value=unbans, inline=True)
                 embed.add_field(
                     name="Creation",
                     value=target_member.created_at.strftime("%B %d, %Y"),
@@ -702,7 +812,8 @@ async def command_query(params, message_in):
                         embed.add_field(name="Current VC", value=voice_name)
                     status = str(target_member.status)
                 else:
-                    if target_member in await client.get_bans(message_in.server):
+                    if target_member in await client.get_bans(
+                            message_in.server):
                         status = "Banned"
                     else:
                         status = "Not part of the server"
@@ -716,7 +827,8 @@ async def command_query(params, message_in):
                         hex_int = int(color, 16)
                         embed.colour = discord.Colour(hex_int)
                     embed.set_thumbnail(url=target_member.avatar_url)
-                return [(config["query"]["user"]["embed"]["output"], embed, "embed")]
+                return [(config["query"]["user"]["embed"]["output"], embed,
+                         "embed")]
 
             if params[1] == "dump":
                 print("dumping")
@@ -734,26 +846,19 @@ async def command_query(params, message_in):
 
                 embed = discord.Embed(
                     title="{name}#{discrim}'s userinfo".format(
-                        name=name,
-                        discrim=str(discrim)),
+                        name=name, discrim=str(discrim)),
                     type="rich")
                 embed.add_field(
                     name="Creation",
                     value=user_dict["created_at"],
-                    inline=True
-                )
+                    inline=True)
                 embed.add_field(
-                    name="Nicks",
-                    value=user_dict["nicks"],
-                    inline=False
-                )
+                    name="Nicks", value=user_dict["nicks"], inline=False)
                 embed.add_field(
-                    name="Names",
-                    value=user_dict["names"],
-                    inline=False
-                )
+                    name="Names", value=user_dict["names"], inline=False)
                 output = []
-                output.append((config["query"]["user"]["dump"], embed, "embed"))
+                output.append((config["query"]["user"]["dump"], embed,
+                               "embed"))
                 list_of_rows = []
 
                 print("!" * 20)
@@ -773,7 +878,8 @@ async def command_query(params, message_in):
                         else:
                             print(key)
                     base.extend(dict2rows(named_dict))
-                    output.append([config["query"]["user"]["dump"], base, "rows"])
+                    output.append(
+                        [config["query"]["user"]["dump"], base, "rows"])
                     # print(output)
 
                 if "server_leaves" in user_dict.keys():
@@ -781,11 +887,13 @@ async def command_query(params, message_in):
                     named_dict = {}
                     for key in user_dict["server_leaves"].keys():
                         if client.get_server(key):
-                            named_dict[client.get_server(key).name] = user_dict["server_leaves"][key]
+                            named_dict[client.get_server(key)
+                                .name] = user_dict["server_leaves"][key]
                         else:
                             print(key)
                     base.extend(dict2rows(named_dict))
-                    output.append([config["query"]["user"]["dump"], base, "rows"])
+                    output.append(
+                        [config["query"]["user"]["dump"], base, "rows"])
                     # print(output)
 
                 if "bans" in user_dict.keys():
@@ -793,11 +901,13 @@ async def command_query(params, message_in):
                     named_dict = {}
                     for key in user_dict["bans"].keys():
                         if client.get_server(key):
-                            named_dict[client.get_server(key).name] = user_dict["bans"][key]
+                            named_dict[client.get_server(key)
+                                .name] = user_dict["bans"][key]
                         else:
                             print(key)
                     base.extend(dict2rows(named_dict))
-                    output.append([config["query"]["user"]["dump"], base, "rows"])
+                    output.append(
+                        [config["query"]["user"]["dump"], base, "rows"])
                     # print(output)
 
                 if "unbans" in user_dict.keys():
@@ -805,11 +915,13 @@ async def command_query(params, message_in):
                     named_dict = {}
                     for key in user_dict["unbans"].keys():
                         if client.get_server(key):
-                            named_dict[client.get_server(key).name] = user_dict["unbans"][key]
+                            named_dict[client.get_server(key)
+                                .name] = user_dict["unbans"][key]
                         else:
                             print(key)
                     base.extend(dict2rows(named_dict))
-                    output.append([config["query"]["user"]["dump"], base, "rows"])
+                    output.append(
+                        [config["query"]["user"]["dump"], base, "rows"])
                     # print(output)
 
                 # print(output)
@@ -818,8 +930,9 @@ async def command_query(params, message_in):
         if params[0] == "roles":
             if params[1] == "list":
                 role_list = []
-                role_list.append(
-                    ["Name", "ID", "Position", "Color", "Hoisted", "Mentionable"])
+                role_list.append([
+                    "Name", "ID", "Position", "Color", "Hoisted", "Mentionable"
+                ])
                 for role in message_in.server.role_hierarchy:
                     new_entry = [
                         role.name, "\"{}\"".format(str(role.id)),
@@ -827,15 +940,16 @@ async def command_query(params, message_in):
                         str(role.hoist), str(role.mentionable)
                     ]
                     role_list.append(new_entry)
-                return [(config["query"]["roles"]["list"][
-                             "output"], role_list, "rows")]
+                return [(config["query"]["roles"]["list"]["output"], role_list,
+                         "rows")]
 
             if params[1] == "members":
                 role_members = await get_role_members(
                     await get_role(message_in.server, params[2]))
                 output = config["query"]["roles"]["members"]["delimiter"].join(
                     [member.mention for member in role_members])
-                return [(config["query"]["roles"]["members"]["output"], output, None)]
+                return [(config["query"]["roles"]["members"]["output"], output,
+                         None)]
         if params[0] == "emoji":
             import re
             emoji_id = utils_text.regex_test("\d+(?=>)",
@@ -847,19 +961,22 @@ async def command_query(params, message_in):
                     target_emoji = emoji
                     print(target_emoji)
                     break
-            embed = discord.Embed(
-                title=target_emoji.name,
-                type="rich")
+            embed = discord.Embed(title=target_emoji.name, type="rich")
             embed.set_footer(text=target_emoji.url)
             embed.set_thumbnail(url=target_emoji.url)
 
-            embed.add_field(name="Server Name", value=target_emoji.server.name, inline=True)
-            embed.add_field(name="Server ID", value=target_emoji.server.id, inline=True)
+            embed.add_field(
+                name="Server Name",
+                value=target_emoji.server.name,
+                inline=True)
+            embed.add_field(
+                name="Server ID", value=target_emoji.server.id, inline=True)
             print(embed)
             invite = None
 
             try:
-                invite = await client.create_invite(target_emoji.server, unique=False)
+                invite = await client.create_invite(
+                    target_emoji.server, unique=False)
             except:
                 pass
             if invite:
@@ -867,8 +984,8 @@ async def command_query(params, message_in):
 
             return [(config["query"]["emoji"]["output"], embed, "embed")]
         if params[0] == "owner":
-            return [(config["query"]["owner"]["output"], message_in.server.owner.mention, "text")]
-
+            return [(config["query"]["owner"]["output"],
+                     message_in.server.owner.mention, "text")]
 
     except:
         await trace(traceback.format_exc())
@@ -878,7 +995,11 @@ async def command_avatar(params, message_in):
         image = Image.open(BytesIO(requests.get(params[1]).content))
         filename = params[2]
     if params[0] == "copy":
-        image = Image.open(BytesIO(requests.get(message_in.server.get_member(params[1]).avatar_url).content))
+        image = Image.open(
+            BytesIO(
+                requests.get(
+                    message_in.server.get_member(params[1]).avatar_url)
+                    .content))
         filename = params[1]
     if params[0] in ["get", "copy"]:
         image_path = utils_file.relative_path(__file__,
@@ -891,7 +1012,9 @@ async def command_avatar(params, message_in):
     if params[0] == "set":
         if "." not in params[1]:
             params[1] += ".png"
-        with open(os.path.join(os.path.dirname(__file__), "avatars", params[1]), "rb") as ava:
+        with open(
+                os.path.join(os.path.dirname(__file__), "avatars", params[1]),
+                "rb") as ava:
             await client.edit_profile(
                 password=DISCORD_PASSWORD, avatar=ava.read())
 
@@ -901,8 +1024,15 @@ async def command_tag(params, message_in):
         if params[0] == "set":
             tag_str = params[1]
             expansion = " ".join(params[2:])
-            await mongo_client.discord.tags.update_one({"tag": tag_str}, {"$set": {"expansion": expansion}}, upsert=True)
-            await relay("Set `{}{}`\n to expand to ```{}\n```".format(config["prefix"]["tag"], tag_str, expansion))
+            await mongo_client.discord.tags.update_one(
+                {
+                    "tag": tag_str
+                }, {"$set": {
+                    "expansion": expansion
+                }},
+                upsert=True)
+            await relay("Set `{}{}`\n to expand to ```{}\n```".format(
+                config["prefix"]["tag"], tag_str, expansion))
         if params[0] == "list":
             tags = {}
             async for doc in mongo_client.discord.tags.find({}):
@@ -912,9 +1042,13 @@ async def command_tag(params, message_in):
             else:
                 await relay("No tags")
         if params[0] == "unset":
-            res = await mongo_client.discord.tags.find_one_and_delete({"tag": params[1]})
+            res = await mongo_client.discord.tags.find_one_and_delete({
+                "tag":
+                    params[1]
+            })
             if res:
-                await relay("Unset `{}{}`\n expanding to ```{}\n```".format(config["prefix"]["tag"], res["tag"], res["expansion"]))
+                await relay("Unset `{}{}`\n expanding to ```{}\n```".format(
+                    config["prefix"]["tag"], res["tag"], res["expansion"]))
             else:
                 await relay("Tag not found")
     except:
@@ -1132,13 +1266,13 @@ async def import_message(mess):
         }})
 
     if mess.channel.id == "170185225526181890":
-        log_str = unidecode(
-            "[{time}][{channel}][{name}] {content}".format(
-                time=mess.timestamp.isoformat(" ")[:16],
-                channel=mess.channel.name,
-                name=mess.author.name,
-                content=mess.clean_content)).replace(r"\n", r"[\n]")
-        utils_file.append_line(r"/home/austin/develop/discbots/logfile.txt", log_str)
+        log_str = unidecode("[{time}][{channel}][{name}] {content}".format(
+            time=mess.timestamp.isoformat(" ")[:16],
+            channel=mess.channel.name,
+            name=mess.author.name,
+            content=mess.clean_content)).replace(r"\n", r"[\n]")
+        utils_file.append_line(r"/home/austin/develop/discbots/logfile.txt",
+                               log_str)
     await mongo_client.discord.message_log.insert_one(messInfo)
 
 async def import_to_user_set(member, set_name, entry):
@@ -1153,8 +1287,7 @@ async def import_to_server_user_set(member, server, set_name, entry):
         "user_id": member.id
     }, {"$addToSet": {
         "{}.{}".format(set_name, server): entry
-    }
-    })
+    }})
 
 # Logging
 
@@ -1284,7 +1417,73 @@ async def relay(text, send_type=None):
         send_type=send_type)
 
 async def trace(text):
-    await client.send_message(client.get_channel("335171044014948352"), "```" + text + "```")
+    await client.send_message(
+        client.get_channel("335171044014948352"), "```" + text + "```")
+
+async def get_fullname(member):
+    return "{}#{}".format(member.name, member.discriminator)
+
+async def update_trusted_data(start, end):
+    r_ow = client.get_server("94882524378968064")
+
+    async def count_trusted(member_id):
+        print("Lyzing: " + str(member_id))
+        return await mongo_client.discord.message_log.find({
+            "user_id"   :
+                member_id,
+            "server_id" :
+                r_ow.id,
+            "date" : {
+                "$gte":
+                    start.isoformat(" "),
+                "$lte":
+                    end.isoformat(" "),
+            },
+            "channel_id":
+                "170185225526181890"
+        }).count()
+
+    async def count_non_trusted(member_id):
+        print("Lyzing: " + str(member_id))
+        return await mongo_client.discord.message_log.find({
+            "user_id"   :
+                member_id,
+            "server_id" :
+                r_ow.id,
+            "date": {
+                "$gte":
+                    start.isoformat(" "),
+                "$lte":
+                    end.isoformat(" "),
+            },
+            "channel_id": {
+                "$ne": "170185225526181890"
+            }
+        }).count()
+
+    id_list = trusted_data.get_worksheet(0).row_values(1)
+    trusted_role = await get_role(r_ow, "169728613216813056")
+    trusteds = await get_role_members(trusted_role)
+    trusted_id_list = [member.id for member in trusteds]
+    missing = set(trusted_id_list) - set(id_list)
+    for missing_id in missing:
+        trusted_data.get_worksheet(0).add_cols(1)
+        trusted_data.get_worksheet(0).update_cell(1,trusted_data.get_worksheet(0).col_count, missing_id)
+        trusted_data.get_worksheet(0).update_cell(2,trusted_data.get_worksheet(0).col_count, await get_fullname(r_ow.get_member(missing_id)))
+        trusted_data.get_worksheet(1).add_cols(1)
+        trusted_data.get_worksheet(1).update_cell(1,trusted_data.get_worksheet(0).col_count, missing_id)
+        trusted_data.get_worksheet(1).update_cell(2,trusted_data.get_worksheet(0).col_count, await get_fullname(r_ow.get_member(missing_id)))
+    id_list = trusted_data.get_worksheet(0).row_values(1)
+    time = datetime.utcnow().strftime(r"%Y-%m-%d")
+
+    new_row = [time]
+    new_row_non = [time]
+    for trusted_id in id_list:
+        trusted = await count_trusted(trusted_id)
+        new_row.append(trusted)
+        non_trusted = await count_non_trusted(trusted_id)
+        new_row_non.append(non_trusted)
+
 
 class Unbuffered(object):
     def __init__(self, stream):
