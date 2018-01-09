@@ -1461,7 +1461,7 @@ async def update_trusted_data(start, end):
             }
         }).count()
 
-    id_list = trusted_data.get_worksheet(0).row_values(1)
+    id_list = trusted_data.get_worksheet(0).row_values(1)[1:]
     trusted_role = await get_role(r_ow, "169728613216813056")
     mod_role = await get_role(r_ow, "397922982632226816")
     mod_perms = await get_role(r_ow, "172950000412655616")
