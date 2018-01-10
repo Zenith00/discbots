@@ -402,96 +402,99 @@ async def perform_command(command, params, message_in):
     except discord.errors.NotFound:
         pass
     output = []
-    print("BASE PARAMS: " + str(params))
-    if command == "tag":
-        await command_tag(params, message_in)
-    if command == "query":
-        output.extend(await command_query(params, message_in))
-    if command == "find":
-        output.extend((config["find"]["current"]["output"], await find_user(
-            matching_ident=params[:-2] if "|" in params else params,
-            find_type="current",
-            server=message_in.server,
-            count=params[-1] if "|" in params else 1), None))
-    if command == "findall":
-        output.append((config["find"]["history"]["output"], await find_user(
-            matching_ident=params[:-2] if "|" in params else params,
-            find_type="history",
-            server=message_in.server,
-            count=params[-1] if "|" in params else 1), None))
-    if command == "findban":
-        output.append((config["find"]["bans"]["output"], await find_user(
-            matching_ident=params[:-2] if "|" in params else params,
-            find_type="bans",
-            server=message_in.server,
-            count=params[-1] if "|" in params else 1), None))
-    if command == "unidecode":
-        text = " ".join(params)
-        result = ""
-        for c in text:
-            result += "{} | {} | {} \n".format(c, unicodedata.name(c), ord(c))
-        output.append(("relay", result, ""))
-    if command == "repeat":
-        for x in range(0, int(params[0])):
-            await client.send_message(message_in.channel, " ".join(params[1:]))
-    if command == "big":
-        text = " ".join(params).lower()
-        big_text = ""
-        for character in text:
-            if character == " ":
-                big_text += "   "
-            else:
-                big_text += "​:regional_indicator_{c}:".format(c=character)
-        output.append(("inplace", big_text, "text"))
-    if command == "ava":
-        await command_avatar(params, message_in)
-    if command == "exec":
-        output.append(await command_exec(params, message_in))
-    # Requires IMGUR
-    if command == "jpeg":
-        url = params[0]
-        url = await more_jpeg(url)
-        output.append(("inplace",
-                       "{url}. Compressed to {ratio}% of original".format(
-                           url=url[0], ratio=url[1]), "text"))
-    # Requires IMGUR
-    # Posts X images from a given imgur album's ID: http://imgur.com/a/ID
-    # %%imgurshuffle X umuvY
-    if command == "imgurshuffle":
-        album_id = params[1]
-        if album_id == "ow":
-            album_id = "umuvY"
-        link_list = [x.link for x in imgur_client.get_album_images(album_id)]
-        random.shuffle(link_list)
-        for link in link_list[:int(params[0])]:
-            await client.send_message(message_in.channel, link)
-    if command == "lyze":
-        output.extend(await command_analyze(params, message_in))
+    try:
+        print("BASE PARAMS: " + str(params))
+        if command == "tag":
+            await command_tag(params, message_in)
+        if command == "query":
+            output.extend(await command_query(params, message_in))
+        if command == "find":
+            output.extend((config["find"]["current"]["output"], await find_user(
+                matching_ident=params[:-2] if "|" in params else params,
+                find_type="current",
+                server=message_in.server,
+                count=params[-1] if "|" in params else 1), None))
+        if command == "findall":
+            output.append((config["find"]["history"]["output"], await find_user(
+                matching_ident=params[:-2] if "|" in params else params,
+                find_type="history",
+                server=message_in.server,
+                count=params[-1] if "|" in params else 1), None))
+        if command == "findban":
+            output.append((config["find"]["bans"]["output"], await find_user(
+                matching_ident=params[:-2] if "|" in params else params,
+                find_type="bans",
+                server=message_in.server,
+                count=params[-1] if "|" in params else 1), None))
+        if command == "unidecode":
+            text = " ".join(params)
+            result = ""
+            for c in text:
+                result += "{} | {} | {} \n".format(c, unicodedata.name(c), ord(c))
+            output.append(("relay", result, ""))
+        if command == "repeat":
+            for x in range(0, int(params[0])):
+                await client.send_message(message_in.channel, " ".join(params[1:]))
+        if command == "big":
+            text = " ".join(params).lower()
+            big_text = ""
+            for character in text:
+                if character == " ":
+                    big_text += "   "
+                else:
+                    big_text += "​:regional_indicator_{c}:".format(c=character)
+            output.append(("inplace", big_text, "text"))
+        if command == "ava":
+            await command_avatar(params, message_in)
+        if command == "exec":
+            output.append(await command_exec(params, message_in))
+        # Requires IMGUR
+        if command == "jpeg":
+            url = params[0]
+            url = await more_jpeg(url)
+            output.append(("inplace",
+                           "{url}. Compressed to {ratio}% of original".format(
+                               url=url[0], ratio=url[1]), "text"))
+        # Requires IMGUR
+        # Posts X images from a given imgur album's ID: http://imgur.com/a/ID
+        # %%imgurshuffle X umuvY
+        if command == "imgurshuffle":
+            album_id = params[1]
+            if album_id == "ow":
+                album_id = "umuvY"
+            link_list = [x.link for x in imgur_client.get_album_images(album_id)]
+            random.shuffle(link_list)
+            for link in link_list[:int(params[0])]:
+                await client.send_message(message_in.channel, link)
+        if command == "lyze":
+            output.extend(await command_analyze(params, message_in))
 
-    if command == "logs":
-        output.extend(await command_logs(params, {
-            "server" : message_in.server,
-            "channel": message_in.channel,
-            "user"   : message_in.author
-        }))
+        if command == "logs":
+            output.extend(await command_logs(params, {
+                "server" : message_in.server,
+                "channel": message_in.channel,
+                "user"   : message_in.author
+            }))
 
-    if command == "remindme":
-        member = message_in.author
-        raw = " ".join(params)
+        if command == "remindme":
+            member = message_in.author
+            raw = " ".join(params)
 
-        time_dict = await utils_text.parse_time_to_end(raw.split(",")[-1])
-        await asyncio.sleep(time_dict["duration"].total_seconds())
+            time_dict = await utils_text.parse_time_to_end(raw.split(",")[-1])
+            await asyncio.sleep(time_dict["duration"].total_seconds())
 
-        await relay("Reminding you after {}: `{}`".format(
-            time_dict["readable"], raw.split(",")[0]))
+            await relay("Reminding you after {}: `{}`".format(
+                time_dict["readable"], raw.split(",")[0]))
 
-    if command == "trustedtest":
-        await update_trusted_data(params[0], params[1])
+        if command == "trustedtest":
+            await update_trusted_data(params[0], params[1])
 
-    if output:
-        for item in output:
-            print(item)
-            await parse_output(item, message_in.channel)
+        if output:
+            for item in output:
+                print(item)
+                await parse_output(item, message_in.channel)
+    except:
+        print(traceback.format_exc())
 
 async def command_analyze(params, message_in):
     query_type = params[0]
