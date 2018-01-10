@@ -701,7 +701,7 @@ async def command_analyze(params, message_in):
         embed.add_field(
             name="Percentile",
             value=str(user_percentile),
-            inline=False)
+            inline=True)
         embed.add_field(
             name="Grade",
             value=str(user_grade),
