@@ -25,6 +25,8 @@ config["logs"]["output"] = "relay"
 
 config["lyze"]["member"] = "inplace"
 config["lyze"]["rank"] = "relay"
+config["lyze"]["lookup"] = "inplace"
+
 
 config["autoupdate"] = False
 config["perspective"] = True
