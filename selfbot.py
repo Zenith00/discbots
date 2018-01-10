@@ -514,7 +514,8 @@ async def perform_command(command, params, message_in):
                 time_dict["readable"], raw.split(",")[0]))
 
         if command == "trustedtest":
-            await update_trusted_data(params[0], params[1])
+            raw_params = " ".join(params).split(",")
+            await update_trusted_data(raw_params[0], raw_params[1])
 
         if output:
             for item in output:
