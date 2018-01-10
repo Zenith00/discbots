@@ -651,7 +651,7 @@ async def command_analyze(params, message_in):
         trusted_data = gc.open_by_key("1psiviI5Uurvq4qdREBuS1Egf79oPpJr1YdHNlyAWHVU")
         out_ranking =  trusted_data.worksheet("[OUT] Ranking")
         target_member = message_in.server.get_member(target)
-        IDs = out_ranking.col_values()
+        IDs = out_ranking.col_values(1)
         index = IDs.index(target)
         row = out_ranking.row_values(index)
         user_name = row[1]
