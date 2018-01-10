@@ -423,6 +423,8 @@ async def perform_command(command, params, message_in):
     output = []
     try:
         print("BASE PARAMS: " + str(params))
+        if command == "reboot":
+            await client.logout()
         if command == "tag":
             await command_tag(params, message_in)
         if command == "query":
