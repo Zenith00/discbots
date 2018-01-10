@@ -696,7 +696,7 @@ async def command_analyze(params, message_in):
             embed.set_thumbnail(url=target_member.avatar_url)
 
         embed.add_field(
-            name="Messaged outside trusted",
+            name="Messages outside trusted",
             value=str(user_count),
             inline=False)
         embed.add_field(
