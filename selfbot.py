@@ -706,7 +706,7 @@ async def command_analyze(params, message_in):
             name="Grade",
             value=str(user_grade),
             inline=False)
-
+        embed.set_footer(text="WebMD says you have cancer")
 
         return [(config["lyze"]["lookup"], embed, "embed")]
 
