@@ -663,10 +663,9 @@ async def command_analyze(params, message_in):
 
         embed = discord.Embed(
             title=
-            "{name}#{discrim}'s message info in the last {dayct} days".format(
+            "{name}#{discrim}'s Health Report".format(
                 name=target_member.name,
-                discrim=str(target_member.discriminator),
-                dayct=days),
+                discrim=str(target_member.discriminator)),
             type="rich")
         embed.add_field(name="ID", value=target_member.id, inline=True)
         avatar_link = target_member.avatar_url
