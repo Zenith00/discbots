@@ -41,8 +41,8 @@ import gspread
 scope = ['https://spreadsheets.google.com/feeds']
 credentials = ServiceAccountCredentials.from_json_keyfile_name(
     "selfbot-c8131927d12c.json", scope)
-gc = gspread.authorize(credentials)
-trusted_data = gc.open_by_key("1psiviI5Uurvq4qdREBuS1Egf79oPpJr1YdHNlyAWHVU")
+# gc = gspread.authorize(credentials)
+# trusted_data = gc.open_by_key("1psiviI5Uurvq4qdREBuS1Egf79oPpJr1YdHNlyAWHVU")
 
 # logging.basicConfig(level=logging.INFO)
 
@@ -1446,6 +1446,8 @@ async def get_fullname(member):
     return "{}#{}".format(member.name, member.discriminator)
 
 async def update_trusted_data(start, end):
+    gc = gspread.authorize(credentials)
+    trusted_data = gc.open_by_key("1psiviI5Uurvq4qdREBuS1Egf79oPpJr1YdHNlyAWHVU")
     r_ow = client.get_server("94882524378968064")
     print("Evaluating from {} to {}".format(start, end))
     try:
