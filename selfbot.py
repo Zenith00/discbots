@@ -1444,6 +1444,7 @@ async def get_fullname(member):
 
 async def update_trusted_data(start, end):
     r_ow = client.get_server("94882524378968064")
+    print("Evaluating from {} to {}".format(start, end))
     try:
         async def count_trusted(member_id):
             print("Lyzing: " + str(member_id))
