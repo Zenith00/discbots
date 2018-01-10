@@ -641,10 +641,10 @@ async def command_analyze(params, message_in):
             ])
         return [(config["lyze"]["rank"], output, "rows")]
     if query_type == "build":
-        start = datetime.utcnow() - timedelta(days=30)
-        end = datetime.utcnow() - timedelta(days=29)
+        start = datetime(year=2017,month=12,day=1)
+        end = start + timedelta(days=1)
         one_day = timedelta(days=1)
-        while abs(end - datetime.utcnow()) > timedelta(days=1):
+        while end < datetime.utcnow():
             await update_trusted_data(start.isoformat(" "), end.isoformat(" "))
             start = start + one_day
             end = end + one_day
