@@ -705,7 +705,7 @@ async def command_analyze(params, message_in):
             inline=True)
         embed.add_field(
             name="Grade",
-            value=str(user_grade),
+            value=str(user_grade) if target_member.id != client.user.id else "A+++ no riggerino",
             inline=False)
         embed.set_footer(text="WebMD says you have cancer")
 
