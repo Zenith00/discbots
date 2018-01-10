@@ -1594,7 +1594,6 @@ async def update_trusted_data(start, end):
             }).count()
 
         async def count_non_trusted(member_id):
-            print("Lyzing: " + str(member_id))
             return await mongo_client.discord.message_log.find({
                 "user_id":
                 member_id,
@@ -1639,22 +1638,16 @@ async def update_trusted_data(start, end):
                 trusted_data.get_worksheet(0).col_count, await
                 get_fullname(r_ow.get_member(missing_id)))
         id_list = trusted_data.get_worksheet(0).row_values(1)[1:]
-        print(id_list)
         time = start
         new_row = [time]
         new_row_non = [time]
         for trusted_id in list(filter(None, id_list)):
             try:
-                print(trusted_id)
                 trusted = await count_trusted(trusted_id)
-                print("Adding Trusted Count: " + str(trusted))
                 new_row.append(str(trusted))
-                print(len(new_row))
 
                 non_trusted = await count_non_trusted(trusted_id)
-                print("Adding NonTrusted Count: " + str(non_trusted))
                 new_row_non.append(str(non_trusted))
-                print(len(new_row_non))
             except:
                 print(traceback.format_exc())
         trusted_data.get_worksheet(0).append_row(new_row)
