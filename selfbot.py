@@ -214,6 +214,16 @@ async def run_startup():
     await update_messages()
     print("Finished importing messages")
 
+last_trusted_update = datetime.utcnow()
+async def log_trusted_data():
+    while True:
+        if (datetime.utcnow() - last_trusted_update).total_seconds() > (24 * 60 * 60):
+            start_time = (datetime.utcnow() - timedelta(days=1)).isoformat(" ")
+            end_time = datetime.utcnow().isoformat(" ")
+            await client.send_message(client.get_channel("400479610434748416"), "Updating: \n" + start_time + " - " + end_time)
+            last_trusted_update = datetime.utcnow()
+            await update_trusted_data(start_time, end_time)
+
 async def ensure_database_struct():
     if "message_log" not in await mongo_client.discord.collection_names():
         await mongo_client.discord.create_collection("message_log")
@@ -594,6 +604,14 @@ async def command_analyze(params, message_in):
                 str(trusted[1][0]), str(trusted[1][1])
             ])
         return [(config["lyze"]["rank"], output, "rows")]
+    if query_type == "build":
+        start = datetime.utcnow() - timedelta(days=30)
+        end = datetime.utcnow() - timedelta(days=29)
+        one_day = timedelta(days=1)
+        while abs(end - datetime.utcnow()) > timedelta(days=1):
+            await update_trusted_data(start.isoformat(" "), end.isoformat(" "))
+            start = start + one_day
+            end = end + one_day
 
 async def parse_output(output, context):
     try:
@@ -1494,7 +1512,6 @@ async def update_trusted_data(start, end):
                 print("Adding Trusted Count: " + str(trusted))
                 new_row.append(str(trusted))
                 print(len(new_row))
-
 
                 non_trusted = await count_non_trusted(trusted_id)
                 print("Adding NonTrusted Count: " + str(non_trusted))
