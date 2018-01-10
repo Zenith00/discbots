@@ -1507,8 +1507,7 @@ async def update_trusted_data(start, end):
             trusted_data.get_worksheet(1).update_cell(2, trusted_data.get_worksheet(0).col_count, await get_fullname(r_ow.get_member(missing_id)))
         id_list = trusted_data.get_worksheet(0).row_values(1)[1:]
         print(id_list)
-        time = datetime.utcnow().strftime(r"%Y-%m-%d")
-
+        time = start
         new_row = [time]
         new_row_non = [time]
         for trusted_id in list(filter(None, id_list)):
