@@ -890,7 +890,6 @@ async def command_query(params, message_in):
             if params[1] == "embed":
                 target_member = message_in.server.get_member(params[2])
                 user_dict = await export_user(target_member.id)
-
                 embed = discord.Embed(
                     title="{name}#{discrim}'s userinfo".format(
                         name=target_member.name,
@@ -1569,6 +1568,8 @@ async def trace(text):
 async def get_fullname(member):
     return "{}#{}".format(member.name, member.discriminator)
 
+async def update_trusted_data_new(start, end):
+    values = defaultdict(int)
 
 async def update_trusted_data(start, end):
     gc = gspread.authorize(credentials)
@@ -1650,6 +1651,8 @@ async def update_trusted_data(start, end):
                 new_row_non.append(str(non_trusted))
             except:
                 print(traceback.format_exc())
+        gc = gspread.authorize(credentials)
+        trusted_data = gc.open_by_key("1psiviI5Uurvq4qdREBuS1Egf79oPpJr1YdHNlyAWHVU")
         trusted_data.get_worksheet(0).append_row(new_row)
         trusted_data.get_worksheet(1).append_row(new_row_non)
     except:
