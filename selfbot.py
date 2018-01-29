@@ -653,7 +653,7 @@ async def command_analyze(params, message_in):
         gc = gspread.authorize(credentials)
         trusted_data = gc.open_by_key("1psiviI5Uurvq4qdREBuS1Egf79oPpJr1YdHNlyAWHVU")
         out_ranking =  trusted_data.worksheet("[OUT] Ranking")
-        target_member = message_in.server.get_member(target)
+        target_member = client.get_server("94882524378968064").get_member(target)
         IDs = out_ranking.col_values(1)
         index = IDs.index(target)
         row = out_ranking.row_values(index)
