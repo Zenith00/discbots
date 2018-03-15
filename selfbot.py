@@ -641,7 +641,7 @@ async def command_analyze(params, message_in):
             ])
         return [(config["lyze"]["rank"], output, "rows")]
     if query_type == "build":
-        start = datetime(year=2018,month=1,day=11)
+        start = datetime(year=2018,month=1,day=30)
         end = start + timedelta(days=1)
         one_day = timedelta(days=1)
         while end < datetime.utcnow():
