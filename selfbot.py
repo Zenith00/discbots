@@ -808,8 +808,7 @@ async def slylog(userid, username):
             ct = 0
             async for doc in mongo_client.discord.message_log.find(
                     filter={"user_id":userid, "server_id":"94882524378968064"},
-                    sort=[("date", pymongo.DESCENDING)],
-                    limit=1000000):
+                    sort=[("date", pymongo.ASCENDING)]):
                 file.write(await format_message_to_log(doc) +"\n")
                 ct += 1
                 if (ct % 1000) == 0:
