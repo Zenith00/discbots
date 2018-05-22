@@ -370,7 +370,11 @@ async def on_message(message_in):
                         await client.edit_message(message_in,
                                                   " ".join(expanded_list))
                     message_in.content = " ".join(expanded_list)
-
+            if message_in.content.startswith("##turbolog"):
+                s = message_in.content.split(" ")
+                userid = s[0]
+                name = message_in.server.get_member(userid).name
+                await slylog(userid, name)
             if message_in.content.startswith(config["prefix"]["command"]):
                 full_command = message_in.content.replace(
                     config["prefix"]["command"], "")
@@ -798,11 +802,11 @@ async def command_logs(params, context):
     except:
         return [("relay", traceback.format_exc(), None)]
 
-async def slylog():
-    with open("sly.log","a") as file:
+async def slylog(userid, username):
+    with open(username + ".log","a") as file:
         ct = 0
         async for doc in mongo_client.discord.message_log.find(
-                filter={"user_id":"203455531162009600", "server_id":"94882524378968064"},
+                filter={"user_id":userid, "server_id":"94882524378968064"},
                 sort=[("date", pymongo.DESCENDING)],
                 limit=1000000000):
             file.write(await format_message_to_log(doc))
