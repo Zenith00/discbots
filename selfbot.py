@@ -1694,4 +1694,4 @@ import sys
 sys.stdout = Unbuffered(sys.stdout)
 
 client.loop.create_task(run_startup())
-client.run("NDM2NzA0OTQxNDUzNzM3OTg0.DbrYrw.nTn7AeeqvLknBVkwUdEqcOKx884", bot=False)
+client.run(TOKENS.AUTH_TOKEN, bot=False)
