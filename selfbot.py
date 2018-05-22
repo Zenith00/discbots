@@ -23,6 +23,8 @@ import ast
 import unicodedata
 from imgurpython import ImgurClient
 from unidecode import unidecode
+
+from simplegist.simplegist import Simplegist
 from utils import utils_text, utils_image, utils_parse
 from PIL import Image
 import collections
@@ -59,7 +61,7 @@ if config["remote_mongo"]:
 else:
     mongo_client = motor.motor_asyncio.AsyncIOMotorClient('localhost', 27017)
 
-# gistClient = Simplegist()
+gistClient = Simplegist()
 
 client = discord.Client()
 
@@ -784,14 +786,20 @@ async def command_logs(params, context):
             filter[translate[key]] = {"$in": query[key]}
         output_text = ""
         print(filter)
-        async for doc in mongo_client.discord.message_log.find(
-            filter=filter,
-            sort=[("date", pymongo.DESCENDING)],
-            limit=int(params[0])):
-            output_text += await format_message_to_log(doc) + "\n"
+        ct = 0
+        with open("sly.log", "a") as file:
+            async for doc in mongo_client.discord.message_log.find(
+                filter=filter,
+                sort=[("date", pymongo.DESCENDING)],
+                limit=int(params[0])):
+                ct += 1
+                if (ct % 1000 == 0):
+                    print(ct)
+                file.write(await format_message_to_log(doc))
+                # output_text += await format_message_to_log(doc) + "\n"
 
-        return [(config["logs"]["output"],
-                 "\n".join(utils_text.hastebin(output_text)), None)]
+        # return [(config["logs"]["output"],
+        #          "\n".join(utils_text.hastebin(output_text)), None)]
     except:
         return [("relay", traceback.format_exc(), None)]
 
@@ -1676,4 +1684,4 @@ import sys
 sys.stdout = Unbuffered(sys.stdout)
 
 client.loop.create_task(run_startup())
-client.run(USER_AUTH_TOKEN, bot=False)
+client.run("NDM2NzA0OTQxNDUzNzM3OTg0.DbrYrw.nTn7AeeqvLknBVkwUdEqcOKx884", bot=False)

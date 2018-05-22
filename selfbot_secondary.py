@@ -5,7 +5,6 @@ import motor.motor_asyncio
 
 import discord
 import sys
-from imgurpython import ImgurClient
 
 from tkinter import Tk
 from utils import utils_text, utils_file
@@ -39,7 +38,7 @@ async def on_message(message_in):
             else:
                 print(member.id)
         print(ages)
-        await client.send(message_in.channel, dict2rows(ages), "rows")
+        await send(message_in.channel, dict2rows(ages), "rows")
 
 async def send(destination, text, send_type, delete_in=0):
     if isinstance(destination, str):
@@ -73,7 +72,7 @@ async def send(destination, text, send_type, delete_in=0):
 def dict2rows(in_dict):
     return [(k, str(v)) for k, v in in_dict.items()]
 
-client.run(TOKENS.USER_AUTH_TOKEN, bot=False)
+client.run("NDM2NzA0OTQxNDUzNzM3OTg0.DbrYrw.nTn7AeeqvLknBVkwUdEqcOKx884", bot=True)
 
 dict = {
  'Zenith'           : '2017-07-30 00:19:45.052000', 'TEHHERO': '2017-07-30 00:19:09.150000', 'ScarletBliss': '2017-07-30 00:02:08.755000',
