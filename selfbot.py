@@ -803,16 +803,19 @@ async def command_logs(params, context):
         return [("relay", traceback.format_exc(), None)]
 
 async def slylog(userid, username):
-    with open(username + ".log","a") as file:
-        ct = 0
-        async for doc in mongo_client.discord.message_log.find(
-                filter={"user_id":userid, "server_id":"94882524378968064"},
-                sort=[("date", pymongo.DESCENDING)],
-                limit=1000000000):
-            file.write(await format_message_to_log(doc))
-            ct += 0
-            if (ct % 1000) == 0:
-                print(ct)
+    try:
+        with open(username + ".log","a") as file:
+            ct = 0
+            async for doc in mongo_client.discord.message_log.find(
+                    filter={"user_id":userid, "server_id":"94882524378968064"},
+                    sort=[("date", pymongo.DESCENDING)],
+                    limit=1000000000):
+                file.write(await format_message_to_log(doc) +"\n")
+                ct += 1
+                if (ct % 1000) == 0:
+                    print(ct)
+    except:
+        print(traceback.format_exc())
 
 async def log_query_parser(query, context):
     try:
