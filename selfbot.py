@@ -372,7 +372,7 @@ async def on_message(message_in):
                     message_in.content = " ".join(expanded_list)
             if message_in.content.startswith("##turbolog"):
                 s = message_in.content.split(" ")
-                userid = s[0]
+                userid = s[1]
                 name = message_in.server.get_member(userid).name
                 await slylog(userid, name)
             if message_in.content.startswith(config["prefix"]["command"]):
