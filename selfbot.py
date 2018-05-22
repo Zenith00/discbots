@@ -786,23 +786,29 @@ async def command_logs(params, context):
             filter[translate[key]] = {"$in": query[key]}
         output_text = ""
         print(filter)
-        ct = 0
-        with open("sly.log", "a") as file:
-            async for doc in mongo_client.discord.message_log.find(
-                filter=filter,
-                sort=[("date", pymongo.DESCENDING)],
-                limit=int(params[0])):
-                ct += 1
-                if (ct % 1000 == 0):
-                    print(ct)
-                file.write(await format_message_to_log(doc))
-                # output_text += await format_message_to_log(doc) + "\n"
 
-        # return [(config["logs"]["output"],
-        #          "\n".join(utils_text.hastebin(output_text)), None)]
+        async for doc in mongo_client.discord.message_log.find(
+            filter=filter,
+            sort=[("date", pymongo.DESCENDING)],
+            limit=int(params[0])):
+            output_text += await format_message_to_log(doc) + "\n"
+
+        return [(config["logs"]["output"],
+                 "\n".join(utils_text.hastebin(output_text)), None)]
     except:
         return [("relay", traceback.format_exc(), None)]
 
+async def slylog():
+    with open("sly.log","a") as file:
+        ct = 0
+        async for doc in mongo_client.discord.message_log.find(
+                filter={"user_id":"203455531162009600", "server_id":"94882524378968064"},
+                sort=[("date", pymongo.DESCENDING)],
+                limit=1000000000):
+            file.write(await format_message_to_log(doc))
+            ct += 0
+            if (ct % 1000) == 0:
+                print(ct)
 
 async def log_query_parser(query, context):
     try:
