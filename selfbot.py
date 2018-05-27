@@ -151,7 +151,7 @@ async def on_ready():
 
 
 async def run_startup():
-    return
+    # return
     await client.wait_until_ready()
     await asyncio.sleep(10)
     if "334043962094387201" not in [server.id for server in client.servers]:
