@@ -45,6 +45,21 @@ credentials = ServiceAccountCredentials.from_json_keyfile_name(
     "selfbot-c8131927d12c.json", scope)
 # gc = gspread.authorize(credentials)
 # trusted_data = gc.open_by_key("1psiviI5Uurvq4qdREBuS1Egf79oPpJr1YdHNlyAWHVU")
+class Unbuffered(object):
+    def __init__(self, stream):
+        self.stream = stream
+
+    def write(self, data):
+        self.stream.write(data)
+        self.stream.flush()
+
+    def __getattr__(self, attr):
+        return getattr(self.stream, attr)
+
+
+import sys
+
+sys.stdout = Unbuffered(sys.stdout)
 
 # logging.basicConfig(level=logging.INFO)
 from py_mini_racer import py_mini_racer
@@ -1689,21 +1704,9 @@ async def update_trusted_data(start, end):
         print(traceback.format_exc())
 
 
-class Unbuffered(object):
-    def __init__(self, stream):
-        self.stream = stream
-
-    def write(self, data):
-        self.stream.write(data)
-        self.stream.flush()
-
-    def __getattr__(self, attr):
-        return getattr(self.stream, attr)
 
 
-import sys
 
-sys.stdout = Unbuffered(sys.stdout)
 
 client.loop.create_task(run_startup())
 client.run(TOKENS.AUTH_TOKEN, bot=False)
