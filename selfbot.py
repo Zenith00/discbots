@@ -47,7 +47,8 @@ credentials = ServiceAccountCredentials.from_json_keyfile_name(
 # trusted_data = gc.open_by_key("1psiviI5Uurvq4qdREBuS1Egf79oPpJr1YdHNlyAWHVU")
 
 # logging.basicConfig(level=logging.INFO)
-
+from py_mini_racer import py_mini_racer
+jsctx = py_mini_racer.MiniRacer()
 stack = []
 if config["remote_mongo"]:
     mongo_client = motor.motor_asyncio.AsyncIOMotorClient(
@@ -865,7 +866,10 @@ async def command_exec(params, message_in):
     if "..sh" in input_command:
         input_command = input_command.replace(
             "..sh", 'client.get_server("{}")'.format(message_in.server.id))
-
+    if params[0] == "jseval":
+        res = jsctx.eval(input_command)
+        return ("inplace", "```js\nInput:\n{}\nOutput:\n{}\n```".format(
+            input_command, res), None)
     if params[0] == "aeval":
         print(input_command)
         res = await eval(input_command)
