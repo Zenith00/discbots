@@ -57,14 +57,7 @@ if __name__ == "__main__":
     subprocess.call("python -m pip install {}".format(relative_path(__file__, "python_Levenshtein-0.12.0-cp36-cp36m-win32.whl")), cwd=os.path.dirname(os.path.abspath(__file__)), shell=True)
     subprocess.call("python -m pip install {}".format(relative_path(__file__, "Pillow-4.2.1-cp36-cp36m-win32.whl")), cwd=os.path.dirname(os.path.abspath(__file__)), shell=True)
     subprocess.call("python -m pip install {}".format(relative_path(__file__, "scipy-0.19.1-cp36-cp36m-win32.whl")), cwd=os.path.dirname(os.path.abspath(__file__)), shell=True)
-    # subprocess.call("python -m pip install {}".format(relative_path(__file__, "numpy-1.13.1+mkl-cp36-cp36m-win32.whl")), cwd=os.path.dirname(os.path.abspath(__file__)), shell=True)
 
-    #
-    # subprocess.call("python -m pip install python-Levenshtein --force-reinstall --use-wheel --no-index --find-links={}".format(relative_path(__file__, "python_Levenshtein-0.12.0-cp36-cp36m-win32.whl")), cwd=os.path.dirname(os.path.abspath(__file__)), shell=True)
-    # subprocess.call("python -m pip install pillow --force-reinstall --use-wheel --no-index --find-links={}".format(relative_path(__file__, "Pillow-4.2.1-cp36-cp36m-win32.whl")), cwd=os.path.dirname(os.path.abspath(__file__)), shell=True)
-    # subprocess.call("python -m pip install numpy --force-reinstall --use-wheel --no-index --find-links={}".format(relative_path(__file__, "numpy-1.13.1+mkl-cp36-cp36m-win32.whl")), cwd=os.path.dirname(os.path.abspath(__file__)), shell=True)
-    # subprocess.call("python -m pip install scipy --force-reholinstall --use-wheel --no-index --find-links={}".format(relative_path(__file__, "scipy-0.19.1-cp36-cp36m-win32.whl")), cwd=os.path.dirname(os.path.abspath(__file__)), shell=True)
-    #
 
 
 
