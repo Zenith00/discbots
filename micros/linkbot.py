@@ -2,7 +2,7 @@ import logging
 import traceback
 
 import discord
-from .. import TOKENS
+from . import TOKENS
 
 
 client = discord.Client()
