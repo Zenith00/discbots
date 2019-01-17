@@ -1,3 +1,6 @@
 [submodule "utils"]
 	path = utils
 	url = git@github.com:Zenith00/utils.git
+[submodule "lux"]
+	path = lux
+	url = git@github.com:Zenith00/lux.git

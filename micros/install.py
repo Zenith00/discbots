@@ -21,9 +21,9 @@ if __name__ == "__main__":
     for x in to_install:
         install(x)
     try:
-        if not os.path.isfile('config.py'):
-            shutil.copy2('config_default.py', 'config.py')
-            print("Created config.py")
+        if not os.path.isfile('CONFIG.py'):
+            shutil.copy2('CONFIG_DEFAULT.py', 'CONFIG.py')
+            print("Created CONFIG.py")
         if not os.path.isfile('TOKENS.py'):
             print("Created TOKENS.py")
             shutil.copy2('TOKENS_DEFAULT.py', 'TOKENS.py')

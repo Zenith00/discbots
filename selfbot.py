@@ -34,7 +34,7 @@ from utils import utils_file
 from fuzzywuzzy import fuzz
 from collections import defaultdict
 import tqdm
-from config import *
+from CONFIG import *
 from utils.utils_text import dict2rows
 import urllib
 from oauth2client.service_account import ServiceAccountCredentials
@@ -411,7 +411,7 @@ async def on_message(message_in):
                         new_config = utils_text.regex_test(
                             "(?<=config!!).*(?=!!config)",
                             message_in.content).group(0)
-                        utils_file.append_line("config.py", new_config)
+                        utils_file.append_line("CONFIG.py", new_config)
 
                     g = git.cmd.Git(utils_file.directory_path(__file__))
                     res = g.pull()
