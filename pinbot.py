@@ -26,19 +26,19 @@ client = lux.client.Lux(CONFIG, auth_function=check_auth)
 
 @client.command(onlyme=True)
 async def aexec(ctx: lux.contexter.Contexter):
-    return lux.zutils.execute("aexec", ctx.deprefixed_content[5:], ctx=ctx)
+    return lux.zutils.execute("aexec", ctx.deprefixed_content[6:], ctx=ctx)
 
 @client.command(onlyme=True)
 async def eval(ctx: lux.contexter.Contexter):
-    return lux.zutils.execute("eval", ctx.deprefixed_content[4:], ctx=ctx)
+    return lux.zutils.execute("eval", ctx.deprefixed_content[5:], ctx=ctx)
 
 @client.command(onlyme=True)
 async def exec(ctx: lux.contexter.Contexter):
-    return lux.zutils.execute("exec", ctx.deprefixed_content[4:], ctx=ctx)
+    return lux.zutils.execute("exec", ctx.deprefixed_content[5:], ctx=ctx)
 
 @client.command(onlyme=True)
 async def aeval(ctx: lux.contexter.Contexter):
-    return await lux.zutils.aeval(ctx.deprefixed_content[5:], ctx=ctx)
+    return await lux.zutils.aeval(ctx.deprefixed_content[6:], ctx=ctx)
 
 @client.command(authtype="whitelist", posts=[(CONFIG.save, "sync", "noctx")])
 async def config(ctx: lux.contexter.Contexter):
