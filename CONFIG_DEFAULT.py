@@ -1,4 +1,4 @@
-PINBOT = {}
+PINBOT = {"TOKEN":""}
 PINBOT["ACK_TYPE"] = "react"
 PINBOT["PREFIX"] = ",,"
 PINBOT["ROLE_BY_CONFIG"] = False
