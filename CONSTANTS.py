@@ -1,6 +1,6 @@
 PINBOT = {"COMMAND_HELP":
                 [["Command", "Params", "Description", "Note"],
-                 ["config", "[name] [value]", "Sets config [name] to be [value]", "Dangerous if used on PINMAP, ALLOWED_IDS"],
+                 ["set", "[name] [value]", "Sets config [name] to be [value]", "Dangerous if used on PINMAP, ALLOWED_IDS"],
                  ["whitelist", "[role/member]", "Toggles whitelist of role/member to use commands", ""],
                  ["print", "", "Prints current config", ""],
                  ["map", "[from-channel] [to-channel]", "Saves pins from [from-channel] to [to-channel]", ""],
