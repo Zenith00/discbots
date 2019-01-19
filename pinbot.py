@@ -12,7 +12,6 @@ pers = None
 
 logging.basicConfig(level=logging.INFO)
 CONFIG = lux.config.Config().load()
-client = lux.client.Lux(CONFIG)
 
 def check_auth(ctx: lux.contexter.Contexter) -> bool:
     print(ctx.config["ALLOWED_IDS"])
@@ -20,6 +19,10 @@ def check_auth(ctx: lux.contexter.Contexter) -> bool:
     return ctx.m.author.id in ctx.config["ALLOWED_IDS"] or \
            any(role.id in ctx.config["ALLOWED_IDS"] for role in ctx.m.author.roles) or \
            ctx.m.author.id == 129706966460137472
+
+client = lux.client.Lux(CONFIG, auth_function=check_auth)
+
+
 
 @client.command(onlyme=True)
 async def aexec(ctx: lux.contexter.Contexter):
