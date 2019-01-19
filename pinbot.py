@@ -18,7 +18,8 @@ def check_auth(ctx: lux.contexter.Contexter) -> bool:
     print(str(role.id for role in ctx.m.author.roles))
     return ctx.m.author.id in ctx.config["ALLOWED_IDS"] or \
            any(role.id in ctx.config["ALLOWED_IDS"] for role in ctx.m.author.roles) or \
-           ctx.m.author.id == 129706966460137472
+           ctx.m.author.id == 129706966460137472 or\
+           ctx.m.author.guild_permissions.manage_guild
 
 client = lux.client.Lux(CONFIG, auth_function=check_auth)
 
