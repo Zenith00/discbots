@@ -26,7 +26,7 @@ from imgurpython import ImgurClient
 from unidecode import unidecode
 # from utils_text import multi_block
 import collections
-import constants
+import CONSTANTS
 from TOKENS import *
 import TOKENS
 from utils import utils_file
@@ -58,7 +58,7 @@ async def on_message(message_in):
         # if message_in.server.id == constants.OVERWATCH_SERVER_ID:
         #     await import_message(message_in)
         # server-meta     server log   bot  log  voice channel
-        if message_in.server and message_in.server.id == constants.OVERWATCH_SERVER_ID and message_in.channel.id not in [
+        if message_in.server and message_in.server.id == CONSTANTS.OVERWATCH_SERVER_ID and message_in.channel.id not in [
                 "264735004553248768", "152757147288076297",
                 "147153976687591424", "200185170249252865"
         ]:
@@ -540,7 +540,7 @@ async def import_to_user_set(member, set_name, entry):
 
 @client.event
 async def on_member_remove(member):
-    if member.server.id == constants.OVERWATCH_SERVER_ID:
+    if member.server.id == CONSTANTS.OVERWATCH_SERVER_ID:
         await import_to_user_set(
             member=member,
             set_name="server_leaves",
@@ -549,7 +549,7 @@ async def on_member_remove(member):
 
 @client.event
 async def on_member_ban(member):
-    if member.server.id == constants.OVERWATCH_SERVER_ID:
+    if member.server.id == CONSTANTS.OVERWATCH_SERVER_ID:
         await import_to_user_set(
             member=member,
             set_name="bans",
@@ -558,7 +558,7 @@ async def on_member_ban(member):
 
 @client.event
 async def on_member_unban(server, member):
-    if server.id == constants.OVERWATCH_SERVER_ID:
+    if server.id == CONSTANTS.OVERWATCH_SERVER_ID:
         await import_to_user_set(
             member=member,
             set_name="unbans",
@@ -582,7 +582,7 @@ async def on_member_update(before, after):
     :type after: discord.Member
     :type before: discord.Member
     """
-    if before.server.id == constants.OVERWATCH_SERVER_ID:
+    if before.server.id == CONSTANTS.OVERWATCH_SERVER_ID:
         if before.nick != after.nick:
             await import_to_user_set(
                 member=after, set_name="nicks", entry=after.nick)
@@ -990,7 +990,7 @@ async def format_message_to_log(message_dict):
     try:
         content = message_dict["content"].replace("```", "")
         try:
-            channel_name = constants.CHANNELID_CHANNELNAME_DICT[str(
+            channel_name = CONSTANTS.CHANNELID_CHANNELNAME_DICT[str(
                 message_dict["channel_id"])]
         except KeyError:
             channel_name = "Unknown"
@@ -1009,7 +1009,7 @@ async def serve_lfg(message_in):
     warn_user = None
     if len(message_in.mentions) == 0:
         found_message = await finder(
-            message=message_in, regex=constants.LFG_REGEX, blacklist="mod")
+            message=message_in, regex=CONSTANTS.LFG_REGEX, blacklist="mod")
     else:
         warn_user = message_in.mentions[0]
     # await client.send_message(client.get_channel(BOT_HAPPENINGS_ID),
@@ -1032,7 +1032,7 @@ async def finder(message, regex, blacklist):
     match = None
     found_message = None
     async for messageCheck in client.logs_from(message.channel, 20):
-        if messageCheck.author.id != message.author.id and messageCheck.author.id != constants.MERCY_ID:
+        if messageCheck.author.id != message.author.id and messageCheck.author.id != CONSTANTS.MERCY_ID:
             if blacklist == "none":
                 auth = False
             elif blacklist == "mod":
@@ -1075,13 +1075,13 @@ async def get_auths(member):
     """
     author_info = await utils_parse.parse_member_info(member)
     role_whitelist = any(x in [
-        constants.ROLENAME_ID_DICT["TRUSTED_ROLE"],
-        constants.ROLENAME_ID_DICT["MVP_ROLE"]
+        CONSTANTS.ROLENAME_ID_DICT["TRUSTED_ROLE"],
+        CONSTANTS.ROLENAME_ID_DICT["MVP_ROLE"]
     ] for x in author_info["role_ids"])
 
     mods = await get_moderators(member.server)
     auths = set()
-    if member.id == constants.ZENITH_ID:
+    if member.id == CONSTANTS.ZENITH_ID:
         auths |= {"zenith"}
         auths |= {"trusted"}
         auths |= {"warn"}

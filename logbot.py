@@ -10,7 +10,7 @@ import regex as re
 from utils import utils_text, utils_parse, utils_file
 import regex as re
 import TOKENS
-import constants
+import CONSTANTS
 import collections
 
 logging.basicConfig(level=logging.INFO)

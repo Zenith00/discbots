@@ -9,7 +9,7 @@ import sys
 from tkinter import Tk
 from utils import utils_text, utils_file
 import pymongo
-import constants
+import CONSTANTS
 from utils.utils_text import *
 import TOKENS
 

@@ -8,6 +8,8 @@ discord-py = {editable = true,extras = ["voice"],git = "https://github.com/Rappt
 pillow = "*"
 requests = "*"
 scipy = "*"
+regex = "*"
+dateparser = "*"
 
 [dev-packages]
 

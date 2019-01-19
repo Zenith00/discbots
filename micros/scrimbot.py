@@ -4,7 +4,7 @@ import asyncio
 import TOKENS
 import os
 import sys
-import constants
+import CONSTANTS
 
 mongo_client = motor.motor_asyncio.AsyncIOMotorClient()
 client = discord.Client()
@@ -39,7 +39,7 @@ async def on_message(message_in):
     params = parameterized[1:]
     auths = await get_auths(message_in.author)
     print(command)
-    if message_in.author.id == constants.ZENITH_ID:
+    if message_in.author.id == CONSTANTS.ZENITH_ID:
         if command == "reboot":
             await client.logout()
         elif command == "rebuild_muted_perms":

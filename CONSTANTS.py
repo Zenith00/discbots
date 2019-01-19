@@ -1,4 +1,14 @@
-import regex as re
+PINBOT = {"COMMAND_HELP":
+                [["Command", "Params", "Description", "Note"],
+                 ["config", "[name] [value]", "Sets config [name] to be [value]", "Dangerous if used on PINMAP, ALLOWED_IDS"],
+                 ["whitelist", "[role/member]", "Toggles whitelist of role/member to use commands", ""],
+                 ["print", "", "Prints current config", ""],
+                 ["map", "[from-channel] [to-channel]", "Saves pins from [from-channel] to [to-channel]", ""],
+                 ["unmap", "[from-channel]", "Stops mapping pins from [from-channel]", ""],
+                 ]}
+
+
+
 
 CHANNELNAME_CHANNELID_DICT = {
     "overwatch-discussion"   : "109672661671505920",
@@ -93,9 +103,7 @@ VOICE_LINES = (
     "A clean bill of health.",
     "Good as new.",
     "Immer unterbricht mich jemand bei der Arbeit.")
-LFG_REGEX = re.compile(
-    (r"(lf(G|\d))|(\d\d\d\d)|(plat|gold|silver|diamond)|(^LF(((NA)|(EU))|(\s?\d)))|((NA|EU) (LF(g|\d)*))|"
-     "(http(s?)://discord.gg/)|(xbox)|(ps4)"))
+
 INVITE_REGEX = r'(?:https?\:\/\/)?discord\.gg\/.+'
 
 HOTS_REGEX = "(heroes of the storm)|(storm)|(heros)|(hots)|(heroes)|(genji)|(oni)"

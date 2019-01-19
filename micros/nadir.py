@@ -21,7 +21,7 @@ from simplegist.simplegist import Simplegist
 from unidecode import unidecode
 from utils_text import *
 
-import constants
+import CONSTANTS
 from TOKENS import *
 from utils.utils_parse import *
 
@@ -46,11 +46,11 @@ gistClient = Simplegist()
 BOT_HAPPENINGS_ID = "245415914600661003"
 ROLENAME_ROLE_DICT = {}
 ID_ROLENAME_DICT = dict([[v, k]
-                         for k, v in constants.ROLENAME_ID_DICT.items()])
+                         for k, v in CONSTANTS.ROLENAME_ID_DICT.items()])
 BLACKLISTED_CHANNELS = (
-    constants.CHANNELNAME_CHANNELID_DICT["bot-log"],
-    constants.CHANNELNAME_CHANNELID_DICT["server-log"],
-    constants.CHANNELNAME_CHANNELID_DICT["voice-channel-output"])
+    CONSTANTS.CHANNELNAME_CHANNELID_DICT["bot-log"],
+    CONSTANTS.CHANNELNAME_CHANNELID_DICT["server-log"],
+    CONSTANTS.CHANNELNAME_CHANNELID_DICT["voice-channel-output"])
 SERVERS = {}
 CHANNELNAME_CHANNEL_DICT = {}
 VCInvite = None
@@ -273,14 +273,14 @@ async def initialize():
     global STREAM
     global stream
 
-    SERVERS["OW"] = client.get_server(constants.OVERWATCH_SERVER_ID)
+    SERVERS["OW"] = client.get_server(CONSTANTS.OVERWATCH_SERVER_ID)
     for role in SERVERS["OW"].roles:
         if role.id in ID_ROLENAME_DICT.keys():
             ROLENAME_ROLE_DICT[ID_ROLENAME_DICT[role.id]] = role
 
-    for name in constants.CHANNELNAME_CHANNELID_DICT.keys():
+    for name in CONSTANTS.CHANNELNAME_CHANNELID_DICT.keys():
         CHANNELNAME_CHANNEL_DICT[name] = SERVERS["OW"].get_channel(
-            constants.CHANNELNAME_CHANNELID_DICT[name])
+            CONSTANTS.CHANNELNAME_CHANNELID_DICT[name])
 
     STREAM = client.get_channel("255970182881738762")
     stream = Streamer(chann=STREAM, thresh=6)
@@ -366,7 +366,7 @@ async def on_member_ban(member):
 
 @client.event
 async def on_member_unban(server, member):
-    if server.id == constants.OVERWATCH_SERVER_ID:
+    if server.id == CONSTANTS.OVERWATCH_SERVER_ID:
         # print("unban detected")
         await add_to_user_set(
             member=member,
@@ -499,13 +499,13 @@ async def get_auths(member):
     """
     author_info = await parse_member_info(member)
     role_whitelist = any(x in [
-        constants.ROLENAME_ID_DICT["TRUSTED_ROLE"],
-        constants.ROLENAME_ID_DICT["MVP_ROLE"]
+        CONSTANTS.ROLENAME_ID_DICT["TRUSTED_ROLE"],
+        CONSTANTS.ROLENAME_ID_DICT["MVP_ROLE"]
     ] for x in author_info["role_ids"])
     mods = await get_moderators(member.server)
 
     auths = set()
-    if member.id == constants.ZENITH_ID:
+    if member.id == CONSTANTS.ZENITH_ID:
         auths |= {"zenith"}
         auths |= {"trusted"}
         auths |= {"warn"}
@@ -646,13 +646,13 @@ async def on_message(message):
             await scrim_new(message)
 
         await client.send_message(
-            await client.get_user_info(constants.ZENITH_ID),
+            await client.get_user_info(CONSTANTS.ZENITH_ID),
             "[" + message.author.name + "]: " + message.content)
         return
 
     if message.channel.id in BLACKLISTED_CHANNELS:
         return
-    if not INITIALIZED and message.server.id == constants.OVERWATCH_SERVER_ID:
+    if not INITIALIZED and message.server.id == CONSTANTS.OVERWATCH_SERVER_ID:
         await initialize()
     else:
         if message.content.startswith("`scrim start"):
@@ -664,7 +664,7 @@ async def on_message(message):
 
         if message.channel == CHANNELNAME_CHANNEL_DICT["spam-channel"]:
             await parse_triggers(message)
-        if message.channel.id not in BLACKLISTED_CHANNELS and message.server.id == constants.OVERWATCH_SERVER_ID:
+        if message.channel.id not in BLACKLISTED_CHANNELS and message.server.id == CONSTANTS.OVERWATCH_SERVER_ID:
             await mongo_add_message_to_log(message)
 
         auths = await get_auths(message.author)
@@ -744,7 +744,7 @@ async def on_message(message):
                 for key in hist.keys():
 
                     try:
-                        named_hist[constants.CHANNELID_CHANNELNAME_DICT[
+                        named_hist[CONSTANTS.CHANNELID_CHANNELNAME_DICT[
                             key]] = hist[key]
                     except:
                         try:
@@ -1059,7 +1059,7 @@ async def on_message(message):
                 await client.send_message(message.channel, str(nicklist)[1:-1])
                 pass
                 # Reboot
-            if "`reboot" == message.content and message.author.id == constants.ZENITH_ID:
+            if "`reboot" == message.content and message.author.id == CONSTANTS.ZENITH_ID:
                 await client.send_message(
                     message.channel, "Rebooting, " + message.author.mention)
                 await client.send_message(
@@ -1158,7 +1158,7 @@ async def on_message(message):
                 if len(message.mentions) == 0:
                     found_message = await finder(
                         message=message,
-                        regex=constants.LFG_REGEX,
+                        regex=CONSTANTS.LFG_REGEX,
                         blacklist="mod")
                 else:
                     warn_user = message.mentions[0]
@@ -1176,7 +1176,7 @@ async def on_message(message):
                 hots_message = "Please keep Heroes of the Storm party-ups to <#247769594155106304>"
                 author = await find_author(
                     message=message,
-                    regex=constants.HOTS_REGEX,
+                    regex=CONSTANTS.HOTS_REGEX,
                     blacklist="mod")
                 if author is not None:
                     hots_message += ", " + author.mention
@@ -1220,7 +1220,7 @@ async def on_message(message):
             # EXTRA-SERVER INVITE CHECKER
             await parse_triggers(message)
             if message.channel.id not in BLACKLISTED_CHANNELS:
-                match = constants.INVITE_REGEX.search(message.content)
+                match = CONSTANTS.INVITE_REGEX.search(message.content)
                 if match is not None:
                     await invite_checker(message, match)
                     # LFG -> Audit
@@ -1542,7 +1542,7 @@ async def on_message_edit(before, after):
         # EXTRA-SERVER INVITE CHECKER
         await parse_triggers(after)
         if after.channel.id not in BLACKLISTED_CHANNELS:
-            match = constants.INVITE_REGEX.search(after.content)
+            match = CONSTANTS.INVITE_REGEX.search(after.content)
             if match is not None:
                 await invite_checker(after, match)
 
@@ -1557,7 +1557,7 @@ async def invite_checker(message, regex_match):
     try:
         print("matchgrp = " + str(regex_match.group(1)))
         invite = await client.get_invite(str(regex_match.group(1)))
-        if invite.server.id != constants.OVERWATCH_SERVER_ID:
+        if invite.server.id != CONSTANTS.OVERWATCH_SERVER_ID:
             channel = message.channel
             # await client.send_message(mess.channel, serverID + " " + OVERWATCH_ID)
             warn = await client.send_message(
@@ -1686,7 +1686,7 @@ async def ping(message):
     timestamp = message.timestamp
     channel = message.channel
     await client.delete_message(message)
-    voice = random.choice(constants.VOICE_LINES)
+    voice = random.choice(CONSTANTS.VOICE_LINES)
     sent = await client.send_message(channel, voice)
     await client.edit_message(sent, voice + " (" + str(
         (sent.timestamp - timestamp).total_seconds() * 500) + " ms) " +
@@ -1772,7 +1772,7 @@ async def finder(message, regex, blacklist):
     match = None
     found_message = None
     async for messageCheck in client.logs_from(message.channel, 20):
-        if messageCheck.author.id != message.author.id and messageCheck.author.id != constants.MERCY_ID:
+        if messageCheck.author.id != message.author.id and messageCheck.author.id != CONSTANTS.MERCY_ID:
             if blacklist == "none":
                 auth = False
             elif blacklist == "mod":
@@ -1877,7 +1877,7 @@ async def message_to_log(message_dict):
 
     content = message_dict["content"].replace("```", "")
     try:
-        channel_name = constants.CHANNELID_CHANNELNAME_DICT[str(
+        channel_name = CONSTANTS.CHANNELID_CHANNELNAME_DICT[str(
             message_dict["channel_id"])]
     except KeyError:
         channel_name = "Unknown"
@@ -2055,7 +2055,7 @@ async def mongo_add_message_to_log(mess):
 async def message_to_stream(mess_dict):
     string = ""
     string += "`<" + mess_dict["date"][:-7] + ">` "
-    string += "**[" + constants.CHANNELID_CHANNELNAME_DICT[str(
+    string += "**[" + CONSTANTS.CHANNELID_CHANNELNAME_DICT[str(
         mess_dict["channel_id"])] + "]** "
 
     item = await get_user_info(mess_dict["user_id"])
@@ -2959,9 +2959,9 @@ class ChannelPlex:
 
     async def __init__(self, server):
         self.server = await client.get_server(server)
-        for key in constants.ROLENAME_ID_DICT.keys():
+        for key in CONSTANTS.ROLENAME_ID_DICT.keys():
             self.__setattr__(
-                key, await client.get_channel(constants.ROLENAME_ID_DICT[key]))
+                key, await client.get_channel(CONSTANTS.ROLENAME_ID_DICT[key]))
 
 
 class RolePlex:
@@ -2976,9 +2976,9 @@ class RolePlex:
 
     async def __init__(self, server):
         self.server = await client.get_server(server)
-        for key in constants.ROLENAME_ID_DICT.keys():
+        for key in CONSTANTS.ROLENAME_ID_DICT.keys():
             self.__setattr__(key, await
-                             get_role(server, constants.ROLENAME_ID_DICT[key]))
+                             get_role(server, CONSTANTS.ROLENAME_ID_DICT[key]))
 
 
 client.run(AUTH_TOKEN, bot=True)

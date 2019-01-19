@@ -1,40 +1,101 @@
 import logging
 import discord
-from CONFIG import PINBOT as CONFIG
 import lux
-from utils import utils_image
+from utils import utils_image, utils_text
+import pprint
+import CONSTANTS
+import itertools
 
 pers_d = {}
 pers_l = []
 pers = None
 
 logging.basicConfig(level=logging.INFO)
-
+CONFIG = lux.config.Config().load()
 client = lux.client.Lux(CONFIG)
 
-@client.command(ack=CONFIG["ACK_TYPE"], onlyme=True)
+def check_auth(ctx: lux.contexter.Contexter) -> bool:
+    print(ctx.config["ALLOWED_IDS"])
+    print(str(role.id for role in ctx.m.author.roles))
+    return ctx.m.author.id in ctx.config["ALLOWED_IDS"] or \
+           any(role.id in ctx.config["ALLOWED_IDS"] for role in ctx.m.author.roles) or \
+           ctx.m.author.id == 129706966460137472
+
+@client.command(onlyme=True)
 async def aexec(ctx: lux.contexter.Contexter):
     return lux.zutils.execute("aexec", ctx.deprefixed_content[5:], ctx=ctx)
 
-@client.command(ack=CONFIG["ACK_TYPE"], onlyme=True)
+@client.command(onlyme=True)
 async def eval(ctx: lux.contexter.Contexter):
     return lux.zutils.execute("eval", ctx.deprefixed_content[4:], ctx=ctx)
 
-@client.command(ack=CONFIG["ACK_TYPE"], onlyme=True)
+@client.command(onlyme=True)
 async def exec(ctx: lux.contexter.Contexter):
     return lux.zutils.execute("exec", ctx.deprefixed_content[4:], ctx=ctx)
 
-@client.command(ack=CONFIG["ACK_TYPE"], onlyme=True)
+@client.command(onlyme=True)
 async def aeval(ctx: lux.contexter.Contexter):
     return await lux.zutils.aeval(ctx.deprefixed_content[5:], ctx=ctx)
 
+@client.command(authtype="whitelist")
+async def config(ctx: lux.contexter.Contexter):
+    command = ctx.deprefixed_content[7:]
+    print(command)
+    command = command.split(" ")
+    command = lux.dutils.mention_to_id(command)
+    command, flags = command[0], command[1:]
+    print("command: " + command)
+    print("flags: " + str(flags))
+    if command == "help":
+        message_list = [f"```{block}```" for block in utils_text.format_rows(CONSTANTS.PINBOT["COMMAND_HELP"])]
+        return message_list
+    if command == "config":
+        flags = flags.split(" ", 1)
+        ctx.config[flags[0]] = flags[1]
+        CONFIG.save()
+        return
+    elif command == "print":
+        return [f"```{block}```" for block in utils_text.format_rows(list(ctx.config.items()))]
+    elif command == "whitelist":
+        target_type, target = command, flags[0]
+        if not lux.zutils.check_int(target):
+            target = ctx.find_role(target)
+            if target:
+                target = target.id
+            else:
+                return "Syntax error in [target]. Must be a mention, id, or role name"
+        target = int(target)
+        if target in ctx.config["ALLOWED_IDS"]:
+            ctx.config["ALLOWED_IDS"].remove(target)
+            target_role = ctx.find_role(target)
+            if target_role:
+                return f"Removed role `[{target_role.name}]` from command whitelist"
+            target_member = ctx.m.guild.get_member(target)
+            if target_member:
+                return f"Removed member `[{str(target_member)}]` from command whitelist"
+            else:
+                return f"Removed ?unknown? `{target}` from command whitelist"
+        else:
+            ctx.config["ALLOWED_IDS"].append(int(target))
+            target_role = ctx.find_role(target)
+            if target_role:
+                return f"Added role `[{target_role.name}]` to command whitelist"
+            target_member = ctx.m.guild.get_member(target)
+            if target_member:
+                return f"Added member `[{str(target_member)}]` to command whitelist"
+            else:
+                return f"Added ?unknown? `{target}` to command whitelist"
+    elif command == "map":
+        ctx.config["PINMAP"][flags[0]] = flags[1]
+    elif command == "unmap":
+        del ctx.config["PINMAP"][flags[0]]
+
 @client.event
 async def on_message_edit(message_bef: discord.Message, message_aft: discord.Message):
-    ctx = lux.contexter.Contexter(message_aft, CONFIG)
+    ctx = lux.contexter.Contexter(message_aft, CONFIG, auth_func=check_auth)
     print(f"{ctx.m.channel.id} : {CONFIG['PINMAP'].keys()}")
     if ctx.m.channel.id in CONFIG["PINMAP"].keys() and not message_bef.pinned and message_aft.pinned:
         await process_pin(ctx)
-
 
 async def process_pin(ctx: lux.contexter.Contexter):
     channel_pins = await ctx.m.channel.pins()
@@ -54,4 +115,4 @@ def delta_messages(before: discord.Message, after: discord.Message):
     print(delta_attrs)
     return delta_attrs
 
-client.run(CONFIG["TOKEN"], bot=True)
+client.run(CONFIG.get_token(), bot=True)

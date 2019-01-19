@@ -34,7 +34,7 @@ from pymongo import ReturnDocument
 from simplegist.simplegist import Simplegist
 from unidecode import unidecode
 # import Color
-import constants
+import CONSTANTS
 import TOKENS
 from utils.utils_parse import *
 from utils.utils_text import *
@@ -70,11 +70,11 @@ temproles = None
 id_channel_dict = {}
 join_warn = False
 ID_ROLENAME_DICT = dict([[v, k]
-                         for k, v in constants.ROLENAME_ID_DICT.items()])
+                         for k, v in CONSTANTS.ROLENAME_ID_DICT.items()])
 BLACKLISTED_CHANNELS = (
-    constants.CHANNELNAME_CHANNELID_DICT["bot-log"],
-    constants.CHANNELNAME_CHANNELID_DICT["server-log"],
-    constants.CHANNELNAME_CHANNELID_DICT["voice-channel-output"])
+    CONSTANTS.CHANNELNAME_CHANNELID_DICT["bot-log"],
+    CONSTANTS.CHANNELNAME_CHANNELID_DICT["server-log"],
+    CONSTANTS.CHANNELNAME_CHANNELID_DICT["voice-channel-output"])
 SERVERS = {}
 CHANNELNAME_CHANNEL_DICT = {}
 
@@ -343,7 +343,7 @@ STATES = {"init": False}
 @client.event
 async def on_member_remove(member):
     if not STATES["init"]: return
-    if member.server.id == constants.OVERWATCH_SERVER_ID:
+    if member.server.id == CONSTANTS.OVERWATCH_SERVER_ID:
         await import_to_user_set(
             member=member,
             set_name="server_leaves",
@@ -352,7 +352,7 @@ async def on_member_remove(member):
 @client.event
 async def on_member_ban(member):
     if not STATES["init"]: return
-    if member.server.id == constants.OVERWATCH_SERVER_ID:
+    if member.server.id == CONSTANTS.OVERWATCH_SERVER_ID:
         await import_to_user_set(
             member=member,
             set_name="bans",
@@ -363,7 +363,7 @@ async def on_member_ban(member):
 async def on_member_unban(server, member):
     if not STATES["init"]: return
 
-    if server.id == constants.OVERWATCH_SERVER_ID:
+    if server.id == CONSTANTS.OVERWATCH_SERVER_ID:
         await import_to_user_set(
             member=member,
             set_name="unbans",
@@ -385,7 +385,7 @@ async def on_member_update(before, after):
     :type after: discord.Member
     :type before: discord.Member
     """
-    if before.server.id == constants.OVERWATCH_SERVER_ID:
+    if before.server.id == CONSTANTS.OVERWATCH_SERVER_ID:
         if before.nick != after.nick:
             await import_to_user_set(
                 member=after, set_name="nicks", entry=after.nick)
@@ -409,7 +409,7 @@ async def on_ready():
 @client.event
 async def on_member_join(member):
     # await add_to_nick_id_list(member)
-    if member.server.id == constants.OVERWATCH_SERVER_ID:
+    if member.server.id == CONSTANTS.OVERWATCH_SERVER_ID:
         await import_user(member)
         if STATES["init"]:
             role = await temproles.check(member)
@@ -437,7 +437,7 @@ async def on_member_join(member):
 
 @client.event
 async def on_message_edit(before, after):
-    if before.server.id == constants.OVERWATCH_SERVER_ID:
+    if before.server.id == CONSTANTS.OVERWATCH_SERVER_ID:
         auths = await get_auths(after.author)
         if "mod" not in auths:
             await parse_triggers(after)
@@ -535,13 +535,13 @@ async def get_auths(member):
     """
     author_info = await parse_member_info(member)
     role_whitelist = any(x in [
-        constants.ROLENAME_ID_DICT["TRUSTED_ROLE"],
-        constants.ROLENAME_ID_DICT["MVP_ROLE"]
+        CONSTANTS.ROLENAME_ID_DICT["TRUSTED_ROLE"],
+        CONSTANTS.ROLENAME_ID_DICT["MVP_ROLE"]
     ] for x in author_info["role_ids"])
 
     mods = await get_moderators(member.server)
     auths = set()
-    if member.id == constants.ZENITH_ID:
+    if member.id == CONSTANTS.ZENITH_ID:
         auths |= {"zenith"}
         auths |= {"trusted"}
         auths |= {"warn"}
@@ -768,7 +768,7 @@ async def perform_command(command, params, message_in):
             elif command == "fixchannels":
                 for channel in message_in.server.channels:
                     channel_id_name = reverse_dict(
-                        constants.CHANNELNAME_CHANNELID_DICT)
+                        CONSTANTS.CHANNELNAME_CHANNELID_DICT)
                     if channel.id in channel_id_name.keys():
                         await client.edit_channel(
                             channel, name=channel_id_name[channel.id])
@@ -1181,8 +1181,8 @@ async def parse_time_to_end(time_string):
         return None
 
 async def skip_jukebox(song_name, member_id, message_in):
-    jukebox = client.get_server(constants.OVERWATCH_SERVER_ID).get_channel(
-        constants.CHANNELNAME_CHANNELID_DICT["jukebox"])
+    jukebox = client.get_server(CONSTANTS.OVERWATCH_SERVER_ID).get_channel(
+        CONSTANTS.CHANNELNAME_CHANNELID_DICT["jukebox"])
     await client.send_message(jukebox,
                               "Skipping song `{songname}`, {mention}".format(
                                   songname=song_name.replace("`", ""),
@@ -1392,7 +1392,7 @@ async def serve_lfg(message_in):
     warn_user = None
     if len(message_in.mentions) == 0:
         found_message = await finder(
-            message=message_in, regex=constants.LFG_REGEX, blacklist="mod")
+            message=message_in, regex=CONSTANTS.LFG_REGEX, blacklist="mod")
     else:
         warn_user = message_in.mentions[0]
     # await client.send_message(client.get_channel(BOT_HAPPENINGS_ID),
@@ -1421,11 +1421,11 @@ async def ping(message):
         voice = message.author.mention + " Put your faith in the light!"
     elif message.author.id == "103057791312203776":
         voice = message.author.mention + " Cheers Love! The Cavalry's Here!"
-    elif message.author.id == constants.ZENITH_ID:
+    elif message.author.id == CONSTANTS.ZENITH_ID:
         voice = message.author.mention + " Test"
     else:
         voice = message.author.mention + " " + random.choice(
-            constants.VOICE_LINES)
+            CONSTANTS.VOICE_LINES)
 
     sent = await client.send_message(channel, voice)
     await client.edit_message(sent, voice + " (" + str(
@@ -1630,7 +1630,7 @@ async def tag_str(trigger, message, regex):
 async def parse_triggers(message) -> list:
     response_docs = []
     content = unidecode(strip_markdown(message.content))
-    match = regex_test(constants.INVITE_REGEX, content)
+    match = regex_test(CONSTANTS.INVITE_REGEX, content)
 
     if match:
         inv_link = match.group(0)
@@ -1641,9 +1641,9 @@ async def parse_triggers(message) -> list:
             print(invite.server.name)
             if invite.server.id == message.server.id:
                 if message.channel.id in [
-                    constants.CHANNELNAME_CHANNELID_DICT[
+                    CONSTANTS.CHANNELNAME_CHANNELID_DICT[
                         "general-discussion"],
-                    constants.CHANNELNAME_CHANNELID_DICT[
+                    CONSTANTS.CHANNELNAME_CHANNELID_DICT[
                         "overwatch-discussion"]
                 ]:
                     party = re.search(
@@ -1805,7 +1805,7 @@ async def generate_user_channel_activity_hist(server, user_id, gist=False):
     hist = dict(hist)
     for key in hist.keys():
         try:
-            named_hist[constants.CHANNELID_CHANNELNAME_DICT[key]] = hist[key]
+            named_hist[CONSTANTS.CHANNELID_CHANNELNAME_DICT[key]] = hist[key]
         except:
             try:
                 name = server.get_channel(key).name
@@ -1943,7 +1943,7 @@ async def format_message_to_log(message_dict):
     try:
         content = message_dict["content"].replace("```", "")
         try:
-            channel_name = constants.CHANNELID_CHANNELNAME_DICT[str(
+            channel_name = CONSTANTS.CHANNELID_CHANNELNAME_DICT[str(
                 message_dict["channel_id"])]
         except KeyError:
             channel_name = "Unknown"
@@ -1997,12 +1997,12 @@ async def log_automated(description: object, log_type) -> None:
     action = ("At " + str(datetime.utcnow().strftime("[%Y-%m-%d %H:%M:%S] ")) +
               ", I automatically " + str(description))
     if log_type == "alert" or log_type == "autorole":
-        target = constants.CHANNELNAME_CHANNELID_DICT["alerts"]
+        target = CONSTANTS.CHANNELNAME_CHANNELID_DICT["alerts"]
     elif log_type == "deletion":
-        target = constants.CHANNELNAME_CHANNELID_DICT["bot-log"]
+        target = CONSTANTS.CHANNELNAME_CHANNELID_DICT["bot-log"]
 
     else:
-        target = constants.CHANNELNAME_CHANNELID_DICT["spam-channel"]
+        target = CONSTANTS.CHANNELNAME_CHANNELID_DICT["spam-channel"]
     await client.send_message(client.get_channel(target), action)
 
 async def alert(text):
@@ -2119,7 +2119,7 @@ async def mention_to_id(command_list):
 async def invite_checker(message, regex_match):
     try:
         invite = await client.get_invite(str(regex_match.group(1)))
-        if invite.server.id != constants.OVERWATCH_SERVER_ID:
+        if invite.server.id != CONSTANTS.OVERWATCH_SERVER_ID:
             channel = message.channel
             # warn = await client.send_message(message.channel,
             #                                  "Please don't link other discord servers here " + message.author.mention)
@@ -2283,7 +2283,7 @@ async def finder(message, regex, blacklist):
     match = None
     found_message = None
     async for messageCheck in client.logs_from(message.channel, 20):
-        if messageCheck.author.id != message.author.id and messageCheck.author.id != constants.MERCY_ID:
+        if messageCheck.author.id != message.author.id and messageCheck.author.id != CONSTANTS.MERCY_ID:
             if blacklist == "none":
                 auth = False
             elif blacklist == "mod":
@@ -2328,7 +2328,7 @@ async def scrub_text(text, channel):
                 id = re.search(r"\d+", id)
                 id = id.group(0)
                 member = client.get_server(
-                    constants.OVERWATCH_SERVER_ID).get_member(id)
+                    CONSTANTS.OVERWATCH_SERVER_ID).get_member(id)
                 if not member:
                     continue
                 perms = channel.permissions_for(member)
@@ -2886,7 +2886,7 @@ async def clock():
     print(STATES["init"])
     STATES["server_log"] = True
     print("Ready")
-    SERVERS["OW"] = client.get_server(constants.OVERWATCH_SERVER_ID)
+    SERVERS["OW"] = client.get_server(CONSTANTS.OVERWATCH_SERVER_ID)
 
     # for name in constants.CHANNELNAME_CHANNELID_DICT.keys():
     #     CHANNELNAME_CHANNEL_DICT[name] = SERVERS["OW"].get_channel(
