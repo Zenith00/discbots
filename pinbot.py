@@ -45,6 +45,7 @@ async def config(ctx: lux.contexter.Contexter):
     command = ctx.deprefixed_content[7:]
     print(command)
     command = command.split(" ")
+    command = [lux.zutils.intorstr(x) for x in command]
     command = lux.dutils.mention_to_id(command)
     command, flags = command[0], command[1:]
     print("command: " + command)
@@ -88,15 +89,16 @@ async def config(ctx: lux.contexter.Contexter):
             else:
                 return f"Added ?unknown? `{target}` to command whitelist"
     elif command == "map":
-        ctx.config["PINMAP"][flags[0]] = flags[1]
+        ctx.config["PINMAP"][lux.zutils.intorstr(flags[0])] = lux.zutils.intorstr(flags[1])
     elif command == "unmap":
         del ctx.config["PINMAP"][flags[0]]
+    elif command == "unset":
+        CONFIG.reset_key(ctx.m.guild.id, flags[0])
 
 @client.event
 async def on_message_edit(message_bef: discord.Message, message_aft: discord.Message):
     ctx = lux.contexter.Contexter(message_aft, CONFIG, auth_func=check_auth)
-    print(f"{ctx.m.channel.id} : {CONFIG['PINMAP'].keys()}")
-    if ctx.m.channel.id in CONFIG["PINMAP"].keys() and not message_bef.pinned and message_aft.pinned:
+    if ctx.m.channel.id in CONFIG.of(message_bef.guild)["PINMAP"].keys() and not message_bef.pinned and message_aft.pinned:
         await process_pin(ctx)
 
 async def process_pin(ctx: lux.contexter.Contexter):
