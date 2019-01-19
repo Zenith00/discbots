@@ -45,8 +45,8 @@ async def config(ctx: lux.contexter.Contexter):
     command = ctx.deprefixed_content[7:]
     print(command)
     command = command.split(" ")
-    command = [lux.zutils.intorstr(x) for x in command]
     command = lux.dutils.mention_to_id(command)
+    command = [lux.zutils.intorstr(x) for x in command]
     command, flags = command[0], command[1:]
     print("command: " + command)
     print("flags: " + str(flags))
