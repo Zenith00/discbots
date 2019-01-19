@@ -47,6 +47,7 @@ async def config(ctx: lux.contexter.Contexter):
     command = command.split(" ")
     command = lux.dutils.mention_to_id(command)
     command = [lux.zutils.intorstr(x) for x in command]
+    #asdf
     command, flags = command[0], command[1:]
     print("command: " + command)
     print("flags: " + str(flags))
