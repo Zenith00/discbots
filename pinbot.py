@@ -104,11 +104,11 @@ async def on_message_edit(message_bef: discord.Message, message_aft: discord.Mes
 
 async def process_pin(ctx: lux.contexter.Contexter):
     channel_pins = await ctx.m.channel.pins()
-    if len(channel_pins) > CONFIG["PIN_THRESHOLD"]:
+    if len(channel_pins) > ctx.config["PIN_THRESHOLD"]:
         earliest_pin = sorted(channel_pins, key=lambda x: x.created_at)[0]
-        target_channel = ctx.find_channel(query=CONFIG["PINMAP"][earliest_pin.channel.id], dynamic=True)  # type: discord.TextChannel
+        target_channel = ctx.find_channel(query=ctx.config["PINMAP"][earliest_pin.channel.id], dynamic=True)
         colour = None
-        if CONFIG["EMBED_COLOR_CALC"]:
+        if ctx.config["EMBED_COLOR_CALC"]:
             avg_color = utils_image.average_color_url(earliest_pin.author.avatar_url)
             colour = discord.Colour.from_rgb(*avg_color)
         await target_channel.send(content=earliest_pin.jump_url, embed=lux.dutils.message2embed(earliest_pin, embed_color=colour))
