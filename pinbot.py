@@ -40,7 +40,7 @@ async def exec(ctx: lux.contexter.Contexter):
 async def aeval(ctx: lux.contexter.Contexter):
     return await lux.zutils.aeval(ctx.deprefixed_content[5:], ctx=ctx)
 
-@client.command(authtype="whitelist")
+@client.command(authtype="whitelist", posts=[(CONFIG.save, "sync", "noctx")])
 async def config(ctx: lux.contexter.Contexter):
     command = ctx.deprefixed_content[7:]
     print(command)
@@ -52,9 +52,8 @@ async def config(ctx: lux.contexter.Contexter):
     if command == "help":
         message_list = [f"```{block}```" for block in utils_text.format_rows(CONSTANTS.PINBOT["COMMAND_HELP"])]
         return message_list
-    if command == "config":
-        flags = flags.split(" ", 1)
-        ctx.config[flags[0]] = flags[1]
+    if command == "set":
+        ctx.config[flags[0]] = lux.zutils.intorstr(flags[1])
         CONFIG.save()
         return
     elif command == "print":
