@@ -121,4 +121,4 @@ def delta_messages(before: discord.Message, after: discord.Message):
     print(delta_attrs)
     return delta_attrs
 
-client.run(CONFIG.get_token(), bot=True)
+client.run(CONFIG.TOKEN, bot=True)
