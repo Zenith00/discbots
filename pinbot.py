@@ -11,7 +11,7 @@ pers_l = []
 pers = None
 
 logging.basicConfig(level=logging.INFO)
-CONFIG = lux.config.Config().load()
+CONFIG = lux.config.Config(botname="PINBOT").load()
 
 def check_auth(ctx: lux.contexter.Contexter) -> bool:
     print(ctx.config["ALLOWED_IDS"])
