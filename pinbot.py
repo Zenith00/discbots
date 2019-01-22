@@ -41,61 +41,65 @@ async def exec(ctx: lux.contexter.Contexter):
 async def aeval(ctx: lux.contexter.Contexter):
     return await lux.zutils.aeval(ctx.deprefixed_content[6:], ctx=ctx)
 
+@client.command(authtype="whitelist", name="help")
+async def get_help(ctx: lux.contexter.Contexter):
+    message_list = [f"```{block}```" for block in utils_text.format_rows(CONSTANTS.PINBOT["COMMAND_HELP"])]
+    return message_list
+
+@client.command(authtype="whitelist", posts=[(CONFIG.save, "sync", "noctx")])
+async def whitelist(ctx: lux.contexter.Contexter):
+    target_list = lux.dutils.mention_to_id(ctx.called_with["args"].split(" "))
+    target = target_list[0]
+    if not lux.zutils.check_int(target):
+        target = ctx.find_role(target)
+        if target:
+            target = target.id
+        else:
+            return "Syntax error in [target]. Must be a mention, id, or role name"
+    target = int(target)
+    if target in ctx.config["ALLOWED_IDS"]:
+        ctx.config["ALLOWED_IDS"].remove(target)
+        target_role = ctx.find_role(target)
+        if target_role:
+            return f"Removed role `[{target_role.name}]` from command whitelist"
+        target_member = ctx.m.guild.get_member(target)
+        if target_member:
+            return f"Removed member `[{str(target_member)}]` from command whitelist"
+        else:
+            return f"Removed ?unknown? `{target}` from command whitelist"
+    else:
+        ctx.config["ALLOWED_IDS"].append(int(target))
+        target_role = ctx.find_role(target)
+        if target_role:
+            return f"Added role `[{target_role.name}]` to command whitelist"
+        target_member = ctx.m.guild.get_member(target)
+        if target_member:
+            return f"Added member `[{str(target_member)}]` to command whitelist"
+        else:
+            return f"Added ?unknown? `{target}` to command whitelist"
+
+
+
+
 @client.command(authtype="whitelist", posts=[(CONFIG.save, "sync", "noctx")])
 async def config(ctx: lux.contexter.Contexter):
-    command = ctx.deprefixed_content[7:]
-    print(command)
-    command = command.split(" ")
-    command = lux.dutils.mention_to_id(command)
-    command = [lux.zutils.intorstr(x) for x in command]
-    #asdf
-    command, flags = command[0], command[1:]
-    print("command: " + command)
-    print("flags: " + str(flags))
-    if command == "help":
-        message_list = [f"```{block}```" for block in utils_text.format_rows(CONSTANTS.PINBOT["COMMAND_HELP"])]
-        return message_list
-    if command == "set":
-        ctx.config[flags[0]] = lux.zutils.intorstr(flags[1])
+    args = ctx.called_with["args"].split(" ")
+    args = [lux.zutils.intorstr(x) for x in args]
+    subcommand, args = args[0], args[1:]
+    if subcommand == "set":
+        ctx.config[args[0]] = lux.zutils.intorstr(args[1])
         CONFIG.save()
-        return
-    elif command == "print":
+        return f"Set key `{args[0]}` to be `{args[1]}`"
+    elif subcommand == "print":
         return [f"```{block}```" for block in utils_text.format_rows(list(ctx.config.items()))]
-    elif command == "whitelist":
-        target_type, target = command, flags[0]
-        if not lux.zutils.check_int(target):
-            target = ctx.find_role(target)
-            if target:
-                target = target.id
-            else:
-                return "Syntax error in [target]. Must be a mention, id, or role name"
-        target = int(target)
-        if target in ctx.config["ALLOWED_IDS"]:
-            ctx.config["ALLOWED_IDS"].remove(target)
-            target_role = ctx.find_role(target)
-            if target_role:
-                return f"Removed role `[{target_role.name}]` from command whitelist"
-            target_member = ctx.m.guild.get_member(target)
-            if target_member:
-                return f"Removed member `[{str(target_member)}]` from command whitelist"
-            else:
-                return f"Removed ?unknown? `{target}` from command whitelist"
-        else:
-            ctx.config["ALLOWED_IDS"].append(int(target))
-            target_role = ctx.find_role(target)
-            if target_role:
-                return f"Added role `[{target_role.name}]` to command whitelist"
-            target_member = ctx.m.guild.get_member(target)
-            if target_member:
-                return f"Added member `[{str(target_member)}]` to command whitelist"
-            else:
-                return f"Added ?unknown? `{target}` to command whitelist"
-    elif command == "map":
-        ctx.config["PINMAP"][lux.zutils.intorstr(flags[0])] = lux.zutils.intorstr(flags[1])
-    elif command == "unmap":
-        del ctx.config["PINMAP"][flags[0]]
-    elif command == "unset":
-        CONFIG.reset_key(ctx.m.guild.id, flags[0])
+    elif subcommand == "map":
+        ctx.config["PINMAP"][lux.zutils.intorstr(args[0])] = lux.zutils.intorstr(args[1])
+    elif subcommand == "unmap":
+        del ctx.config["PINMAP"][args[0]]
+    elif subcommand == "unset":
+        CONFIG.reset_key(ctx.m.guild.id, args[0])
+    elif subcommand == "reset":
+        CONFIG.reset(ctx.m.guild.id)
 
 @client.event
 async def on_message_edit(message_bef: discord.Message, message_aft: discord.Message):
