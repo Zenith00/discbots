@@ -107,7 +107,7 @@ async def set_prefix(ctx: lux.contexter.Contexter):
 
 @client.command(authtype="whitelist", posts=[(CONFIG.save, "sync", "noctx")])
 async def config(ctx: lux.contexter.Contexter):
-    args = lux.dutils.mention_to_id(ctx.called_with["args"].split(" ", 1))
+    args = lux.dutils.mention_to_id(ctx.called_with["args"].split(" "))
     subcommand = args[0]
     if len(args) > 1:
         args = args[1:]
