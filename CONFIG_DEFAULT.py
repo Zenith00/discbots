@@ -1,7 +1,6 @@
 PINBOT = {"TOKEN":""}
 PINBOT["ACK_TYPE"] = "react"
 PINBOT["PREFIX"] = ",,"
-PINBOT["ROLE_BY_CONFIG"] = False
 PINBOT["PINMAP"] = {}
 PINBOT["DEFAULT_OUT"] = "inplace"
 PINBOT["PIN_THRESHOLD"] = 35
