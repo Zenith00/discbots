@@ -18,12 +18,10 @@ def check_auth(ctx: lux.contexter.Contexter) -> bool:
     print(str(role.id for role in ctx.m.author.roles))
     return ctx.m.author.id in ctx.config["ALLOWED_IDS"] or \
            any(role.id in ctx.config["ALLOWED_IDS"] for role in ctx.m.author.roles) or \
-           ctx.m.author.id == 129706966460137472 or\
+           ctx.m.author.id == 129706966460137472 or \
            ctx.m.author.guild_permissions.manage_guild
 
 client = lux.client.Lux(CONFIG, auth_function=check_auth)
-
-
 
 @client.command(onlyme=True)
 async def aexec(ctx: lux.contexter.Contexter):
@@ -78,15 +76,15 @@ async def whitelist(ctx: lux.contexter.Contexter):
         else:
             return f"Added ?unknown? `{target}` to command whitelist"
 
-
 @client.command(authtype="whitelist", posts=[(CONFIG.save, "sync", "noctx")])
 async def setmax(ctx: lux.contexter.Contexter):
     args = ctx.called_with["args"].split(" ")
     try:
         ctx.config["PIN_THRESHOLD"] = int(args[0])
+        return f"PIN_THRESHOLD set to be {args[0]}"
     except ValueError:
-        return f"{args[0]} was not recognized as a valid number. Please try again." \
-               f""
+        return f"{args[0]} was not recognized as a valid number. Please try again."
+
 @client.command(authtype="whitelist", posts=[(CONFIG.save, "sync", "noctx")])
 async def config(ctx: lux.contexter.Contexter):
     args = ctx.called_with["args"].split(" ")
@@ -100,12 +98,17 @@ async def config(ctx: lux.contexter.Contexter):
         return [f"```{block}```" for block in utils_text.format_rows(list(ctx.config.items()))]
     elif subcommand == "map":
         ctx.config["PINMAP"][lux.zutils.intorstr(args[0])] = lux.zutils.intorstr(args[1])
+        return f"Mapped pins from <#{args[0]}> to be overflowed into <#{args[1]}>"
     elif subcommand == "unmap":
         del ctx.config["PINMAP"][args[0]]
+        return f"No longer overflowing pins from <#{args[0]}>"
     elif subcommand == "unset":
+        resp = f"Unset {args[0]}, old value = {config[args[0]]}" if args[0] in config.keys() else "Invalid key, no changes made"
         CONFIG.reset_key(ctx.m.guild.id, args[0])
+        return resp
     elif subcommand == "reset":
         CONFIG.reset(ctx.m.guild.id)
+        return "Config reset to default"
 
 @client.event
 async def on_message_edit(message_bef: discord.Message, message_aft: discord.Message):
