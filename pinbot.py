@@ -107,33 +107,17 @@ async def on_message_edit(message_bef: discord.Message, message_aft: discord.Mes
     if ctx.m.channel.id in CONFIG.of(message_bef.guild)["PINMAP"].keys() and not message_bef.pinned and message_aft.pinned:
         await process_pin(ctx)
 
-import datetime
-
 async def process_pin(ctx: lux.contexter.Contexter):
-    print("start")
-    dt = lux.zutils.timeme(datetime.datetime.utcnow())
     channel_pins = await ctx.m.channel.pins()
-    print("pins:")
-    dt = lux.zutils.timeme(dt)
     if len(channel_pins) > ctx.config["PIN_THRESHOLD"]:
         earliest_pin = sorted(channel_pins, key=lambda x: x.created_at)[0]
-        print("sorted pins")
-        dt = lux.zutils.timeme(dt)
         target_channel = ctx.find_channel(query=ctx.config["PINMAP"][earliest_pin.channel.id], dynamic=True)
-        print("found channel")
-        dt = lux.zutils.timeme(dt)
         colour = None
         if ctx.config["EMBED_COLOR_CALC"]:
             avg_color = utils_image.average_color_url(earliest_pin.author.avatar_url)
             colour = discord.Colour.from_rgb(*avg_color)
-        print("colorcalced")
-        dt = lux.zutils.timeme(dt)
         await target_channel.send(content=earliest_pin.jump_url, embed=lux.dutils.message2embed(earliest_pin, embed_color=colour))
-        print("sent message")
-        dt = lux.zutils.timeme(dt)
         await earliest_pin.unpin()
-        print("unpinned")
-        dt = lux.zutils.timeme(dt)
 
 def delta_messages(before: discord.Message, after: discord.Message):
     delta = set(lux.dutils.message2dict(before).items()) ^ set(lux.dutils.message2dict(after).items())
