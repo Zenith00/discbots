@@ -1,7 +1,7 @@
 PINBOT = {"COMMAND_HELP":
                 [["Command", "Params", "Description", "Note"],
                  ["whitelist", "[role/member]", "Toggles whitelist of role/member to use commands", "Try a mention?"],
-                 ["help", "", "this command?"],
+                 ["help", "", "My brother! He's dying!"],
                  ["config set", "[name] [value]", "Sets config [name] to be [value]", "With caution..."],
                  ["config unset", "[name]", "Restores config [name] to default", "When in doubt"],
                  ["config reset", "", "Restores config to default", "In case of emergency, break glass"],
