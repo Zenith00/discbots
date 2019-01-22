@@ -92,7 +92,6 @@ async def map_channel(ctx: lux.contexter.Contexter):
     ctx.config["PINMAP"][lux.zutils.intorstr(args[0])] = lux.zutils.intorstr(args[1])
     return f"Mapped pins from <#{args[0]}> to be overflowed into <#{args[1]}>"
 
-
 @client.command(authtype="whitelist", posts=[(CONFIG.save, "sync", "noctx")], name="unmap")
 async def unmap_channel(ctx: lux.contexter.Contexter):
     args = lux.dutils.mention_to_id(ctx.called_with["args"].split(" "))
@@ -106,11 +105,12 @@ async def set_prefix(ctx: lux.contexter.Contexter):
     ctx.config["PREFIX"] = new_prefix
     return resp
 
-
 @client.command(authtype="whitelist", posts=[(CONFIG.save, "sync", "noctx")])
 async def config(ctx: lux.contexter.Contexter):
-    args = lux.dutils.mention_to_id(ctx.called_with["args"].split(" ",1))
-    subcommand, args = args[0], args[1]
+    args = lux.dutils.mention_to_id(ctx.called_with["args"].split(" ", 1))
+    subcommand = args[0]
+    if len(args) > 1:
+        args = args[1:]
 
     if subcommand == "set":
         ctx.config[args[0]] = ast.literal_eval(args[1])
