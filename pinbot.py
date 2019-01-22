@@ -79,8 +79,14 @@ async def whitelist(ctx: lux.contexter.Contexter):
             return f"Added ?unknown? `{target}` to command whitelist"
 
 
-
-
+@client.command(authtype="whitelist", posts=[(CONFIG.save, "sync", "noctx")])
+async def setmax(ctx: lux.contexter.Contexter):
+    args = ctx.called_with["args"].split(" ")
+    try:
+        ctx.config["PIN_THRESHOLD"] = int(args[0])
+    except ValueError:
+        return f"{args[0]} was not recognized as a valid number. Please try again." \
+               f""
 @client.command(authtype="whitelist", posts=[(CONFIG.save, "sync", "noctx")])
 async def config(ctx: lux.contexter.Contexter):
     args = ctx.called_with["args"].split(" ")
