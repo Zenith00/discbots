@@ -1,12 +1,14 @@
 PINBOT = {"COMMAND_HELP":
               [["Command", "Params", "Description", "Note"],
-               ["setmax", "[#|max pins]", "Sets the max # of pins before embedding", "Short for ,,config set PIN_THRESHOLD [#]"],
-               ["whitelist", "[@|role/member]", "Allows/Disallows role/member to use commands", "Try a mention?"],
                ["help", "", "", "My brother! He's dying! Get help!"],
-               ["config set", "[name] [value]", "Sets config [name] to be [value]", "With caution..."],
-               ["config unset", "[name]", "Restores config [name] to default", "When in doubt..."],
+               ["setmax", "[#|max pins]", "Sets the max # of pins before embedding", "Short for ,,config set PIN_THRESHOLD [#]"],
+               ["map", "[#from-channel] [#to-channel]", "Saves pins from [from-channel] to [to-channel]", "many-to-one"],
+               ["unmap", "[#from-channel]", "Stops saving pins from [from-channel]", ""],
+               ["whitelist", "[@|role/member]", "Allows/Disallows role/member to use commands", "Try a mention?"],
+               ["setprefix", "[prefix]", "Sets prefix to be [prefix]", ""],
+
+               ["config set", "[name] [value]", "Sets config [name] to be literal_eval([value])", "With great power..."],
+               ["config unset", "[name]", "Restores config [name] to default", "...comes great responsibility"],
                ["config reset", "", "Restores config to default", "In case of emergency, break glass"],
-               ["config print", "", "Prints current config", "Config description pending..."],
-               ["config map", "[#from-channel] [#to-channel]", "Saves pins from [from-channel] to [to-channel]", "many-to-one"],
-               ["config unmap", "[#from-channel]", "Stops saving pins from [from-channel]", ""],
+               ["config print", "", "Prints current config", "Secret settings pending documentation..."],
                ]}

@@ -5,6 +5,7 @@ from utils import utils_image, utils_text
 import pprint
 import CONSTANTS
 import itertools
+import ast
 
 pers_d = {}
 pers_l = []
@@ -85,23 +86,38 @@ async def setmax(ctx: lux.contexter.Contexter):
     except ValueError:
         return f"{args[0]} was not recognized as a valid number. Please try again."
 
+@client.command(authtype="whitelist", posts=[(CONFIG.save, "sync", "noctx")], name="map")
+async def map_channel(ctx: lux.contexter.Contexter):
+    args = lux.dutils.mention_to_id(ctx.called_with["args"].split(" "))
+    ctx.config["PINMAP"][lux.zutils.intorstr(args[0])] = lux.zutils.intorstr(args[1])
+    return f"Mapped pins from <#{args[0]}> to be overflowed into <#{args[1]}>"
+
+
+@client.command(authtype="whitelist", posts=[(CONFIG.save, "sync", "noctx")], name="unmap")
+async def unmap_channel(ctx: lux.contexter.Contexter):
+    args = lux.dutils.mention_to_id(ctx.called_with["args"].split(" "))
+    del ctx.config["PINMAP"][args[0]]
+    return f"No longer overflowing pins from <#{args[0]}>"
+
+@client.command(authtype="whitelist", posts=[(CONFIG.save, "sync", "noctx")], name="setprefix")
+async def set_prefix(ctx: lux.contexter.Contexter):
+    new_prefix = ctx.called_with["args"].split(" ")[0]
+    resp = f"Prefix changed from `{ctx.config['PREFIX']}` to `{new_prefix}`"
+    ctx.config["PREFIX"] = new_prefix
+    return resp
+
+
 @client.command(authtype="whitelist", posts=[(CONFIG.save, "sync", "noctx")])
 async def config(ctx: lux.contexter.Contexter):
-    args = ctx.called_with["args"].split(" ")
-    args = [lux.zutils.intorstr(x) for x in args]
-    subcommand, args = args[0], args[1:]
+    args = lux.dutils.mention_to_id(ctx.called_with["args"].split(" ",1))
+    subcommand, args = args[0], args[1]
+
     if subcommand == "set":
-        ctx.config[args[0]] = lux.zutils.intorstr(args[1])
+        ctx.config[args[0]] = ast.literal_eval(args[1])
         CONFIG.save()
-        return f"Set key `{args[0]}` to be `{args[1]}`"
+        return f"Set key `{args[0]}` to be `{ctx.config[args[0]]}`"
     elif subcommand == "print":
         return [f"```{block}```" for block in utils_text.format_rows(list(ctx.config.items()))]
-    elif subcommand == "map":
-        ctx.config["PINMAP"][lux.zutils.intorstr(args[0])] = lux.zutils.intorstr(args[1])
-        return f"Mapped pins from <#{args[0]}> to be overflowed into <#{args[1]}>"
-    elif subcommand == "unmap":
-        del ctx.config["PINMAP"][args[0]]
-        return f"No longer overflowing pins from <#{args[0]}>"
     elif subcommand == "unset":
         resp = f"Unset {args[0]}, old value = {config[args[0]]}" if args[0] in config.keys() else "Invalid key, no changes made"
         CONFIG.reset_key(ctx.m.guild.id, args[0])
