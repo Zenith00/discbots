@@ -15,14 +15,14 @@ redd = praw.Reddit(client_id=TOKENS.REDDIT_ID, client_secret=TOKENS.REDDIT_SECRE
 
 @client.event
 async def on_message(mess_in):
-    print("message received?")
+    print("message received?", flush=True)
 
 
 @asyncio.coroutine
 async def astream():
     subreddit_stream = redd.subreddit("KindVoices").stream.submissions()
     while True:
-        print("Yielding...?")
+        print("Yielding...?", flush=True)
         submission = yield subreddit_stream #type: praw_models.Submission
         embed = discord.Embed()
         embed.set_author(name="/u/"+submission.author.name, icon_url=submission.author.icon_img,
