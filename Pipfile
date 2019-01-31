@@ -10,6 +10,9 @@ requests = "*"
 scipy = "*"
 regex = "*"
 dateparser = "*"
+google-api-python-client = "*"
+aioify = "*"
+praw = "*"
 
 [dev-packages]
 
