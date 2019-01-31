@@ -8,12 +8,21 @@ import lux
 import TOKENS
 logging.basicConfig(level=logging.INFO)
 
+CONFIG = lux.config.Config(botname="KVSRSTREAM").load()
+client = lux.client.Lux(CONFIG)
+
 redd = praw.Reddit(client_id=TOKENS.REDDIT_ID, client_secret=TOKENS.REDDIT_SECRET, user_agent="KVStream")
+
+@client.event
+async def on_message(mess_in):
+    print("message received?")
+
 
 @asyncio.coroutine
 async def astream():
     subreddit_stream = redd.subreddit("KindVoices").stream.submissions()
     while True:
+        print("Yielding...?")
         submission = yield subreddit_stream #type: praw_models.Submission
         embed = discord.Embed()
         embed.set_author(name="/u/"+submission.author.name, icon_url=submission.author.icon_img,
@@ -22,8 +31,5 @@ async def astream():
         embed.set_footer(text=f"Submitted at {submission.created_utc}")
         await client.get_channel(540332172670926851).send(content=submission.shortlink, embed=embed)
 
-CONFIG = lux.config.Config(botname="KVSRSTREAM").load()
-client = lux.client.Lux(CONFIG)
 client.loop.create_task(astream())
-
 client.run(CONFIG.TOKEN)
