@@ -1,9 +1,13 @@
 import asyncio
+import logging
+
 import discord
 import praw
 from praw import models as praw_models
 import lux
 import TOKENS
+logging.basicConfig(level=logging.INFO)
+
 redd = praw.Reddit(client_id=TOKENS.REDDIT_ID, client_secret=TOKENS.REDDIT_SECRET, user_agent="KVStream")
 
 @asyncio.coroutine
@@ -20,6 +24,6 @@ async def astream():
 
 CONFIG = lux.config.Config(botname="KVSRSTREAM").load()
 client = lux.client.Lux(CONFIG)
-client.loop.run_until_complete(astream())
+client.loop.create_task(astream())
 
 client.run(CONFIG.TOKEN)
