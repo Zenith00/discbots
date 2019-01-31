@@ -1,5 +1,3 @@
-import logging
-
 from googleapiclient import discovery
 import TOKENS
 import discord
@@ -8,7 +6,6 @@ from aioify import aioify
 perspective_api = discovery.build('commentanalyzer', 'v1alpha1', developerKey=TOKENS.PERSPECTIVE_KEY)
 CONFIG = lux.config.Config(botname="PHAROS").load()
 client = lux.client.Lux(CONFIG)
-logging.basicConfig(level=logging.INFO)
 
 @aioify
 def persp_req(content):
