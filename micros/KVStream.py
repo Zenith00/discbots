@@ -20,10 +20,8 @@ async def on_message(mess_in):
 
 @asyncio.coroutine
 async def astream():
-    subreddit_stream = redd.subreddit("all").stream.submissions()
-    while True:
+    for submission in redd.subreddit("all").stream.submissions():
         print("Yielding...?", flush=True)
-        submission = yield subreddit_stream #type: praw_models.Submission
         embed = discord.Embed()
         embed.set_author(name="/u/"+submission.author.name, icon_url=submission.author.icon_img,
                          url=f"https://www.reddit.com/u/{submission.author.name}")
