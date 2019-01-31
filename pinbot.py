@@ -132,6 +132,10 @@ async def on_message_edit(message_bef: discord.Message, message_aft: discord.Mes
     if ctx.m.channel.id in CONFIG.of(message_bef.guild)["PINMAP"].keys() and not message_bef.pinned and message_aft.pinned:
         await process_pin(ctx)
 
+@client.event
+async def on_ready():
+    await client.change_presence(activity=discord.Game(name="pinbot.page.link/invite for support"))
+
 async def process_pin(ctx: lux.contexter.Contexter):
     channel_pins = await ctx.m.channel.pins()
     if len(channel_pins) > ctx.config["PIN_THRESHOLD"]:
