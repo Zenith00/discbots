@@ -2,7 +2,7 @@ import asyncio
 import discord
 import praw
 from praw import models as praw_models
-from . import lux
+from .. import lux
 import TOKENS
 redd = praw.Reddit(client_id=TOKENS.REDDIT_ID, client_secret=TOKENS.REDDIT_SECRET, user_agent="KVStream")
 
