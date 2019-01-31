@@ -10,6 +10,6 @@ PINBOT["ALLOWED_IDS"] = []
 INVITEBOT = {}
 INVITEBOT["PREFIX"] = ",,"
 
-PHAROS = {}
+PHAROS = {"PREFIX":"p!"}
 
-KVSRSTREAM = {}
+KVSRSTREAM = {"PREFIX":"kv!"}
