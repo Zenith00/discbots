@@ -20,7 +20,7 @@ redd = praw.Reddit(client_id=TOKENS.REDDIT_ID, client_secret=TOKENS.REDDIT_SECRE
 @asyncio.coroutine
 async def astream():
     await client.wait_until_ready()
-    for submission in redd.subreddit("kindvoice").stream.submissions():
+    for submission in redd.subreddit("kindvoice").stream.submissions(skip_existing=True):
         try:
             print("Yielding...?", flush=True)
             embed = discord.Embed()
