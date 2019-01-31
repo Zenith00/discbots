@@ -20,7 +20,7 @@ async def on_message(mess_in):
 
 @asyncio.coroutine
 async def astream():
-    subreddit_stream = redd.subreddit("KindVoices").stream.submissions()
+    subreddit_stream = redd.subreddit("all").stream.submissions()
     while True:
         print("Yielding...?", flush=True)
         submission = yield subreddit_stream #type: praw_models.Submission
