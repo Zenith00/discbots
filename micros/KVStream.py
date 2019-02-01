@@ -23,7 +23,7 @@ async def astream():
     for submission in redd.subreddit("KindVoice").stream.submissions(skip_existing=True):
         try:
             print("Yielding...?", flush=True)
-            embed = discord.Embed()
+            embed = discord.Embed(title=submission.title)
             embed.set_author(name="/u/"+submission.author.name, icon_url=submission.author.icon_img,
                              url=f"https://www.reddit.com/u/{submission.author.name}")
             embed.description = lux.zutils.threshold_string(submission.selftext, 1000)
