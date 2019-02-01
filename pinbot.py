@@ -133,6 +133,11 @@ async def on_message_edit(message_bef: discord.Message, message_aft: discord.Mes
         await process_pin(ctx)
 
 @client.event
+async def on_message(message_in):
+    print("Debug: " + message_in.content)
+
+
+@client.event
 async def on_ready():
     await client.change_presence(activity=discord.Game(name="pinbot.page.link/invite for support"))
 
