@@ -10,7 +10,7 @@ import lux
 import TOKENS
 logging.basicConfig(level=logging.INFO)
 
-CONFIG = lux.config.Config(botname="KVSRSTREAM").clean()
+CONFIG = lux.config.Config(botname="KVSRSTREAM")
 client = lux.client.Lux(CONFIG)
 
 redd = praw.Reddit(client_id=TOKENS.REDDIT_ID, client_secret=TOKENS.REDDIT_SECRET, user_agent="KVStream")
