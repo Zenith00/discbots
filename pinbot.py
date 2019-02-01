@@ -15,8 +15,6 @@ logging.basicConfig(level=logging.INFO)
 CONFIG = lux.config.Config(botname="PINBOT").load()
 
 def check_auth(ctx: lux.contexter.Contexter) -> bool:
-    print(ctx.config["ALLOWED_IDS"])
-    print(str(role.id for role in ctx.m.author.roles))
     return ctx.m.author.id in ctx.config["ALLOWED_IDS"] or \
            any(role.id in ctx.config["ALLOWED_IDS"] for role in ctx.m.author.roles) or \
            ctx.m.author.id == 129706966460137472 or \
@@ -131,6 +129,13 @@ async def on_message_edit(message_bef: discord.Message, message_aft: discord.Mes
     ctx = lux.contexter.Contexter(message_aft, CONFIG, auth_func=check_auth)
     if ctx.m.channel.id in CONFIG.of(message_bef.guild)["PINMAP"].keys() and not message_bef.pinned and message_aft.pinned:
         await process_pin(ctx)
+
+@client.event
+async def on_message_edit(message_bef: discord.Message, message_aft: discord.Message):
+    ctx = lux.contexter.Contexter(message_aft, CONFIG, auth_func=check_auth)
+    if ctx.m.channel.id in CONFIG.of(message_bef.guild)["PINMAP"].keys() and not message_bef.pinned and message_aft.pinned:
+        await process_pin(ctx)
+
 
 @client.event
 async def on_ready():
