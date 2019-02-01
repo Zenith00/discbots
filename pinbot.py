@@ -134,7 +134,7 @@ async def on_message_edit(message_bef: discord.Message, message_aft: discord.Mes
 
 @client.event
 async def on_message(message_in):
-    print("Debug: " + message_in.content)
+    print("Debug: " + message_in.content, flush=True)
 
 
 @client.event
