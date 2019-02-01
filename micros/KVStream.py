@@ -15,6 +15,9 @@ client = lux.client.Lux(CONFIG)
 
 redd = praw.Reddit(client_id=TOKENS.REDDIT_ID, client_secret=TOKENS.REDDIT_SECRET, user_agent="KVStream")
 
+@client.event
+async def on_message(mess):
+    print("Debug found message")
 
 
 @asyncio.coroutine
