@@ -3,6 +3,7 @@ import datetime
 import logging
 import traceback
 
+import aioify
 import discord
 import praw
 from praw import models as praw_models
@@ -20,9 +21,7 @@ async def on_message(mess):
     print("Debug found message")
 
 
-@asyncio.coroutine
-async def astream():
-    await client.wait_until_ready()
+def astream():
     for submission in redd.subreddit("KindVoice").stream.submissions(skip_existing=True):
         try:
             print("Yielding...?", flush=True)
@@ -32,9 +31,9 @@ async def astream():
             embed.description = lux.zutils.threshold_string(submission.selftext, 1000)
             embed.set_footer(text=f"Submitted at {datetime.datetime.utcfromtimestamp(submission.created_utc).isoformat(' ')}")
             channel = client.get_channel(540332172670926851)
-            await channel.send(content=submission.shortlink, embed=embed)
+            client.loop.create_task(channel.send(content=submission.shortlink, embed=embed))
         except:
-            print(traceback.format_exc())
+            print(traceback.format_exc(), flush=True)
 
-client.loop.create_task(astream())
+client.loop.run_in_executor(None, astream)
 client.run(CONFIG.TOKEN)
