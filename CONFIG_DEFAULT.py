@@ -12,4 +12,5 @@ INVITEBOT["PREFIX"] = ",,"
 
 PHAROS = {"PREFIX":"p!"}
 
-KVSRSTREAM = {"PREFIX":"kv!"}
+KVSRSTREAM = {"PREFIX":"kv!",
+              "EVAL":True}
