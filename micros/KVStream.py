@@ -25,6 +25,9 @@ async def on_message(mess):
 
 @client.append_event
 async def on_reaction_add(reaction : discord.Reaction, user : discord.User):
+    print(f"Reaction found...")
+    if reaction.emoji == "✅":
+        await reaction.message.channel.send(f"Detected checkmark made by {user} on message {reaction.message.jump_url}")
     if reaction.message.author == client.user and reaction.emoji == "✅":
         if reaction.message.id in tracked_posts:
             await reaction.message.channel.send(f"Detected reaction made by {user} on message {reaction.message.jump_url}")
