@@ -15,7 +15,9 @@ logging.basicConfig(level=logging.INFO)
 CONFIG = lux.config.Config(botname="KVSRSTREAM")
 client = lux.client.Lux(CONFIG)
 
-redd = praw.Reddit(client_id=TOKENS.REDDIT_ID, client_secret=TOKENS.REDDIT_SECRET, user_agent="KVStream")
+
+
+redd = praw.Reddit(**TOKENS.KVSRSTREAM)
 
 tracked_posts = set()
 
@@ -31,6 +33,12 @@ async def on_reaction_add(reaction : discord.Reaction, user : discord.User):
     if reaction.message.author == client.user and reaction.emoji == "✅":
         if reaction.message.id in tracked_posts:
             await reaction.message.channel.send(f"Detected reaction made by {user} on message {reaction.message.jump_url}")
+            await reaction.message.channel.send(f"Send debug PM to /u/Zenith042 from /u/KindVoiceDiscordBot")
+            await reddit_pm()
+
+async def reddit_pm(target="Zenith042", title="Default Title", content="Default Content"):
+    redditor = redd.redditor(target)
+    redditor.message(title, content)
 
 
 def astream():
