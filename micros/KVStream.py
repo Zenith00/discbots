@@ -30,13 +30,17 @@ async def on_reaction_add(reaction : discord.Reaction, user : discord.User):
     print(f"Reaction found...")
     if reaction.emoji == "✅":
         await reaction.message.channel.send(f"Detected checkmark made by {user} on message {reaction.message.jump_url}")
+        await reaction.message.channel.send(f"Send debug PM to /u/SortedQuartz from /u/KindVoiceDiscordBot")
+        await reddit_pm()
+
+
     if reaction.message.author == client.user and reaction.emoji == "✅":
         if reaction.message.id in tracked_posts:
             await reaction.message.channel.send(f"Detected reaction made by {user} on message {reaction.message.jump_url}")
-            await reaction.message.channel.send(f"Send debug PM to /u/Zenith042 from /u/KindVoiceDiscordBot")
+            await reaction.message.channel.send(f"Send debug PM to /u/SortedQuartz from /u/KindVoiceDiscordBot")
             await reddit_pm()
 
-async def reddit_pm(target="Zenith042", title="Default Title", content="Default Content"):
+async def reddit_pm(target="SortedQuartz", title="Default Title", content="Default Content"):
     redditor = redd.redditor(target)
     redditor.message(title, content)
 
