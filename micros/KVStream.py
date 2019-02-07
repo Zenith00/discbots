@@ -17,7 +17,7 @@ client = lux.client.Lux(CONFIG)
 
 
 
-redd = praw.Reddit(**TOKENS.KVSRSTREAM)
+redd = praw.Reddit(**TOKENS.KVSRSTREAM_EXTRA)
 
 tracked_posts = set()
 
