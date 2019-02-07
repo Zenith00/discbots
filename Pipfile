@@ -13,6 +13,9 @@ dateparser = "*"
 google-api-python-client = "*"
 aioify = "*"
 praw = "*"
+pandas = "*"
+tqdm = "*"
+seaborn = "*"
 
 [dev-packages]
 
