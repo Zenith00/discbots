@@ -56,6 +56,10 @@ def astream():
             embed.set_footer(text=f"Submitted at {datetime.datetime.utcfromtimestamp(submission.created_utc).isoformat(' ')}")
             channel = client.get_channel(540332172670926851)
             client.loop.create_task(channel.send(content=submission.shortlink, embed=embed))
+            if "[L]" in submission.title:
+                client.loop.create_task(channel.send(content="Detected as Looking"))
+            if "[O]" in submission.title:
+                client.loop.create_task(channel.send(content="Detected as Offering"))
         except:
             print(traceback.format_exc(), flush=True)
 
