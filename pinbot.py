@@ -98,7 +98,6 @@ async def config(ctx: lux.contexter.Contexter):
 
     if subcommand == "set":
         ctx.config[args[0]] = ast.literal_eval(args[1])
-        CONFIG.save()
         return f"Set key `{args[0]}` to be `{ctx.config[args[0]]}`"
     elif subcommand == "print":
         return [f"```{block}```" for block in utils_text.format_rows(list(ctx.config.items()))]
@@ -109,6 +108,8 @@ async def config(ctx: lux.contexter.Contexter):
     elif subcommand == "reset":
         CONFIG.reset(ctx.m.guild.id)
         return "Config reset to default"
+
+    CONFIG.save()
 
 @client.event
 async def on_message_edit(message_bef: discord.Message, message_aft: discord.Message):
