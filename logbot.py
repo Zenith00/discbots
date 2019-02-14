@@ -1,26 +1,23 @@
+import collections
 import json
 import logging
 import textwrap
-from io import BytesIO, StringIO
-from datetime import datetime, timedelta
 import traceback
+from datetime import datetime, timedelta
+from io import StringIO
+
 import discord
-import motor.motor_asyncio
 import regex as re
-from utils import utils_text, utils_parse, utils_file
-import regex as re
+
 import TOKENS
-import CONSTANTS
-import collections
+from utils import utils_text, utils_file
 
 logging.basicConfig(level=logging.INFO)
 
-mongo_client = motor.motor_asyncio.AsyncIOMotorClient(
-    "mongodb://{usn}:{pwd}@nadir.space".format(
-        usn=TOKENS.MONGO_USN, pwd=TOKENS.MONGO_PASS))
+
 # mongo_client = motor.motor_asyncio.AsyncIOMotorClient()
 
-log_db = mongo_client.logbot
+# log_db = mongo_client.logbot
 client = discord.Client()
 
 STATES = {"init": False}
@@ -542,20 +539,20 @@ async def log_action(server, action, detail):
                 id=detail["id"],
                 content=detail["content"])
             target_channel = message_log
-            await log_db[server.id].insert_one({
-                "date"   :
-                    datetime.utcnow().isoformat(" "),
-                "action" :
-                    action,
-                "channel":
-                    detail["channel"],
-                "mention":
-                    detail["mention"],
-                "id"     :
-                    detail["id"],
-                "content":
-                    detail["content"]
-            })
+            # await log_db[server.id].insert_one({
+            #     "date"   :
+            #         datetime.utcnow().isoformat(" "),
+            #     "action" :
+            #         action,
+            #     "channel":
+            #         detail["channel"],
+            #     "mention":
+            #         detail["mention"],
+            #     "id"     :
+            #         detail["id"],
+            #     "content":
+            #         detail["content"]
+            # })
         elif action == "edit":
             message = "{time} :pencil: [EDIT] [{channel}] [{mention}] [{id}]:\n`-BEFORE:` {before} \n`+ AFTER:` {after}".format(
                 time=time,
@@ -565,22 +562,22 @@ async def log_action(server, action, detail):
                 before=detail["before"],
                 after=detail["after"])
             target_channel = message_log
-            await log_db[server.id].insert_one({
-                "date"   :
-                    datetime.utcnow().isoformat(" "),
-                "action" :
-                    action,
-                "channel":
-                    detail["channel"],
-                "mention":
-                    detail["mention"],
-                "id"     :
-                    detail["id"],
-                "before" :
-                    detail["before"],
-                "after"  :
-                    detail["after"]
-            })
+            # await log_db[server.id].insert_one({
+            #     "date"   :
+            #         datetime.utcnow().isoformat(" "),
+            #     "action" :
+            #         action,
+            #     "channel":
+            #         detail["channel"],
+            #     "mention":
+            #         detail["mention"],
+            #     "id"     :
+            #         detail["id"],
+            #     "before" :
+            #         detail["before"],
+            #     "after"  :
+            #         detail["after"]
+            # })
 
     if log_config[server.id]["states"]["server_log"]:
         target_channel = server_log
@@ -591,27 +588,27 @@ async def log_action(server, action, detail):
                 mention=detail["mention"],
                 id=detail["id"],
                 age=detail["age"])
-            await log_db[server.id].insert_one({
-                "date"  :
-                    datetime.utcnow().isoformat(" "),
-                "action":
-                    action,
-                "id"    :
-                    detail["id"],
-                "age"   :
-                    detail["age"]
-            })
+            # await log_db[server.id].insert_one({
+            #     "date"  :
+            #         datetime.utcnow().isoformat(" "),
+            #     "action":
+            #         action,
+            #     "id"    :
+            #         detail["id"],
+            #     "age"   :
+            #         detail["age"]
+            # })
         elif action == "leave":
             message = "{time} :outbox_tray: [LEAVE] [{mention}] [{id}]".format(
                 time=time, mention=detail["mention"], id=detail["id"])
-            await log_db[server.id].insert_one({
-                "date"  :
-                    datetime.utcnow().isoformat(" "),
-                "action":
-                    action,
-                "id"    :
-                    detail["id"]
-            })
+            # await log_db[server.id].insert_one({
+            #     "date"  :
+            #         datetime.utcnow().isoformat(" "),
+            #     "action":
+            #         action,
+            #     "id"    :
+            #         detail["id"]
+            # })
 
         elif action == "ban":
             message = "{time} :no_entry_sign: [BAN] [{mention}] [{id}] Name: {name} {nick}".format(
@@ -621,31 +618,31 @@ async def log_action(server, action, detail):
                 name=detail["member"].name + "#" +
                      detail["member"].discriminator,
                 nick=detail["member"].nick if detail["member"].nick else "")
-            await log_db[server.id].insert_one({
-                "date"   :
-                    datetime.utcnow().isoformat(" "),
-                "action" :
-                    action,
-                "id"     :
-                    detail["member"].id,
-                "mention":
-                    detail["member"].mention
-            })
+            # await log_db[server.id].insert_one({
+            #     "date"   :
+            #         datetime.utcnow().isoformat(" "),
+            #     "action" :
+            #         action,
+            #     "id"     :
+            #         detail["member"].id,
+            #     "mention":
+            #         detail["member"].mention
+            # })
 
         elif action == "unban":
             message = "{time} :white_check_mark:  [UNBAN] [{mention}] [{id}]".format(
                 time=time, mention="<@!" + detail["id"] + ">", id=detail["id"])
 
-            await log_db[server.id].insert_one({
-                "date"   :
-                    datetime.utcnow().isoformat(" "),
-                "action" :
-                    action,
-                "id"     :
-                    detail["id"],
-                "mention":
-                    detail["mention"]
-            })
+            # await log_db[server.id].insert_one({
+            #     "date"   :
+            #         datetime.utcnow().isoformat(" "),
+            #     "action" :
+            #         action,
+            #     "id"     :
+            #         detail["id"],
+            #     "mention":
+            #         detail["mention"]
+            # })
         elif action == "role_change":
             # print("TRIGGERING ROLE CHANGE")
 
@@ -711,24 +708,24 @@ async def log_action(server, action, detail):
             ago = now - threshold
             date_text = ago.isoformat(" ")
 
-            movecount = await (log_db[server.id].find({
-                "action": action,
-                "id"    : detail["id"],
-                "date"  : {
-                    "$gt": date_text
-                }
-            }).count())
-
-            if movecount < 5:
-                emoji = ":white_check_mark:"
-            elif movecount < 10:
-                emoji = ":grey_question:"
-            elif movecount < 15:
-                emoji = ":warning:"
-            elif movecount < 20:
-                emoji = ":exclamation:"
-            else:  # movecount < 25:
-                emoji = ":bangbang:"
+            # movecount = await (log_db[server.id].find({
+            #     "action": action,
+            #     "id"    : detail["id"],
+            #     "date"  : {
+            #         "$gt": date_text
+            #     }
+            # }).count())
+            #
+            # if movecount < 5:
+            emoji = ":white_check_mark:"
+            # elif movecount < 10:
+            #     emoji = ":grey_question:"
+            # elif movecount < 15:
+            #     emoji = ":warning:"
+            # elif movecount < 20:
+            #     emoji = ":exclamation:"
+            # else:  # movecount < 25:
+            #  emoji = ":bangbang:"
             target_channel = voice_log
             if voice_state.voice_channel:
                 in_room = str(len(voice_state.voice_channel.voice_members))
@@ -736,26 +733,17 @@ async def log_action(server, action, detail):
             else:
                 in_room = "0"
                 room_cap = "0"
-            message = "{emoji} {date} {mention} : `{before}` → `{after}` [{usercount}/{userlimit}] ({count})".format(
+            message = "{emoji} {date} {mention} : `{before}` → `{after}` [{usercount}/{userlimit}] ()".format(
                 emoji=emoji,
                 date=time,
                 mention="<@!" + detail["id"] + ">",
                 before=before,
                 after=after,
                 usercount=in_room,
-                userlimit=room_cap,
-                count=movecount)
+                userlimit=room_cap)
             if server.id in trackers.keys() and detail["after"].id in trackers[server.id].keys():
                 trackers[server.id][detail["after"].id].add_entry(message)
 
-            await log_db[server.id].insert_one({
-                "date"  :
-                    datetime.utcnow().isoformat(" "),
-                "action":
-                    action,
-                "id"    :
-                    detail["id"]
-            })
 
     if message and target_channel:
         message = await scrub_text(message, voice_log)
