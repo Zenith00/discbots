@@ -1,0 +1,13 @@
+diff a/CONFIG_DEFAULT.py b/CONFIG_DEFAULT.py	(rejected hunks)
+@@ -10,6 +10,7 @@
+ INVITEBOT = {}
+ INVITEBOT["PREFIX"] = ",,"
+ 
+-PHAROS = {}
++PHAROS = {"PREFIX":"p!"}
+ 
+-KVSRSTREAM = {}
+\ No newline at end of file
++KVSRSTREAM = {"PREFIX":"kv!",
++              "EVAL":True}
+\ No newline at end of file
