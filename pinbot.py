@@ -141,7 +141,9 @@ async def process_pin(ctx: lux.contexter.Contexter):
         if "EMBED_COLOR_CALC" in ctx.config.keys() and ctx.config["EMBED_COLOR_CALC"]:
             avg_color = utils_image.average_color_url(earliest_pin.author.avatar_url)
             colour = discord.Colour.from_rgb(*avg_color)
-        await target_channel.send(content=earliest_pin.jump_url, embed=lux.dutils.message2embed(earliest_pin, embed_color=colour))
+        embed = lux.dutils.message2embed(earliest_pin, embed_color=colour)
+        # embed.set_footer(text = f"{Pinned by {embed.footer.text})
+        await target_channel.send(content=earliest_pin.jump_url, embed=embed)
         await earliest_pin.unpin()
 
 def delta_messages(before: discord.Message, after: discord.Message):
