@@ -29,6 +29,11 @@ async def get_help(ctx: lux.contexter.Contexter):
     message_list = [f"```{block}```" for block in utils_text.format_rows(CONSTANTS.PINBOT["COMMAND_HELP"])]
     return message_list
 
+@client.command(authtype="whitelist", name="pinall")
+async def pin_all(ctx: lux.contexter.Contexter):
+    while process_pin(ctx):
+        pass
+
 @client.command(authtype="whitelist", posts=[(CONFIG.save, "sync", "noctx")])
 async def whitelist(ctx: lux.contexter.Contexter):
     target_list = lux.dutils.mention_to_id(ctx.called_with["args"].split(" "))
@@ -109,7 +114,7 @@ async def config(ctx: lux.contexter.Contexter):
         CONFIG.reset(ctx.m.guild.id)
         return "Config reset to default"
 
-    CONFIG.save()
+
 
 @client.event
 async def on_message_edit(message_bef: discord.Message, message_aft: discord.Message):
@@ -145,6 +150,9 @@ async def process_pin(ctx: lux.contexter.Contexter):
         # embed.set_footer(text = f"{Pinned by {embed.footer.text})
         await target_channel.send(content=earliest_pin.jump_url, embed=embed)
         await earliest_pin.unpin()
+        return True
+    return False
+
 
 def delta_messages(before: discord.Message, after: discord.Message):
     delta = set(lux.dutils.message2dict(before).items()) ^ set(lux.dutils.message2dict(after).items())
