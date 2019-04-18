@@ -22,12 +22,19 @@ def check_auth(ctx: lux.contexter.Contexter) -> bool:
 
 client = lux.client.Lux(CONFIG, auth_function=check_auth)
 
-
-
 @client.command(authtype="whitelist", name="help")
 async def get_help(ctx: lux.contexter.Contexter):
     message_list = [f"```{block}```" for block in utils_text.format_rows(CONSTANTS.PINBOT["COMMAND_HELP"])]
     return message_list
+
+@client.command(authtype="whitelist", name="setup")
+async def get_help(ctx: lux.contexter.Contexter):
+    debug_message = ("```Note that:\n"
+                     "  1) You need to first ,,map a channel to another one\n"
+                     "  2) ,,setmax will determine how many pins the bot will allow before converting the pins"
+                     "  2b) You can use ,,pinall after ,,setmax to retroactively convert pins. This is slow."
+                     "  3) The bot will only recognize pins on messages that were sent after the bot was added. THis is due to API limitations.```")
+    return debug_message
 
 @client.command(authtype="whitelist", name="pinall")
 async def pin_all(ctx: lux.contexter.Contexter):
@@ -114,8 +121,6 @@ async def config(ctx: lux.contexter.Contexter):
         CONFIG.reset(ctx.m.guild.id)
         return "Config reset to default"
 
-
-
 @client.event
 async def on_message_edit(message_bef: discord.Message, message_aft: discord.Message):
     ctx = lux.contexter.Contexter(message_aft, CONFIG, auth_func=check_auth)
@@ -127,7 +132,6 @@ async def on_message_edit(message_bef: discord.Message, message_aft: discord.Mes
     ctx = lux.contexter.Contexter(message_aft, CONFIG, auth_func=check_auth)
     if ctx.m.channel.id in CONFIG.of(message_bef.guild)["PINMAP"].keys() and not message_bef.pinned and message_aft.pinned:
         await process_pin(ctx)
-
 
 @client.event
 async def on_ready():
@@ -152,7 +156,6 @@ async def process_pin(ctx: lux.contexter.Contexter):
         await earliest_pin.unpin()
         return True
     return False
-
 
 def delta_messages(before: discord.Message, after: discord.Message):
     delta = set(lux.dutils.message2dict(before).items()) ^ set(lux.dutils.message2dict(after).items())
