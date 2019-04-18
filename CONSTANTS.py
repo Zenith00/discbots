@@ -11,4 +11,7 @@ PINBOT = {"COMMAND_HELP":
                ["config unset", "[name]", "Restores config [name] to default", "...comes great responsibility"],
                ["config reset", "", "Restores config to default", "In case of emergency, break glass"],
                ["config print", "", "Prints current config", "Secret settings pending documentation..."],
+               ["", "", "", ""],
+               ["pinall", "", "Processes pins in channel until reaching threshold", ""],
+
                ]}
