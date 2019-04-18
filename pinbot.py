@@ -31,7 +31,7 @@ async def get_help(ctx: lux.contexter.Contexter):
 
 @client.command(authtype="whitelist", name="pinall")
 async def pin_all(ctx: lux.contexter.Contexter):
-    while process_pin(ctx):
+    while await process_pin(ctx):
         pass
 
 @client.command(authtype="whitelist", posts=[(CONFIG.save, "sync", "noctx")])
