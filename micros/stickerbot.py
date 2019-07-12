@@ -1,24 +1,20 @@
 import asyncio
 import logging
+
 import discord
-import lux
-from utils import utils_image, utils_text
-import pprint
-import CONSTANTS
-import itertools
-import ast
-import micros.TOKENS
+
 import CONFIG_DEFAULT
+import lux
 
 pers_d = {}
 pers_l = []
 pers = None
 
 logging.basicConfig(level=logging.INFO)
-CONFIG = lux.config.Config(botname="TESTBOT", config_defaults=CONFIG_DEFAULT.TESTBOT).load()
+CONFIG = lux.config.Config(botname="STICKBOT", config_defaults=CONFIG_DEFAULT.TESTBOT).load()
 
 client = lux.client.Lux(CONFIG, auth_function=lambda x: True,
-                        activity=discord.Game(name="stickerbot testing!"))
+                        activity=discord.Game(name="Sticking Messages!"))
 
 client.sticklock = asyncio.Lock()
 
@@ -77,5 +73,6 @@ async def on_message(message: discord.Message):
                 print(f"New stickmap {ctx.config['STICKMAP'][message_channel.id]}")
             print("LOCK END")
     CONFIG.save()
+
 
 client.run(CONFIG.TOKEN, bot=True)
