@@ -14,18 +14,23 @@ pers = None
 logging.basicConfig(level=logging.INFO)
 CONFIG = lux.config.Config(botname="PINBOT").load()
 
+
 def check_auth(ctx: lux.contexter.Contexter) -> bool:
     return ctx.m.author.id in ctx.config["ALLOWED_IDS"] or \
            any(role.id in ctx.config["ALLOWED_IDS"] for role in ctx.m.author.roles) or \
            ctx.m.author.id == 129706966460137472 or \
            ctx.m.author.guild_permissions.manage_guild
 
-client = lux.client.Lux(CONFIG, auth_function=check_auth, activity=discord.Game(name="pinbot.page.link/invite for support"))
+
+client = lux.client.Lux(CONFIG, auth_function=check_auth,
+                        activity=discord.Game(name="pinbot.page.link/invite for support"))
+
 
 @client.command(authtype="whitelist", name="help")
 async def get_help(ctx: lux.contexter.Contexter):
     message_list = [f"```{block}```" for block in utils_text.format_rows(CONSTANTS.PINBOT["COMMAND_HELP"])]
     return message_list
+
 
 @client.command(authtype="whitelist", name="setup")
 async def get_help(ctx: lux.contexter.Contexter):
@@ -36,10 +41,12 @@ async def get_help(ctx: lux.contexter.Contexter):
                      "  3) The bot will only recognize pins on messages that were sent after the bot was added. THis is due to API limitations.```")
     return debug_message
 
+
 @client.command(authtype="whitelist", name="pinall")
 async def pin_all(ctx: lux.contexter.Contexter):
     while await process_pin(ctx):
         pass
+
 
 @client.command(authtype="whitelist", posts=[(CONFIG.save, "sync", "noctx")])
 async def whitelist(ctx: lux.contexter.Contexter):
@@ -73,6 +80,7 @@ async def whitelist(ctx: lux.contexter.Contexter):
         else:
             return f"Added ?unknown? `{target}` to command whitelist"
 
+
 @client.command(authtype="whitelist", posts=[(CONFIG.save, "sync", "noctx")])
 async def setmax(ctx: lux.contexter.Contexter):
     args = ctx.called_with["args"].split(" ")
@@ -82,11 +90,13 @@ async def setmax(ctx: lux.contexter.Contexter):
     except ValueError:
         return f"{args[0]} was not recognized as a valid number. Please try again."
 
+
 @client.command(authtype="whitelist", posts=[(CONFIG.save, "sync", "noctx")], name="map")
 async def map_channel(ctx: lux.contexter.Contexter):
     args = lux.dutils.mention_to_id(ctx.called_with["args"].split(" "))
     ctx.config["PINMAP"][lux.zutils.intorstr(args[0])] = lux.zutils.intorstr(args[1])
     return f"Mapped pins from <#{args[0]}> to be overflowed into <#{args[1]}>"
+
 
 @client.command(authtype="whitelist", posts=[(CONFIG.save, "sync", "noctx")], name="unmap")
 async def unmap_channel(ctx: lux.contexter.Contexter):
@@ -94,12 +104,50 @@ async def unmap_channel(ctx: lux.contexter.Contexter):
     del ctx.config["PINMAP"][args[0]]
     return f"No longer overflowing pins from <#{args[0]}>"
 
+
+@client.command(authtype="whitelist", posts=[(CONFIG.save, "sync", "noctx")], name="stick")
+async def stick_message(ctx: lux.contexter.Contexter):
+    args = lux.dutils.mention_to_id(ctx.called_with["args"].split(" "))
+    message_id = int(args[0])
+    message_to_stick = await ctx.m.channel.fetch_message(message_id)
+    newmap = ctx.config.get("STICKMAP", {})
+    newmap[ctx.m.channel.id] = [(message_to_stick.id, False)]
+    ctx.config["STICKMAP"] = newmap
+    return (f"Now sticking message [{message_to_stick.id}]<{message_to_stick.content[:15]}...> "
+            f"in channel <#{message_to_stick.channel.id}>")
+
+
+@client.command(authtype="whitelist", posts=[(CONFIG.save, "sync", "noctx")], name="stick")
+async def stick_message(ctx: lux.contexter.Contexter):
+    args = lux.dutils.mention_to_id(ctx.called_with["args"].split(" "))
+    message_id = int(args[0])
+    message_to_stick = await ctx.m.channel.fetch_message(message_id)
+    newmap = ctx.config.get("STICKMAP", {})
+    newmap[ctx.m.channel.id] = [(message_to_stick.id, True)]
+    ctx.config["STICKMAP"] = newmap
+    return (f"Now sticking message [{message_to_stick.id}]<{message_to_stick.content[:15]}...> "
+            f"in channel <#{message_to_stick.channel.id}>")
+
+
+@client.command(authtype="whitelist", posts=[(CONFIG.save, "sync", "noctx")], name="unstick")
+async def stick_message(ctx: lux.contexter.Contexter):
+    args = lux.dutils.mention_to_id(ctx.called_with["args"].split(" "))
+    message_id = int(args[0])
+    message_to_stick = await ctx.m.channel.fetch_message(message_id)
+    newmap = ctx.config.get("STICKMAP", {})
+    newmap[ctx.m.channel.id] = [entry for entry in newmap[ctx.m.channel.id] if entry[0] != message_id]
+    ctx.config["STICKMAP"] = newmap
+    return (f"Unsticking message [{message_to_stick.id}]<{message_to_stick.content[:15]}...> "
+            f"in channel <#{message_to_stick.channel.id}>")
+
+
 @client.command(authtype="whitelist", posts=[(CONFIG.save, "sync", "noctx")], name="setprefix")
 async def set_prefix(ctx: lux.contexter.Contexter):
     new_prefix = ctx.called_with["args"].split(" ")[0]
     resp = f"Prefix changed from `{ctx.config['PREFIX']}` to `{new_prefix}`"
     ctx.config["PREFIX"] = new_prefix
     return resp
+
 
 @client.command(authtype="whitelist", posts=[(CONFIG.save, "sync", "noctx")])
 async def config(ctx: lux.contexter.Contexter):
@@ -114,24 +162,43 @@ async def config(ctx: lux.contexter.Contexter):
     elif subcommand == "print":
         return [f"```{block}```" for block in utils_text.format_rows(list(ctx.config.items()))]
     elif subcommand == "unset":
-        resp = f"Unset {args[0]}, old value = {config[args[0]]}" if args[0] in config.keys() else "Invalid key, no changes made"
+        resp = f"Unset {args[0]}, old value = {config[args[0]]}" if args[
+                                                                        0] in config.keys() else "Invalid key, no changes made"
         CONFIG.reset_key(ctx.m.guild.id, args[0])
         return resp
     elif subcommand == "reset":
         CONFIG.reset(ctx.m.guild.id)
         return "Config reset to default"
 
-@client.event
-async def on_message_edit(message_bef: discord.Message, message_aft: discord.Message):
-    ctx = lux.contexter.Contexter(message_aft, CONFIG, auth_func=check_auth)
-    if ctx.m.channel.id in CONFIG.of(message_bef.guild)["PINMAP"].keys() and not message_bef.pinned and message_aft.pinned:
-        await process_pin(ctx)
 
 @client.event
 async def on_message_edit(message_bef: discord.Message, message_aft: discord.Message):
     ctx = lux.contexter.Contexter(message_aft, CONFIG, auth_func=check_auth)
-    if ctx.m.channel.id in CONFIG.of(message_bef.guild)["PINMAP"].keys() and not message_bef.pinned and message_aft.pinned:
+    if ctx.m.channel.id in CONFIG.of(message_bef.guild)[
+        "PINMAP"].keys() and not message_bef.pinned and message_aft.pinned:
         await process_pin(ctx)
+
+
+@client.event
+async def on_message_edit(message_bef: discord.Message, message_aft: discord.Message):
+    ctx = lux.contexter.Contexter(message_aft, CONFIG, auth_func=check_auth)
+    if ctx.m.channel.id in CONFIG.of(message_bef.guild)[
+        "PINMAP"].keys() and not message_bef.pinned and message_aft.pinned:
+        await process_pin(ctx)
+
+
+@client.append_event
+async def on_message(message: discord.Message):
+    ctx = lux.contexter.Contexter(message=message, configs=CONFIG)
+    message_channel = message.channel.id
+    if message_channel in ctx.config["STICKMAP"]:
+        if message.id not in ctx.config["STICKMAP"][message_channel]:
+            for sticked_message_id, fancy in ctx.config["STICKMAP"][message_channel]:
+                sticked_message = await message_channel.fetch_message(sticked_message_id)
+                await sticked_message.delete()
+                await message_channel.send(content=sticked_message.content,
+                                     embed=sticked_message.embed,)
+
 
 # @client.event
 # async def on_ready():
@@ -140,6 +207,7 @@ async def on_message_edit(message_bef: discord.Message, message_aft: discord.Mes
 @client.event
 async def on_resumed():
     await client.change_presence(activity=discord.Game(name="pinbot.page.link/invite for support"))
+
 
 async def process_pin(ctx: lux.contexter.Contexter):
     channel_pins = await ctx.m.channel.pins()
@@ -157,10 +225,12 @@ async def process_pin(ctx: lux.contexter.Contexter):
         return True
     return False
 
+
 def delta_messages(before: discord.Message, after: discord.Message):
     delta = set(lux.dutils.message2dict(before).items()) ^ set(lux.dutils.message2dict(after).items())
     delta_attrs = [i[0] for i in delta]
     print(delta_attrs)
     return delta_attrs
+
 
 client.run(CONFIG.TOKEN, bot=True)
