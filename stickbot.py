@@ -49,6 +49,7 @@ async def unstick_message(ctx: lux.contexter.Contexter):
 
 @client.append_event
 async def on_message(message: discord.Message):
+    print("", flush=True)
     ctx = lux.contexter.Contexter(message=message, configs=CONFIG)
     if message.content.startswith(ctx.config["PREFIX"] + "stick"):
         return
