@@ -14,3 +14,7 @@ PHAROS = {"PREFIX":"p!"}
 
 KVSRSTREAM = {"PREFIX":"kv!",
               "EVAL":True}
+
+TESTBOT = {}
+TESTBOT["PREFIX"] = ",,"
+TESTBOT["STICKMAP"] = {}
