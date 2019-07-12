@@ -11,7 +11,7 @@ pers_l = []
 pers = None
 
 logging.basicConfig(level=logging.INFO)
-CONFIG = lux.config.Config(botname="STICKBOT", config_defaults=CONFIG_DEFAULT.TESTBOT).load()
+CONFIG = lux.config.Config(botname="STICKBOT", config_defaults=CONFIG_DEFAULT.STICKBOT).load()
 
 client = lux.client.Lux(CONFIG, auth_function=lambda x: True,
                         activity=discord.Game(name="Sticking Messages!"))
