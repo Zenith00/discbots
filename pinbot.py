@@ -105,41 +105,6 @@ async def unmap_channel(ctx: lux.contexter.Contexter):
     return f"No longer overflowing pins from <#{args[0]}>"
 
 
-@client.command(authtype="whitelist", posts=[(CONFIG.save, "sync", "noctx")], name="stick")
-async def stick_message(ctx: lux.contexter.Contexter):
-    args = lux.dutils.mention_to_id(ctx.called_with["args"].split(" "))
-    message_id = int(args[0])
-    message_to_stick = await ctx.m.channel.fetch_message(message_id)
-    newmap = ctx.config.get("STICKMAP", {})
-    newmap[ctx.m.channel.id] = [(message_to_stick.id, False)]
-    ctx.config["STICKMAP"] = newmap
-    return (f"Now sticking message [{message_to_stick.id}]<{message_to_stick.content[:15]}...> "
-            f"in channel <#{message_to_stick.channel.id}>")
-
-
-@client.command(authtype="whitelist", posts=[(CONFIG.save, "sync", "noctx")], name="stick")
-async def stick_message(ctx: lux.contexter.Contexter):
-    args = lux.dutils.mention_to_id(ctx.called_with["args"].split(" "))
-    message_id = int(args[0])
-    message_to_stick = await ctx.m.channel.fetch_message(message_id)
-    newmap = ctx.config.get("STICKMAP", {})
-    newmap[ctx.m.channel.id] = [(message_to_stick.id, True)]
-    ctx.config["STICKMAP"] = newmap
-    return (f"Now sticking message [{message_to_stick.id}]<{message_to_stick.content[:15]}...> "
-            f"in channel <#{message_to_stick.channel.id}>")
-
-
-@client.command(authtype="whitelist", posts=[(CONFIG.save, "sync", "noctx")], name="unstick")
-async def stick_message(ctx: lux.contexter.Contexter):
-    args = lux.dutils.mention_to_id(ctx.called_with["args"].split(" "))
-    message_id = int(args[0])
-    message_to_stick = await ctx.m.channel.fetch_message(message_id)
-    newmap = ctx.config.get("STICKMAP", {})
-    newmap[ctx.m.channel.id] = [entry for entry in newmap[ctx.m.channel.id] if entry[0] != message_id]
-    ctx.config["STICKMAP"] = newmap
-    return (f"Unsticking message [{message_to_stick.id}]<{message_to_stick.content[:15]}...> "
-            f"in channel <#{message_to_stick.channel.id}>")
-
 
 @client.command(authtype="whitelist", posts=[(CONFIG.save, "sync", "noctx")], name="setprefix")
 async def set_prefix(ctx: lux.contexter.Contexter):
@@ -189,16 +154,7 @@ async def on_message_edit(message_bef: discord.Message, message_aft: discord.Mes
 
 @client.append_event
 async def on_message(message: discord.Message):
-    ctx = lux.contexter.Contexter(message=message, configs=CONFIG)
-    message_channel = message.channel.id
-    if message_channel in ctx.config["STICKMAP"]:
-        if message.id not in ctx.config["STICKMAP"][message_channel]:
-            for sticked_message_id, fancy in ctx.config["STICKMAP"][message_channel]:
-                sticked_message = await message_channel.fetch_message(sticked_message_id)
-                await sticked_message.delete()
-                await message_channel.send(content=sticked_message.content,
-                                     embed=sticked_message.embed,)
-
+    pass
 
 # @client.event
 # async def on_ready():

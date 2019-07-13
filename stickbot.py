@@ -55,6 +55,8 @@ async def on_message(message: discord.Message):
         return
     message_channel = message.channel
     if message_channel.id in ctx.config["STICKMAP"]:
+        if client.sticklock.locked():
+            return
         async with client.sticklock:
             print("LOCK START")
             print(f"Got message {message.id}, <<{message.content}>>, "
