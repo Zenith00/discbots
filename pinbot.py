@@ -5,6 +5,7 @@ from utils import utils_image, utils_text
 import pprint
 import CONSTANTS
 import itertools
+import CONFIG_DEFAULT
 import ast
 
 pers_d = {}
@@ -12,7 +13,7 @@ pers_l = []
 pers = None
 
 logging.basicConfig(level=logging.INFO)
-CONFIG = lux.config.Config(botname="PINBOT").load()
+CONFIG = lux.config.Config(botname="PINBOT", config_defaults=CONFIG_DEFAULT.PINBOT).load()
 
 
 def check_auth(ctx: lux.contexter.Contexter) -> bool:
