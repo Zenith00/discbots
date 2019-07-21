@@ -105,7 +105,6 @@ async def unmap_channel(ctx: lux.contexter.Contexter):
     return f"No longer overflowing pins from <#{args[0]}>"
 
 
-
 @client.command(authtype="whitelist", posts=[(CONFIG.save, "sync", "noctx")], name="setprefix")
 async def set_prefix(ctx: lux.contexter.Contexter):
     new_prefix = ctx.called_with["args"].split(" ")[0]
@@ -138,23 +137,24 @@ async def config(ctx: lux.contexter.Contexter):
 
 @client.event
 async def on_message_edit(message_bef: discord.Message, message_aft: discord.Message):
-    ctx = lux.contexter.Contexter(message_aft, CONFIG, auth_func=check_auth)
+    ctx = lux.contexter.Contexter(message_aft, guild=message_bef.guild, configs=CONFIG, auth_func=check_auth)
     if ctx.m.channel.id in CONFIG.of(message_bef.guild)[
         "PINMAP"].keys() and not message_bef.pinned and message_aft.pinned:
         await process_pin(ctx)
 
 
-@client.event
-async def on_message_edit(message_bef: discord.Message, message_aft: discord.Message):
-    ctx = lux.contexter.Contexter(message_aft, CONFIG, auth_func=check_auth)
-    if ctx.m.channel.id in CONFIG.of(message_bef.guild)[
-        "PINMAP"].keys() and not message_bef.pinned and message_aft.pinned:
-        await process_pin(ctx)
+# @client.event
+# async def on_message_edit(message_bef: discord.Message, message_aft: discord.Message):
+#     ctx = lux.contexter.Contexter(message_aft, CONFIG, auth_func=check_auth)
+#     if ctx.m.channel.id in CONFIG.of(message_bef.guild)[
+#         "PINMAP"].keys() and not message_bef.pinned and message_aft.pinned:
+#         await process_pin(ctx)
 
 
 @client.append_event
 async def on_message(message: discord.Message):
     pass
+
 
 # @client.event
 # async def on_ready():
