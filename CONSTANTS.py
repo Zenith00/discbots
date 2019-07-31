@@ -9,7 +9,7 @@ PINBOT = {"COMMAND_HELP":
                ["whitelist", "[@|role/member]", "Allow/Forbid role/member using commands", "Try a mention?"],
                ["setprefix", "[prefix]", "Sets prefix to [prefix]", ""],
                ["", "", "", ""],
-               ["config set", "[name] [value]", "Sets config [name] to ([value])", "With great power..."],
+               ["config set", "[name] [val]", "Sets config [name] to leval([val])", "With great power..."],
                ["config unset", "[name]", "Restores config [name] to default", "...comes great responsibility"],
                ["config reset", "", "Restores all config to default", "In case of emergency, break glass"],
                ["config print", "", "Prints current config", "Secret settings pending documentation..."],
