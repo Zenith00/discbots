@@ -154,6 +154,7 @@ async def on_message_edit(message_bef: discord.Message, message_aft: discord.Mes
 
 @client.append_event
 async def on_message(message: discord.Message):
+    print("", flush=True)
     if message.guild is None:
         channel : ty.Optional[discord.abc.Messageable] = client.get_channel(541021292116312066)
         if channel is not None:
