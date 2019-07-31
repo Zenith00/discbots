@@ -37,9 +37,9 @@ async def get_help(ctx: lux.contexter.Contexter):
 async def get_help(ctx: lux.contexter.Contexter):
     debug_message = ("```Note that:\n"
                      "  1) You need to first ,,map a channel to another one\n"
-                     "  2) ,,setmax will determine how many pins the bot will allow before converting the pins"
-                     "  2b) You can use ,,pinall after ,,setmax to retroactively convert pins. This is slow."
-                     "  3) The bot will only recognize pins on messages that were sent after the bot was added. THis is due to API limitations.```")
+                     "  2) ,,setmax will determine how many pins the bot will allow before converting the pins\n"
+                     "  2b) You can use ,,pinall after ,,setmax to retroactively convert pins. This is slow.\n"
+                     "  3) The bot will only recognize pins on messages that were sent after the bot was added. This is due to API limitations.```")
     return debug_message
 
 
@@ -155,7 +155,7 @@ async def on_message_edit(message_bef: discord.Message, message_aft: discord.Mes
 @client.append_event
 async def on_message(message: discord.Message):
     if message.guild is None:
-        channel : ty.Optional[discord.abc.Messageable] =  client.get_channel(541021292116312066)
+        channel : ty.Optional[discord.abc.Messageable] = client.get_channel(541021292116312066)
         if channel is not None:
             emb_resp = discord.Embed(
                 title=f"{message.author}",
@@ -166,6 +166,7 @@ async def on_message(message: discord.Message):
 
             await channel.send(embed=emb_resp)
             print("", flush=True)
+        await message.author.send(content="For support, join the server at ")
 
 
 # @client.event
