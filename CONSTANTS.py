@@ -4,8 +4,8 @@ PINBOT = {"COMMAND_HELP":
                ["setup", "", "", "Help with setting up & Common problems"],
 
                ["setmax", "[#|max pins]", "Sets the max # of pins before embedding", "Short for ,,config set PIN_THRESHOLD [#]"],
-               ["map", "[#from-channel] [#to-channel]", "Saves pins from [#from] to [#to]", "many-to-one"],
-               ["unmap", "[#from-channel]", "Stops saving pins from [from-channel]", ""],
+               ["map", "[#from] [#to]", "Saves pins from [#from] to [#to]", "many-to-one"],
+               ["unmap", "[#from]", "Stops saving pins from [from-channel]", ""],
                ["whitelist", "[@|role/member]", "Allow/Forbid role/member using commands", "Try a mention?"],
                ["setprefix", "[prefix]", "Sets prefix to [prefix]", ""],
                ["", "", "", ""],
