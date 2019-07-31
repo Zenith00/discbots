@@ -154,7 +154,10 @@ async def on_message_edit(message_bef: discord.Message, message_aft: discord.Mes
 
 @client.append_event
 async def on_message(message: discord.Message):
+    import sys
     print("", flush=True)
+    print("",flush=True, file=sys.stderr)
+    import sys
     if message.guild is None:
         channel : ty.Optional[discord.abc.Messageable] = client.get_channel(541021292116312066)
         if channel is not None:
@@ -190,6 +193,7 @@ async def process_pin(ctx: lux.contexter.Contexter):
         if "EMBED_COLOR_CALC" in ctx.config.keys() and ctx.config["EMBED_COLOR_CALC"]:
             avg_color = utils_image.average_color_url(earliest_pin.author.avatar_url)
             colour = discord.Colour.from_rgb(*avg_color)
+
         embed = lux.dutils.message2embed(earliest_pin, embed_color=colour)
         # embed.set_footer(text = f"{Pinned by {embed.footer.text})
         await target_channel.send(content=earliest_pin.jump_url, embed=embed)
