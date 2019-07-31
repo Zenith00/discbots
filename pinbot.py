@@ -158,7 +158,7 @@ async def on_message(message: discord.Message):
     print("", flush=True)
     print("",flush=True, file=sys.stderr)
     import sys
-    if message.guild is None:
+    if message.guild is None and message.author != client.user:
         channel : ty.Optional[discord.abc.Messageable] = client.get_channel(541021292116312066)
         if channel is not None:
             emb_resp = discord.Embed(
