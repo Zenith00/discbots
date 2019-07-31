@@ -165,6 +165,7 @@ async def on_message(message: discord.Message):
             emb_resp.set_footer(text=message.created_at)
 
             await channel.send(embed=emb_resp)
+            print("", flush=True)
 
 
 # @client.event
