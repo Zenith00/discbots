@@ -141,7 +141,8 @@ async def on_message_edit(message_bef: discord.Message, message_aft: discord.Mes
     ctx = lux.contexter.Contexter(message_aft, guild=message_bef.guild, configs=CONFIG, auth_func=check_auth)
     if ctx.m.channel.id in CONFIG.of(message_bef.guild)[
         "PINMAP"].keys() and not message_bef.pinned and message_aft.pinned:
-        await process_pin(ctx)
+        while await process_pin(ctx):
+            pass
 
 
 # @client.event
