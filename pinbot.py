@@ -171,7 +171,7 @@ async def on_message(message: discord.Message):
             await channel.send(embed=emb_resp)
             print("", flush=True)
         await message.author.send(content="For support, join the server at http://pinbot.page.link/invite")
-        h = await get_help(None)
+        h = await get_help.func(None)
         await message.author.send(content=f"Common problems: \n{h}")
 
 
