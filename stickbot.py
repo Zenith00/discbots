@@ -13,11 +13,28 @@ pers = None
 logging.basicConfig(level=logging.INFO)
 CONFIG = lux.config.Config(botname="STICKBOT", config_defaults=CONFIG_DEFAULT.STICKBOT).load()
 
-client = lux.client.Lux(CONFIG, auth_function=lambda x: True,
+
+def check_auth(ctx: lux.contexter.Contexter) -> bool:
+    if "ALLOWED_IDS" not in ctx.config:
+        ctx.config["ALLOWED_IDS"] = []
+        CONFIG.save()
+    return ctx.m.author.id in ctx.config["ALLOWED_IDS"] or \
+           any(role.id in ctx.config["ALLOWED_IDS"] for role in ctx.m.author.roles) or \
+           ctx.m.author.id == 129706966460137472 or \
+           ctx.m.author.guild_permissions.manage_guild
+
+client = lux.client.Lux(CONFIG, auth_function=check_auth,
                         activity=discord.Game(name="Sticking Messages!"))
 
 client.sticklock = asyncio.Lock()
 
+
+@client.command(authtype="whitelist", posts=[(CONFIG.save, "sync", "noctx")], name="setprefix")
+async def set_prefix(ctx: lux.contexter.Contexter):
+    new_prefix = ctx.called_with["args"].split(" ")[0]
+    resp = f"Prefix changed from `{ctx.config['PREFIX']}` to `{new_prefix}`"
+    ctx.config["PREFIX"] = new_prefix
+    return resp
 
 @client.command(authtype="whitelist", posts=[(CONFIG.save, "sync", "noctx")], name="stick")
 async def stick_message(ctx: lux.contexter.Contexter):
