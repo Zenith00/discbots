@@ -1,6 +1,7 @@
 PINBOT = {"COMMAND_HELP":
               [["Command", "Params", "Description", "Note"],
-               ["help", "", "", "My brother! He's dying! Get help!"],
+               ["help", "", "This command!", "My brother! He's dying! Get help!"],
+               ["help_note", "", "Shows notes instead of description", ""],
                ["setup", "", "", "Help with setting up & Common problems"],
 
                ["setmax", "[#|max pins]", "Sets the max # of pins before embedding", "Short for ,,config set PIN_THRESHOLD [#]"],
