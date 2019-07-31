@@ -7,7 +7,7 @@ import CONSTANTS
 import itertools
 import CONFIG_DEFAULT
 import ast
-
+import typing as ty
 pers_d = {}
 pers_l = []
 pers = None
@@ -154,7 +154,17 @@ async def on_message_edit(message_bef: discord.Message, message_aft: discord.Mes
 
 @client.append_event
 async def on_message(message: discord.Message):
-    pass
+    if message.guild is None:
+        channel : ty.Optional[discord.abc.Messageable] =  client.get_channel(541021292116312066)
+        if channel is not None:
+            emb_resp = discord.Embed(
+                title=f"{message.author}",
+                description=f"{message.content}",
+                timestamp=message.created_at
+            )
+            emb_resp.set_footer(text=message.created_at)
+
+            await channel.send(embed=emb_resp)
 
 
 # @client.event
