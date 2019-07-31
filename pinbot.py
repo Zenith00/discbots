@@ -167,7 +167,8 @@ async def on_message(message: discord.Message):
             await channel.send(embed=emb_resp)
             print("", flush=True)
         await message.author.send(content="For support, join the server at http://pinbot.page.link/invite")
-        await message.author.send(content=f"Common problems: \n{await get_help(None)}")
+        h = await get_help(None)
+        await message.author.send(content=f"Common problems: \n{h}")
 
 
 # @client.event
