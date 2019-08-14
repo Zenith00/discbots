@@ -179,6 +179,7 @@ async def on_message(message: discord.Message):
         await message.author.send(content="For support, join the server at http://pinbot.page.link/invite")
         h = await get_help.func(None)
         await message.author.send(content=f"Common problems: \n{h}")
+        await message.author.send(content=f"To invite me to your server, use https://discordapp.com/oauth2/authorize?client_id=535572077118488576&scope=bot&permissions=26688")
 
 
 # @client.event
