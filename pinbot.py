@@ -203,7 +203,7 @@ async def process_pin(ctx: lux.contexter.Contexter):
 
         embed = lux.dutils.message2embed(earliest_pin, embed_color=colour)
         # embed.set_footer(text = f"{Pinned by {embed.footer.text})
-        await target_channel.send(content=earliest_pin.jump_url, embed=embed)
+        await target_channel.send(embed=embed)
         await earliest_pin.unpin()
         return True
     return False
