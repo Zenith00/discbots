@@ -124,7 +124,7 @@ async def stick(ctx: lux.contexter.Contexter):
 
 
 @client.command(authtype="whitelist", posts=[(CONFIG.save, "sync", "noctx")], name="unstick")
-async def stick(ctx: lux.contexter.Contexter):
+async def unstick(ctx: lux.contexter.Contexter):
     fixeds = ctx.config.get("FIXED", set())
     fixeds.remove(int(ctx.called_with["args"].split(" ")[0]))
     ctx.config["FIXED"] = fixeds
