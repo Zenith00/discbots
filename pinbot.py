@@ -128,6 +128,7 @@ async def stick(ctx: lux.contexter.Contexter):
     fixeds = ctx.config.get("FIXED", set())
     fixeds.remove(int(ctx.called_with["args"].split(" ")[0]))
     ctx.config["FIXED"] = fixeds
+    print(ctx.config["FIXED"])
 
     return f":white_check_mark:"
 
@@ -220,7 +221,7 @@ async def process_pin(ctx: lux.contexter.Contexter):
 
         fixeds = ctx.config.get("FIXED", set())
 
-        earliest_pin = next(pin for pin in sorted_pins if pin not in fixeds)
+        earliest_pin = next(pin for pin in sorted_pins if pin.id not in fixeds)
 
         if earliest_pin:
             target_channel = ctx.find_channel(query=ctx.config["PINMAP"][earliest_pin.channel.id], dynamic=True)
