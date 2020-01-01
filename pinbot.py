@@ -8,6 +8,7 @@ import itertools
 import CONFIG_DEFAULT
 import ast
 import typing as ty
+
 pers_d = {}
 pers_l = []
 pers = None
@@ -29,12 +30,15 @@ client = lux.client.Lux(CONFIG, auth_function=check_auth,
 
 @client.command(authtype="whitelist", name="help")
 async def get_help(ctx: lux.contexter.Contexter):
-    message_list = [f"```{block}```" for block in utils_text.format_rows([row[:-1] for row in CONSTANTS.PINBOT["COMMAND_HELP"]])]
+    message_list = [f"```{block}```" for block in
+                    utils_text.format_rows([row[:-1] for row in CONSTANTS.PINBOT["COMMAND_HELP"]])]
     return message_list
+
 
 @client.command(authtype="whitelist", name="help_note")
 async def get_help(ctx: lux.contexter.Contexter):
-    message_list = [f"```{block}```" for block in utils_text.format_rows([row[:-2] + [row[-1]] for row in CONSTANTS.PINBOT["COMMAND_HELP"]])]
+    message_list = [f"```{block}```" for block in
+                    utils_text.format_rows([row[:-2] + [row[-1]] for row in CONSTANTS.PINBOT["COMMAND_HELP"]])]
     return message_list
 
 
@@ -111,6 +115,23 @@ async def unmap_channel(ctx: lux.contexter.Contexter):
     return f"No longer overflowing pins from <#{args[0]}>"
 
 
+@client.command(authtype="whitelist", posts=[(CONFIG.save, "sync", "noctx")], name="stick")
+async def stick(ctx: lux.contexter.Contexter):
+    fixeds = ctx.config.get("FIXED", set())
+    fixeds.add(int(ctx.called_with["args"].split(" ")[0]))
+    ctx.config["FIXED"] = fixeds
+    return f":white_check_mark:"
+
+
+@client.command(authtype="whitelist", posts=[(CONFIG.save, "sync", "noctx")], name="unstick")
+async def stick(ctx: lux.contexter.Contexter):
+    fixeds = ctx.config.get("FIXED", set())
+    fixeds.remove(int(ctx.called_with["args"].split(" ")[0]))
+    ctx.config["FIXED"] = fixeds
+
+    return f":white_check_mark:"
+
+
 @client.command(authtype="whitelist", posts=[(CONFIG.save, "sync", "noctx")], name="setprefix")
 async def set_prefix(ctx: lux.contexter.Contexter):
     new_prefix = ctx.called_with["args"].split(" ")[0]
@@ -162,10 +183,10 @@ async def on_message_edit(message_bef: discord.Message, message_aft: discord.Mes
 async def on_message(message: discord.Message):
     import sys
     print("", flush=True)
-    print("",flush=True, file=sys.stderr)
+    print("", flush=True, file=sys.stderr)
     import sys
     if message.guild is None and message.author != client.user:
-        channel : ty.Optional[discord.abc.Messageable] = client.get_channel(541021292116312066)
+        channel: ty.Optional[discord.abc.Messageable] = client.get_channel(541021292116312066)
         if channel is not None:
             emb_resp = discord.Embed(
                 title=f"{message.author}",
@@ -179,7 +200,8 @@ async def on_message(message: discord.Message):
         await message.author.send(content="For support, join the server at http://pinbot.page.link/invite")
         h = await get_help.func(None)
         await message.author.send(content=f"Common problems: \n{h}")
-        await message.author.send(content=f"To invite me to your server, use https://discordapp.com/oauth2/authorize?client_id=535572077118488576&scope=bot&permissions=26688")
+        await message.author.send(
+            content=f"To invite me to your server, use https://discordapp.com/oauth2/authorize?client_id=535572077118488576&scope=bot&permissions=26688")
 
 
 # @client.event
@@ -194,18 +216,24 @@ async def on_resumed():
 async def process_pin(ctx: lux.contexter.Contexter):
     channel_pins = await ctx.m.channel.pins()
     if len(channel_pins) > ctx.config["PIN_THRESHOLD"]:
-        earliest_pin = sorted(channel_pins, key=lambda x: x.created_at)[0]
-        target_channel = ctx.find_channel(query=ctx.config["PINMAP"][earliest_pin.channel.id], dynamic=True)
-        colour = None
-        if "EMBED_COLOR_CALC" in ctx.config.keys() and ctx.config["EMBED_COLOR_CALC"]:
-            avg_color = utils_image.average_color_url(earliest_pin.author.avatar_url)
-            colour = discord.Colour.from_rgb(*avg_color)
+        sorted_pins = sorted(channel_pins, key=lambda x: x.created_at)
 
-        embed = lux.dutils.message2embed(earliest_pin, embed_color=colour)
-        # embed.set_footer(text = f"{Pinned by {embed.footer.text})
-        await target_channel.send(embed=embed)
-        await earliest_pin.unpin()
-        return True
+        fixeds = ctx.config.get("FIXED", set())
+
+        earliest_pin = next(pin for pin in sorted_pins if pin not in fixeds)
+
+        if earliest_pin:
+            target_channel = ctx.find_channel(query=ctx.config["PINMAP"][earliest_pin.channel.id], dynamic=True)
+            colour = None
+            if "EMBED_COLOR_CALC" in ctx.config.keys() and ctx.config["EMBED_COLOR_CALC"]:
+                avg_color = utils_image.average_color_url(earliest_pin.author.avatar_url)
+                colour = discord.Colour.from_rgb(*avg_color)
+
+            embed = lux.dutils.message2embed(earliest_pin, embed_color=colour)
+            # embed.set_footer(text = f"{Pinned by {embed.footer.text})
+            await target_channel.send(embed=embed)
+            await earliest_pin.unpin()
+            return True
     return False
 
 
