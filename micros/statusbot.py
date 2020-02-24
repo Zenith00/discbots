@@ -1,5 +1,5 @@
 import discord
-from . import TOKENS
+import TOKENS
 import mcstatus
 import asyncio
 client = discord.Client()
