@@ -54,8 +54,11 @@ async def get_help(ctx: lux.contexter.Contexter):
 
 @client.command(authtype="whitelist", name="pinall")
 async def pin_all(ctx: lux.contexter.Contexter):
-    while await process_pin(ctx):
-        pass
+    res = await process_pin(ctx)
+    while res:
+        if res is not True:
+            return res
+        res = await process_pin(ctx)
 
 
 @client.command(authtype="whitelist", posts=[(CONFIG.save, "sync", "noctx")])
@@ -109,7 +112,13 @@ async def setmax(ctx: lux.contexter.Contexter):
 @client.command(authtype="whitelist", posts=[(CONFIG.save, "sync", "noctx")], name="map")
 async def map_channel(ctx: lux.contexter.Contexter):
     args = lux.dutils.mention_to_id(ctx.called_with["args"].split(" "))
-    ctx.config["PINMAP"][lux.zutils.intorstr(args[0])] = lux.zutils.intorstr(args[1])
+    source_channel_id = lux.zutils.intorstr(args[0])
+    destination_channel_id = lux.zutils.intorstr(args[1])
+    ctx.config["PINMAP"][source_channel_id] = destination_channel_id
+
+    while await process_pin(ctx, channel=client.get_channel(source_channel_id)):
+        pass
+
     return f"Mapped pins from <#{args[0]}> to be overflowed into <#{args[1]}>"
 
 
@@ -216,10 +225,26 @@ async def on_resumed():
 
 
 async def process_pin(ctx: lux.contexter.Contexter, channel=None):
+
+    if ctx.m.channel.id not in ctx.config["PINMAP"].keys():
+        return
+
+    if not ctx.m.channel.permissions_for(ctx.m.guild.me).manage_messages:
+        return "I do not have permissions to unpin messages in this channel. Need <Manage Messages>"
+
+    destination_channel = ctx.find_channel(query=ctx.config["PINMAP"][ctx.m.channel.id], dynamic=True)
+
+    if not destination_channel.permissions_for(ctx.m.guild.me).send_messages:
+        return f"I do not have permissions to send messages in the target channel {destination_channel.mention}. Need <Send Messages>"
+
+
+
+
     if channel:
         channel_pins = await channel.pins()
     else:
         channel_pins = await ctx.m.channel.pins()
+
     if len(channel_pins) > ctx.config["PIN_THRESHOLD"]:
         sorted_pins = sorted(channel_pins, key=lambda x: x.created_at)
 
