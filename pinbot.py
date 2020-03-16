@@ -96,6 +96,11 @@ async def setmax(ctx: lux.contexter.Contexter):
     args = ctx.called_with["args"].split(" ")
     try:
         ctx.config["PIN_THRESHOLD"] = int(args[0])
+
+        for source_channel in [client.get_channel(source) for source in  ctx.config["PINMAP"].keys()]:
+            while await process_pin(ctx=ctx, channel=source_channel):
+                pass
+
         return f"PIN_THRESHOLD set to be {args[0]}"
     except ValueError:
         return f"{args[0]} was not recognized as a valid number. Please try again."
@@ -182,10 +187,6 @@ async def on_message_edit(message_bef: discord.Message, message_aft: discord.Mes
 
 @client.append_event
 async def on_message(message: discord.Message):
-    import sys
-    print("", flush=True)
-    print("", flush=True, file=sys.stderr)
-    import sys
     if message.guild is None and message.author != client.user:
         channel: ty.Optional[discord.abc.Messageable] = client.get_channel(541021292116312066)
         if channel is not None:
@@ -214,8 +215,11 @@ async def on_resumed():
     await client.change_presence(activity=discord.Game(name="pinbot.page.link/invite for support"))
 
 
-async def process_pin(ctx: lux.contexter.Contexter):
-    channel_pins = await ctx.m.channel.pins()
+async def process_pin(ctx: lux.contexter.Contexter, channel=None):
+    if channel:
+        channel_pins = await channel.pins()
+    else:
+        channel_pins = await ctx.m.channel.pins()
     if len(channel_pins) > ctx.config["PIN_THRESHOLD"]:
         sorted_pins = sorted(channel_pins, key=lambda x: x.created_at)
 
