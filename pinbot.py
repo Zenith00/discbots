@@ -55,6 +55,7 @@ async def get_help(ctx: lux.contexter.Contexter):
 
 @client.command(authtype="whitelist", name="pinall")
 async def pin_all(ctx: lux.contexter.Contexter):
+
     res = await process_pin(ctx)
     while res:
         if res is not True:
@@ -115,6 +116,12 @@ async def map_channel(ctx: lux.contexter.Contexter):
     args = lux.dutils.mention_to_id(ctx.called_with["args"].split(" "))
     source_channel_id = lux.zutils.intorstr(args[0])
     destination_channel_id = lux.zutils.intorstr(args[1])
+
+    res = permission_check(ctx.m.guild, client.get_channel(source_channel_id), client.get_channel(destination_channel_id))
+    if res:
+        return res
+
+
     ctx.config["PINMAP"][source_channel_id] = destination_channel_id
 
     while await process_pin(ctx, channel=client.get_channel(source_channel_id)):
@@ -225,20 +232,25 @@ async def on_resumed():
     await client.change_presence(activity=discord.Game(name="pinbot.page.link/invite for support"))
 
 
+async def permission_check(guild: discord.Guild, source : discord.TextChannel, destination: discord.TextChannel):
+    output = ""
+    if not source.permissions_for(guild.me).manage_messages:
+        output += f"\n<Manage Messages> in {source.mention}"
+    if not destination.permissions_for(guild.me).send_messages:
+        output += f"\n<Send Messages> in {destination.mention}"
+    if not destination.permissions_for(guild.me).embed_links:
+        output += f"\n<Embed Links> in {destination.mention}"
+    if output:
+        return "I require permissions:" + output
+
 async def process_pin(ctx: lux.contexter.Contexter, channel=None):
 
     if ctx.m.channel.id not in ctx.config["PINMAP"].keys():
         return
 
-    if not ctx.m.channel.permissions_for(ctx.m.guild.me).manage_messages:
-        return "I do not have permissions to unpin messages in this channel. Need <Manage Messages>"
-
-    destination_channel = ctx.find_channel(query=ctx.config["PINMAP"][ctx.m.channel.id], dynamic=True)
-
-    if not destination_channel.permissions_for(ctx.m.guild.me).send_messages:
-        return f"I do not have permissions to send messages in the target channel {destination_channel.mention}. Need <Send Messages>"
-
-
+    res = await permission_check(ctx.m.guild, ctx.m.channel, ctx.find_channel(query=ctx.config["PINMAP"][ctx.m.channel.id], dynamic=True))
+    if res:
+        return res
 
 
     if channel:
