@@ -133,8 +133,11 @@ async def map_channel(ctx: lux.contexter.Contexter):
 @client.command(authtype="whitelist", posts=[(CONFIG.save, "sync", "noctx")], name="unmap")
 async def unmap_channel(ctx: lux.contexter.Contexter):
     args = lux.dutils.mention_to_id(ctx.called_with["args"].split(" "))
-    del ctx.config["PINMAP"][args[0]]
-    return f"No longer overflowing pins from <#{args[0]}>"
+    if args[0] in ctx.config["PINMAP"]:
+        del ctx.config["PINMAP"][args[0]]
+        return f"No longer overflowing pins from <#{args[0]}>"
+    else:
+        return f"<#{args[0]}> is not currently mapped"
 
 
 @client.command(authtype="whitelist", posts=[(CONFIG.save, "sync", "noctx")], name="stick")
