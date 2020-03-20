@@ -117,7 +117,7 @@ async def map_channel(ctx: lux.contexter.Contexter):
     source_channel_id = lux.zutils.intorstr(args[0])
     destination_channel_id = lux.zutils.intorstr(args[1])
 
-    res = permission_check(ctx.m.guild, client.get_channel(source_channel_id), client.get_channel(destination_channel_id))
+    res = await permission_check(ctx.m.guild, client.get_channel(source_channel_id), client.get_channel(destination_channel_id))
     if res:
         return res
 
