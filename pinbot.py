@@ -25,7 +25,8 @@ def check_auth(ctx: lux.contexter.Contexter) -> bool:
 
 
 client = lux.client.Lux(CONFIG, auth_function=check_auth,
-                        activity=discord.Game(name=",,help | pinbot.page.link/invite for support"))
+                        activity=discord.Game(name=",,help | pinbot.page.link/invite for support"),
+                        heartbeat_timeout=60)
 
 
 @client.command(authtype="whitelist", name="help")
