@@ -55,12 +55,8 @@ async def get_help(ctx: lux.contexter.Contexter):
 
 @client.command(authtype="whitelist", name="pinall")
 async def pin_all(ctx: lux.contexter.Contexter):
-
-    res = await process_pin(ctx)
-    while res:
-        if res is not True:
-            return res
-        res = await process_pin(ctx)
+    while await process_pin(ctx):
+        pass
 
 
 @client.command(authtype="whitelist", posts=[(CONFIG.save, "sync", "noctx")])
@@ -102,7 +98,7 @@ async def setmax(ctx: lux.contexter.Contexter):
     try:
         ctx.config["PIN_THRESHOLD"] = int(args[0])
 
-        for source_channel in [client.get_channel(source) for source in  ctx.config["PINMAP"].keys()]:
+        for source_channel in [client.get_channel(source) for source in ctx.config["PINMAP"].keys()]:
             while await process_pin(ctx=ctx, channel=source_channel):
                 pass
 
@@ -120,7 +116,6 @@ async def map_channel(ctx: lux.contexter.Contexter):
     res = await permission_check(ctx.m.guild, client.get_channel(source_channel_id), client.get_channel(destination_channel_id))
     if res:
         return res
-
 
     ctx.config["PINMAP"][source_channel_id] = destination_channel_id
 
@@ -235,7 +230,7 @@ async def on_resumed():
     await client.change_presence(activity=discord.Game(name="pinbot.page.link/invite for support"))
 
 
-async def permission_check(guild: discord.Guild, source : discord.TextChannel, destination: discord.TextChannel):
+async def permission_check(guild: discord.Guild, source: discord.TextChannel, destination: discord.TextChannel):
     output = ""
     if not source.permissions_for(guild.me).manage_messages:
         output += f"\n<Manage Messages> in {source.mention}"
@@ -246,15 +241,17 @@ async def permission_check(guild: discord.Guild, source : discord.TextChannel, d
     if output:
         return "I require permissions:" + output
 
+
 async def process_pin(ctx: lux.contexter.Contexter, channel=None):
     print(f"Firing process pin with ctx {ctx}")
     if ctx.m.channel.id not in ctx.config["PINMAP"].keys():
         return
 
     res = await permission_check(ctx.m.guild, ctx.m.channel, ctx.find_channel(query=ctx.config["PINMAP"][ctx.m.channel.id], dynamic=True))
-    if res:
-        return res
 
+    if res:
+        await ctx.m.channel.send(res)
+        return False
 
     if channel:
         channel_pins = await channel.pins()
@@ -279,7 +276,7 @@ async def process_pin(ctx: lux.contexter.Contexter, channel=None):
             # embed.set_footer(text = f"{Pinned by {embed.footer.text})
             await target_channel.send(embed=embed)
             await earliest_pin.unpin()
-            return True
+        return True
     return False
 
 
