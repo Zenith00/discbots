@@ -247,7 +247,7 @@ async def permission_check(guild: discord.Guild, source : discord.TextChannel, d
         return "I require permissions:" + output
 
 async def process_pin(ctx: lux.contexter.Contexter, channel=None):
-
+    print(f"Firing process pin with ctx {ctx}")
     if ctx.m.channel.id not in ctx.config["PINMAP"].keys():
         return
 
