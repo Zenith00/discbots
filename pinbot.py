@@ -55,9 +55,9 @@ async def get_help(ctx: lux.contexter.Contexter):
 
 @client.command(authtype="whitelist", name="pinall")
 async def pin_all(ctx: lux.contexter.Contexter):
-    while await process_pin(ctx):
-        pass
-
+    for source_channel in [client.get_channel(source) for source in ctx.config["PINMAP"].keys()]:
+        while await process_pin(ctx=ctx, channel=source_channel):
+            pass
 
 @client.command(authtype="whitelist", posts=[(CONFIG.save, "sync", "noctx")])
 async def whitelist(ctx: lux.contexter.Contexter):
@@ -251,7 +251,7 @@ async def process_pin(ctx: lux.contexter.Contexter, channel=None):
 
     if res:
         await ctx.m.channel.send(res)
-        return False
+        return
 
     if channel:
         channel_pins = await channel.pins()
@@ -277,7 +277,6 @@ async def process_pin(ctx: lux.contexter.Contexter, channel=None):
             await target_channel.send(embed=embed)
             await earliest_pin.unpin()
             return True
-    return False
 
 
 def delta_messages(before: discord.Message, after: discord.Message):
