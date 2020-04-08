@@ -26,7 +26,7 @@ def check_auth(ctx: lux.contexter.Contexter) -> bool:
 
 client = lux.client.Lux(CONFIG, auth_function=check_auth,
                         activity=discord.Game(name=",,help | pinbot.page.link/invite for support"),
-                        heartbeat_timeout=60)
+                        heartbeat_timeout=60, fetch_offline_members=False)
 
 
 @client.command(authtype="whitelist", name="help")
@@ -58,6 +58,7 @@ async def pin_all(ctx: lux.contexter.Contexter):
     for source_channel in [client.get_channel(source) for source in ctx.config["PINMAP"].keys()]:
         while await process_pin(ctx=ctx, channel=source_channel):
             pass
+
 
 @client.command(authtype="whitelist", posts=[(CONFIG.save, "sync", "noctx")])
 async def whitelist(ctx: lux.contexter.Contexter):
@@ -286,4 +287,4 @@ def delta_messages(before: discord.Message, after: discord.Message):
     return delta_attrs
 
 
-client.run(CONFIG.TOKEN, bot=True)
+client.run(CONFIG.TOKEN, bot=True, )
