@@ -278,6 +278,7 @@ async def process_pin(ctx: lux.contexter.Contexter, channel=None):
             await target_channel.send(embed=embed)
             await earliest_pin.unpin()
             return True
+    return False
 
 
 def delta_messages(before: discord.Message, after: discord.Message):
