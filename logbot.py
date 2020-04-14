@@ -356,7 +356,7 @@ async def command_exec(params, message_in):
         try:
             exec(input_command)
         finally:
-            sys.stdout = old_stdout
+            sys.stdout = old_stdout 
         if redirected_output.getvalue():
             return ("inplace", "```py\nInput:\n{}\nOutput:\n{}\n```".format(input_command, redirected_output.getvalue()), None)
     if params[0] == "eval":
@@ -532,7 +532,7 @@ async def log_action(server, action, detail):
     if log_config[server.id]["states"]["message_log"]:
         if action == "delete":
 
-            message = "{time} :wastebasket: [DELETE] [{channel}] [{mention}] [{id}]:\n{content}".format(
+            message = "{time} :wastebasket: [**DELETE**] [{channel}] [{mention}] [{id}]:\n{content}".format(
                 time=time,
                 channel=detail["channel"],
                 mention=detail["mention"],
@@ -554,7 +554,7 @@ async def log_action(server, action, detail):
             #         detail["content"]
             # })
         elif action == "edit":
-            message = "{time} :pencil: [EDIT] [{channel}] [{mention}] [{id}]:\n`-BEFORE:` {before} \n`+ AFTER:` {after}".format(
+            message = "{time} :pencil: [**EDIT**] [{channel}] [{mention}] [{id}]:\n`-BEFORE:` {before} \n`+ AFTER:` {after}".format(
                 time=time,
                 channel=detail["channel"],
                 mention=detail["mention"],
@@ -583,7 +583,7 @@ async def log_action(server, action, detail):
         target_channel = server_log
 
         if action == "join":
-            message = "{time} :inbox_tray: [JOIN] [{mention}] [{id}]. Account Age: {age}".format(
+            message = "{time} :inbox_tray: [**JOIN**] [{mention}] [{id}]. Account Age: {age}".format(
                 time=time,
                 mention=detail["mention"],
                 id=detail["id"],
@@ -599,7 +599,7 @@ async def log_action(server, action, detail):
             #         detail["age"]
             # })
         elif action == "leave":
-            message = "{time} :outbox_tray: [LEAVE] [{mention}] [{id}]".format(
+            message = "{time} :outbox_tray: [**LEAVE**] [{mention}] [{id}]".format(
                 time=time, mention=detail["mention"], id=detail["id"])
             # await log_db[server.id].insert_one({
             #     "date"  :
@@ -611,7 +611,7 @@ async def log_action(server, action, detail):
             # })
 
         elif action == "ban":
-            message = "{time} :no_entry_sign: [BAN] [{mention}] [{id}] Name: {name} {nick}".format(
+            message = "{time} :no_entry_sign: [**BAN**] [{mention}] [{id}] Name: {name} {nick}".format(
                 time=time,
                 mention=detail["member"].mention,
                 id=detail["member"].id,
@@ -630,7 +630,7 @@ async def log_action(server, action, detail):
             # })
 
         elif action == "unban":
-            message = "{time} :white_check_mark:  [UNBAN] [{mention}] [{id}]".format(
+            message = "{time} :white_check_mark:  [**UNBAN**] [{mention}] [{id}]".format(
                 time=time, mention="<@!" + detail["id"] + ">", id=detail["id"])
 
             # await log_db[server.id].insert_one({
@@ -656,7 +656,7 @@ async def log_action(server, action, detail):
             mention = member.mention
             mention = await scrub_text(mention, target_channel)
 
-            message = "{time} :pencil: [ROLECHANGE] [{mention}] [{id}]:\n`-BEFORE:` {before} \n`+ AFTER:` {after}".format(
+            message = "{time} :pencil: [**ROLECHANGE**] [{mention}] [{id}]:\n`-BEFORE:` {before} \n`+ AFTER:` {after}".format(
                 time=time,
                 mention=mention,
                 id=member.id,
@@ -666,7 +666,7 @@ async def log_action(server, action, detail):
 
         elif action == "name_change":
 
-            message = "{time} :gear: [NAMECHANGE] [{mention}] [{id}]:\n`-BEFORE:` {before} \n`+ AFTER:` {after}".format(
+            message = "{time} :gear: [**NAMECHANGE**] [{mention}] [{id}]:\n`-BEFORE:` {before} \n`+ AFTER:` {after}".format(
                 time=time,
                 mention=detail["member"].mention,
                 id=detail["member"].id,
@@ -677,7 +677,7 @@ async def log_action(server, action, detail):
 
         elif action == "nick_change":
 
-            message = "{time} :gear: [NICKCHANGE] [{mention}] [{id}]:\n`-BEFORE:` {before} \n`+ AFTER:` {after}".format(
+            message = "{time} :gear: [**NICKCHANGE**] [{mention}] [{id}]:\n`-BEFORE:` {before} \n`+ AFTER:` {after}".format(
                 time=time,
                 mention=detail["member"].mention,
                 id=detail["member"].id,
