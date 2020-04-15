@@ -34,7 +34,7 @@ async def get_help(ctx: lux.contexter.Contexter):
     message_list = [f"```{block}```" for block in
                     utils_text.format_rows([row[:-1] for row in CONSTANTS.PINBOT["COMMAND_HELP"]])]
     return message_list
-s
+
 
 @client.command(authtype="whitelist", name="help_note")
 async def get_help(ctx: lux.contexter.Contexter):
