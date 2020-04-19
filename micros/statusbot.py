@@ -1,7 +1,9 @@
 import discord
 import TOKENS
+import logging
 import mcstatus
 import asyncio
+logging.basicConfig(level=logging.INFO)
 
 client = discord.Client()
 
