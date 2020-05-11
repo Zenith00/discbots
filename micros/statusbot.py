@@ -9,7 +9,7 @@ client = discord.Client()
 
 async def clock():
     await client.wait_until_ready()
-    while not client.is_closed():
+    while True:
         try:
 
             await client.change_presence(
