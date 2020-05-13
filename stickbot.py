@@ -28,7 +28,7 @@ client = lux.client.Lux(CONFIG, auth_function=check_auth,
 
 client.sticklock = asyncio.Lock()
 
-a
+
 @client.command(authtype="whitelist", posts=[(CONFIG.save, "sync", "noctx")], name="setprefix")
 async def set_prefix(ctx: lux.contexter.Contexter):
     new_prefix = ctx.called_with["args"].split(" ")[0]
