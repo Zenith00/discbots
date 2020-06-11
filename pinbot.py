@@ -13,7 +13,7 @@ pers_d = {}
 pers_l = []
 pers = None
 
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.DEBUG)
 CONFIG = lux.config.Config(botname="PINBOT", config_defaults=CONFIG_DEFAULT.PINBOT).load()
 
 
