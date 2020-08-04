@@ -284,7 +284,7 @@ async def process_pin(ctx: lux.contexter.Contexter, channel=None):
 def delta_messages(before: discord.Message, after: discord.Message):
     delta = set(lux.dutils.message2dict(before).items()) ^ set(lux.dutils.message2dict(after).items())
     delta_attrs = [i[0] for i in delta]
-    print(delta_attrs)
+    # print(delta_attrs)
     return delta_attrs
 
 
