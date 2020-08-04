@@ -13,7 +13,7 @@ pers_d = {}
 pers_l = []
 pers = None
 
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.INFO)
 CONFIG = lux.config.Config(botname="PINBOT", config_defaults=CONFIG_DEFAULT.PINBOT).load()
 
 
@@ -149,7 +149,7 @@ async def unstick(ctx: lux.contexter.Contexter):
     fixeds = ctx.config.get("FIXED", set())
     fixeds.remove(int(ctx.called_with["args"].split(" ")[0]))
     ctx.config["FIXED"] = fixeds
-    print(ctx.config["FIXED"])
+    # print(ctx.config["FIXED"])
 
     return f":white_check_mark:"
 
