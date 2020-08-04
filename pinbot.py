@@ -111,8 +111,8 @@ async def setmax(ctx: lux.contexter.Contexter):
 @client.command(authtype="whitelist", posts=[(CONFIG.save, "sync", "noctx")], name="map")
 async def map_channel(ctx: lux.contexter.Contexter):
     args = lux.dutils.mention_to_id(ctx.called_with["args"].split(" "))
-    source_channel_id = lux.zutils.intorstr(args[0])
-    destination_channel_id = lux.zutils.intorstr(args[1])
+    source_channel_id = int(args[0])
+    destination_channel_id = int(args[1])
 
     res = await permission_check(ctx.m.guild, client.get_channel(source_channel_id), client.get_channel(destination_channel_id))
     if res:
